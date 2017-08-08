@@ -1,4 +1,4 @@
-package com.outcomehub;
+package life.genny;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
@@ -12,7 +12,8 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
-import com.outcomehub.qwanda.Answer;
+
+import life.genny.qwanda.Answer;
 
 public class JTest {
 	@Test

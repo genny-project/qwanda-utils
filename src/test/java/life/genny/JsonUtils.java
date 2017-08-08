@@ -1,11 +1,7 @@
-package com.outcomehub;
-
-import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlTransient;
+package life.genny;
 
 import org.junit.Assert;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -28,9 +24,7 @@ public class JsonUtils {
 	}
 
 
-	@Transient
-	@JsonIgnore
-	@XmlTransient
+
 	public  <T>  T get(Class testClass,final String json)  {
 	        T item = null;
 

@@ -1,23 +1,17 @@
-package com.outcomehub;
+package life.genny;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.util.Date;
 
 import org.junit.Test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.outcomehub.qwanda.Answer;
-import com.outcomehub.qwanda.DateTimeDeserializer;
 import com.outcomehub.qwandautils.KeycloakUtils;
 import com.outcomehub.qwandautils.QwandaUtils;
+
+import life.genny.qwanda.Answer;
+import life.genny.qwanda.DateTimeDeserializer;
 
 public class QwandaTest {
 
