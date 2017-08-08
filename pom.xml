@@ -130,7 +130,7 @@
 			<version>3.5</version>
 		</dependency>
 		<dependency>
-			<groupId>com.outcome-hub</groupId>
+			<groupId>life.genny</groupId>
 			<artifactId>qwanda</artifactId>
 			<version>${qwanda.version}</version>
 			<exclusions>
