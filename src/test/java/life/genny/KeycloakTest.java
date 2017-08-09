@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.junit.Test;
 import org.keycloak.representations.AccessTokenResponse;
 
-import com.outcomehub.qwandautils.KeycloakUtils;
+import life.genny.qwandautils.KeycloakUtils;
 
 public class KeycloakTest {
 

@@ -1,4 +1,4 @@
-package com.outcomehub.qwandautils;
+package life.genny.qwandautils;
 
 import java.io.BufferedReader;
 import java.io.IOException;

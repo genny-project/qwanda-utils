@@ -7,11 +7,11 @@ import org.junit.Test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.outcomehub.qwandautils.KeycloakUtils;
-import com.outcomehub.qwandautils.QwandaUtils;
 
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.DateTimeDeserializer;
+import life.genny.qwandautils.KeycloakUtils;
+import life.genny.qwandautils.QwandaUtils;
 
 public class QwandaTest {
 
