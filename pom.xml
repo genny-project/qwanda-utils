@@ -32,14 +32,14 @@
 		<!-- EJB spec version -->
 		<ejb-spec-version>3.2</ejb-spec-version>
 
-		<qwanda.version>0.5.2</qwanda.version>
+		<qwanda.version>0.5.3</qwanda.version>
 
 
 		<jackson.version>2.8.7</jackson.version>
 		<version.mysql-connector>6.0.6</version.mysql-connector>
 		<jersey-version>2.13</jersey-version>
 		<version.apache-httpclient>4.5.3</version.apache-httpclient>
-	<version.keycloak>3.2.0.Final</version.keycloak>
+		<version.keycloak>3.2.0.Final</version.keycloak>
 	</properties>
 
 	<scm>
@@ -77,93 +77,56 @@
 	</repositories>
 
 	<dependencies>
-	<!-- 	<dependency>
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>4.8.0.201706111038-r</version>
+		</dependency>
+
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit-version}</version>
 			<scope>test</scope>
 		</dependency>
- -->
+
+
+		<!-- <dependency> <groupId>junit</groupId> <artifactId>junit</artifactId> 
+			<version>${junit-version}</version> <scope>test</scope> </dependency> -->
 		<!-- http://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
-		<!-- <dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>${log4j-core-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.8.0</version>
-		</dependency> -->
+		<!-- <dependency> <groupId>org.apache.logging.log4j</groupId> <artifactId>log4j-core</artifactId> 
+			<version>${log4j-core-version}</version> </dependency> <dependency> <groupId>com.google.code.gson</groupId> 
+			<artifactId>gson</artifactId> <version>2.8.0</version> </dependency> -->
 		<!-- MySQL database driver -->
 		<!-- <dependency> <groupId>mysql</groupId> <artifactId>mysql-connector-java</artifactId> 
 			<version>${version.mysql-connector}</version> </dependency> -->
 
-		<!-- <dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>${jackson.version}</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.glassfish.jersey.media</groupId>
-			<artifactId>jersey-media-json-jackson</artifactId>
-			<version>${jersey-version}</version>
-		</dependency>
- -->
-		<!-- <dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-jsr310</artifactId>
-			<version>${jackson.version}</version>
-		</dependency> -->
+		<!-- <dependency> <groupId>com.fasterxml.jackson.core</groupId> <artifactId>jackson-annotations</artifactId> 
+			<version>${jackson.version}</version> <scope>provided</scope> </dependency> 
+			<dependency> <groupId>org.glassfish.jersey.media</groupId> <artifactId>jersey-media-json-jackson</artifactId> 
+			<version>${jersey-version}</version> </dependency> -->
+		<!-- <dependency> <groupId>com.fasterxml.jackson.core</groupId> <artifactId>jackson-databind</artifactId> 
+			<version>${jackson.version}</version> </dependency> <dependency> <groupId>com.fasterxml.jackson.datatype</groupId> 
+			<artifactId>jackson-datatype-jsr310</artifactId> <version>${jackson.version}</version> 
+			</dependency> -->
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
-		<!-- <dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.5</version>
-		</dependency>
-		<dependency>
-			<groupId>life.genny</groupId>
-			<artifactId>qwanda</artifactId>
-			<version>${qwanda.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>dom4j</groupId>
-					<artifactId>dom4j</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>2.8.2</version>
-		</dependency> -->
+		<!-- <dependency> <groupId>org.apache.commons</groupId> <artifactId>commons-lang3</artifactId> 
+			<version>3.5</version> </dependency> <dependency> <groupId>life.genny</groupId> 
+			<artifactId>qwanda</artifactId> <version>${qwanda.version}</version> <exclusions> 
+			<exclusion> <groupId>dom4j</groupId> <artifactId>dom4j</artifactId> </exclusion> 
+			</exclusions> </dependency> <dependency> <groupId>org.apache.logging.log4j</groupId> 
+			<artifactId>log4j-core</artifactId> <version>2.8.2</version> </dependency> -->
 
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>${version.apache-httpclient}</version>
 		</dependency>
-		<!-- <dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-core</artifactId>
-			<version>${version.keycloak}</version>
-		</dependency>
-
-		https://mvnrepository.com/artifact/org.keycloak/keycloak-admin-client
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-admin-client</artifactId>
-			<version>${version.keycloak}</version>
-		</dependency>
- -->
+		<!-- <dependency> <groupId>org.keycloak</groupId> <artifactId>keycloak-core</artifactId> 
+			<version>${version.keycloak}</version> </dependency> https://mvnrepository.com/artifact/org.keycloak/keycloak-admin-client 
+			<dependency> <groupId>org.keycloak</groupId> <artifactId>keycloak-admin-client</artifactId> 
+			<version>${version.keycloak}</version> </dependency> -->
 	</dependencies>
 
 	<build>
