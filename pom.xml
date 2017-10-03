@@ -91,7 +91,50 @@
 			<scope>test</scope>
 		</dependency>
 
-
+		<dependency>
+			<groupId>life.genny</groupId>
+			<artifactId>qwanda</artifactId>
+			<version>0.5.3</version>
+			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>jackson-annotations</artifactId>
+					<groupId>com.fasterxml.jackson.core</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jackson-databind</artifactId>
+					<groupId>com.fasterxml.jackson.core</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jackson-datatype-jsr310</artifactId>
+					<groupId>com.fasterxml.jackson.datatype</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>dom4j</artifactId>
+					<groupId>dom4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>hibernate-envers</artifactId>
+					<groupId>org.hibernate</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>hibernate-core</artifactId>
+					<groupId>org.hibernate</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>hibernate-commons-annotations</artifactId>
+					<groupId>org.hibernate.common</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>hibernate-jpa-2.1-api</artifactId>
+					<groupId>org.hibernate.javax.persistence</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>hsqldb</artifactId>
+					<groupId>org.hsqldb</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<!-- <dependency> <groupId>junit</groupId> <artifactId>junit</artifactId> 
 			<version>${junit-version}</version> <scope>test</scope> </dependency> -->
 		<!-- http://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
@@ -127,6 +170,26 @@
 			<version>${version.keycloak}</version> </dependency> https://mvnrepository.com/artifact/org.keycloak/keycloak-admin-client 
 			<dependency> <groupId>org.keycloak</groupId> <artifactId>keycloak-admin-client</artifactId> 
 			<version>${version.keycloak}</version> </dependency> -->
+
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>1.22.0</version>
+		</dependency>
+		<!-- compile 'com.google.apis:google-api-services-sheets:v4-rev483-1.22.0' 
+			https://mvnrepository.com/artifact/com.google.oauth-client/google-oauth-client -->
+		<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-sheets -->
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-sheets</artifactId>
+			<version>v4-rev483-1.22.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.google.oauth-client/google-oauth-client-jetty -->
+		<dependency>
+			<groupId>com.google.oauth-client</groupId>
+			<artifactId>google-oauth-client-jetty</artifactId>
+			<version>1.22.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
