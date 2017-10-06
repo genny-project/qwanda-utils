@@ -77,6 +77,14 @@
 	</repositories>
 
 	<dependencies>
+
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.5</version>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
 		<dependency>
 			<groupId>org.eclipse.jgit</groupId>
@@ -189,9 +197,23 @@
 			<groupId>com.google.oauth-client</groupId>
 			<artifactId>google-oauth-client-jetty</artifactId>
 			<version>1.22.0</version>
-		</dependency>
+		</dependency> 
+		<!-- <dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>1.22.0</version>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-oauth2</artifactId>
+			<version>v2-rev75-1.19.0</version>
+		</dependency>  -->
+		<!-- <dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-sheets</artifactId>
+			<version>v4-rev473-1.22.0</version>
+		</dependency>	 -->
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
