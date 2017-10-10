@@ -25,48 +25,105 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import life.genny.qwanda.entity.BaseEntity;
+import java.io.File;
 
 public class GennySheets {
+//public static final String SHEETID = System.getenv("GOOGLE_SHEETID");
+//public static final String SHEETID = "1VSXJUn8_BHG1aW0DQrFDnvLjx_jxcNiD33QzqO5D-jc";
+  
+  /** Range of Columns to read or write */
+  private final String RANGE = "!A1:ZZ";
+ 
+  private String appName = "Google Sheets API Java Quickstart";
+  
+  /** Global variable normally instantiated from a Json file or env variable */
+  private String clientSecret;
+  
+  /** Global variable for the Sheet ID located on the URL of google docs spreedsheet between the d/ and trailing slash ( / ) . */
+  private String sheetId;
+  
+  /** Global instance of the {@link Gson}. */
+  private Gson g = new Gson();
 
-  public static final String RANGE = "!A1:ZZ";
-  // public static final String CLIENT_SECRET = System.getenv("GOOGLE_CLIENT_SECRET");
-  public static final String CLIENT_SECRET =
-      "{\"installed\":{\"client_id\":\"260075856207-9d7a02ekmujr2bh7i53dro28n132iqhe.apps.googleusercontent.com\",\"project_id\":\"genny-sheets-181905\",\"auth_uri\":\"https://accounts.google.com/o/oauth2/auth\",\"token_uri\":\"https://accounts.google.com/o/oauth2/token\",\"auth_provider_x509_cert_url\":\"https://www.googleapis.com/oauth2/v1/certs\",\"client_secret\":\"vgXEFRgQvh3_t_e5Hj-eb6IX\",\"redirect_uris\":[\"urn:ietf:wg:oauth:2.0:oob\",\"http://localhost\"]}}";
-  public static final String APPLICATION_NAME = "Google Sheets API Java Quickstart";
-  // public static final String SHEETID = System.getenv("GOOGLE_SHEETID");
-  public static final String SHEETID = "1VSXJUn8_BHG1aW0DQrFDnvLjx_jxcNiD33QzqO5D-jc";
-  /** Directory to store user credentials for this application. */
-  public static final java.io.File DATA_STORE_DIR = new java.io.File(
-      System.getProperty("user.home"), ".credentials/sheets.googleapis.com-java-quickstart");
-
-  /** Global instance of the {@link FileDataStoreFactory}. */
-  private static FileDataStoreFactory DATA_STORE_FACTORY;
+  private FileDataStoreFactory DATA_STORE_FACTORY;
 
   /** Global instance of the JSON factory. */
-  private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+  private final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
   /** Global instance of the HTTP transport. */
-  private static HttpTransport HTTP_TRANSPORT;
-
+  private HttpTransport HTTP_TRANSPORT;
+  
+  /** Directory to store user credentials for this application. */
+  private File dataStoreDir;
+  
   /**
    * Global instance of the scopes required by this quickstart.
    *
    * If modifying these scopes, delete your previously saved credentials at
    * ~/.credentials/sheets.googleapis.com-java-quickstart
    */
-  private static final List<String> SCOPES = Arrays.asList(SheetsScopes.SPREADSHEETS);
-
-  public static Sheets getSheetsService() throws IOException {
-    final Credential credential = authorize();
-    return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
-        .setApplicationName(APPLICATION_NAME).build();
+  private final List<String> SCOPES = Arrays.asList(SheetsScopes.SPREADSHEETS);
+  
+  public GennySheets(String clientSecret, String sheetId, File dataStoreDir ) {
+    this.clientSecret = clientSecret;
+    this.sheetId = sheetId;
+    this.dataStoreDir = dataStoreDir;
+    try {
+      DATA_STORE_FACTORY = new FileDataStoreFactory(this.dataStoreDir);
+      HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }catch (final Throwable t) {
+      t.printStackTrace();
+      System.exit(1);
+    }
+  }
+  
+  public GennySheets(String clientSecret, String sheetId, File dataStoreDir, String appName) {
+    this(clientSecret, sheetId, dataStoreDir);
+    this.appName = appName;
+  }
+    
+  /**
+   * @return the clientSecret
+   */
+  public String getClientSecret() {
+    return clientSecret;
   }
 
-  public static Credential authorize() throws IOException {
+  /**
+   * @param clientSecret the clientSecret to set
+   */
+  public void setClientSecret(String clientSecret) {
+    this.clientSecret = clientSecret;
+  }
+
+  /**
+   * @return the sheetId
+   */
+  public String getSheetId() {
+    return sheetId;
+  }
+
+  /**
+   * @param sheetId the sheetId to set
+   */
+  public void setSheetId(String sheetId) {
+    this.sheetId = sheetId;
+  }
+
+  public Sheets getSheetsService() throws IOException {
+    final Credential credential = authorize();
+    return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+        .setApplicationName(appName).build();
+  }
+
+  public Credential authorize() throws IOException {
     // Load client secrets.
     out.println(System.getProperty("user.home"));
     // InputStream in = GennySheets.class.getResourceAsStream("/client_secret_2.json");
-    final InputStream in = IOUtils.toInputStream(CLIENT_SECRET, "UTF-8");
+    final InputStream in = IOUtils.toInputStream(clientSecret, "UTF-8");
     final GoogleClientSecrets clientSecrets =
         GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
@@ -76,28 +133,16 @@ public class GennySheets {
             .setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
     final Credential credential =
         new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
-    System.out.println("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
+    System.out.println("Credentials saved to " + dataStoreDir.getAbsolutePath());
     return credential;
   }
-
-  static {
-    try {
-      HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-      DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
-    } catch (final Throwable t) {
-      t.printStackTrace();
-      System.exit(1);
-    }
-  }
-  static Gson g = new Gson();
-
-  public static <T> List<T> transform(final List<List<Object>> values, final Class object) {
+  
+  public <T> List<T> transform(final List<List<Object>> values, final Class object) {
     final List<String> keys = new ArrayList<String>();
     final List<T> k = new ArrayList<T>();
     for (final Object key : values.get(0)) {
       keys.add((String) key);
     }
-    // values.stream().peek(act-> System.out.println(act+"ok1")).
     values.remove(0);
     for (final List row : values) {
       final Map<String, Object> mapper = new HashMap<String, Object>();
@@ -110,27 +155,25 @@ public class GennySheets {
     return k;
   }
 
-  public static <T> List<T> getBeans(final Class clazz) throws IOException {
+  public <T> List<T> getBeans(final Class clazz) throws IOException {
     final Sheets service = getSheetsService();
     final String range = clazz.getSimpleName() + RANGE;
-    final ValueRange response = service.spreadsheets().values().get(SHEETID, range).execute();
+    final ValueRange response = service.spreadsheets().values().get(sheetId, range).execute();
     final List<List<Object>> values = response.getValues();
     return transform(values, clazz);
   }
 
-  public static List<List<Object>> getStrings(final String sheetName, final String range)
+  public List<List<Object>> getStrings(final String sheetName, final String range)
       throws IOException {
     final Sheets service = getSheetsService();
     final String absoluteRange = sheetName + RANGE;
     final ValueRange response =
-        service.spreadsheets().values().get(SHEETID, absoluteRange).execute();
+        service.spreadsheets().values().get(sheetId, absoluteRange).execute();
     final List<List<Object>> values = response.getValues();
     return values;
   }
 
-
-  public static List<BaseEntity> getBaseEntitys() {
-
+  public List<BaseEntity> getBaseEntitys() {
     try {
       return getBeans(BaseEntity.class);
     } catch (final IOException e) {
@@ -138,34 +181,11 @@ public class GennySheets {
     }
   }
 
-  public static void main() throws IOException {
-
-    final List<BaseEntity> bes = getBeans(BaseEntity.class);
-
+  public static void main(String...outs) throws IOException {
+    GennySheets sheets = new GennySheets("{\"installed\":{\"client_id\":\"260075856207-9d7a02ekmujr2bh7i53dro28n132iqhe.apps.googleusercontent.com\",\"project_id\":\"genny-sheets-181905\",\"auth_uri\":\"https://accounts.google.com/o/oauth2/auth\",\"token_uri\":\"https://accounts.google.com/o/oauth2/token\",\"auth_provider_x509_cert_url\":\"https://www.googleapis.com/oauth2/v1/certs\",\"client_secret\":\"vgXEFRgQvh3_t_e5Hj-eb6IX\",\"redirect_uris\":[\"urn:ietf:wg:oauth:2.0:oob\",\"http://localhost\"]}}",
+                                                                          "1VSXJUn8_BHG1aW0DQrFDnvLjx_jxcNiD33QzqO5D-jc", new File(
+                                                                              System.getProperty("user.home"), ".credentials/sheets.googleapis.com-java-quickstart"));
+    final List<BaseEntity> bes = sheets.getBeans(BaseEntity.class);
     bes.forEach(out::println);
-    // InputStream in = GennySheets.class.getResourceAsStream("/opt/realm/keycloak.json");
-    // String theString = new BufferedReader(new InputStreamReader(in))
-    // .lines().collect(Collectors.joining("\n"));
-    // System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"+System.getProperty("user.dir"));
-
-    // out.print(DATA_STORE_DIR);
-    // File dir = new File("/opt/realm/");
-    //
-    // // attempt to create the directory here
-    // boolean successful = dir.mkdir();
-    // if (successful)
-    // {
-    // // creating the directory succeeded
-    // System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$directory was created successfully");
-    // }
-    // else
-    // {
-    // // creating the directory failed
-    // System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$failed trying to create the
-    // directory");
-    // }
-    // File[] fi= File;
-    // out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&& "+fi[0].getAbsolutePath()+
-    // "&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
   }
 }
