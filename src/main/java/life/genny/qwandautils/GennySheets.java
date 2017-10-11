@@ -64,6 +64,8 @@ public class GennySheets {
    */
   private final List<String> SCOPES = Arrays.asList(SheetsScopes.SPREADSHEETS);
   
+  private Sheets service;
+  
   public GennySheets(String clientSecret, String sheetId, File dataStoreDir ) {
     this.clientSecret = clientSecret;
     this.sheetId = sheetId;
@@ -71,6 +73,7 @@ public class GennySheets {
     try {
       DATA_STORE_FACTORY = new FileDataStoreFactory(this.dataStoreDir);
       HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+      service = getSheetsService();
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -78,6 +81,7 @@ public class GennySheets {
       t.printStackTrace();
       System.exit(1);
     }
+    
   }
   
   public GennySheets(String clientSecret, String sheetId, File dataStoreDir, String appName) {
@@ -155,9 +159,25 @@ public class GennySheets {
     }
     return k;
   }
+  
+  public <T> List<T> transformNotKnown(final List<List<Object>> values) {
+    final List<String> keys = new ArrayList<String>();
+    final List<T> k = new ArrayList<T>();
+    for (final Object key : values.get(0)) {
+      keys.add((String) key);
+    }
+    values.remove(0);
+    for (final List row : values) {
+      final Map<String, Object> mapper = new HashMap<String, Object>();
+      for (int counter = 0; counter < row.size(); counter++) {
+        mapper.put(keys.get(counter), row.get(counter));
+      }
+      k.add((T) mapper);
+    }
+    return k;
+  }
 
   public <T> List<T> getBeans(final Class clazz) throws IOException {
-    final Sheets service = getSheetsService();
     final String range = clazz.getSimpleName() + RANGE;
     final ValueRange response = service.spreadsheets().values().get(sheetId, range).execute();
     final List<List<Object>> values = response.getValues();
@@ -166,7 +186,6 @@ public class GennySheets {
 
   public List<List<Object>> getStrings(final String sheetName, final String range)
       throws IOException {
-    final Sheets service = getSheetsService();
     final String absoluteRange = sheetName + RANGE;
     final ValueRange response =
         service.spreadsheets().values().get(sheetId, absoluteRange).execute();
@@ -174,6 +193,14 @@ public class GennySheets {
     return values;
   }
 
+  public <T> List<T> row2DoubleTuples(final String sheetName)
+      throws IOException {
+    final String absoluteRange = sheetName + RANGE;
+    final ValueRange response =
+        service.spreadsheets().values().get(sheetId, absoluteRange).execute();
+    final List<List<Object>> values = response.getValues();
+    return transformNotKnown(values);
+  }
   public List<BaseEntity> getBaseEntitys() {
     try {
       return getBeans(BaseEntity.class);
