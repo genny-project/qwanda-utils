@@ -149,6 +149,7 @@ public class GennySheets {
       for (int counter = 0; counter < row.size(); counter++) {
         mapper.put(keys.get(counter), row.get(counter));
       }
+//      out.println(mapper);
       final T lo = (T) g.fromJson(mapper.toString(), object);
       k.add(lo);
     }
@@ -179,13 +180,5 @@ public class GennySheets {
     } catch (final IOException e) {
       return new ArrayList<BaseEntity>();
     }
-  }
-
-  public static void main(String...outs) throws IOException {
-    GennySheets sheets = new GennySheets("{\"installed\":{\"client_id\":\"260075856207-9d7a02ekmujr2bh7i53dro28n132iqhe.apps.googleusercontent.com\",\"project_id\":\"genny-sheets-181905\",\"auth_uri\":\"https://accounts.google.com/o/oauth2/auth\",\"token_uri\":\"https://accounts.google.com/o/oauth2/token\",\"auth_provider_x509_cert_url\":\"https://www.googleapis.com/oauth2/v1/certs\",\"client_secret\":\"vgXEFRgQvh3_t_e5Hj-eb6IX\",\"redirect_uris\":[\"urn:ietf:wg:oauth:2.0:oob\",\"http://localhost\"]}}",
-                                                                          "1VSXJUn8_BHG1aW0DQrFDnvLjx_jxcNiD33QzqO5D-jc", new File(
-                                                                              System.getProperty("user.home"), ".credentials/sheets.googleapis.com-java-quickstart"));
-    final List<BaseEntity> bes = sheets.getBeans(BaseEntity.class);
-    bes.forEach(out::println);
   }
 }
