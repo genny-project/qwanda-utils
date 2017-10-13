@@ -109,7 +109,16 @@ public class KeycloakUtils {
   }
 
 
+
   public static Map<String, Object> getJsonMap(final String json) {
+
+    final JSONObject jsonObj = getDecodedToken(json);
+    return getJsonMap(jsonObj);
+  }
+
+  public static Map<String, Object> getJsonMap(final JSONObject jsonObj) {
+
+    final String json = jsonObj.toString();
     Map<String, Object> map = new HashMap<String, Object>();
 
     try {
@@ -118,7 +127,10 @@ public class KeycloakUtils {
 
 
       // convert JSON string to Map
-      map = mapper.readValue(json, new TypeReference<Map<String, String>>() {});
+      final TypeReference<HashMap<String, Object>> typeRef =
+          new TypeReference<HashMap<String, Object>>() {};
+
+      map = mapper.readValue(json, typeRef);
 
 
     } catch (final JsonGenerationException e) {
@@ -131,7 +143,6 @@ public class KeycloakUtils {
 
     return map;
   }
-
 
 
 }
