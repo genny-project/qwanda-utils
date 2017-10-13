@@ -1,5 +1,9 @@
 package life.genny.qwandautils;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 // import org.keycloak.OAuth2Constants;
@@ -12,6 +16,8 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class KeycloakUtils {
 
@@ -101,6 +107,31 @@ public class KeycloakUtils {
     }
     return jsonObj;
   }
+
+
+  public static Map<String, Object> getJsonMap(final String json) {
+    Map<String, Object> map = new HashMap<String, Object>();
+
+    try {
+
+      final ObjectMapper mapper = new ObjectMapper();
+
+
+      // convert JSON string to Map
+      map = mapper.readValue(json, new TypeReference<Map<String, String>>() {});
+
+
+    } catch (final JsonGenerationException e) {
+      e.printStackTrace();
+    } catch (final JsonMappingException e) {
+      e.printStackTrace();
+    } catch (final IOException e) {
+      e.printStackTrace();
+    }
+
+    return map;
+  }
+
 
 
 }
