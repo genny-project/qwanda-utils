@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 import life.genny.qwanda.attribute.Attribute;
+import life.genny.qwanda.attribute.AttributeLink;
 import life.genny.qwanda.attribute.EntityAttribute;
+import life.genny.qwanda.datatype.DataType;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.EntityEntity;
 import life.genny.qwanda.validation.Validation;
@@ -16,18 +18,39 @@ import life.genny.qwandautils.GennySheets;
 public class GoogleUtilsTest {
   GennySheets sheets;
 
-//  @Test
+ @Test
   public void getData() {
+//    sheets = new GennySheets(
+//        "{\"installed\":{\"client_id\":\"260075856207-9d7a02ekmujr2bh7i53dro28n132iqhe.apps.googleusercontent.com\",\"project_id\":\"genny-sheets-181905\",\"auth_uri\":\"https://accounts.google.com/o/oauth2/auth\",\"token_uri\":\"https://accounts.google.com/o/oauth2/token\",\"auth_provider_x509_cert_url\":\"https://www.googleapis.com/oauth2/v1/certs\",\"client_secret\":\"vgXEFRgQvh3_t_e5Hj-eb6IX\",\"redirect_uris\":[\"urn:ietf:wg:oauth:2.0:oob\",\"http://localhost\"]}}",
+//        "1VSXJUn8_BHG1aW0DQrFDnvLjx_jxcNiD33QzqO5D-jc", new File(System.getProperty("user.home"),
+//            ".credentials/sheets.googleapis.com-java-quickstart"));
+    
     sheets = new GennySheets(
         "{\"installed\":{\"client_id\":\"260075856207-9d7a02ekmujr2bh7i53dro28n132iqhe.apps.googleusercontent.com\",\"project_id\":\"genny-sheets-181905\",\"auth_uri\":\"https://accounts.google.com/o/oauth2/auth\",\"token_uri\":\"https://accounts.google.com/o/oauth2/token\",\"auth_provider_x509_cert_url\":\"https://www.googleapis.com/oauth2/v1/certs\",\"client_secret\":\"vgXEFRgQvh3_t_e5Hj-eb6IX\",\"redirect_uris\":[\"urn:ietf:wg:oauth:2.0:oob\",\"http://localhost\"]}}",
-        "1VSXJUn8_BHG1aW0DQrFDnvLjx_jxcNiD33QzqO5D-jc", new File(System.getProperty("user.home"),
+        "1-h7cmgJyUf2Xg7fd9icCJAdLjj6oXtYFPXGqd8En7sM", new File(System.getProperty("user.home"),
             ".credentials/sheets.googleapis.com-java-quickstart"));
-    getBaseEntity();
-    getAttributes();
-    getEntityAttribute();
-    getEntityEntity();
-    getValidation();
-    getA();
+    
+    
+    
+//    getBaseEntity();
+//    getAttributes();
+//    getEntityAttribute();
+//    getEntityEntity();
+//    getValidation();
+//    getA();
+    System.out.println("sheets validations");
+    Map<String, Validation> daa = sheets.validationData();
+//    sheets.validationData().entrySet().stream().forEach(out::println);
+    Map<String, DataType> dao = sheets.dataTypesData(daa);
+    Map<String, Attribute> atrr =  sheets.attributesData(dao);
+    
+    Map<String, BaseEntity> bes  = sheets.baseEntityData();
+//    sheets.attr2BaseEntitys(atrr, bes).entrySet().stream().forEach(out::println);
+    Map<String, AttributeLink> attrLink = sheets.attrLink();
+    sheets.be2BeTarget(attrLink, bes).entrySet().stream().forEach(out::println); 
+//    Map<String, Question> question = sheets.questionsData(atrr);
+//    sheets.asksData(question, bes).entrySet().stream().forEach(out::println);
+    
   }
 
   public void getBaseEntity() {

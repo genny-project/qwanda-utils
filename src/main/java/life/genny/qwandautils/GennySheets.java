@@ -15,33 +15,51 @@ import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.gson.Gson;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import javax.persistence.NoResultException;
+import javax.persistence.OptimisticLockException;
+import life.genny.qwanda.Ask;
+import life.genny.qwanda.Question;
+import life.genny.qwanda.attribute.Attribute;
+import life.genny.qwanda.attribute.AttributeLink;
+import life.genny.qwanda.attribute.EntityAttribute;
+import life.genny.qwanda.datatype.DataType;
 import life.genny.qwanda.entity.BaseEntity;
+import life.genny.qwanda.entity.EntityEntity;
+import life.genny.qwanda.exception.BadDataException;
+import life.genny.qwanda.validation.Validation;
+import life.genny.qwanda.validation.ValidationList;
 import java.io.File;
 
 public class GennySheets {
-//public static final String SHEETID = System.getenv("GOOGLE_SHEETID");
-//public static final String SHEETID = "1VSXJUn8_BHG1aW0DQrFDnvLjx_jxcNiD33QzqO5D-jc";
-  
+  // public static final String SHEETID = System.getenv("GOOGLE_SHEETID");
+  // public static final String SHEETID = "1VSXJUn8_BHG1aW0DQrFDnvLjx_jxcNiD33QzqO5D-jc";
+
   /** Range of Columns to read or write */
   private final String RANGE = "!A1:ZZ";
- 
+
   private String appName = "Google Sheets API Java Quickstart";
-  
+
   /** Global variable normally instantiated from a Json file or env variable */
   private String clientSecret;
-  
-  /** Global variable for the Sheet ID located on the URL of google docs spreedsheet between the d/ and trailing slash ( / ) . */
+
+  /**
+   * Global variable for the Sheet ID located on the URL of google docs spreedsheet between the d/
+   * and trailing slash ( / ) .
+   */
   private String sheetId;
-  
+
   /** Global instance of the {@link Gson}. */
   private Gson g = new Gson();
 
@@ -52,10 +70,10 @@ public class GennySheets {
 
   /** Global instance of the HTTP transport. */
   private HttpTransport HTTP_TRANSPORT;
-  
+
   /** Directory to store user credentials for this application. */
   private File dataStoreDir;
-  
+
   /**
    * Global instance of the scopes required by this quickstart.
    *
@@ -63,10 +81,10 @@ public class GennySheets {
    * ~/.credentials/sheets.googleapis.com-java-quickstart
    */
   private final List<String> SCOPES = Arrays.asList(SheetsScopes.SPREADSHEETS);
-  
+
   private Sheets service;
-  
-  public GennySheets(String clientSecret, String sheetId, File dataStoreDir ) {
+
+  public GennySheets(String clientSecret, String sheetId, File dataStoreDir) {
     this.clientSecret = clientSecret;
     this.sheetId = sheetId;
     this.dataStoreDir = dataStoreDir;
@@ -77,18 +95,18 @@ public class GennySheets {
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
-    }catch (final Throwable t) {
+    } catch (final Throwable t) {
       t.printStackTrace();
       System.exit(1);
     }
-    
+
   }
-  
+
   public GennySheets(String clientSecret, String sheetId, File dataStoreDir, String appName) {
     this(clientSecret, sheetId, dataStoreDir);
     this.appName = appName;
   }
-    
+
   /**
    * @return the clientSecret
    */
@@ -119,8 +137,8 @@ public class GennySheets {
 
   public Sheets getSheetsService() throws IOException {
     final Credential credential = authorize();
-    return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
-        .setApplicationName(appName).build();
+    return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(appName)
+        .build();
   }
 
   public Credential authorize() throws IOException {
@@ -140,7 +158,7 @@ public class GennySheets {
     System.out.println("Credentials saved to " + dataStoreDir.getAbsolutePath());
     return credential;
   }
-  
+
   public <T> List<T> transform(final List<List<Object>> values, final Class object) {
     final List<String> keys = new ArrayList<String>();
     final List<T> k = new ArrayList<T>();
@@ -153,13 +171,13 @@ public class GennySheets {
       for (int counter = 0; counter < row.size(); counter++) {
         mapper.put(keys.get(counter), row.get(counter));
       }
-//      out.println(mapper);
+      // out.println(mapper);
       final T lo = (T) g.fromJson(mapper.toString(), object);
       k.add(lo);
     }
     return k;
   }
-  
+
   public <T> List<T> transformNotKnown(final List<List<Object>> values) {
     final List<String> keys = new ArrayList<String>();
     final List<T> k = new ArrayList<T>();
@@ -193,19 +211,283 @@ public class GennySheets {
     return values;
   }
 
-  public <T> List<T> row2DoubleTuples(final String sheetName)
-      throws IOException {
+  public <T> List<T> row2DoubleTuples(final String sheetName) throws IOException {
     final String absoluteRange = sheetName + RANGE;
     final ValueRange response =
         service.spreadsheets().values().get(sheetId, absoluteRange).execute();
     final List<List<Object>> values = response.getValues();
     return transformNotKnown(values);
   }
+
   public List<BaseEntity> getBaseEntitys() {
     try {
       return getBeans(BaseEntity.class);
     } catch (final IOException e) {
       return new ArrayList<BaseEntity>();
     }
+  }
+
+  public Map<String, Validation> validationData() {
+    List<Validation> validations = new ArrayList<Validation>();
+    try {
+      validations = getBeans(Validation.class);
+    } catch (final IOException e2) {
+      e2.printStackTrace();
+    }
+    return validations.stream().map(valObject -> {
+      Map<String, Validation> map = new HashMap<String, Validation>();
+      map.put(valObject.getCode(), valObject);
+      return map;
+    }).reduce((ac, acc) -> {
+      ac.putAll(acc);
+      return ac;
+    }).get();
+  }
+
+  public Map<String, DataType> dataTypesData(Map<String, Validation> validationData) {
+    List<Map> obj = new ArrayList<Map>();
+    try {
+      obj = row2DoubleTuples(DataType.class.getSimpleName());
+    } catch (final IOException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+    return obj.stream().map(object -> {
+      Map<String, DataType> dataTypeMap = new HashMap<String, DataType>();
+      if (object.get("code") != null) {
+        final String code = (String) object.get("code");
+        final String name = (String) object.get("name");
+        final String validations = (String) object.get("validations");
+        final ValidationList validationList = new ValidationList();
+        validationList.setValidationList(new ArrayList<Validation>());
+        if (validations != null) {
+          final String[] validationListStr = validations.split(",");
+          for (final String validationCode : validationListStr) {
+            validationList.getValidationList().add(validationData.get(validationCode));
+          }
+        }
+        if (!dataTypeMap.containsKey(code)) {
+          final DataType dataType = new DataType(name, validationList);
+          dataTypeMap.put(code, dataType);
+        }
+      }
+      return dataTypeMap;
+    }).reduce((ac, acc) -> {
+      ac.putAll(acc);
+      return ac;
+    }).get();
+  }
+
+  public Map<String, Attribute> attributesData(Map<String, DataType> dataTypeMap) {
+    List<Map> attrs = null;
+    try {
+      attrs = row2DoubleTuples(Attribute.class.getSimpleName());
+    } catch (final IOException e2) {
+      // TODO Auto-generated catch block
+      e2.printStackTrace();
+    }
+    return attrs.stream().map(data -> {
+      Map<String, Attribute> attributeMap = new HashMap<String, Attribute>();
+      Attribute attribute = null;
+      String code = (String) data.get("code");
+      String name = (String) data.get("name");
+      final String datatype = (String) data.get("datatype");
+      if (data.get("code") != null) {
+        attribute = new Attribute(code, name, dataTypeMap.get(datatype));
+      }
+      attributeMap.put(code, attribute);
+      return attributeMap;
+    }).reduce((ac, acc) -> {
+      ac.putAll(acc);
+      return ac;
+    }).get();
+  }
+
+  public Map<String, BaseEntity> baseEntityData() {
+    List<BaseEntity> bes = null;
+    try {
+      bes = getBeans(BaseEntity.class);
+      bes.stream().forEach(object -> {
+      });
+    } catch (final IOException e2) {
+      // TODO Auto-generated catch block
+      e2.printStackTrace();
+    }
+    return bes.stream().map(valObject -> {
+      Map<String, BaseEntity> map = new HashMap<String, BaseEntity>();
+      map.put(valObject.getCode(), valObject);
+      return map;
+    }).reduce((ac, acc) -> {
+      ac.putAll(acc);
+      return ac;
+    }).get();
+  }
+
+  public <T> T getObjectByValue(T object) {
+    
+    final T newObject = object;
+    return newObject;
+  }
+
+  public Map<String, BaseEntity> attr2BaseEntitys(Map<String, Attribute> findAttributeByCode,
+      Map<String, BaseEntity> findBaseEntityByCode) {
+    List<Map> obj2 = null;
+    try {
+      obj2 = row2DoubleTuples(EntityAttribute.class.getSimpleName());
+    } catch (final IOException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+    return obj2.stream().map(object -> {
+      Map<String, BaseEntity> map = new HashMap<String, BaseEntity>();
+      final String beCode = (String) object.get("baseEntityCode");
+      final String attributeCode = (String) object.get("attributeCode");
+      final String weightStr = (String) object.get("weight");
+      final String valueString = (String) object.get("valueString");
+      System.out.println("BECode:" + beCode + ":attCode" + attributeCode + ":weight:" + weightStr
+          + ": valueString:" + valueString);
+      Attribute attribute = new Attribute("ds","dsd", null);
+      BaseEntity be =  new BaseEntity("ds","dsd");
+      System.out.println("==============11=============="+ findBaseEntityByCode.get(beCode)+"============================");
+      try {
+        BeanUtils.copyProperties(attribute, findAttributeByCode.get(attributeCode));
+        BeanUtils.copyProperties(be,  findBaseEntityByCode.get(beCode));
+      } catch (IllegalAccessException | InvocationTargetException e1) {
+        // TODO Auto-generated catch block
+        e1.printStackTrace();
+      }
+      System.out.println("============================"+be+"============================");
+//    service.update(be);
+//      attribute = findAttributeByCode.get(attributeCode);
+//      be = findBaseEntityByCode.get(beCode);
+      final Double weight = Double.valueOf(weightStr);
+      try {
+        be.addAttribute(attribute, weight, valueString);
+      } catch (BadDataException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      map.put(beCode, be);
+      return map;
+    }).reduce((ac, acc) -> {
+      ac.putAll(acc);
+      return ac;
+    }).get();
+  }
+
+  public Map<String, AttributeLink> attrLink() {
+    List<Map> obj2 = null;
+    try {
+      obj2 = row2DoubleTuples(AttributeLink.class.getSimpleName());
+    } catch (final IOException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+    return obj2.stream().map(object -> {
+      Map<String, AttributeLink> map = new HashMap<String, AttributeLink>();
+      final String code = (String) object.get("code");
+      final String name = (String) object.get("name");
+      AttributeLink linkAttribute = new AttributeLink(code, name);
+      map.put(code, linkAttribute);
+      return map;
+    }).reduce((ac, acc) -> {
+      ac.putAll(acc);
+      return ac;
+    }).get();
+  }
+
+  public Map<String, BaseEntity> be2BeTarget(Map<String, AttributeLink> findAttributeLinkByCode,
+      Map<String, BaseEntity> findBaseEntityByCode) {
+    List<Map> obj3 = null;
+    try {
+      obj3 = row2DoubleTuples(EntityEntity.class.getSimpleName());
+    } catch (final IOException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+    return obj3.stream().map(object -> {
+      Map<String, BaseEntity> map = new HashMap<String, BaseEntity>();
+      final String parentCode = (String) object.get("parentCode");
+      final String targetCode = (String) object.get("targetCode");
+      final String linkCode = (String) object.get("linkCode");
+      final String weightStr = (String) object.get("weight");
+      BaseEntity sbe = new BaseEntity("null","null");
+      BaseEntity tbe = new BaseEntity("null","null");   
+      try {
+        BaseEntity temp1 = findBaseEntityByCode.get(parentCode);
+        BaseEntity temp2 = findBaseEntityByCode.get(targetCode);
+        BeanUtils.copyProperties(sbe, temp1);
+        BeanUtils.copyProperties(tbe, temp2);
+        AttributeLink linkAttribute2 = getObjectByValue(findAttributeLinkByCode.get(linkCode));
+        final Double weight = Double.valueOf(weightStr);
+        sbe.addTarget(tbe, linkAttribute2, weight);
+      } catch (final NoResultException e) {
+        e.printStackTrace();
+      } catch (IllegalAccessException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (InvocationTargetException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (BadDataException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } 
+      map.put(tbe.getCode(), tbe);
+      return map;
+    }).reduce((ac, acc) -> {
+      ac.putAll(acc);
+      return ac;
+    }).get();
+  }
+
+  public Map<String, Question> questionsData(Map<String, Attribute> findAttributeByCode) {
+    List<Map> obj4 = null;
+    try {
+      obj4 = row2DoubleTuples(Question.class.getSimpleName());
+    } catch (final IOException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+    return obj4.stream().map(object -> {
+      Map<String, Question> map = new HashMap<String, Question>();
+      final String code = (String) object.get("code");
+      final String name = (String) object.get("name");
+      final String attrCode = (String) object.get("attribute_code");
+      Attribute attr;
+      attr = findAttributeByCode.get(attrCode);
+      Question q = new Question(code, name, attr);
+      map.put(code, q);
+      return map;
+    }).reduce((ac, acc) -> {
+      ac.putAll(acc);
+      return ac;
+    }).get();
+  }
+
+  public Map<String, Ask> asksData(Map<String, Question> findQuestionByCode,
+      Map<String, BaseEntity> findBaseEntityByCode) {
+    List<Map> obj5 = null;
+    try {
+      obj5 = row2DoubleTuples(Ask.class.getSimpleName());
+    } catch (final IOException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+    return obj5.stream().map(object -> {
+      Map<String, Ask> map = new HashMap<String, Ask>();
+      final String qCode = (String) object.get("question_code");
+      final String name = (String) object.get("name");
+      final String source = (String) object.get("source");
+      Question q;
+      q = findQuestionByCode.get(qCode);
+      BaseEntity s = findBaseEntityByCode.get(source);
+      Ask a = new Ask(q, s, s);
+      map.put(q.getCode() + s.getCode(), a);
+      return map;
+    }).reduce((ac, acc) -> {
+      ac.putAll(acc);
+      return ac;
+    }).get();
   }
 }
