@@ -16,8 +16,11 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class KeycloakUtils {
 
@@ -142,6 +145,14 @@ public class KeycloakUtils {
     }
 
     return map;
+  }
+  
+  public static HashSet<String> getRoleSet(final String role){
+	  String accessRole = role.substring(role.indexOf("[") + 1, role.indexOf("]"));
+		String[] strs = accessRole.trim().split("\\s*,\\s*");
+		 HashSet<String> roles= new HashSet<String>(Arrays.asList(strs));  
+	  return roles;
+	  
   }
 
 
