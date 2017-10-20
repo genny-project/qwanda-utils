@@ -94,7 +94,8 @@ public class KeycloakUtils {
     }
 
   }
-
+  
+  //Decode the keycloak token string and send back in Json Format
   public static JSONObject getDecodedToken(final String bearerToken) {
     JSONObject jsonObj = null;
     String decodedJson = null;
@@ -111,30 +112,22 @@ public class KeycloakUtils {
     return jsonObj;
   }
 
-
-
+  //Send the decoded Json token in the map
   public static Map<String, Object> getJsonMap(final String json) {
-
     final JSONObject jsonObj = getDecodedToken(json);
     return getJsonMap(jsonObj);
   }
 
   public static Map<String, Object> getJsonMap(final JSONObject jsonObj) {
-
     final String json = jsonObj.toString();
     Map<String, Object> map = new HashMap<String, Object>();
-
     try {
-
       final ObjectMapper mapper = new ObjectMapper();
-
-
       // convert JSON string to Map
       final TypeReference<HashMap<String, Object>> typeRef =
           new TypeReference<HashMap<String, Object>>() {};
 
       map = mapper.readValue(json, typeRef);
-
 
     } catch (final JsonGenerationException e) {
       e.printStackTrace();
@@ -147,6 +140,9 @@ public class KeycloakUtils {
     return map;
   }
   
+  /*
+   * Return the Set of access roles of the user logged in based on the keycloak access_roles
+   */
   public static HashSet<String> getRoleSet(final String role){
 	  String accessRole = role.substring(role.indexOf("[") + 1, role.indexOf("]"));
 		String[] strs = accessRole.trim().split("\\s*,\\s*");
@@ -154,6 +150,17 @@ public class KeycloakUtils {
 	  return roles;
 	  
   }
-
+  
+  /*  For testing user with different realm name in dev env as dev/genny keycloak can't be added with other realms  
+   *  Gets the Project realm from Genny Env if it is present
+   */
+  static String projectRealm = null;
+   public static String getPRJRealmFromDevEnv() {
+	  if(System.getenv("PROJECT_REALM") != null) {
+		 projectRealm = System.getenv("PROJECT_REALM");
+	 }
+    return projectRealm;
+  }
+  
 
 }
