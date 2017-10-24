@@ -17,6 +17,8 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.gson.Gson;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.IOUtils;
+import javax.persistence.NoResultException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,9 +28,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import javax.persistence.NoResultException;
-import javax.persistence.OptimisticLockException;
 import life.genny.qwanda.Ask;
 import life.genny.qwanda.Question;
 import life.genny.qwanda.attribute.Attribute;
@@ -40,7 +39,6 @@ import life.genny.qwanda.entity.EntityEntity;
 import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.validation.Validation;
 import life.genny.qwanda.validation.ValidationList;
-import java.io.File;
 
 public class GennySheets {
   // public static final String SHEETID = System.getenv("GOOGLE_SHEETID");
@@ -84,7 +82,7 @@ public class GennySheets {
 
   private Sheets service;
 
-  public GennySheets(String clientSecret, String sheetId, File dataStoreDir) {
+  public GennySheets(final String clientSecret, final String sheetId, final File dataStoreDir) {
     this.clientSecret = clientSecret;
     this.sheetId = sheetId;
     this.dataStoreDir = dataStoreDir;
@@ -92,7 +90,7 @@ public class GennySheets {
       DATA_STORE_FACTORY = new FileDataStoreFactory(this.dataStoreDir);
       HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
       service = getSheetsService();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     } catch (final Throwable t) {
@@ -102,7 +100,8 @@ public class GennySheets {
 
   }
 
-  public GennySheets(String clientSecret, String sheetId, File dataStoreDir, String appName) {
+  public GennySheets(final String clientSecret, final String sheetId, final File dataStoreDir,
+      final String appName) {
     this(clientSecret, sheetId, dataStoreDir);
     this.appName = appName;
   }
@@ -117,7 +116,7 @@ public class GennySheets {
   /**
    * @param clientSecret the clientSecret to set
    */
-  public void setClientSecret(String clientSecret) {
+  public void setClientSecret(final String clientSecret) {
     this.clientSecret = clientSecret;
   }
 
@@ -131,7 +130,7 @@ public class GennySheets {
   /**
    * @param sheetId the sheetId to set
    */
-  public void setSheetId(String sheetId) {
+  public void setSheetId(final String sheetId) {
     this.sheetId = sheetId;
   }
 
@@ -235,7 +234,7 @@ public class GennySheets {
       e2.printStackTrace();
     }
     return validations.stream().map(valObject -> {
-      Map<String, Validation> map = new HashMap<String, Validation>();
+      final Map<String, Validation> map = new HashMap<String, Validation>();
       map.put(valObject.getCode(), valObject);
       return map;
     }).reduce((ac, acc) -> {
@@ -244,7 +243,7 @@ public class GennySheets {
     }).get();
   }
 
-  public Map<String, DataType> dataTypesData(Map<String, Validation> validationData) {
+  public Map<String, DataType> dataTypesData(final Map<String, Validation> validationData) {
     List<Map> obj = new ArrayList<Map>();
     try {
       obj = row2DoubleTuples(DataType.class.getSimpleName());
@@ -253,7 +252,7 @@ public class GennySheets {
       e1.printStackTrace();
     }
     return obj.stream().map(object -> {
-      Map<String, DataType> dataTypeMap = new HashMap<String, DataType>();
+      final Map<String, DataType> dataTypeMap = new HashMap<String, DataType>();
       if (object.get("code") != null) {
         final String code = (String) object.get("code");
         final String name = (String) object.get("name");
@@ -278,7 +277,7 @@ public class GennySheets {
     }).get();
   }
 
-  public Map<String, Attribute> attributesData(Map<String, DataType> dataTypeMap) {
+  public Map<String, Attribute> attributesData(final Map<String, DataType> dataTypeMap) {
     List<Map> attrs = null;
     try {
       attrs = row2DoubleTuples(Attribute.class.getSimpleName());
@@ -287,10 +286,10 @@ public class GennySheets {
       e2.printStackTrace();
     }
     return attrs.stream().map(data -> {
-      Map<String, Attribute> attributeMap = new HashMap<String, Attribute>();
+      final Map<String, Attribute> attributeMap = new HashMap<String, Attribute>();
       Attribute attribute = null;
-      String code = (String) data.get("code");
-      String name = (String) data.get("name");
+      final String code = (String) data.get("code");
+      final String name = (String) data.get("name");
       final String datatype = (String) data.get("datatype");
       if (data.get("code") != null) {
         attribute = new Attribute(code, name, dataTypeMap.get(datatype));
@@ -314,7 +313,7 @@ public class GennySheets {
       e2.printStackTrace();
     }
     return bes.stream().map(valObject -> {
-      Map<String, BaseEntity> map = new HashMap<String, BaseEntity>();
+      final Map<String, BaseEntity> map = new HashMap<String, BaseEntity>();
       map.put(valObject.getCode(), valObject);
       return map;
     }).reduce((ac, acc) -> {
@@ -323,14 +322,14 @@ public class GennySheets {
     }).get();
   }
 
-  public <T> T getObjectByValue(T object) {
-    
+  public <T> T getObjectByValue(final T object) {
+
     final T newObject = object;
     return newObject;
   }
 
-  public Map<String, BaseEntity> attr2BaseEntitys(Map<String, Attribute> findAttributeByCode,
-      Map<String, BaseEntity> findBaseEntityByCode) {
+  public Map<String, BaseEntity> attr2BaseEntitys(final Map<String, Attribute> findAttributeByCode,
+      final Map<String, BaseEntity> findBaseEntityByCode) {
     List<Map> obj2 = null;
     try {
       obj2 = row2DoubleTuples(EntityAttribute.class.getSimpleName());
@@ -339,31 +338,32 @@ public class GennySheets {
       e1.printStackTrace();
     }
     return obj2.stream().map(object -> {
-      Map<String, BaseEntity> map = new HashMap<String, BaseEntity>();
+      final Map<String, BaseEntity> map = new HashMap<String, BaseEntity>();
       final String beCode = (String) object.get("baseEntityCode");
       final String attributeCode = (String) object.get("attributeCode");
       final String weightStr = (String) object.get("weight");
       final String valueString = (String) object.get("valueString");
       System.out.println("BECode:" + beCode + ":attCode" + attributeCode + ":weight:" + weightStr
           + ": valueString:" + valueString);
-      Attribute attribute = new Attribute("ds","dsd", null);
-      BaseEntity be =  new BaseEntity("ds","dsd");
-      System.out.println("==============11=============="+ findBaseEntityByCode.get(beCode)+"============================");
+      final Attribute attribute = new Attribute("ds", "dsd", null);
+      final BaseEntity be = new BaseEntity("ds", "dsd");
+      System.out.println("==============11==============" + findBaseEntityByCode.get(beCode)
+          + "============================");
       try {
         BeanUtils.copyProperties(attribute, findAttributeByCode.get(attributeCode));
-        BeanUtils.copyProperties(be,  findBaseEntityByCode.get(beCode));
+        BeanUtils.copyProperties(be, findBaseEntityByCode.get(beCode));
       } catch (IllegalAccessException | InvocationTargetException e1) {
         // TODO Auto-generated catch block
         e1.printStackTrace();
       }
-      System.out.println("============================"+be+"============================");
-//    service.update(be);
-//      attribute = findAttributeByCode.get(attributeCode);
-//      be = findBaseEntityByCode.get(beCode);
+      System.out.println("============================" + be + "============================");
+      // service.update(be);
+      // attribute = findAttributeByCode.get(attributeCode);
+      // be = findBaseEntityByCode.get(beCode);
       final Double weight = Double.valueOf(weightStr);
       try {
         be.addAttribute(attribute, weight, valueString);
-      } catch (BadDataException e) {
+      } catch (final BadDataException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
@@ -384,10 +384,10 @@ public class GennySheets {
       e1.printStackTrace();
     }
     return obj2.stream().map(object -> {
-      Map<String, AttributeLink> map = new HashMap<String, AttributeLink>();
+      final Map<String, AttributeLink> map = new HashMap<String, AttributeLink>();
       final String code = (String) object.get("code");
       final String name = (String) object.get("name");
-      AttributeLink linkAttribute = new AttributeLink(code, name);
+      final AttributeLink linkAttribute = new AttributeLink(code, name);
       map.put(code, linkAttribute);
       return map;
     }).reduce((ac, acc) -> {
@@ -396,8 +396,9 @@ public class GennySheets {
     }).get();
   }
 
-  public Map<String, BaseEntity> be2BeTarget(Map<String, AttributeLink> findAttributeLinkByCode,
-      Map<String, BaseEntity> findBaseEntityByCode) {
+  public Map<String, BaseEntity> be2BeTarget(
+      final Map<String, AttributeLink> findAttributeLinkByCode,
+      final Map<String, BaseEntity> findBaseEntityByCode) {
     List<Map> obj3 = null;
     try {
       obj3 = row2DoubleTuples(EntityEntity.class.getSimpleName());
@@ -406,33 +407,34 @@ public class GennySheets {
       e1.printStackTrace();
     }
     return obj3.stream().map(object -> {
-      Map<String, BaseEntity> map = new HashMap<String, BaseEntity>();
+      final Map<String, BaseEntity> map = new HashMap<String, BaseEntity>();
       final String parentCode = (String) object.get("parentCode");
       final String targetCode = (String) object.get("targetCode");
       final String linkCode = (String) object.get("linkCode");
       final String weightStr = (String) object.get("weight");
-      BaseEntity sbe = new BaseEntity("null","null");
-      BaseEntity tbe = new BaseEntity("null","null");   
+      final BaseEntity sbe = new BaseEntity("null", "null");
+      final BaseEntity tbe = new BaseEntity("null", "null");
       try {
-        BaseEntity temp1 = findBaseEntityByCode.get(parentCode);
-        BaseEntity temp2 = findBaseEntityByCode.get(targetCode);
+        final BaseEntity temp1 = findBaseEntityByCode.get(parentCode);
+        final BaseEntity temp2 = findBaseEntityByCode.get(targetCode);
         BeanUtils.copyProperties(sbe, temp1);
         BeanUtils.copyProperties(tbe, temp2);
-        AttributeLink linkAttribute2 = getObjectByValue(findAttributeLinkByCode.get(linkCode));
+        final AttributeLink linkAttribute2 =
+            getObjectByValue(findAttributeLinkByCode.get(linkCode));
         final Double weight = Double.valueOf(weightStr);
         sbe.addTarget(tbe, linkAttribute2, weight);
       } catch (final NoResultException e) {
         e.printStackTrace();
-      } catch (IllegalAccessException e) {
+      } catch (final IllegalAccessException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
-      } catch (InvocationTargetException e) {
+      } catch (final InvocationTargetException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
-      } catch (BadDataException e) {
+      } catch (final BadDataException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
-      } 
+      }
       map.put(tbe.getCode(), tbe);
       return map;
     }).reduce((ac, acc) -> {
@@ -441,7 +443,7 @@ public class GennySheets {
     }).get();
   }
 
-  public Map<String, Question> questionsData(Map<String, Attribute> findAttributeByCode) {
+  public Map<String, Question> questionsData(final Map<String, Attribute> findAttributeByCode) {
     List<Map> obj4 = null;
     try {
       obj4 = row2DoubleTuples(Question.class.getSimpleName());
@@ -450,13 +452,13 @@ public class GennySheets {
       e1.printStackTrace();
     }
     return obj4.stream().map(object -> {
-      Map<String, Question> map = new HashMap<String, Question>();
+      final Map<String, Question> map = new HashMap<String, Question>();
       final String code = (String) object.get("code");
       final String name = (String) object.get("name");
       final String attrCode = (String) object.get("attribute_code");
       Attribute attr;
       attr = findAttributeByCode.get(attrCode);
-      Question q = new Question(code, name, attr);
+      final Question q = new Question(code, name, attr);
       map.put(code, q);
       return map;
     }).reduce((ac, acc) -> {
@@ -465,8 +467,8 @@ public class GennySheets {
     }).get();
   }
 
-  public Map<String, Ask> asksData(Map<String, Question> findQuestionByCode,
-      Map<String, BaseEntity> findBaseEntityByCode) {
+  public Map<String, Ask> asksData(final Map<String, Question> findQuestionByCode,
+      final Map<String, BaseEntity> findBaseEntityByCode) {
     List<Map> obj5 = null;
     try {
       obj5 = row2DoubleTuples(Ask.class.getSimpleName());
@@ -475,14 +477,14 @@ public class GennySheets {
       e1.printStackTrace();
     }
     return obj5.stream().map(object -> {
-      Map<String, Ask> map = new HashMap<String, Ask>();
+      final Map<String, Ask> map = new HashMap<String, Ask>();
       final String qCode = (String) object.get("question_code");
-      final String name = (String) object.get("name");
+      object.get("name");
       final String source = (String) object.get("source");
       Question q;
       q = findQuestionByCode.get(qCode);
-      BaseEntity s = findBaseEntityByCode.get(source);
-      Ask a = new Ask(q, s, s);
+      final BaseEntity s = findBaseEntityByCode.get(source);
+      final Ask a = new Ask(q, s, s);
       map.put(q.getCode() + s.getCode(), a);
       return map;
     }).reduce((ac, acc) -> {
