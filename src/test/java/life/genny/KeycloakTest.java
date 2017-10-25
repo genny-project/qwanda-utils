@@ -1,11 +1,18 @@
 package life.genny;
 
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
+import java.lang.invoke.MethodHandles;
 // import org.junit.Test;
 // import org.keycloak.representations.AccessTokenResponse;
 import life.genny.qwandautils.KeycloakUtils;
 
 public class KeycloakTest {
+
+
+
+  private static final Logger log = org.apache.logging.log4j.LogManager
+      .getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
   // @Test
   // // run the keycloak docker located in the root of the project runKeycloak.sh
@@ -45,5 +52,7 @@ public class KeycloakTest {
     // System.out.println(jsonMap);
 
   }
+
+
 
 }

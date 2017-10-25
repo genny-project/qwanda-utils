@@ -64,6 +64,24 @@ public class KeycloakService {
 
   }
 
+
+
+  public KeycloakService(final String keycloakUrl, final String realm, final String username,
+      final String password, final String clientid) throws IOException {
+
+
+    this.keycloakUrl = keycloakUrl;
+    this.realm = realm;
+    this.username = username;
+    this.password = password;
+    this.clientid = clientid;
+    this.secret = "public"; // public mode
+
+
+    accessToken = getToken();
+
+  }
+
   //
   private AccessTokenResponse getToken() throws IOException {
 
@@ -79,8 +97,10 @@ public class KeycloakService {
       formParams.add(new BasicNameValuePair("username", username));
       formParams.add(new BasicNameValuePair("password", password));
       formParams.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, "password"));
-      formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_ID, "security-admin-console"));
-      formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_SECRET, secret));
+      formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_ID, "admin-cli"));
+      if (!this.secret.equals("public")) {
+        formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_SECRET, secret));
+      }
       final UrlEncodedFormEntity form = new UrlEncodedFormEntity(formParams, "UTF-8");
 
       post.setEntity(form);
@@ -153,4 +173,20 @@ public class KeycloakService {
       client.getConnectionManager().shutdown();
     }
   }
+
+  /**
+   * @return the keycloak
+   */
+  public Keycloak getKeycloak() {
+    return keycloak;
+  }
+
+  /**
+   * @param keycloak the keycloak to set
+   */
+  public void setKeycloak(final Keycloak keycloak) {
+    this.keycloak = keycloak;
+  }
+
+
 }

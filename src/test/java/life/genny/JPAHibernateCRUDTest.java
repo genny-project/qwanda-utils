@@ -15,24 +15,32 @@ import com.google.gson.JsonSerializationContext;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.junit.Test;
+import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.mortbay.log.Log;
 import javax.persistence.Query;
 import javax.ws.rs.core.MultivaluedMap;
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.AnswerLink;
 import life.genny.qwanda.attribute.Attribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
+import life.genny.qwandautils.KeycloakService;
 
 public class JPAHibernateCRUDTest extends JPAHibernateTest {
 
@@ -73,14 +81,16 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
 
     final BaseEntity person = service.findBaseEntityByCode("PER_USER1");
     try {
-      AnswerLink al = person.addAnswer(answer, 1.0);
-      al = service.update(al);
+      final AnswerLink al = person.addAnswer(answer, 1.0);
+      service.insert(al);
       service.update(person);
     } catch (final BadDataException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
 
+    final AnswerLink al2 = service.findAnswerLinkByCodes("PER_USER1", "PER_USER1", "PRI_FIRSTNAME");
+    log.info(al2);
   }
 
   @Test
@@ -106,7 +116,7 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
   @Test
   public void sqlCountTest() {
     final String sql =
-        "SELECT count(be) FROM BaseEntity be,EntityEntity ee where ee.pk.target.code=be.code and ee.pk.linkAttribute.code=:linkAttributeCode and ee.pk.source.code=:sourceCode";
+        "SELECT count(distinct be) FROM BaseEntity be,EntityEntity ee where ee.pk.target.code=be.code and ee.pk.linkAttribute.code=:linkAttributeCode and ee.pk.source.code=:sourceCode";
 
     final Long count = (Long) em.createQuery(sql).setParameter("sourceCode", "GRP_USERS")
         .setParameter("linkAttributeCode", "LNK_CORE").getSingleResult();
@@ -329,126 +339,215 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
   @Test
   public void getChildrenWithAttributesPaged() {
     System.out.println("\n\n******************* KIDS WITH ATTRIBUTE!**************");
-    final MultivaluedMap<String, String> params = new MultivaluedMapImpl<String, String>();
-    params.add("pageStart", "0");
-    params.add("pageSize", "10");
+    final MultivaluedMap<String, String> qparams = new MultivaluedMapImpl<String, String>();
+    qparams.add("pageStart", "0");
+    qparams.add("pageSize", "10");
+    final String sourceCode = "GRP_USERS";
+    final String linkCode = "LNK_CORE";
 
-    params.add("PRI_USERNAME", "user1");
+
+    qparams.add("PRI_USERNAME", "user1");
     // params.add("PRI_USERNAME", "user2");
 
     Integer pageStart = 0;
     Integer pageSize = 10; // default
-    final MultivaluedMap<String, String> qparams = new MultivaluedMapImpl<String, String>();
-    qparams.putAll(params);
+    final Boolean includeAttributes = true;
+    final MultivaluedMap<String, String> params = new MultivaluedMapImpl<String, String>();
+    params.putAll(qparams);
 
     final String pageStartStr = params.getFirst("pageStart");
     final String pageSizeStr = params.getFirst("pageSize");
     final String levelStr = params.getFirst("level");
     if (pageStartStr != null) {
       pageStart = Integer.decode(pageStartStr);
-      qparams.remove("pageStart");
+      params.remove("pageStart");
     }
     if (pageSizeStr != null) {
       pageSize = Integer.decode(pageSizeStr);
-      qparams.remove("pageSize");
+      params.remove("pageSize");
     }
     if (levelStr != null) {
       Integer.decode(levelStr);
+      params.remove("level");
     }
-
 
 
     final List<BaseEntity> eeResults;
     new HashMap<String, BaseEntity>();
 
-
-    log.info("**************** BE SEARCH WITH ATTRIBUTE VALUE WITH ATTRIBUTES!! pageStart = "
-        + pageStart + " pageSize=" + pageSize + " ****************");
-
-    // ugly and insecure
-    final Integer pairCount = qparams.size();
-    if (pairCount.equals(0)) {
-      eeResults = em.createQuery(
-          "SELECT distinct be FROM BaseEntity be,EntityEntity ee JOIN be.baseEntityAttributes bee where ee.pk.target.code=be.code and ee.pk.linkAttribute.code=:linkAttributeCode and ee.pk.source.code=:sourceCode")
-          .setParameter("sourceCode", "GRP_USERS").setParameter("linkAttributeCode", "LNK_CORE")
-          .setFirstResult(pageStart).setMaxResults(pageSize).getResultList();
+    if (includeAttributes) {
 
 
-    } else {
-      System.out.println("PAIR COUNT IS NOT ZERO " + pairCount);
-      String eaStrings = "";
-      String eaStringsQ = "(";
-      for (int i = 0; i < (pairCount); i++) {
-        eaStrings += ",EntityAttribute ea" + i;
-        eaStringsQ += "ea" + i + ".baseEntityCode=be.code or ";
-      }
-      eaStringsQ = eaStringsQ.substring(0, eaStringsQ.length() - 4);
-      eaStringsQ += ")";
+      // ugly and insecure
+      final Integer pairCount = params.size();
+      if (pairCount == 0) {
+        eeResults = em.createQuery(
+            "SELECT distinct be FROM BaseEntity be,EntityEntity ee JOIN be.baseEntityAttributes bee where ee.pk.target.code=be.code and ee.pk.linkAttribute.code=:linkAttributeCode and ee.pk.source.code=:sourceCode")
+            .setParameter("sourceCode", sourceCode).setParameter("linkAttributeCode", linkCode)
+            .setFirstResult(pageStart).setMaxResults(pageSize).getResultList();
 
-      String queryStr = "SELECT distinct be FROM BaseEntity be,EntityEntity ee" + eaStrings
-          + "  JOIN be.baseEntityAttributes bee where " + eaStringsQ
-          + " and ee.pk.target.code=be.code and ee.pk.linkAttribute.code=:linkAttributeCode and ee.pk.source.code=:sourceCode and ";
-      int attributeCodeIndex = 0;
-      int valueIndex = 0;
-      final List<String> attributeCodeList = new ArrayList<String>();
-      final List<String> valueList = new ArrayList<String>();
 
-      for (final Map.Entry<String, List<String>> entry : qparams.entrySet()) {
-        if (entry.getKey().equals("pageStart") || entry.getKey().equals("pageSize")) { // ugly
-          continue;
-        }
-        final List<String> qvalueList = entry.getValue();
-        if (!qvalueList.isEmpty()) {
-          // create the value or
-          String valueQuery = "(";
-          for (final String value : qvalueList) {
-            valueQuery +=
-                "ea" + attributeCodeIndex + ".valueString=:valueString" + valueIndex + " or ";
-            valueList.add(valueIndex, value);
-            valueIndex++;
+      } else {
+        System.out.println("PAIR COUNT IS NOT ZERO " + pairCount);
+        String eaStrings = "";
+        String eaStringsQ = "";
+        if (pairCount > 0) {
+          eaStringsQ = "(";
+          for (int i = 0; i < (pairCount); i++) {
+            eaStrings += ",EntityAttribute ea" + i;
+            eaStringsQ += "ea" + i + ".baseEntityCode=be.code or ";
           }
-          // remove last or
-          valueQuery = valueQuery.substring(0, valueQuery.length() - 4);
-          valueQuery += ")";
-          attributeCodeList.add(attributeCodeIndex, entry.getKey());
-          if (attributeCodeIndex > 0) {
-            queryStr += " and ";
-          }
-          queryStr += " ea" + attributeCodeIndex + ".attributeCode=:attributeCode"
-              + attributeCodeIndex + " and " + valueQuery;
-          System.out.println("Key : " + entry.getKey() + " Value : " + entry.getValue());
+          eaStringsQ = eaStringsQ.substring(0, eaStringsQ.length() - 4);
+          eaStringsQ += ") and ";
         }
-        attributeCodeIndex++;
+
+
+        String queryStr = "SELECT distinct be FROM BaseEntity be,EntityEntity ee" + eaStrings
+            + "  JOIN be.baseEntityAttributes bee where " + eaStringsQ
+            + "  ee.pk.target.code=be.code and ee.pk.linkAttribute.code=:linkAttributeCode and ee.pk.source.code=:sourceCode and ";
+        int attributeCodeIndex = 0;
+        int valueIndex = 0;
+        final List<String> attributeCodeList = new ArrayList<String>();
+        final List<String> valueList = new ArrayList<String>();
+
+        for (final Map.Entry<String, List<String>> entry : params.entrySet()) {
+          if (entry.getKey().equals("pageStart") || entry.getKey().equals("pageSize")) { // ugly
+            continue;
+          }
+          final List<String> qvalueList = entry.getValue();
+          if (!qvalueList.isEmpty()) {
+            // create the value or
+            String valueQuery = "(";
+            for (final String value : qvalueList) {
+              valueQuery +=
+                  "ea" + attributeCodeIndex + ".valueString=:valueString" + valueIndex + " or ";
+              valueList.add(valueIndex, value);
+              valueIndex++;
+            }
+            // remove last or
+            valueQuery = valueQuery.substring(0, valueQuery.length() - 4);
+            valueQuery += ")";
+            attributeCodeList.add(attributeCodeIndex, entry.getKey());
+            if (attributeCodeIndex > 0) {
+              queryStr += " and ";
+            }
+            queryStr += " ea" + attributeCodeIndex + ".attributeCode=:attributeCode"
+                + attributeCodeIndex + " and " + valueQuery;
+            System.out.println("Key : " + entry.getKey() + " Value : " + entry.getValue());
+          }
+          attributeCodeIndex++;
+
+        }
+        System.out.println("KIDS + ATTRIBUTE Query=" + queryStr);
+        final Query query = em.createQuery(queryStr);
+        int index = 0;
+        for (final String attributeParm : attributeCodeList) {
+          query.setParameter("attributeCode" + index, attributeParm);
+          System.out.println("attributeCode" + index + "=:" + attributeParm);
+          index++;
+        }
+        index = 0;
+        for (final String valueParm : valueList) {
+          query.setParameter("valueString" + index, valueParm);
+          System.out.println("valueString" + index + "=:" + valueParm);
+          index++;
+        }
+        query.setParameter("sourceCode", sourceCode).setParameter("linkAttributeCode", linkCode);
+
+        query.setFirstResult(pageStart).setMaxResults(pageSize);
+        eeResults = query.getResultList();
+
 
       }
-      System.out.println("KIDS + ATTRIBUTE Query=" + queryStr);
-      final Query query = em.createQuery(queryStr);
-      int index = 0;
-      for (final String attributeParm : attributeCodeList) {
-        query.setParameter("attributeCode" + index, attributeParm);
-        System.out.println("attributeCode" + index + "=:" + attributeParm);
-        index++;
-      }
-      index = 0;
-      for (final String valueParm : valueList) {
-        query.setParameter("valueString" + index, valueParm);
-        System.out.println("valueString" + index + "=:" + valueParm);
-        index++;
-      }
-      query.setParameter("sourceCode", "GRP_USERS").setParameter("linkAttributeCode", "LNK_CORE");
-
-      query.setFirstResult(pageStart).setMaxResults(pageSize);
-      eeResults = query.getResultList();
-    }
-    if (eeResults.isEmpty()) {
-      System.out.println("EEE IS EMPTY");
     } else {
-      System.out.println("EEE Count" + eeResults.size());
-      System.out.println("EEE" + eeResults);
-    }
-    for (final BaseEntity be : eeResults) {
-      System.out.println("\n" + be.getCode() + " + attributes");
-      be.getBaseEntityAttributes().stream().forEach(p -> System.out.println(p.getAttributeCode()));
+      Log.info("**************** ENTITY ENTITY WITH NO ATTRIBUTES ****************");
+
+
+      // ugly and insecure
+      final Integer pairCount = params.size();
+      if (pairCount == 0) {
+        eeResults = em.createQuery(
+            "SELECT distinct be FROM BaseEntity be,EntityEntity ee  where ee.pk.target.code=be.code and ee.pk.linkAttribute.code=:linkAttributeCode and ee.pk.source.code=:sourceCode")
+            .setParameter("sourceCode", sourceCode).setParameter("linkAttributeCode", linkCode)
+            .setFirstResult(pageStart).setMaxResults(pageSize).getResultList();
+
+
+      } else {
+        System.out.println("PAIR COUNT  " + pairCount);
+        String eaStrings = "";
+        String eaStringsQ = "";
+        if (pairCount > 0) {
+          eaStringsQ = "(";
+          for (int i = 0; i < (pairCount); i++) {
+            eaStrings += ",EntityAttribute ea" + i;
+            eaStringsQ += "ea" + i + ".baseEntityCode=be.code or ";
+          }
+          eaStringsQ = eaStringsQ.substring(0, eaStringsQ.length() - 4);
+          eaStringsQ += ") and ";
+        }
+
+        String queryStr = "SELECT distinct be FROM BaseEntity be,EntityEntity ee" + eaStrings
+            + "  where " + eaStringsQ
+            + " ee.pk.target.code=be.code and ee.pk.linkAttribute.code=:linkAttributeCode and ee.pk.source.code=:sourceCode and ";
+        int attributeCodeIndex = 0;
+        int valueIndex = 0;
+        final List<String> attributeCodeList = new ArrayList<String>();
+        final List<String> valueList = new ArrayList<String>();
+
+        for (final Map.Entry<String, List<String>> entry : params.entrySet()) {
+          if (entry.getKey().equals("pageStart") || entry.getKey().equals("pageSize")) { // ugly
+            continue;
+          }
+          final List<String> qvalueList = entry.getValue();
+          if (!qvalueList.isEmpty()) {
+            // create the value or
+            String valueQuery = "(";
+            for (final String value : qvalueList) {
+              valueQuery +=
+                  "ea" + attributeCodeIndex + ".valueString=:valueString" + valueIndex + " or ";
+              valueList.add(valueIndex, value);
+              valueIndex++;
+            }
+            // remove last or
+
+            valueQuery = valueQuery.substring(0, valueQuery.length() - 4);
+
+            valueQuery += ")";
+            attributeCodeList.add(attributeCodeIndex, entry.getKey());
+            if (attributeCodeIndex > 0) {
+              queryStr += " and ";
+            }
+            queryStr += " ea" + attributeCodeIndex + ".attributeCode=:attributeCode"
+                + attributeCodeIndex + " and " + valueQuery;
+            System.out.println("Key : " + entry.getKey() + " Value : " + entry.getValue());
+          }
+          attributeCodeIndex++;
+
+        }
+        System.out.println("KIDS + ATTRIBUTE Query=" + queryStr);
+        final Query query = em.createQuery(queryStr);
+        int index = 0;
+        for (final String attributeParm : attributeCodeList) {
+          query.setParameter("attributeCode" + index, attributeParm);
+          System.out.println("attributeCode" + index + "=:" + attributeParm);
+          index++;
+        }
+        index = 0;
+        for (final String valueParm : valueList) {
+          query.setParameter("valueString" + index, valueParm);
+          System.out.println("valueString" + index + "=:" + valueParm);
+          index++;
+        }
+        query.setParameter("sourceCode", sourceCode).setParameter("linkAttributeCode", linkCode);
+
+        query.setFirstResult(pageStart).setMaxResults(pageSize);
+        eeResults = query.getResultList();
+
+      }
+      for (final BaseEntity be : eeResults) {
+        be.setBaseEntityAttributes(null); // ugly
+      }
+
     }
     System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
     // TODO: improve
@@ -487,4 +586,100 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
       log.info("NO RESULT");
     }
   }
+
+
+  // @Test
+  public void getKeycloakUsersTest() {
+    KeycloakService ks;
+    final Map<String, Map<String, Object>> usersMap = new HashMap<String, Map<String, Object>>();
+
+    try {
+      ks = new KeycloakService("https://bouncer.outcome-hub.com", "channel40", "service",
+          "WelcomeToTheTruck", "channel40");
+      final List<LinkedHashMap> users = ks.fetchKeycloakUsers();
+      for (final Object user : users) {
+        final LinkedHashMap map = (LinkedHashMap) user;
+        final Map<String, Object> userMap = new HashMap<String, Object>();
+        for (final Object key : map.keySet()) {
+          // System.out.println(key + ":" + map.get(key));
+          userMap.put((String) key, map.get(key));
+
+        }
+        usersMap.put((String) userMap.get("username"), userMap);
+        System.out.println();
+      }
+
+      System.out.println("finished");
+    } catch (final IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    for (final String username : usersMap.keySet()) {
+      final MultivaluedMap params = new MultivaluedMapImpl();
+      params.add("PRI_USERNAME", username);
+      final Map<String, Object> userMap = usersMap.get(username);
+
+      final List<BaseEntity> users = service.findBaseEntitysByAttributeValues(params, true, 0, 1);
+      if (users.isEmpty()) {
+        final String code = "PER_CH40_" + username;
+        final String firstName = (String) userMap.get("firstName");
+        final String lastName = (String) userMap.get("lastName");
+        final String name = firstName + " " + lastName;
+        final String email = (String) userMap.get("email");
+        final String id = (String) userMap.get("id");
+        final Long unixSeconds = (Long) userMap.get("createdTimestamp");
+        final Date date = new Date(unixSeconds); // *1000 is to convert seconds to milliseconds
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z"); // the format of
+                                                                                    // your date
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT+10")); // give a timezone reference for formating
+        sdf.format(date);
+        final Attribute firstNameAtt = service.findAttributeByCode("PRI_FIRSTNAME");
+        final Attribute lastNameAtt = service.findAttributeByCode("PRI_LASTNAME");
+        final Attribute nameAtt = service.findAttributeByCode("PRI_NAME");
+        final Attribute emailAtt = service.findAttributeByCode("PRI_EMAIL");
+        final Attribute uuidAtt = service.findAttributeByCode("PRI_UUID");
+        final Attribute usernameAtt = service.findAttributeByCode("PRI_USERNAME");
+
+        try {
+          final BaseEntity user = new BaseEntity(code, name);
+
+          user.addAttribute(firstNameAtt, 0.0, firstName);
+          user.addAttribute(lastNameAtt, 0.0, lastName);
+          user.addAttribute(nameAtt, 0.0, name);
+          user.addAttribute(emailAtt, 0.0, email);
+          user.addAttribute(uuidAtt, 0.0, id);
+          user.addAttribute(usernameAtt, 0.0, username);
+          service.insert(user);
+
+          System.out.println("BE:" + user);
+        } catch (final BadDataException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+
+      } else {
+        users.get(0);
+      }
+
+    }
+
+  }
+
+  public void updateUser(final String realm, final String keycloakId, final String fn,
+      final String ln) throws Exception {
+    KeycloakService ks;
+
+    ks = new KeycloakService("https://bouncer.outcome-hub.com", "channel40", "service",
+        "WelcomeToTheTruck", "channel40");
+
+    final UserResource userResource = ks.getKeycloak().realm(realm).users().get(keycloakId);
+    final UserRepresentation user = userResource.toRepresentation();
+    user.setFirstName(fn);
+    user.setLastName(ln);
+    userResource.update(user);
+
+  }
+
+
 }

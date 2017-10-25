@@ -109,6 +109,31 @@ public class BaseEntityService {
     return ask.getId();
   }
 
+  public AnswerLink insert(final AnswerLink answerLink) {
+    // always check if rule exists through check for unique code
+    try {
+      em.persist(answerLink);
+      // baseEntityEventSrc.fire(entity);
+
+    } catch (final EntityExistsException e) {
+      // so update otherwise // TODO merge?
+      AnswerLink existing = findAnswerLinkByCodes(answerLink.getTargetCode(),
+          answerLink.getSourceCode(), answerLink.getAttributeCode());
+      existing.setValueString(answerLink.getValueString());
+      existing.setExpired(answerLink.getExpired());
+      existing.setRefused(answerLink.getRefused());
+      existing.setValueBoolean(answerLink.getValueBoolean());
+      existing.setValueDateTime(answerLink.getValueDateTime());
+      existing.setValueDouble(answerLink.getValueDouble());
+      existing.setWeight(answerLink.getWeight());
+
+      existing = em.merge(existing);
+      return existing;
+
+    }
+    return answerLink;
+  }
+
   public Long insert(final Rule rule) {
     // always check if rule exists through check for unique code
     try {
