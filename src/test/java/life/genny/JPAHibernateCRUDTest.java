@@ -4,6 +4,14 @@ package life.genny;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.junit.Test;
@@ -11,18 +19,69 @@ import org.mortbay.log.Log;
 import javax.persistence.Query;
 import javax.ws.rs.core.MultivaluedMap;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Type;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import life.genny.qwanda.Answer;
+import life.genny.qwanda.AnswerLink;
 import life.genny.qwanda.attribute.Attribute;
 import life.genny.qwanda.entity.BaseEntity;
+import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
 
 public class JPAHibernateCRUDTest extends JPAHibernateTest {
 
+
+
   private static final Logger log = org.apache.logging.log4j.LogManager
       .getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
+
+  @Test
+  public void saveAnswerTest() {
+    final String json = "{ " + "\"created\": \"2014-11-01T12:34:56+10:00\"," + "\"value\": \"Bob\","
+        + "\"expired\": false," + "\"refused\": false," + "\"weight\": 1," + "\"version\": 1,"
+        + "\"targetCode\": \"PER_USER1\"," + "\"sourceCode\": \"PER_USER1\","
+        + "\"attributeCode\": \"PRI_FIRSTNAME\"" + "}";
+
+    // final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
+
+    final Gson gson = new GsonBuilder()
+        .registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
+          @Override
+          public LocalDateTime deserialize(final JsonElement json, final Type type,
+              final JsonDeserializationContext jsonDeserializationContext)
+              throws JsonParseException {
+            return ZonedDateTime.parse(json.getAsJsonPrimitive().getAsString()).toLocalDateTime();
+          }
+
+          public JsonElement serialize(final LocalDateTime date, final Type typeOfSrc,
+              final JsonSerializationContext context) {
+            return new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)); // "yyyy-mm-dd"
+          }
+        }).create();
+    final Answer answer = gson.fromJson(json, Answer.class);
+    log.info("Answer loaded :" + answer);
+    final Long answerId = service.insert(answer);
+
+    log.info("answerId=" + answerId);
+
+    final BaseEntity person = service.findBaseEntityByCode("PER_USER1");
+    try {
+      AnswerLink al = person.addAnswer(answer, 1.0);
+      al = service.update(al);
+      service.update(person);
+    } catch (final BadDataException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+  }
 
   @Test
   public void fetchAttribute() {
@@ -270,8 +329,6 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
   @Test
   public void getChildrenWithAttributesPaged() {
     System.out.println("\n\n******************* KIDS WITH ATTRIBUTE!**************");
-    Integer pageStart = 0;
-    Integer pageSize = 10; // default
     final MultivaluedMap<String, String> params = new MultivaluedMapImpl<String, String>();
     params.add("pageStart", "0");
     params.add("pageSize", "10");
@@ -279,16 +336,26 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
     params.add("PRI_USERNAME", "user1");
     // params.add("PRI_USERNAME", "user2");
 
+    Integer pageStart = 0;
+    Integer pageSize = 10; // default
+    final MultivaluedMap<String, String> qparams = new MultivaluedMapImpl<String, String>();
+    qparams.putAll(params);
+
     final String pageStartStr = params.getFirst("pageStart");
     final String pageSizeStr = params.getFirst("pageSize");
     final String levelStr = params.getFirst("level");
-    if (pageStartStr != null && pageSizeStr != null) {
+    if (pageStartStr != null) {
       pageStart = Integer.decode(pageStartStr);
+      qparams.remove("pageStart");
+    }
+    if (pageSizeStr != null) {
       pageSize = Integer.decode(pageSizeStr);
+      qparams.remove("pageSize");
     }
     if (levelStr != null) {
       Integer.decode(levelStr);
     }
+
 
 
     final List<BaseEntity> eeResults;
@@ -299,8 +366,8 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
         + pageStart + " pageSize=" + pageSize + " ****************");
 
     // ugly and insecure
-    final Integer pairCount = params.size();
-    if (pairCount.equals(2)) {
+    final Integer pairCount = qparams.size();
+    if (pairCount.equals(0)) {
       eeResults = em.createQuery(
           "SELECT distinct be FROM BaseEntity be,EntityEntity ee JOIN be.baseEntityAttributes bee where ee.pk.target.code=be.code and ee.pk.linkAttribute.code=:linkAttributeCode and ee.pk.source.code=:sourceCode")
           .setParameter("sourceCode", "GRP_USERS").setParameter("linkAttributeCode", "LNK_CORE")
@@ -311,7 +378,7 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
       System.out.println("PAIR COUNT IS NOT ZERO " + pairCount);
       String eaStrings = "";
       String eaStringsQ = "(";
-      for (int i = 0; i < (pairCount - 2); i++) {
+      for (int i = 0; i < (pairCount); i++) {
         eaStrings += ",EntityAttribute ea" + i;
         eaStringsQ += "ea" + i + ".baseEntityCode=be.code or ";
       }
@@ -326,7 +393,7 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
       final List<String> attributeCodeList = new ArrayList<String>();
       final List<String> valueList = new ArrayList<String>();
 
-      for (final Map.Entry<String, List<String>> entry : params.entrySet()) {
+      for (final Map.Entry<String, List<String>> entry : qparams.entrySet()) {
         if (entry.getKey().equals("pageStart") || entry.getKey().equals("pageSize")) { // ugly
           continue;
         }

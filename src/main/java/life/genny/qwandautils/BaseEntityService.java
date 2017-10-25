@@ -236,12 +236,12 @@ public class BaseEntityService {
         final Set<AnswerLink> answerLinks = be.getAnswers();
         // dumbly check if existing answerLink there
         for (final AnswerLink al : answerLinks) { // watch for duplicates
-          if (al.getAsk().getId().equals(ask.getId())) {
-            if (al.getCreated().equals(answer.getCreated())) {
-              // this is the same answer
-              al.setExpired(answer.getExpired());
-            }
-          }
+          // if (al.getAsk().getId().equals(ask.getId())) {
+          // if (al.getCreated().equals(answer.getCreated())) {
+          // // this is the same answer
+          // al.setExpired(answer.getExpired());
+          // }
+          // }
         }
         be = em.merge(be);
       }
@@ -296,6 +296,17 @@ public class BaseEntityService {
   // }
   // return entity.getId();
   // }
+
+  public AnswerLink update(AnswerLink answerLink) {
+    // always check if answerLink exists through check for unique code
+    try {
+      answerLink = em.merge(answerLink);
+    } catch (final IllegalArgumentException e) {
+      // so persist otherwise
+      em.persist(answerLink);
+    }
+    return answerLink;
+  }
 
   public Long update(Ask ask) {
     // always check if ask exists through check for unique code
