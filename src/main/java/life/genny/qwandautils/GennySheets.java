@@ -134,13 +134,13 @@ public class GennySheets {
     this.sheetId = sheetId;
   }
 
-  public Sheets getSheetsService() throws IOException {
+  public Sheets getSheetsService() throws Exception {
     final Credential credential = authorize();
     return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(appName)
         .build();
   }
 
-  public Credential authorize() throws IOException {
+  public Credential authorize() throws Exception {
     // Load client secrets.
     out.println(System.getProperty("user.home"));
     // InputStream in = GennySheets.class.getResourceAsStream("/client_secret_2.json");

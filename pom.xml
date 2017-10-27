@@ -199,12 +199,12 @@
 			<artifactId>jackson-datatype-jsr310</artifactId> <version>${jackson.version}</version> 
 			</dependency> -->
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
-		<!-- <dependency> <groupId>org.apache.commons</groupId> <artifactId>commons-lang3</artifactId> 
-			<version>3.5</version> </dependency> <dependency> <groupId>life.genny</groupId> 
-			<artifactId>qwanda</artifactId> <version>${qwanda.version}</version> <exclusions> 
-			<exclusion> <groupId>dom4j</groupId> <artifactId>dom4j</artifactId> </exclusion> 
-			</exclusions> </dependency> <dependency> <groupId>org.apache.logging.log4j</groupId> 
-			<artifactId>log4j-core</artifactId> <version>2.8.2</version> </dependency> -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.5</version>
+		</dependency>
+
 
 		<!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
 		<dependency>
@@ -218,38 +218,18 @@
 			<artifactId>httpclient</artifactId>
 			<version>${version.apache-httpclient}</version>
 		</dependency>
-		<!-- <dependency> <groupId>org.keycloak</groupId> <artifactId>keycloak-core</artifactId> 
-			<version>${version.keycloak}</version> </dependency> https://mvnrepository.com/artifact/org.keycloak/keycloak-admin-client 
-			<dependency> <groupId>org.keycloak</groupId> <artifactId>keycloak-admin-client</artifactId> 
-			<version>${version.keycloak}</version> </dependency> -->
 
 		<dependency>
 			<groupId>com.google.api-client</groupId>
 			<artifactId>google-api-client</artifactId>
 			<version>1.22.0</version>
 		</dependency>
-		<!-- compile 'com.google.apis:google-api-services-sheets:v4-rev483-1.22.0' 
-			https://mvnrepository.com/artifact/com.google.oauth-client/google-oauth-client -->
-		<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-sheets -->
-		<dependency>
-			<groupId>com.google.apis</groupId>
-			<artifactId>google-api-services-sheets</artifactId>
-			<version>v4-rev483-1.22.0</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.google.oauth-client/google-oauth-client-jetty -->
-		<dependency>
-			<groupId>com.google.oauth-client</groupId>
-			<artifactId>google-oauth-client-jetty</artifactId>
-			<version>1.22.0</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.json/json -->
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 			<version>20170516</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
@@ -317,15 +297,7 @@
 			<artifactId>google-api-services-sheets</artifactId>
 			<version>v4-rev483-1.22.0</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.google.api-client/google-api-client-gson -->
 
-
-		<!-- <dependency> <groupId>com.google.api-client</groupId> <artifactId>google-api-client</artifactId> 
-			<version>1.22.0</version> </dependency> -->
-		<!-- <dependency> <groupId>com.google.apis</groupId> <artifactId>google-api-services-oauth2</artifactId> 
-			<version>v2-rev75-1.19.0</version> </dependency> -->
-		<!-- <dependency> <groupId>com.google.apis</groupId> <artifactId>google-api-services-sheets</artifactId> 
-			<version>v4-rev473-1.22.0</version> </dependency> -->
 	</dependencies>
 	<build>
 		<plugins>
