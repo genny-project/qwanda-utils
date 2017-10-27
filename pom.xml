@@ -81,7 +81,7 @@
 		</repository>
 		<repository>
 			<id>life.genny</id>
-			<url>https://nexus.outcome-hub.com/nexus/content/repositories/life.genny</url>
+			<url>http://nexus.outcome-hub.com/nexus/content/repositories/life.genny</url>
 		</repository>
 	</repositories>
 
