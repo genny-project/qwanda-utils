@@ -52,7 +52,7 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
 
   @Test
   public void saveAnswerTest() {
-    final String json = "{ " + "\"created\": \"2014-11-01T12:34:56+10:00\"," + "\"value\": \"Bob\","
+    String json = "{ " + "\"created\": \"2014-11-01T12:34:56+10:00\"," + "\"value\": \"Bob\","
         + "\"expired\": false," + "\"refused\": false," + "\"weight\": 1," + "\"version\": 1,"
         + "\"targetCode\": \"PER_USER1\"," + "\"sourceCode\": \"PER_USER1\","
         + "\"attributeCode\": \"PRI_FIRSTNAME\"" + "}";
@@ -79,17 +79,35 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
 
     log.info("answerId=" + answerId);
 
+    json = "{ " + "\"created\": \"2014-11-01T12:34:56+10:00\"," + "\"value\": \"Anish\","
+        + "\"expired\": false," + "\"refused\": false," + "\"weight\": 1," + "\"version\": 1,"
+        + "\"targetCode\": \"PER_USER1\"," + "\"sourceCode\": \"PER_USER1\","
+        + "\"attributeCode\": \"PRI_FIRSTNAME\"" + "}";
+
+    // final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
+
+
+    final Answer answer2 = gson.fromJson(json, Answer.class);
+    log.info("Answer loaded :" + answer2);
+    final Long answerId2 = service.insert(answer2);
+
+    log.info("answerId2=" + answerId2);
+
+
     final BaseEntity person = service.findBaseEntityByCode("PER_USER1");
     try {
       final AnswerLink al = person.addAnswer(answer, 1.0);
+      final AnswerLink al2 = person.addAnswer(answer2, 1.0);
       service.insert(al);
+      service.insert(al2);
       service.update(person);
     } catch (final BadDataException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
 
-    final AnswerLink al2 = service.findAnswerLinkByCodes("PER_USER1", "PER_USER1", "PRI_FIRSTNAME");
+    final List<AnswerLink> al2 =
+        service.findAnswerLinksByCodes("PER_USER1", "PER_USER1", "PRI_FIRSTNAME");
     log.info(al2);
   }
 

@@ -508,7 +508,17 @@ public class BaseEntityService {
 
   }
 
+  public List<AnswerLink> findAnswerLinksByCodes(final String targetCode, final String sourceCode,
+      final String attributeCode) {
 
+    final List<AnswerLink> results = em.createQuery(
+        "SELECT a FROM AnswerLink a where a.targetCode=:targetCode and a.sourceCode=:sourceCode and  attributeCode=:attributeCode")
+        .setParameter("targetCode", targetCode).setParameter("sourceCode", sourceCode)
+        .setParameter("attributeCode", attributeCode).getResultList();
+
+    return results;
+
+  }
 
   public BaseEntity findUserByAttributeValue(final String attributeCode, final Integer value) {
 
