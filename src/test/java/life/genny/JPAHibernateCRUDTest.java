@@ -52,13 +52,6 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
 
   @Test
   public void saveAnswerTest() {
-    String json = "{ " + "\"created\": \"2014-11-01T12:34:56+10:00\"," + "\"value\": \"Bob\","
-        + "\"expired\": false," + "\"refused\": false," + "\"weight\": 1," + "\"version\": 1,"
-        + "\"targetCode\": \"PER_USER1\"," + "\"sourceCode\": \"PER_USER1\","
-        + "\"attributeCode\": \"PRI_FIRSTNAME\"" + "}";
-
-    // final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
-
     final Gson gson = new GsonBuilder()
         .registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
           @Override
@@ -73,22 +66,29 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
             return new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)); // "yyyy-mm-dd"
           }
         }).create();
+
+
+    String json = "{ " + "\"created\": \"2014-11-01T12:34:56+10:00\"," + "\"value\": \"Bob\","
+        + "\"expired\": false," + "\"refused\": false," + "\"weight\": 1," + "\"version\": 1,"
+        + "\"targetCode\": \"PER_USER1\"," + "\"sourceCode\": \"PER_USER1\","
+        + "\"attributeCode\": \"PRI_FIRSTNAME\"" + "}";
+
     final Answer answer = gson.fromJson(json, Answer.class);
     log.info("Answer loaded :" + answer);
     final Long answerId = service.insert(answer);
 
     log.info("answerId=" + answerId);
 
-    json = "{ " + "\"created\": \"2014-11-01T12:34:56+10:00\"," + "\"value\": \"Anish\","
+    json = "{ " + "\"created\": \"2014-11-01T12:34:57+10:00\"," + "\"value\": \"Console\","
         + "\"expired\": false," + "\"refused\": false," + "\"weight\": 1," + "\"version\": 1,"
         + "\"targetCode\": \"PER_USER1\"," + "\"sourceCode\": \"PER_USER1\","
-        + "\"attributeCode\": \"PRI_FIRSTNAME\"" + "}";
+        + "\"attributeCode\": \"PRI_LASTNAME\"" + "}";
 
     // final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
 
 
     final Answer answer2 = gson.fromJson(json, Answer.class);
-    log.info("Answer loaded :" + answer2);
+    log.info("Answer2 loaded :" + answer2);
     final Long answerId2 = service.insert(answer2);
 
     log.info("answerId2=" + answerId2);
@@ -105,6 +105,9 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
+
+    final List<AnswerLink> answers = service.findAnswerLinks();
+    log.info(answers);
 
     final List<AnswerLink> al2 =
         service.findAnswerLinksByCodes("PER_USER1", "PER_USER1", "PRI_FIRSTNAME");
