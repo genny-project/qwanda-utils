@@ -37,6 +37,8 @@
         <properties>
             <!-- Configuring JDBC properties -->
           <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
+          <property name="javax.persistence.jdbc.url" value="jdbc:mysql://127.0.0.1:3310/gennydb?autoReconnect=true&amp;failOverReadOnly=false&amp;maxReconnects=10&amp;zeroDateTimeBehavior=convertToNull&amp;autoReconnect=true" />
+          
             <property name="javax.persistence.jdbc.user" value="genny" />
             <property name="javax.persistence.jdbc.password" value="password" />
 
