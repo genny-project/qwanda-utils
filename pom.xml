@@ -18,7 +18,7 @@
 		<junit-version>4.12</junit-version>
 		<log4j-core-version>2.5</log4j-core-version>
 
-		<qwanda.version>0.5.4</qwanda.version>
+		<qwanda.version>0.5.5</qwanda.version>
 
 		<!-- plugin versions -->
 		<ejb-plugin-version>2.3</ejb-plugin-version>
