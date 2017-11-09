@@ -173,108 +173,108 @@ public class BaseEntityService {
     return validation.getId();
   }
 
-//  public Long insert(final Answer answer) {
-//    // always check if answer exists through check for unique code
-//    try {
-//      BaseEntity beSource = null;
-//      BaseEntity beTarget = null;
-//      Attribute attribute = null;
-//      Ask ask = null;
-//
-//      System.out.println("Answer:" + answer);
-//      if (answer.getAskId() != null) {
-//        ask = findAskById(answer.getAskId());
-//        beTarget = ask.getTarget();
-//        beSource = ask.getSource();
-//        attribute = ask.getQuestion().getAttribute();
-//        if (!((answer.getSourceCode().equals(beSource.getCode()))
-//            && (answer.getAttributeCode().equals(attribute.getCode()))
-//            && (answer.getTargetCode().equals(beTarget.getCode())))) {
-//          return -1L; // need to throw error
-//        }
-//      } else {
-//        // Need to find source and target by their codes
-//        beSource = findBaseEntityByCode(answer.getSourceCode());
-//        beTarget = findBaseEntityByCode(answer.getTargetCode());
-//        attribute = findAttributeByCode(answer.getAttributeCode());
-//      }
-//
-//      System.out.println("Found Source:" + beSource.getCode() + " AND Target:" + beTarget.getCode()
-//          + " and attribute:" + attribute.getCode());
-//      // now look for existing answerlink
-//      answer.setAsk(ask);
-//      if (ask == null) {
-//        answer.setAttribute(attribute);
-//      }
-//
-//
-//      em.persist(answer);
-//      // update answerlink
-//
-//      // check if answerlink already there
-//      AnswerLink answerLink = null;
-//
-//      try {
-//        answerLink = findAnswerLinkByCodes(beTarget.getCode(), beSource.getCode(),
-//            answer.getAttributeCode());
-//        System.out.println("Merging AnswerLink");
-//        answerLink.setAnswer(answer);
-//        answerLink = em.merge(answerLink);
-//
-//      } catch (final NoResultException e) {
-//
-//        answerLink = beSource.addAnswer(beTarget, answer, answer.getWeight());
-//        beTarget = em.merge(beTarget);
-//        System.out.println("AnswerLink added to Target");
-//      }
-//
-//      // if (answerLink == null) {
-//      //// answerLink = beSource.addAnswer(beTarget, answer, answer.getWeight());
-//      //// beTarget = em.merge(beTarget);
-//      //// System.out.println("AnswerLink added to Target");
-//      // } else {
-//      // System.out.println("Merging AnswerLink");
-//      // answerLink.setAnswer(answer);
-//      // answerLink = em.merge(answerLink);
-//      // }
-//
-//      if (ask != null) {
-//        if (!ask.getAnswerList().getAnswerList().contains(answerLink)) {
-//          System.out.println("Ask does not have answerLink");
-//          ask.getAnswerList().getAnswerList().add(answerLink);
-//          ask = em.merge(ask);
-//        }
-//      }
-//      // baseEntityEventSrc.fire(entity);
-//
-//
-//    } catch (final BadDataException e) {
-//
-//    } catch (final EntityExistsException e) {
-//      System.out.println("Answer Insert EntityExistsException");
-//      // so update otherwise // TODO merge?
-//      Answer existing = findAnswerById(answer.getId());
-//      existing = em.merge(existing);
-//      if (answer.getAskId() != null) {
-//        final Ask ask = findAskById(answer.getAsk().getId());
-//        BaseEntity be = ask.getTarget();
-//        final Set<AnswerLink> answerLinks = be.getAnswers();
-//        // dumbly check if existing answerLink there
-//        for (final AnswerLink al : answerLinks) { // watch for duplicates
-//          // if (al.getAsk().getId().equals(ask.getId())) {
-//          // if (al.getCreated().equals(answer.getCreated())) {
-//          // // this is the same answer
-//          // al.setExpired(answer.getExpired());
-//          // }
-//          // }
-//        }
-//        be = em.merge(be);
-//      }
-//      return existing.getId();
-//
-//    }
-//    return answer.getId();
-//  }
+  public Long insert(final Answer answer) {
+    // always check if answer exists through check for unique code
+    try {
+      BaseEntity beSource = null;
+      BaseEntity beTarget = null;
+      Attribute attribute = null;
+      Ask ask = null;
+
+      System.out.println("Answer:" + answer);
+      if (answer.getAskId() != null) {
+        ask = findAskById(answer.getAskId());
+        beTarget = ask.getTarget();
+        beSource = ask.getSource();
+        attribute = ask.getQuestion().getAttribute();
+        if (!((answer.getSourceCode().equals(beSource.getCode()))
+            && (answer.getAttributeCode().equals(attribute.getCode()))
+            && (answer.getTargetCode().equals(beTarget.getCode())))) {
+          return -1L; // need to throw error
+        }
+      } else {
+        // Need to find source and target by their codes
+        beSource = findBaseEntityByCode(answer.getSourceCode());
+        beTarget = findBaseEntityByCode(answer.getTargetCode());
+        attribute = findAttributeByCode(answer.getAttributeCode());
+      }
+
+      System.out.println("Found Source:" + beSource.getCode() + " AND Target:" + beTarget.getCode()
+          + " and attribute:" + attribute.getCode());
+      // now look for existing answerlink
+      answer.setAsk(ask);
+      if (ask == null) {
+        answer.setAttribute(attribute);
+      }
+
+
+      em.persist(answer);
+      // update answerlink
+
+      // check if answerlink already there
+      AnswerLink answerLink = null;
+
+      try {
+        answerLink = findAnswerLinkByCodes(beTarget.getCode(), beSource.getCode(),
+            answer.getAttributeCode());
+        System.out.println("Merging AnswerLink");
+        answerLink.setAnswer(answer);
+        answerLink = em.merge(answerLink);
+
+      } catch (final NoResultException e) {
+
+        answerLink = beSource.addAnswer(beTarget, answer, answer.getWeight());
+        beTarget = em.merge(beTarget);
+        System.out.println("AnswerLink added to Target");
+      }
+
+      // if (answerLink == null) {
+      //// answerLink = beSource.addAnswer(beTarget, answer, answer.getWeight());
+      //// beTarget = em.merge(beTarget);
+      //// System.out.println("AnswerLink added to Target");
+      // } else {
+      // System.out.println("Merging AnswerLink");
+      // answerLink.setAnswer(answer);
+      // answerLink = em.merge(answerLink);
+      // }
+
+      if (ask != null) {
+        if (!ask.getAnswerList().getAnswerList().contains(answerLink)) {
+          System.out.println("Ask does not have answerLink");
+          ask.getAnswerList().getAnswerList().add(answerLink);
+          ask = em.merge(ask);
+        }
+      }
+      // baseEntityEventSrc.fire(entity);
+
+
+    } catch (final BadDataException e) {
+
+    } catch (final EntityExistsException e) {
+      System.out.println("Answer Insert EntityExistsException");
+      // so update otherwise // TODO merge?
+      Answer existing = findAnswerById(answer.getId());
+      existing = em.merge(existing);
+      if (answer.getAskId() != null) {
+        final Ask ask = findAskById(answer.getAsk().getId());
+        BaseEntity be = ask.getTarget();
+        final Set<AnswerLink> answerLinks = be.getAnswers();
+        // dumbly check if existing answerLink there
+        for (final AnswerLink al : answerLinks) { // watch for duplicates
+          // if (al.getAsk().getId().equals(ask.getId())) {
+          // if (al.getCreated().equals(answer.getCreated())) {
+          // // this is the same answer
+          // al.setExpired(answer.getExpired());
+          // }
+          // }
+        }
+        be = em.merge(be);
+      }
+      return existing.getId();
+
+    }
+    return answer.getId();
+  }
 
 
 
@@ -636,54 +636,54 @@ public class BaseEntityService {
   // }
 
 
-//  public void importKeycloakUsers(final List<Group> parentGroupList,
-//      final AttributeLink linkAttribute) throws IOException, BadDataException {
-//
-//
-//    final Map<String, String> envParams = System.getenv();
-//    String keycloakUrl = envParams.get("KEYCLOAKURL");
-//    System.out.println("Keycloak URL=[" + keycloakUrl + "]");
-//    keycloakUrl = keycloakUrl.replaceAll("'", "");
-//    final String realm = envParams.get("KEYCLOAK_REALM");
-//    final String username = envParams.get("KEYCLOAK_USERNAME");
-//    final String password = envParams.get("KEYCLOAK_PASSWORD");
-//    final String clientid = envParams.get("KEYCLOAK_CLIENTID");
-//    final String secret = envParams.get("KEYCLOAK_SECRET");
-//
-//    System.out.println("Realm is :[" + realm + "]");
-//
-//    final KeycloakService kcs =
-//        new KeycloakService(keycloakUrl, realm, username, password, clientid, secret);
-//    final List<LinkedHashMap> users = kcs.fetchKeycloakUsers();
-//    for (final LinkedHashMap user : users) {
-//      final String name = user.get("firstName") + " " + user.get("lastName");
-//      final Person newUser = new Person(name);
-//      final String keycloakUUID = (String) user.get("id");
-//      newUser.setCode(Person.getDefaultCodePrefix() + keycloakUUID.toUpperCase());
-//      newUser.setName(name);
-//      newUser.addAttribute(createAttributeText("NAME"), 1.0, name);
-//      newUser.addAttribute(createAttributeText("FIRSTNAME"), 1.0, user.get("firstName"));
-//      newUser.addAttribute(createAttributeText("LASTNAME"), 1.0, user.get("lastName"));
-//      newUser.addAttribute(createAttributeText("UUID"), 1.0, user.get("id"));
-//      newUser.addAttribute(createAttributeText("EMAIL"), 1.0, user.get("email"));
-//      newUser.addAttribute(createAttributeText("USERNAME"), 1.0, user.get("username"));
-//      System.out.println("Code=" + newUser.getCode());;
-//      insert(newUser);
-//      // Now link to groups
-//      for (final Group parent : parentGroupList) {
-//        if (!parent.containsTarget(newUser.getCode(), linkAttribute.getCode())) {
-//          parent.addTarget(newUser, linkAttribute, 1.0);
-//
-//
-//        }
-//      }
-//    }
-//    // now save the parents
-//    for (Group parent : parentGroupList) {
-//      parent = em.merge(parent);
-//    }
-//    System.out.println(users);
-//  }
+  public void importKeycloakUsers(final List<Group> parentGroupList,
+      final AttributeLink linkAttribute) throws IOException, BadDataException {
+
+
+    final Map<String, String> envParams = System.getenv();
+    String keycloakUrl = envParams.get("KEYCLOAKURL");
+    System.out.println("Keycloak URL=[" + keycloakUrl + "]");
+    keycloakUrl = keycloakUrl.replaceAll("'", "");
+    final String realm = envParams.get("KEYCLOAK_REALM");
+    final String username = envParams.get("KEYCLOAK_USERNAME");
+    final String password = envParams.get("KEYCLOAK_PASSWORD");
+    final String clientid = envParams.get("KEYCLOAK_CLIENTID");
+    final String secret = envParams.get("KEYCLOAK_SECRET");
+
+    System.out.println("Realm is :[" + realm + "]");
+
+    final KeycloakService kcs =
+        new KeycloakService(keycloakUrl, realm, username, password, clientid, secret);
+    final List<LinkedHashMap> users = kcs.fetchKeycloakUsers();
+    for (final LinkedHashMap user : users) {
+      final String name = user.get("firstName") + " " + user.get("lastName");
+      final Person newUser = new Person(name);
+      final String keycloakUUID = (String) user.get("id");
+      newUser.setCode(Person.getDefaultCodePrefix() + keycloakUUID.toUpperCase());
+      newUser.setName(name);
+      newUser.addAttribute(createAttributeText("NAME"), 1.0, name);
+      newUser.addAttribute(createAttributeText("FIRSTNAME"), 1.0, user.get("firstName"));
+      newUser.addAttribute(createAttributeText("LASTNAME"), 1.0, user.get("lastName"));
+      newUser.addAttribute(createAttributeText("UUID"), 1.0, user.get("id"));
+      newUser.addAttribute(createAttributeText("EMAIL"), 1.0, user.get("email"));
+      newUser.addAttribute(createAttributeText("USERNAME"), 1.0, user.get("username"));
+      System.out.println("Code=" + newUser.getCode());;
+      insert(newUser);
+      // Now link to groups
+      for (final Group parent : parentGroupList) {
+        if (!parent.containsTarget(newUser.getCode(), linkAttribute.getCode())) {
+          parent.addTarget(newUser, linkAttribute, 1.0);
+
+
+        }
+      }
+    }
+    // now save the parents
+    for (Group parent : parentGroupList) {
+      parent = em.merge(parent);
+    }
+    System.out.println(users);
+  }
 
   private Attribute createAttributeText(final String attributeName) {
     Attribute attribute = null;

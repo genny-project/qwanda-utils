@@ -140,7 +140,7 @@
 		<dependency>
 			<groupId>life.genny</groupId>
 			<artifactId>qwanda</artifactId>
-			<version>${qwanda.version}</version>
+			<version>0.5.3</version>
 			<scope>compile</scope>
 			<exclusions>
 				<exclusion>

@@ -1,6 +1,5 @@
 package life.genny.qwandautils;
 
-
 import static java.lang.System.out;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -41,7 +40,7 @@ import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.validation.Validation;
 import life.genny.qwanda.validation.ValidationList;
 
-public class GennySheets {
+public class GennySheets2 {
   // public static final String SHEETID = System.getenv("GOOGLE_SHEETID");
   // public static final String SHEETID = "1VSXJUn8_BHG1aW0DQrFDnvLjx_jxcNiD33QzqO5D-jc";
 
@@ -83,7 +82,7 @@ public class GennySheets {
 
   private Sheets service;
 
-  public GennySheets(final String clientSecret, final String sheetId, final File dataStoreDir) {
+  public GennySheets2(final String clientSecret, final String sheetId, final File dataStoreDir) {
     this.clientSecret = clientSecret;
     this.sheetId = sheetId;
     this.dataStoreDir = dataStoreDir;
@@ -101,7 +100,7 @@ public class GennySheets {
 
   }
 
-  public GennySheets(final String clientSecret, final String sheetId, final File dataStoreDir,
+  public GennySheets2(final String clientSecret, final String sheetId, final File dataStoreDir,
       final String appName) {
     this(clientSecret, sheetId, dataStoreDir);
     this.appName = appName;
@@ -135,7 +134,6 @@ public class GennySheets {
     this.sheetId = sheetId;
   }
 
-  
   public Sheets getSheetsService() throws Exception {
     final Credential credential = authorize();
     return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(appName)
@@ -220,56 +218,32 @@ public class GennySheets {
     return transformNotKnown(values);
   }
 
-  public Map<String, Map> newGetBase() {
-    List<Map> obj = new ArrayList<Map>();
+  public List<BaseEntity> getBaseEntitys() {
     try {
-      obj = row2DoubleTuples(BaseEntity.class.getSimpleName());
-    } catch (final IOException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
+      return getBeans(BaseEntity.class);
+    } catch (final IOException e) {
+      return new ArrayList<BaseEntity>();
     }
-    return obj.stream().map(object -> {
-      final Map<String, Map> map = new HashMap<String, Map>();
-      final String code = (String) object.get("code");
-      final String name = (String) object.get("name");
-      final String icon = (String) object.get("icon");
-      Map<String, String> fields = new HashMap<String, String>();
-      fields.put("code", code);
-      fields.put("name", name);
-      fields.put("icon", icon);      
-      map.put(code, fields);
+  }
+
+  public Map<String, Validation> validationData() {
+    List<Validation> validations = new ArrayList<Validation>();
+    try {
+      validations = getBeans(Validation.class);
+    } catch (final IOException e2) {
+      e2.printStackTrace();
+    }
+    return validations.stream().map(valObject -> {
+      final Map<String, Validation> map = new HashMap<String, Validation>();
+      map.put(valObject.getCode(), valObject);
       return map;
     }).reduce((ac, acc) -> {
       ac.putAll(acc);
       return ac;
     }).get();
   }
-  
-  public Map<String, Map> newGetVal() {
-    List<Map> obj = new ArrayList<Map>();
-    try {
-      obj = row2DoubleTuples(Validation.class.getSimpleName());
-    } catch (final IOException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-    return obj.stream().map(object -> {
-      final Map<String, Map> map = new HashMap<String, Map>();
-      final String code = (String) object.get("code");
-      final String name = (String) object.get("name");
-      final String regex = (String) object.get("regex");
-      Map<String, String> fields = new HashMap<String, String>();
-      fields.put("code", code);
-      fields.put("name", name);
-      fields.put("regex", regex);      
-      map.put(code, fields);
-      return map;
-    }).reduce((ac, acc) -> {
-      ac.putAll(acc);
-      return ac;
-    }).get();
-  }
-  public Map<String, Map> newGetDType() {
+
+  public Map<String, DataType> dataTypesData(final Map<String, Validation> validationData) {
     List<Map> obj = new ArrayList<Map>();
     try {
       obj = row2DoubleTuples(DataType.class.getSimpleName());
@@ -278,202 +252,243 @@ public class GennySheets {
       e1.printStackTrace();
     }
     return obj.stream().map(object -> {
-      final Map<String, Map> map = new HashMap<String, Map>();
-      final String code = (String) object.get("code");
-      final String name = (String) object.get("name");
-      final String validations = (String) object.get("validations");
-      Map<String, String> fields = new HashMap<String, String>();
-      fields.put("code", code);
-      fields.put("name", name);
-      fields.put("validations", validations);      
-      map.put(code, fields);
-      return map;
+      final Map<String, DataType> dataTypeMap = new HashMap<String, DataType>();
+      if (object.get("code") != null) {
+        final String code = (String) object.get("code");
+        final String name = (String) object.get("name");
+        final String validations = (String) object.get("validations");
+        final ValidationList validationList = new ValidationList();
+        validationList.setValidationList(new ArrayList<Validation>());
+        if (validations != null) {
+          final String[] validationListStr = validations.split(",");
+          for (final String validationCode : validationListStr) {
+            validationList.getValidationList().add(validationData.get(validationCode));
+          }
+        }
+        if (!dataTypeMap.containsKey(code)) {
+          final DataType dataType = new DataType(name, validationList);
+          dataTypeMap.put(code, dataType);
+        }
+      }
+      return dataTypeMap;
     }).reduce((ac, acc) -> {
       ac.putAll(acc);
       return ac;
     }).get();
-  } 
-  public Map<String, Map> newGetAttr() {
-    List<Map> obj = new ArrayList<Map>();
+  }
+
+  public Map<String, Attribute> attributesData(final Map<String, DataType> dataTypeMap) {
+    List<Map> attrs = null;
     try {
-      obj = row2DoubleTuples(Attribute.class.getSimpleName());
-    } catch (final IOException e1) {
+      attrs = row2DoubleTuples(Attribute.class.getSimpleName());
+    } catch (final IOException e2) {
       // TODO Auto-generated catch block
-      e1.printStackTrace();
+      e2.printStackTrace();
     }
-    return obj.stream().map(object -> {
-      final Map<String, Map> map = new HashMap<String, Map>();
-      final String code = (String) object.get("code");
-      final String name = (String) object.get("name");
-      final String dataType = (String) object.get("datatype");
-      Map<String, String> fields = new HashMap<String, String>();
-      fields.put("code", code);
-      fields.put("name", name);
-      fields.put("dataType", dataType);      
-      map.put(code, fields);
+    return attrs.stream().map(data -> {
+      final Map<String, Attribute> attributeMap = new HashMap<String, Attribute>();
+      Attribute attribute = null;
+      final String code = (String) data.get("code");
+      final String name = (String) data.get("name");
+      final String datatype = (String) data.get("datatype");
+      if (data.get("code") != null) {
+        attribute = new Attribute(code, name, dataTypeMap.get(datatype));
+      }
+      attributeMap.put(code, attribute);
+      return attributeMap;
+    }).reduce((ac, acc) -> {
+      ac.putAll(acc);
+      return ac;
+    }).get();
+  }
+
+  public Map<String, BaseEntity> baseEntityData() {
+    List<BaseEntity> bes = null;
+    try {
+      bes = getBeans(BaseEntity.class);
+      bes.stream().forEach(object -> {
+      });
+    } catch (final IOException e2) {
+      // TODO Auto-generated catch block
+      e2.printStackTrace();
+    }
+    return bes.stream().map(valObject -> {
+      final Map<String, BaseEntity> map = new HashMap<String, BaseEntity>();
+      map.put(valObject.getCode(), valObject);
       return map;
     }).reduce((ac, acc) -> {
       ac.putAll(acc);
       return ac;
     }).get();
   }
-  public Map<String, Map> newGetAttrLink() {
-    List<Map> obj = new ArrayList<Map>();
-    try {
-      obj = row2DoubleTuples(AttributeLink.class.getSimpleName());
-    } catch (final IOException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-    return obj.stream().map(object -> {
-      final Map<String, Map> map = new HashMap<String, Map>();
-      final String code = (String) object.get("code");
-      final String name = (String) object.get("name");
-      Map<String, String> fields = new HashMap<String, String>();
-      fields.put("code", code);
-      fields.put("name", name);
-      map.put(code, fields);
-      return map;
-    }).reduce((ac, acc) -> {
-      ac.putAll(acc);
-      return ac;
-    }).get();
+
+  public <T> T getObjectByValue(final T object) {
+
+    final T newObject = object;
+    return newObject;
   }
-  
-  public Map<String, Map> newGetEntAttr() {
-    List<Map> obj = new ArrayList<Map>();
+
+  public Map<String, BaseEntity> attr2BaseEntitys(final Map<String, Attribute> findAttributeByCode,
+      final Map<String, BaseEntity> findBaseEntityByCode) {
+    List<Map> obj2 = null;
     try {
-      obj = row2DoubleTuples(EntityAttribute.class.getSimpleName());
+      obj2 = row2DoubleTuples(EntityAttribute.class.getSimpleName());
     } catch (final IOException e1) {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
-    return obj.stream().map(object -> {
-      final Map<String, Map> map = new HashMap<String, Map>();
-      final String baseEntityCode = (String) object.get("baseEntityCode");
+    return obj2.stream().map(object -> {
+      final Map<String, BaseEntity> map = new HashMap<String, BaseEntity>();
+      final String beCode = (String) object.get("baseEntityCode");
       final String attributeCode = (String) object.get("attributeCode");
-      final String weight = (String) object.get("weight");
+      final String weightStr = (String) object.get("weight");
       final String valueString = (String) object.get("valueString");
-      Map<String, String> fields = new HashMap<String, String>();
-      fields.put("baseEntityCode", baseEntityCode);
-      fields.put("attributeCode", attributeCode);
-      fields.put("weight", weight);
-      fields.put("valueString", valueString);
-      map.put(baseEntityCode+attributeCode, fields);
+      System.out.println("BECode:" + beCode + ":attCode" + attributeCode + ":weight:" + weightStr
+          + ": valueString:" + valueString);
+      final Attribute attribute = new Attribute("ds", "dsd", null);
+      final BaseEntity be = new BaseEntity("ds", "dsd");
+      System.out.println("==============11==============" + findBaseEntityByCode.get(beCode)
+          + "============================");
+      try {
+        BeanUtils.copyProperties(attribute, findAttributeByCode.get(attributeCode));
+        BeanUtils.copyProperties(be, findBaseEntityByCode.get(beCode));
+      } catch (IllegalAccessException | InvocationTargetException e1) {
+        // TODO Auto-generated catch block
+        e1.printStackTrace();
+      }
+      System.out.println("============================" + be + "============================");
+      // service.update(be);
+      // attribute = findAttributeByCode.get(attributeCode);
+      // be = findBaseEntityByCode.get(beCode);
+      final Double weight = Double.valueOf(weightStr);
+      try {
+        be.addAttribute(attribute, weight, valueString);
+      } catch (final BadDataException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      map.put(beCode, be);
       return map;
     }).reduce((ac, acc) -> {
       ac.putAll(acc);
       return ac;
     }).get();
   }
-  
-  public Map<String, Map> newGetEntEnt() {
-    List<Map> obj = new ArrayList<Map>();
+
+  public Map<String, AttributeLink> attrLink() {
+    List<Map> obj2 = null;
     try {
-      obj = row2DoubleTuples(EntityEntity.class.getSimpleName());
+      obj2 = row2DoubleTuples(AttributeLink.class.getSimpleName());
     } catch (final IOException e1) {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
-    return obj.stream().map(object -> {
-      final Map<String, Map> map = new HashMap<String, Map>();
+    return obj2.stream().map(object -> {
+      final Map<String, AttributeLink> map = new HashMap<String, AttributeLink>();
+      final String code = (String) object.get("code");
+      final String name = (String) object.get("name");
+      final AttributeLink linkAttribute = new AttributeLink(code, name);
+      map.put(code, linkAttribute);
+      return map;
+    }).reduce((ac, acc) -> {
+      ac.putAll(acc);
+      return ac;
+    }).get();
+  }
+
+  public Map<String, BaseEntity> be2BeTarget(
+      final Map<String, AttributeLink> findAttributeLinkByCode,
+      final Map<String, BaseEntity> findBaseEntityByCode) {
+    List<Map> obj3 = null;
+    try {
+      obj3 = row2DoubleTuples(EntityEntity.class.getSimpleName());
+    } catch (final IOException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+    return obj3.stream().map(object -> {
+      final Map<String, BaseEntity> map = new HashMap<String, BaseEntity>();
       final String parentCode = (String) object.get("parentCode");
       final String targetCode = (String) object.get("targetCode");
       final String linkCode = (String) object.get("linkCode");
-      final String weight = (String) object.get("weight");
-      Map<String, String> fields = new HashMap<String, String>();
-      fields.put("parentCode", parentCode);
-      fields.put("targetCode", targetCode);
-      fields.put("linkCode", linkCode);
-      fields.put("weight", weight);
-      map.put(targetCode+parentCode+linkCode, fields);
+      final String weightStr = (String) object.get("weight");
+      final BaseEntity sbe = new BaseEntity("null", "null");
+      final BaseEntity tbe = new BaseEntity("null", "null");
+      try {
+        final BaseEntity temp1 = findBaseEntityByCode.get(parentCode);
+        final BaseEntity temp2 = findBaseEntityByCode.get(targetCode);
+        BeanUtils.copyProperties(sbe, temp1);
+        BeanUtils.copyProperties(tbe, temp2);
+        final AttributeLink linkAttribute2 =
+            getObjectByValue(findAttributeLinkByCode.get(linkCode));
+        final Double weight = Double.valueOf(weightStr);
+        sbe.addTarget(tbe, linkAttribute2, weight);
+      } catch (final NoResultException e) {
+        e.printStackTrace();
+      } catch (final IllegalAccessException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (final InvocationTargetException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (final BadDataException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      map.put(tbe.getCode(), tbe);
       return map;
     }).reduce((ac, acc) -> {
       ac.putAll(acc);
       return ac;
     }).get();
   }
-  
-  public Map<String, Map> newGetQtn() {
-    List<Map> obj = new ArrayList<Map>();
+
+  public Map<String, Question> questionsData(final Map<String, Attribute> findAttributeByCode) {
+    List<Map> obj4 = null;
     try {
-      obj = row2DoubleTuples(Question.class.getSimpleName());
+      obj4 = row2DoubleTuples(Question.class.getSimpleName());
     } catch (final IOException e1) {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
-    return obj.stream().map(object -> {
-      final Map<String, Map> map = new HashMap<String, Map>();
+    return obj4.stream().map(object -> {
+      final Map<String, Question> map = new HashMap<String, Question>();
       final String code = (String) object.get("code");
       final String name = (String) object.get("name");
-      final String attribute_code = (String) object.get("attribute_code");
-      Map<String, String> fields = new HashMap<String, String>();
-      fields.put("code", code);
-      fields.put("name", name);
-      fields.put("attribute_code", attribute_code);
-      map.put(code, fields);
+      final String attrCode = (String) object.get("attribute_code");
+      Attribute attr;
+      attr = findAttributeByCode.get(attrCode);
+      final Question q = new Question(code, name, attr);
+      map.put(code, q);
       return map;
     }).reduce((ac, acc) -> {
       ac.putAll(acc);
       return ac;
     }).get();
   }
-  
-  public Map<String, Map> newGetAsk() {
-    List<Map> obj = new ArrayList<Map>();
+
+  public Map<String, Ask> asksData(final Map<String, Question> findQuestionByCode,
+      final Map<String, BaseEntity> findBaseEntityByCode) {
+    List<Map> obj5 = null;
     try {
-      obj = row2DoubleTuples(Ask.class.getSimpleName());
+      obj5 = row2DoubleTuples(Ask.class.getSimpleName());
     } catch (final IOException e1) {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
-    return obj.stream().map(object -> {
-      final Map<String, Map> map = new HashMap<String, Map>();
-      final String question_code = (String) object.get("question_code");
-      final String name = (String) object.get("name");
-      final String sourceCode = (String) object.get("sourceCode");
-      final String targetCode = (String) object.get("targetCode");
-      final String attributeCode = (String) object.get("attributeCode");
-      final String refused = (String) object.get("refused");
-      final String expired = (String) object.get("expired");
-      final String expectedId = (String) object.get("expectedId");
-      Map<String, String> fields = new HashMap<String, String>();
-      fields.put("question_code", question_code);
-      fields.put("name", name);
-      fields.put("sourceCode", sourceCode);
-      fields.put("targetCode", targetCode);
-      fields.put("sourceCode", sourceCode);
-      fields.put("attributeCode", attributeCode);
-      fields.put("refused", refused);
-      fields.put("expired", expired);
-      fields.put("expectedId", expectedId);
-      map.put(question_code+sourceCode+targetCode, fields);
+    return obj5.stream().map(object -> {
+      final Map<String, Ask> map = new HashMap<String, Ask>();
+      final String qCode = (String) object.get("question_code");
+      object.get("name");
+      final String source = (String) object.get("source");
+      Question q;
+      q = findQuestionByCode.get(qCode);
+      final BaseEntity s = findBaseEntityByCode.get(source);
+      final Ask a = new Ask(q, s, s);
+      map.put(q.getCode() + s.getCode(), a);
       return map;
     }).reduce((ac, acc) -> {
       ac.putAll(acc);
-      return ac;
-    }).get();
-  }
-  
-  public List<Map> projectsImport(File path) {
-    List<Map> obj = new ArrayList<Map>();
-    try {
-      obj = row2DoubleTuples("Projects");
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return obj.stream().map(data -> {
-      final List<Map> map = new ArrayList<Map>();
-      String code = (String) data.get("code");
-      String sheetID = (String) data.get("sheetID");
-      Object clientSecret = data.get("clientSecret");
-      Map<String, Object> fields = new HashMap<String, Object>();
-      fields.put("sheetID", sheetID );
-      fields.put("clientSecret", clientSecret);
-      map.add(fields);
-      return map;
-    }).reduce((ac, acc) -> {
-      ac.addAll(acc);
       return ac;
     }).get();
   }

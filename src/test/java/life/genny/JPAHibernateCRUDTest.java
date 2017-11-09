@@ -40,7 +40,7 @@ import life.genny.qwanda.attribute.Attribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
-//import life.genny.qwandautils.KeycloakService;
+import life.genny.qwandautils.KeycloakService;
 
 public class JPAHibernateCRUDTest extends JPAHibernateTest {
 
@@ -50,83 +50,83 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
       .getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 
-//  @Test
-//  public void saveAnswerTest() {
-//    final Gson gson = new GsonBuilder()
-//        .registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
-//          @Override
-//          public LocalDateTime deserialize(final JsonElement json, final Type type,
-//              final JsonDeserializationContext jsonDeserializationContext)
-//              throws JsonParseException {
-//            return ZonedDateTime.parse(json.getAsJsonPrimitive().getAsString()).toLocalDateTime();
-//          }
-//
-//          public JsonElement serialize(final LocalDateTime date, final Type typeOfSrc,
-//              final JsonSerializationContext context) {
-//            return new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)); // "yyyy-mm-dd"
-//          }
-//        }).create();
-//
-//
-//    String json = "{ " + "\"created\": \"2014-11-01T12:34:56+10:00\"," + "\"value\": \"Bob\","
-//        + "\"expired\": false," + "\"refused\": false," + "\"weight\": 1," + "\"version\": 1,"
-//        + "\"targetCode\": \"PER_USER1\"," + "\"sourceCode\": \"PER_USER1\","
-//        + "\"attributeCode\": \"PRI_FIRSTNAME\"" + "}";
-//
-//    final Answer answer = gson.fromJson(json, Answer.class);
-//    log.info("Answer loaded :" + answer);
-//    final Long answerId = service.insert(answer);
-//
-//    log.info("answerId=" + answerId);
-//
-//    json = "{ " + "\"created\": \"2014-11-01T12:34:57+10:00\"," + "\"value\": \"Console\","
-//        + "\"expired\": false," + "\"refused\": false," + "\"weight\": 1," + "\"version\": 1,"
-//        + "\"targetCode\": \"PER_USER1\"," + "\"sourceCode\": \"PER_USER1\","
-//        + "\"attributeCode\": \"PRI_LASTNAME\"" + "}";
-//
-//    // final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
-//
-//
-//    final Answer answer2 = gson.fromJson(json, Answer.class);
-//    log.info("Answer2 loaded :" + answer2);
-//    final Long answerId2 = service.insert(answer2);
-//
-//    log.info("answerId2=" + answerId2);
-//
-//
-//    final BaseEntity person = service.findBaseEntityByCode("PER_USER1");
-//    try {
-//      final AnswerLink al = person.addAnswer(answer, 1.0);
-//      final AnswerLink al2 = person.addAnswer(answer2, 1.0);
-//      service.insert(al);
-//      service.insert(al2);
-//      service.update(person);
-//    } catch (final BadDataException e) {
-//      // TODO Auto-generated catch block
-//      e.printStackTrace();
-//    }
-//
-//    final List<AnswerLink> answers = service.findAnswerLinks();
-//    log.info(answers);
-//
-//    final List<AnswerLink> al2 =
-//        service.findAnswerLinksByCodes("PER_USER1", "PER_USER1", "PRI_FIRSTNAME");
-//    log.info(al2);
-//  }
+  @Test
+  public void saveAnswerTest() {
+    final Gson gson = new GsonBuilder()
+        .registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
+          @Override
+          public LocalDateTime deserialize(final JsonElement json, final Type type,
+              final JsonDeserializationContext jsonDeserializationContext)
+              throws JsonParseException {
+            return ZonedDateTime.parse(json.getAsJsonPrimitive().getAsString()).toLocalDateTime();
+          }
 
-//  @Test
+          public JsonElement serialize(final LocalDateTime date, final Type typeOfSrc,
+              final JsonSerializationContext context) {
+            return new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)); // "yyyy-mm-dd"
+          }
+        }).create();
+
+
+    String json = "{ " + "\"created\": \"2014-11-01T12:34:56+10:00\"," + "\"value\": \"Bob\","
+        + "\"expired\": false," + "\"refused\": false," + "\"weight\": 1," + "\"version\": 1,"
+        + "\"targetCode\": \"PER_USER1\"," + "\"sourceCode\": \"PER_USER1\","
+        + "\"attributeCode\": \"PRI_FIRSTNAME\"" + "}";
+
+    final Answer answer = gson.fromJson(json, Answer.class);
+    log.info("Answer loaded :" + answer);
+    final Long answerId = service.insert(answer);
+
+    log.info("answerId=" + answerId);
+
+    json = "{ " + "\"created\": \"2014-11-01T12:34:57+10:00\"," + "\"value\": \"Console\","
+        + "\"expired\": false," + "\"refused\": false," + "\"weight\": 1," + "\"version\": 1,"
+        + "\"targetCode\": \"PER_USER1\"," + "\"sourceCode\": \"PER_USER1\","
+        + "\"attributeCode\": \"PRI_LASTNAME\"" + "}";
+
+    // final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
+
+
+    final Answer answer2 = gson.fromJson(json, Answer.class);
+    log.info("Answer2 loaded :" + answer2);
+    final Long answerId2 = service.insert(answer2);
+
+    log.info("answerId2=" + answerId2);
+
+
+    final BaseEntity person = service.findBaseEntityByCode("PER_USER1");
+    try {
+      final AnswerLink al = person.addAnswer(answer, 1.0);
+      final AnswerLink al2 = person.addAnswer(answer2, 1.0);
+      service.insert(al);
+      service.insert(al2);
+      service.update(person);
+    } catch (final BadDataException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    final List<AnswerLink> answers = service.findAnswerLinks();
+    log.info(answers);
+
+    final List<AnswerLink> al2 =
+        service.findAnswerLinksByCodes("PER_USER1", "PER_USER1", "PRI_FIRSTNAME");
+    log.info(al2);
+  }
+
+  @Test
   public void fetchAttribute() {
     final Attribute at = service.findAttributeByCode("PRI_FIRSTNAME");
     log.info(at);
   }
 
-//  @Test
+  @Test
   public void fetchBE() {
     final BaseEntity be = service.findBaseEntityByCode("PER_USER1");
     log.info(be);
   }
 
-//  @Test
+  @Test
   public void countBE() {
     final Long count =
         (Long) em.createQuery("SELECT count(be) FROM BaseEntity be where  be.code=:sourceCode")
@@ -134,7 +134,7 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
     assertThat(count, is(1L));
   }
 
-//  @Test
+  @Test
   public void sqlCountTest() {
     final String sql =
         "SELECT count(distinct be) FROM BaseEntity be,EntityEntity ee where ee.pk.target.code=be.code and ee.pk.linkAttribute.code=:linkAttributeCode and ee.pk.source.code=:sourceCode";
@@ -146,7 +146,7 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
     assertThat(count, is(3L));
   }
 
-//  @Test
+  @Test
   public void sqlBETest() {
     final String sql =
         "SELECT be FROM BaseEntity be,EntityEntity ee where ee.pk.target.code=be.code and ee.pk.linkAttribute.code=:linkAttributeCode and ee.pk.source.code=:sourceCode";
@@ -163,7 +163,7 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
 
 
 
-//  @Test
+  @Test
   public void sqlBEandAttributesTest() {
 
     final String sql =
@@ -180,7 +180,7 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
     assertThat(eeResults.get(0).getBaseEntityAttributes().size(), greaterThan(5));
   }
 
-//  @Test
+  @Test
   public void test_Query() {
     final String sourceCode = "GRP_USERS";
     final String linkCode = "LNK_CORE";
@@ -252,7 +252,7 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
   // assertEquals(0, books.size());
   // }
 
-//  @Test
+  @Test
   public void getBesWithAttributesPaged() {
     Integer pageStart = 0;
     Integer pageSize = 10; // default
@@ -357,7 +357,7 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
 
   }
 
-//  @Test
+  @Test
   public void getChildrenWithAttributesPaged() {
     System.out.println("\n\n******************* KIDS WITH ATTRIBUTE!**************");
     final MultivaluedMap<String, String> qparams = new MultivaluedMapImpl<String, String>();
@@ -577,7 +577,7 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
 
   }
 
-//  @Test
+  @Test
   public void sqlBEFilterTest() {
     // final String sql =
     // "SELECT distinct be FROM BaseEntity be,EntityEntity ee,EntityAttribute ea0,EntityAttribute
@@ -610,97 +610,97 @@ public class JPAHibernateCRUDTest extends JPAHibernateTest {
 
 
   // @Test
-//  public void getKeycloakUsersTest() {
-//    KeycloakService ks;
-//    final Map<String, Map<String, Object>> usersMap = new HashMap<String, Map<String, Object>>();
-//
-//    try {
-//      ks = new KeycloakService("https://bouncer.outcome-hub.com", "channel40", "service",
-//          "WelcomeToTheTruck", "channel40");
-//      final List<LinkedHashMap> users = ks.fetchKeycloakUsers();
-//      for (final Object user : users) {
-//        final LinkedHashMap map = (LinkedHashMap) user;
-//        final Map<String, Object> userMap = new HashMap<String, Object>();
-//        for (final Object key : map.keySet()) {
-//          // System.out.println(key + ":" + map.get(key));
-//          userMap.put((String) key, map.get(key));
-//
-//        }
-//        usersMap.put((String) userMap.get("username"), userMap);
-//        System.out.println();
-//      }
-//
-//      System.out.println("finished");
-//    } catch (final IOException e) {
-//      // TODO Auto-generated catch block
-//      e.printStackTrace();
-//    }
-//
-//    for (final String username : usersMap.keySet()) {
-//      final MultivaluedMap params = new MultivaluedMapImpl();
-//      params.add("PRI_USERNAME", username);
-//      final Map<String, Object> userMap = usersMap.get(username);
-//
-//      final List<BaseEntity> users = service.findBaseEntitysByAttributeValues(params, true, 0, 1);
-//      if (users.isEmpty()) {
-//        final String code = "PER_CH40_" + username;
-//        final String firstName = (String) userMap.get("firstName");
-//        final String lastName = (String) userMap.get("lastName");
-//        final String name = firstName + " " + lastName;
-//        final String email = (String) userMap.get("email");
-//        final String id = (String) userMap.get("id");
-//        final Long unixSeconds = (Long) userMap.get("createdTimestamp");
-//        final Date date = new Date(unixSeconds); // *1000 is to convert seconds to milliseconds
-//        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z"); // the format of
-//                                                                                    // your date
-//        sdf.setTimeZone(TimeZone.getTimeZone("GMT+10")); // give a timezone reference for formating
-//        sdf.format(date);
-//        final Attribute firstNameAtt = service.findAttributeByCode("PRI_FIRSTNAME");
-//        final Attribute lastNameAtt = service.findAttributeByCode("PRI_LASTNAME");
-//        final Attribute nameAtt = service.findAttributeByCode("PRI_NAME");
-//        final Attribute emailAtt = service.findAttributeByCode("PRI_EMAIL");
-//        final Attribute uuidAtt = service.findAttributeByCode("PRI_UUID");
-//        final Attribute usernameAtt = service.findAttributeByCode("PRI_USERNAME");
-//
-//        try {
-//          final BaseEntity user = new BaseEntity(code, name);
-//
-//          user.addAttribute(firstNameAtt, 0.0, firstName);
-//          user.addAttribute(lastNameAtt, 0.0, lastName);
-//          user.addAttribute(nameAtt, 0.0, name);
-//          user.addAttribute(emailAtt, 0.0, email);
-//          user.addAttribute(uuidAtt, 0.0, id);
-//          user.addAttribute(usernameAtt, 0.0, username);
-//          service.insert(user);
-//
-//          System.out.println("BE:" + user);
-//        } catch (final BadDataException e) {
-//          // TODO Auto-generated catch block
-//          e.printStackTrace();
-//        }
-//
-//      } else {
-//        users.get(0);
-//      }
-//
-//    }
-//
-//  }
+  public void getKeycloakUsersTest() {
+    KeycloakService ks;
+    final Map<String, Map<String, Object>> usersMap = new HashMap<String, Map<String, Object>>();
 
-//  public void updateUser(final String realm, final String keycloakId, final String fn,
-//      final String ln) throws Exception {
-//    KeycloakService ks;
-//
-//    ks = new KeycloakService("https://bouncer.outcome-hub.com", "channel40", "service",
-//        "WelcomeToTheTruck", "channel40");
-//
-//    final UserResource userResource = ks.getKeycloak().realm(realm).users().get(keycloakId);
-//    final UserRepresentation user = userResource.toRepresentation();
-//    user.setFirstName(fn);
-//    user.setLastName(ln);
-//    userResource.update(user);
-//
-//  }
+    try {
+      ks = new KeycloakService("https://bouncer.outcome-hub.com", "channel40", "service",
+          "WelcomeToTheTruck", "channel40");
+      final List<LinkedHashMap> users = ks.fetchKeycloakUsers();
+      for (final Object user : users) {
+        final LinkedHashMap map = (LinkedHashMap) user;
+        final Map<String, Object> userMap = new HashMap<String, Object>();
+        for (final Object key : map.keySet()) {
+          // System.out.println(key + ":" + map.get(key));
+          userMap.put((String) key, map.get(key));
+
+        }
+        usersMap.put((String) userMap.get("username"), userMap);
+        System.out.println();
+      }
+
+      System.out.println("finished");
+    } catch (final IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    for (final String username : usersMap.keySet()) {
+      final MultivaluedMap params = new MultivaluedMapImpl();
+      params.add("PRI_USERNAME", username);
+      final Map<String, Object> userMap = usersMap.get(username);
+
+      final List<BaseEntity> users = service.findBaseEntitysByAttributeValues(params, true, 0, 1);
+      if (users.isEmpty()) {
+        final String code = "PER_CH40_" + username;
+        final String firstName = (String) userMap.get("firstName");
+        final String lastName = (String) userMap.get("lastName");
+        final String name = firstName + " " + lastName;
+        final String email = (String) userMap.get("email");
+        final String id = (String) userMap.get("id");
+        final Long unixSeconds = (Long) userMap.get("createdTimestamp");
+        final Date date = new Date(unixSeconds); // *1000 is to convert seconds to milliseconds
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z"); // the format of
+                                                                                    // your date
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT+10")); // give a timezone reference for formating
+        sdf.format(date);
+        final Attribute firstNameAtt = service.findAttributeByCode("PRI_FIRSTNAME");
+        final Attribute lastNameAtt = service.findAttributeByCode("PRI_LASTNAME");
+        final Attribute nameAtt = service.findAttributeByCode("PRI_NAME");
+        final Attribute emailAtt = service.findAttributeByCode("PRI_EMAIL");
+        final Attribute uuidAtt = service.findAttributeByCode("PRI_UUID");
+        final Attribute usernameAtt = service.findAttributeByCode("PRI_USERNAME");
+
+        try {
+          final BaseEntity user = new BaseEntity(code, name);
+
+          user.addAttribute(firstNameAtt, 0.0, firstName);
+          user.addAttribute(lastNameAtt, 0.0, lastName);
+          user.addAttribute(nameAtt, 0.0, name);
+          user.addAttribute(emailAtt, 0.0, email);
+          user.addAttribute(uuidAtt, 0.0, id);
+          user.addAttribute(usernameAtt, 0.0, username);
+          service.insert(user);
+
+          System.out.println("BE:" + user);
+        } catch (final BadDataException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+
+      } else {
+        users.get(0);
+      }
+
+    }
+
+  }
+
+  public void updateUser(final String realm, final String keycloakId, final String fn,
+      final String ln) throws Exception {
+    KeycloakService ks;
+
+    ks = new KeycloakService("https://bouncer.outcome-hub.com", "channel40", "service",
+        "WelcomeToTheTruck", "channel40");
+
+    final UserResource userResource = ks.getKeycloak().realm(realm).users().get(keycloakId);
+    final UserRepresentation user = userResource.toRepresentation();
+    user.setFirstName(fn);
+    user.setLastName(ln);
+    userResource.update(user);
+
+  }
 
 
 }
