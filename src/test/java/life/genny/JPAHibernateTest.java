@@ -259,57 +259,57 @@ public class JPAHibernateTest {
     em.getTransaction().commit();
   }
 
-  public Map<String, Object> genny(final String projectType, final File path) {
-
-    final GennySheets sheets = new GennySheets(secret, projectType, path);
-
-    final Map<String, Validation> gValidations = sheets.validationData();
-    gValidations.entrySet().stream().map(tuple -> tuple.getValue()).forEach(validation -> {
-      service.insert(validation);
-    });
-    final Map<String, DataType> gDataTypes = sheets.dataTypesData(gValidations);
-    final Map<String, Attribute> gAttrs = sheets.attributesData(gDataTypes);
-    gAttrs.entrySet().stream().map(tuple -> tuple.getValue()).forEach(attr -> {
-      service.insert(attr);
-    });
-    final Map<String, BaseEntity> gBes = sheets.baseEntityData();
-    gBes.entrySet().stream().map(tuple -> tuple.getValue()).forEach(be -> {
-      service.insert(be);
-    });
-    final Map<String, BaseEntity> gAttr2Bes = sheets.attr2BaseEntitys(gAttrs, gBes);
-    gAttr2Bes.entrySet().stream().map(tuple -> tuple.getValue()).forEach(be -> {
-      System.out.println(be + "***********************");
-      service.update(be);
-    });
-    final Map<String, AttributeLink> gAttrLink = sheets.attrLink();
-    gAttrLink.entrySet().stream().map(tuple -> tuple.getValue()).forEach(link -> {
-      service.insert(link);
-    });
-    final Map<String, BaseEntity> gBes2Bes = sheets.be2BeTarget(gAttrLink, gAttr2Bes);
-    gBes2Bes.entrySet().stream().map(tuple -> tuple.getValue()).forEach(tbe -> {
-      service.update(tbe);
-    });
-    final Map<String, Question> gQuestions = sheets.questionsData(gAttrs);
-    gQuestions.entrySet().stream().map(tuple -> tuple.getValue()).forEach(q -> {
-      service.insert(q);
-    });
-    final Map<String, Ask> gAsks = sheets.asksData(gQuestions, gBes);
-    gAsks.entrySet().stream().map(tuple -> tuple.getValue()).forEach(ask -> {
-      service.insert(ask);
-    });
-    final Map<String, Object> genny = new HashMap<String, Object>();
-    genny.put("validations", gValidations);
-    genny.put("dataType", gDataTypes);
-    genny.put("attributes", gAttrs);
-    genny.put("baseEntitys", gBes);
-    genny.put("attibutesEntity", gAttr2Bes);
-    genny.put("attributeLink", gAttrLink);
-    genny.put("basebase", gBes2Bes);
-    genny.put("questions", gQuestions);
-    genny.put("ask", gAsks);
-
-    return genny;
-  }
+//  public Map<String, Object> genny(final String projectType, final File path) {
+//
+//    final GennySheets sheets = new GennySheets(secret, projectType, path);
+//
+//    final Map<String, Validation> gValidations = sheets.validationData();
+//    gValidations.entrySet().stream().map(tuple -> tuple.getValue()).forEach(validation -> {
+//      service.insert(validation);
+//    });
+//    final Map<String, DataType> gDataTypes = sheets.dataTypesData(gValidations);
+//    final Map<String, Attribute> gAttrs = sheets.attributesData(gDataTypes);
+//    gAttrs.entrySet().stream().map(tuple -> tuple.getValue()).forEach(attr -> {
+//      service.insert(attr);
+//    });
+//    final Map<String, BaseEntity> gBes = sheets.baseEntityData();
+//    gBes.entrySet().stream().map(tuple -> tuple.getValue()).forEach(be -> {
+//      service.insert(be);
+//    });
+//    final Map<String, BaseEntity> gAttr2Bes = sheets.attr2BaseEntitys(gAttrs, gBes);
+//    gAttr2Bes.entrySet().stream().map(tuple -> tuple.getValue()).forEach(be -> {
+//      System.out.println(be + "***********************");
+//      service.update(be);
+//    });
+//    final Map<String, AttributeLink> gAttrLink = sheets.attrLink();
+//    gAttrLink.entrySet().stream().map(tuple -> tuple.getValue()).forEach(link -> {
+//      service.insert(link);
+//    });
+//    final Map<String, BaseEntity> gBes2Bes = sheets.be2BeTarget(gAttrLink, gAttr2Bes);
+//    gBes2Bes.entrySet().stream().map(tuple -> tuple.getValue()).forEach(tbe -> {
+//      service.update(tbe);
+//    });
+//    final Map<String, Question> gQuestions = sheets.questionsData(gAttrs);
+//    gQuestions.entrySet().stream().map(tuple -> tuple.getValue()).forEach(q -> {
+//      service.insert(q);
+//    });
+//    final Map<String, Ask> gAsks = sheets.asksData(gQuestions, gBes);
+//    gAsks.entrySet().stream().map(tuple -> tuple.getValue()).forEach(ask -> {
+//      service.insert(ask);
+//    });
+//    final Map<String, Object> genny = new HashMap<String, Object>();
+//    genny.put("validations", gValidations);
+//    genny.put("dataType", gDataTypes);
+//    genny.put("attributes", gAttrs);
+//    genny.put("baseEntitys", gBes);
+//    genny.put("attibutesEntity", gAttr2Bes);
+//    genny.put("attributeLink", gAttrLink);
+//    genny.put("basebase", gBes2Bes);
+//    genny.put("questions", gQuestions);
+//    genny.put("ask", gAsks);
+//
+//    return genny;
+//  }
 
   @After
   public void aftertest() {

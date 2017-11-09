@@ -38,15 +38,15 @@ public class GoogleUtilsTest {
     // getValidation();
     // getA();
     System.out.println("sheets validations");
-    final Map<String, Validation> daa = sheets.validationData();
-    // sheets.validationData().entrySet().stream().forEach(out::println);
-    final Map<String, DataType> dao = sheets.dataTypesData(daa);
-    sheets.attributesData(dao);
-
-    final Map<String, BaseEntity> bes = sheets.baseEntityData();
-    // sheets.attr2BaseEntitys(atrr, bes).entrySet().stream().forEach(out::println);
-    final Map<String, AttributeLink> attrLink = sheets.attrLink();
-    sheets.be2BeTarget(attrLink, bes).entrySet().stream().forEach(out::println);
+//    final Map<String, Validation> daa = sheets.validationData();
+//    // sheets.validationData().entrySet().stream().forEach(out::println);
+//    final Map<String, DataType> dao = sheets.dataTypesData(daa);
+//    sheets.attributesData(dao);
+//
+//    final Map<String, BaseEntity> bes = sheets.baseEntityData();
+//    // sheets.attr2BaseEntitys(atrr, bes).entrySet().stream().forEach(out::println);
+//    final Map<String, AttributeLink> attrLink = sheets.attrLink();
+//    sheets.be2BeTarget(attrLink, bes).entrySet().stream().forEach(out::println);
     // Map<String, Question> question = sheets.questionsData(atrr);
     // sheets.asksData(question, bes).entrySet().stream().forEach(out::println);
 
