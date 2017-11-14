@@ -425,7 +425,7 @@ return null;
         .createQuery(
             "SELECT ea FROM EntityAttribute ea where ea.pk.baseEntity.code=:baseEntityCode")
         .setParameter("baseEntityCode", baseEntityCode).getResultList();
-    result.setBaseEntityAttributes(new HashSet<EntityAttribute>(attributes));
+    result.setBaseEntityAttributes(new ArrayList<EntityAttribute>(attributes));
     return result;
 
   }
