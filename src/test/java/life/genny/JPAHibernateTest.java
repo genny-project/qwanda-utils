@@ -50,7 +50,7 @@ public class JPAHibernateTest {
   protected static BaseEntityService service = null;
 
 
-  @BeforeClass
+//  @BeforeClass
   public static void init() throws FileNotFoundException, SQLException {
     emf = Persistence.createEntityManagerFactory("mnf-pu-test");
     em = emf.createEntityManager();
@@ -311,7 +311,7 @@ public class JPAHibernateTest {
     return genny;
   }
 
-  @After
+//  @After
   public void aftertest() {
     // log.info("AFTER: Clearing data");
     // org.h2.store.fs.FileUtils.deleteRecursive("mem:test", true);
@@ -321,7 +321,7 @@ public class JPAHibernateTest {
     // .executeUpdate();
   }
 
-  @AfterClass
+//  @AfterClass
   public static void tearDown() {
     log.info("Tearing down");
     org.h2.store.fs.FileUtils.deleteRecursive("mem:test", true);

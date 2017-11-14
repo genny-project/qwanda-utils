@@ -54,6 +54,8 @@ import life.genny.qwanda.validation.Validation;
 
 public class BaseEntityService {
 
+  
+  
   EntityManager em;
 
   public BaseEntityService(final EntityManager em) {
@@ -184,8 +186,6 @@ public class BaseEntityService {
       System.out.println("Answer:" + answer);
       if (answer.getAskId() != null) {
         ask = findAskById(answer.getAskId());
-        beTarget = ask.getTarget();
-        beSource = ask.getSource();
         attribute = ask.getQuestion().getAttribute();
         if (!((answer.getSourceCode().equals(beSource.getCode()))
             && (answer.getAttributeCode().equals(attribute.getCode()))
@@ -202,7 +202,6 @@ public class BaseEntityService {
       System.out.println("Found Source:" + beSource.getCode() + " AND Target:" + beTarget.getCode()
           + " and attribute:" + attribute.getCode());
       // now look for existing answerlink
-      answer.setAsk(ask);
       if (ask == null) {
         answer.setAttribute(attribute);
       }
@@ -238,42 +237,19 @@ public class BaseEntityService {
       // answerLink = em.merge(answerLink);
       // }
 
-      if (ask != null) {
-        if (!ask.getAnswerList().getAnswerList().contains(answerLink)) {
-          System.out.println("Ask does not have answerLink");
-          ask.getAnswerList().getAnswerList().add(answerLink);
-          ask = em.merge(ask);
-        }
-      }
       // baseEntityEventSrc.fire(entity);
 
 
     } catch (final BadDataException e) {
-
+return null;
     } catch (final EntityExistsException e) {
       System.out.println("Answer Insert EntityExistsException");
       // so update otherwise // TODO merge?
       Answer existing = findAnswerById(answer.getId());
       existing = em.merge(existing);
-      if (answer.getAskId() != null) {
-        final Ask ask = findAskById(answer.getAsk().getId());
-        BaseEntity be = ask.getTarget();
-        final Set<AnswerLink> answerLinks = be.getAnswers();
-        // dumbly check if existing answerLink there
-        for (final AnswerLink al : answerLinks) { // watch for duplicates
-          // if (al.getAsk().getId().equals(ask.getId())) {
-          // if (al.getCreated().equals(answer.getCreated())) {
-          // // this is the same answer
-          // al.setExpired(answer.getExpired());
-          // }
-          // }
-        }
-        be = em.merge(be);
-      }
-      return existing.getId();
-
+return null;
     }
-    return answer.getId();
+    return null;
   }
 
 

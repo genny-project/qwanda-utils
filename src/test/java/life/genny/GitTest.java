@@ -6,7 +6,7 @@ import life.genny.qwandautils.QwandaUtils;
 
 public class GitTest {
 
-  @Test
+//  @Test
   public void gitTest() {
 
     try {
