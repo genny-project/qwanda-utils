@@ -46,7 +46,6 @@ public class ScoringUtils {
 							Double attributeScore = 0.0;
 							switch (targetEA.getAttribute().getDataType().getClassName()) {
 							case "java.lang.Boolean" : 
-								attributeScore = targetEA.getValueBoolean()
 							}
 						}
 					}

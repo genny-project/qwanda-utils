@@ -484,8 +484,6 @@ public class GennySheets2 {
       Question q;
       q = findQuestionByCode.get(qCode);
       final BaseEntity s = findBaseEntityByCode.get(source);
-      final Ask a = new Ask(q, s, s);
-      map.put(q.getCode() + s.getCode(), a);
       return map;
     }).reduce((ac, acc) -> {
       ac.putAll(acc);
