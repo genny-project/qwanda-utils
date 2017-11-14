@@ -1,8 +1,10 @@
 package life.genny.qwandautils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
-import life.genny.qwanda.exception.BadDataException;
 
 /**
  * ScoringUtils provides scoring functions. BaseEntitys can be scored against
@@ -45,9 +47,46 @@ public class ScoringUtils {
 							// TODO: enums faster...
 							Double attributeScore = 0.0;
 							switch (targetEA.getAttribute().getDataType().getClassName()) {
-							case "java.lang.Boolean" : 
-								attributeScore = targetEA.getValueBoolean()
+							case "java.lang.Boolean":
+								attributeScore = (targetEA.getValueBoolean() ? targetEA.getWeight() : 0.0)
+										* (sourceEA.getValueBoolean() ? sourceEA.getWeight() : 0.0);
+								break;
+							case "java.lang.Double":
+								if (targetEA.getValueDouble() == sourceEA.getValueDouble()) {
+									attributeScore = (targetEA.getValueDouble() * targetEA.getWeight())
+											* (sourceEA.getValueDouble() * sourceEA.getWeight());
+								}
+								break;
+							case "java.lang.Long":
+								if (targetEA.getValueLong() == sourceEA.getValueLong()) {
+									attributeScore = (targetEA.getValueLong().doubleValue() * targetEA.getWeight())
+											* (sourceEA.getValueLong().doubleValue() * sourceEA.getWeight());
+								}
+								break;
+							case "java.lang.String":
+								if (targetEA.getValueString().equalsIgnoreCase(sourceEA.getValueString())) {
+									attributeScore = (targetEA.getWeight()) * (sourceEA.getWeight());
+								}
+								break;
+							case "java.lang.Integer":
+								if (targetEA.getValueInteger() == sourceEA.getValueInteger()) {
+									attributeScore = (targetEA.getValueInteger().doubleValue() * targetEA.getWeight())
+											* (sourceEA.getValueInteger().doubleValue() * sourceEA.getWeight());
+								}
+								break;
+							case "java.time.LocalDateTime":
+								if (targetEA.getValueDateTime().isEqual(sourceEA.getValueDateTime())) {
+									attributeScore = (targetEA.getWeight()) * (sourceEA.getWeight());
+								}
+								break;
+							case "java.time.LocalDate":
+								if (targetEA.getValueDate().isEqual(sourceEA.getValueDate())) {
+									attributeScore = (targetEA.getWeight()) * (sourceEA.getWeight());
+								}
+								break;
 							}
+
+							rawScore += attributeScore;
 						}
 					}
 				}
@@ -55,7 +94,8 @@ public class ScoringUtils {
 		}
 
 		// for each attribute apply weightings using standard decision matrix score
-
+		BigDecimal bd = new BigDecimal(rawScore).setScale(2, RoundingMode.HALF_EVEN);
+		rawScore = bd.doubleValue();
 		return rawScore;
 	}
 }
