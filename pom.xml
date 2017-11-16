@@ -49,9 +49,7 @@
 		<jersey-version>2.13</jersey-version>
 		<version.apache-httpclient>4.5.3</version.apache-httpclient>
 		<version.keycloak>3.2.0.Final</version.keycloak>
-		<version.hsqldb>2.3.4</version.hsqldb>
-		<version.h2db>1.4.193</version.h2db>
-		<hibernate.version>5.2.4.Final</hibernate.version>
+
 		<keycloak-core.version>3.2.0.Final</keycloak-core.version>
 		<keycloak-adapter-core.version>3.2.0.Final</keycloak-adapter-core.version>
 		<version.resteasy>3.0.10.Final</version.resteasy>
@@ -69,12 +67,6 @@
 	</ciManagement>
 	<repositories>
 		<repository>
-			<url>http://download.java.net/maven/2/</url>
-			<id>hibernate-support</id>
-			<layout>default</layout>
-			<name>Repository for Hibernate Support</name>
-		</repository>
-		<repository>
 			<id>JBoss repository</id>
 			<url>http://repository.jboss.org/nexus/content/groups/public/</url>
 			<name>Repository for JBoss</name>
@@ -87,11 +79,12 @@
 			<id>Sonatype repository</id>
 			<url>https://oss.sonatype.org/content/repositories/releases/</url>
 		</repository>
-		<repository>
+<!-- 		<repository>
 			<id>life.genny</id>
 			<url>http://nexus.outcome-hub.com/nexus/content/repositories/life.genny</url>
 		</repository>
-	</repositories>
+ -->	
+ </repositories>
 
 	<dependencies>
 		<dependency>
@@ -131,83 +124,13 @@
 			<version>1.3</version>
 			<scope>test</scope>
 		</dependency>
-				<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-			<version>${hibernate.version}</version>
-		</dependency>
-
-		<!-- testing -->
-
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<version>1.4.192</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>life.genny</groupId>
 			<artifactId>qwanda</artifactId>
 			<version>${qwanda.version}</version>
-			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>jackson-annotations</artifactId>
-					<groupId>com.fasterxml.jackson.core</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jackson-databind</artifactId>
-					<groupId>com.fasterxml.jackson.core</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jackson-datatype-jsr310</artifactId>
-					<groupId>com.fasterxml.jackson.datatype</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>dom4j</artifactId>
-					<groupId>dom4j</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>hibernate-envers</artifactId>
-					<groupId>org.hibernate</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>hibernate-core</artifactId>
-					<groupId>org.hibernate</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>hibernate-commons-annotations</artifactId>
-					<groupId>org.hibernate.common</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>hibernate-jpa-2.1-api</artifactId>
-					<groupId>org.hibernate.javax.persistence</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>hsqldb</artifactId>
-					<groupId>org.hsqldb</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<!-- <dependency> <groupId>junit</groupId> <artifactId>junit</artifactId> 
-			<version>${junit-version}</version> <scope>test</scope> </dependency> -->
-		<!-- http://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
-		<!-- <dependency> <groupId>org.apache.logging.log4j</groupId> <artifactId>log4j-core</artifactId> 
-			<version>${log4j-core-version}</version> </dependency> <dependency> <groupId>com.google.code.gson</groupId> 
-			<artifactId>gson</artifactId> <version>2.8.0</version> </dependency> -->
-		<!-- MySQL database driver -->
-		<!-- <dependency> <groupId>mysql</groupId> <artifactId>mysql-connector-java</artifactId> 
-			<version>${version.mysql-connector}</version> </dependency> -->
 
-		<!-- <dependency> <groupId>com.fasterxml.jackson.core</groupId> <artifactId>jackson-annotations</artifactId> 
-			<version>${jackson.version}</version> <scope>provided</scope> </dependency> 
-			<dependency> <groupId>org.glassfish.jersey.media</groupId> <artifactId>jersey-media-json-jackson</artifactId> 
-			<version>${jersey-version}</version> </dependency> -->
-		<!-- <dependency> <groupId>com.fasterxml.jackson.core</groupId> <artifactId>jackson-databind</artifactId> 
-			<version>${jackson.version}</version> </dependency> <dependency> <groupId>com.fasterxml.jackson.datatype</groupId> 
-			<artifactId>jackson-datatype-jsr310</artifactId> <version>${jackson.version}</version> 
-			</dependency> -->
-		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+		</dependency>
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
