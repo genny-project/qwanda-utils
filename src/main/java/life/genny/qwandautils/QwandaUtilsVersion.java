@@ -5,6 +5,8 @@ import java.util.Properties;
 
 import com.google.gson.Gson;
 
+import life.genny.qwanda.QwandaVersion;
+
 public class QwandaUtilsVersion {
 
 	static public String getVersion()
@@ -26,8 +28,10 @@ public class QwandaUtilsVersion {
 	{
 		   Properties properties = new Properties();
 		    try {
-		      properties.load(Thread.currentThread().getContextClassLoader().getResource("git.properties")
-		          .openStream());
+		    	QwandaUtilsVersion qv = new QwandaUtilsVersion();
+		    	properties.load(qv.getClass().getResourceAsStream("/git.properties" ));
+		     // properties.load(Thread.currentThread().getContextClassLoader().getResource("git.properties")
+		      //    .openStream());
 		    } catch (IOException e) {
 		      // TODO Auto-generated catch block
 		      e.printStackTrace();
