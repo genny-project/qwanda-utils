@@ -18,11 +18,14 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.gson.Gson;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.Logger;
+
 import javax.persistence.NoResultException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,8 +45,13 @@ import life.genny.qwanda.validation.Validation;
 import life.genny.qwanda.validation.ValidationList;
 
 public class GennySheets {
-  // public static final String SHEETID = System.getenv("GOOGLE_SHEETID");
-  // public static final String SHEETID = "1VSXJUn8_BHG1aW0DQrFDnvLjx_jxcNiD33QzqO5D-jc";
+	/**
+	 * Stores logger object.
+	 */
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
+
 
   /** Range of Columns to read or write */
   private final String RANGE = "!A1:ZZ";
