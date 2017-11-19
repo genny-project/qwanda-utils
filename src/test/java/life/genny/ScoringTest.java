@@ -87,10 +87,10 @@ public class ScoringTest {
 		log.info("Score (+localdatetime, mismatch) = "+score);
 		assertThat(score, equalTo(1.34));
 
-		product.addAttribute(attributeDateTime, 0.3, LocalDateTime.of(2017, Month.JUNE, 20, 10, 13));
+		product.addAttribute(attributeDateTime, 0.4, LocalDateTime.of(2017, Month.JUNE, 20, 10, 13));
 		score  = ScoringUtils.calculateScore(person, product);
 		log.info("Score (+localdatetime) = "+score);
-		assertThat(score, equalTo(1.43));
+		assertThat(score, equalTo(1.46));
 
 	}
 
