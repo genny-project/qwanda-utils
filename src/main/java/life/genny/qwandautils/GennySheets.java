@@ -389,11 +389,13 @@ public class GennySheets {
       final String targetCode = (String) object.get("targetCode");
       final String linkCode = (String) object.get("linkCode");
       final String weight = (String) object.get("weight");
+      final String valueString = (String) object.get("valueString");
       Map<String, String> fields = new HashMap<String, String>();
       fields.put("parentCode", parentCode);
       fields.put("targetCode", targetCode);
       fields.put("linkCode", linkCode);
       fields.put("weight", weight);
+      fields.put("valueString", valueString);
       map.put(targetCode+parentCode+linkCode, fields);
       return map;
     }).reduce((ac, acc) -> {
