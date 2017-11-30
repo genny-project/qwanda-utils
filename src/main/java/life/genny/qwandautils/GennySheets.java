@@ -152,7 +152,7 @@ public class GennySheets {
 
   public Credential authorize() throws Exception {
     // Load client secrets.
-    out.println(System.getProperty("user.home"));
+   // out.println(System.getProperty("user.home"));
     // InputStream in = GennySheets.class.getResourceAsStream("/client_secret_2.json");
     final InputStream in = IOUtils.toInputStream(clientSecret, "UTF-8");
     final GoogleClientSecrets clientSecrets =
