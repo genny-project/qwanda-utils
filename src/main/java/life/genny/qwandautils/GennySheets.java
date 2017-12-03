@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import life.genny.qwanda.Ask;
 import life.genny.qwanda.Question;
+import life.genny.qwanda.QuestionQuestion;
 import life.genny.qwanda.attribute.Attribute;
 import life.genny.qwanda.attribute.AttributeLink;
 import life.genny.qwanda.attribute.EntityAttribute;
@@ -428,6 +429,34 @@ public class GennySheets {
       return ac;
     }).get();
   }
+  
+  public Map<String, Map> newGetQueQue() {
+	    List<Map> obj = new ArrayList<Map>();
+	    try {
+	      obj = row2DoubleTuples(QuestionQuestion.class.getSimpleName());
+	    } catch (final IOException e1) {
+	      // TODO Auto-generated catch block
+	      e1.printStackTrace();
+	    }
+	    return obj.stream().map(object -> {
+	      final Map<String, Map> map = new HashMap<String, Map>();
+	      final String parentCode = (String) object.get("parentCode");
+	      final String targetCode = (String) object.get("targetCode");
+	      final String weight = (String) object.get("weight");
+	      final String mandatory = (String) object.get("mandatory");
+	      Map<String, String> fields = new HashMap<String, String>();
+	      fields.put("parentCode", parentCode);
+	      fields.put("targetCode", targetCode);
+	      fields.put("weight", weight);
+	      fields.put("mandatory", mandatory);
+	      map.put(targetCode+parentCode, fields);
+	      return map;
+	    }).reduce((ac, acc) -> {
+	      ac.putAll(acc);
+	      return ac;
+	    }).get();
+	  }
+  
   
   public Map<String, Map> newGetAsk() {
     List<Map> obj = new ArrayList<Map>();
