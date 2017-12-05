@@ -7,13 +7,13 @@
 	<name>qwanda-utils</name>
 	<description>Question and Answer Engine Utilities</description>
 
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <distribution>repo</distribution>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-        </license>
-    </licenses>
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<distribution>repo</distribution>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+		</license>
+	</licenses>
 
 	<properties>
 		<jar.finalName>${project.name}</jar.finalName>
@@ -79,12 +79,9 @@
 			<id>Sonatype repository</id>
 			<url>https://oss.sonatype.org/content/repositories/releases/</url>
 		</repository>
-<!-- 		<repository>
-			<id>life.genny</id>
-			<url>http://nexus.outcome-hub.com/nexus/content/repositories/life.genny</url>
-		</repository>
- -->	
- </repositories>
+		<!-- <repository> <id>life.genny</id> <url>http://nexus.outcome-hub.com/nexus/content/repositories/life.genny</url> 
+			</repository> -->
+	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -136,6 +133,7 @@
 			<artifactId>commons-lang3</artifactId>
 			<version>3.5</version>
 		</dependency>
+
 
 
 		<!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
@@ -219,17 +217,24 @@
 			<version>1.47.1</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.google.api-client</groupId>
-			<artifactId>google-api-client</artifactId>
-			<version>1.22.0</version>
-		</dependency>
+		<!-- <dependency> <groupId>com.google.api-client</groupId> <artifactId>google-api-client</artifactId> 
+			<version>1.22.0</version> </dependency> -->
 		<dependency>
 			<groupId>com.google.apis</groupId>
 			<artifactId>google-api-services-sheets</artifactId>
 			<version>v4-rev483-1.22.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.api-client</groupId>
+					<artifactId>google-api-client</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-drive</artifactId>
+			<version>v3-rev90-1.23.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
