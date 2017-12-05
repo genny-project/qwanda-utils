@@ -482,6 +482,9 @@ public class GennySheets {
       final String refused = (String) object.get("refused");
       final String expired = (String) object.get("expired");
       final String expectedId = (String) object.get("expectedId");
+      final String weight = (String) object.get("weight");
+      final String mandatory = (String) object.get("mandatory");
+
       Map<String, String> fields = new HashMap<String, String>();
       fields.put("question_code", question_code);
       fields.put("name", name);
@@ -492,6 +495,9 @@ public class GennySheets {
       fields.put("refused", refused);
       fields.put("expired", expired);
       fields.put("expectedId", expectedId);
+      fields.put("weight", weight);
+      fields.put("mandatory", mandatory);
+
       map.put(question_code + sourceCode + targetCode, fields);
       return map;
     }).reduce((ac, acc) -> {
