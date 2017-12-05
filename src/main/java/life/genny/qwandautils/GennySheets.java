@@ -503,6 +503,33 @@ public class GennySheets {
   public List<Map> projectsImport() {
     List<Map> obj = new ArrayList<Map>();
     try {
+      obj = row2DoubleTuples("Modules");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return obj.stream().map(data -> {
+      final List<Map> map = new ArrayList<Map>();
+      String code = (String) data.get("code");
+      String name = (String) data.get("name");
+      String module = (String) data.get("module");
+      String sheetID = (String) data.get("sheetID");
+      Object clientSecret = data.get("clientSecret");
+      Map<String, Object> fields = new HashMap<String, Object>();
+      fields.put("sheetID", sheetID);
+      fields.put("name", name);
+      fields.put("module", module);
+      fields.put("clientSecret", clientSecret);
+      map.add(fields);
+      return map;
+    }).reduce((ac, acc) -> {
+      ac.addAll(acc);
+      return ac;
+    }).get();
+  }
+  
+  public List<Map> hostingImport() {
+    List<Map> obj = new ArrayList<Map>();
+    try {
       obj = row2DoubleTuples("Projects");
     } catch (IOException e) {
       e.printStackTrace();
