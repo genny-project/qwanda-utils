@@ -11,7 +11,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-
+import org.json.simple.parser.JSONParser;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,6 +29,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPathConstants;
 import org.w3c.dom.Document;
+
+
 
 public class QwandaUtils {
 	public static String apiGet(final String getUrl, final String authToken)
@@ -93,41 +95,5 @@ public class QwandaUtils {
 		}
 		return retJson;
 	}
-	
-	
-	//Gives the latitude and longitude of the given address
-	public static String[] getLatLong(String address) throws Exception
-	{
-		int responseCode=0;
-		String api = "http://maps.googleapis.com/maps/api/geocode/xml?address=" + URLEncoder.encode(address, "UTF-8") + "&sensor=true";
-	    System.out.println("API URL : "+api);
-	    URL url = new URL(api);
-	    HttpURLConnection httpConnection = (HttpURLConnection)url.openConnection();
-	    httpConnection.connect();
-	    responseCode = httpConnection.getResponseCode();
-	    if(responseCode == 200)
-	    {
-	      DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();;
-	      Document document = dBuilder.parse(httpConnection.getInputStream());
-	      XPathFactory xPathfactory = XPathFactory.newInstance();
-	      XPath xpath = xPathfactory.newXPath();
-	      XPathExpression expr = xpath.compile("/GeocodeResponse/status");
-	      String status = (String)expr.evaluate(document, XPathConstants.STRING);
-	      if(status.equals("OK"))
-	      {
-	         expr = xpath.compile("//geometry/location/lat");
-	         String latitude = (String)expr.evaluate(document, XPathConstants.STRING);
-	         expr = xpath.compile("//geometry/location/lng");
-	         String longitude = (String)expr.evaluate(document, XPathConstants.STRING);
-	         return new String[] {latitude, longitude};
-	      }
-	      else
-	      {
-	         throw new Exception("Error from the API - response status: "+status);
-	      }
-	    }
-	    return null;
-	  }
-	
 
 }
