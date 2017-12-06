@@ -53,7 +53,7 @@ public class GennySheets {
       .getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
   /** Range of Columns to read or write */
-  private final String RANGE = "!A1:ZZ";
+  private final String RANGE = "!A1:Z";
 
   private String appName = "Google Sheets API Java Quickstart";
 
@@ -484,7 +484,6 @@ public class GennySheets {
       final String expectedId = (String) object.get("expectedId");
       final String weight = (String) object.get("weight");
       final String mandatory = (String) object.get("mandatory");
-
       Map<String, String> fields = new HashMap<String, String>();
       fields.put("question_code", question_code);
       fields.put("name", name);
