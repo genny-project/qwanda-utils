@@ -558,4 +558,35 @@ public class GennySheets {
       return ac;
     }).get();
   }
+  
+  public Map<String, Map> getMessageTemplates() {
+	    List<Map> obj = new ArrayList<Map>();
+	    try {
+	      obj = row2DoubleTuples("Messages");
+	    } catch (final IOException e) {
+	      e.printStackTrace();
+	    }
+	    return obj.stream().map(object -> {
+	      final Map<String, Map> map = new HashMap<String, Map>();
+	      final String code = (String) object.get("code");
+	      final String description = (String) object.get("description");
+	      final String subject = (String) object.get("subject");
+	      final String email = (String) object.get("email");
+	      final String sms = (String) object.get("sms");
+	      Map<String, String> fields = new HashMap<String, String>();
+	      fields.put("code", code);
+	      fields.put("description", description);
+	      fields.put("subject", subject);
+	      fields.put("email", email);
+	      fields.put("sms", sms);
+	      map.put(code, fields);
+	      System.out.println("**********************templates*****************************");
+	      System.out.println(map);
+	      return map;
+	    }).reduce((ac, acc) -> {
+	      ac.putAll(acc);
+	      return ac;
+	    }).get();
+	  }
+  
 }
