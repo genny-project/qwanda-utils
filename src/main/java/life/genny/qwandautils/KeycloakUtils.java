@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -56,10 +57,10 @@ public class KeycloakUtils {
 		try {
 			HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl + "/auth")
 					.path(ServiceUrlConstants.TOKEN_PATH).build(realm));
-			System.out.println("url token post=" + keycloakUrl + "/auth" + ",tokenpath="
-					+ ServiceUrlConstants.TOKEN_PATH + ":realm=" + realm + ":clientid=" + clientId + ":secret" + secret
-					+ ":un:" + username + "pw:" + password);
-			;
+//			System.out.println("url token post=" + keycloakUrl + "/auth" + ",tokenpath="
+//					+ ServiceUrlConstants.TOKEN_PATH + ":realm=" + realm + ":clientid=" + clientId + ":secret" + secret
+//					+ ":un:" + username + "pw:" + password);
+//			;
 			post.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
 			List<NameValuePair> formParams = new ArrayList<NameValuePair>();
@@ -209,12 +210,12 @@ public class KeycloakUtils {
 				+ "\"enabled\" : true, " 
 				+ "\"emailVerified\" : true, " 
 				+ "\"firstName\" : \""+newFirstname+"\", " 
-				+ "\"lastName\" : \"\"+newLastname+\"\", " 
+				+ "\"lastName\" : \""+newLastname+"\", " 
 				+ "\"groups\" : ["  
-				+  " \"\"+newGroupRoles+\"\" "  
+				+  " \""+newGroupRoles+"\" "  
 				+ "],"  
 				+ "\"realmRoles\" : [" 
-				+   "\"\"+newRealmRoles+\"\" " 
+				+   "\""+newRealmRoles+"\" " 
 				+ "]" 
 				+"}";
 
@@ -223,8 +224,8 @@ public class KeycloakUtils {
 		HttpClient httpClient = new DefaultHttpClient();
 
 		try {
-			HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl + "/auth/admin/realms/"+realm+"/users")
-					.path(ServiceUrlConstants.TOKEN_PATH).build(realm));
+			HttpPost post = new HttpPost(keycloakUrl+"/auth/admin/realms/"+realm+"/users");
+	//		HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl + "/auth/admin/realms/"+realm+"/users"));
 
 			post.addHeader("Content-Type", "application/json");
 			post.addHeader("Authorization", "Bearer "+token);
@@ -236,19 +237,24 @@ public class KeycloakUtils {
 			HttpResponse response = httpClient.execute(post);
 
 			int statusCode = response.getStatusLine().getStatusCode();
+			
 			HttpEntity entity = response.getEntity();
 			String content = null;
-			if (statusCode != 200) {
+			if (statusCode != 201) {
 				content = getContent(entity);
 				throw new IOException("" + statusCode);
 			}
 			if (entity == null) {
 				throw new IOException("Null Entity");
 			} else {
-				content = getContent(entity);
+				Header[] headers = response.getHeaders("Location");
+				String locationUrl = headers[0].getValue();
+				content = locationUrl.replaceFirst(".*/(\\w+)","$1");
 			}
-			return JsonSerialization.readValue(content, String.class);
-		} finally {
+			return content;
+		} 
+		
+		finally {
 			httpClient.getConnectionManager().shutdown();
 		}
 	}
