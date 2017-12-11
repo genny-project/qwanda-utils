@@ -17,6 +17,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 // import org.keycloak.OAuth2Constants;
@@ -184,30 +185,54 @@ public class KeycloakUtils {
 		return projectRealm;
 	}
 
-	public static String createUser(String keycloakUrl, String realm, String clientId, String secret,
-			String username, String password) throws IOException {
+	public static String createUser(String token, String keycloakUrl, String realm, 
+			String newUsername,
+			String newFirstname,
+			String newLastname,
+			String newEmail
+			) throws IOException {
+			return createUser(token,keycloakUrl,realm,newUsername,newFirstname,newLastname,newEmail);
+	}
+	
+	public static String createUser(String token, String keycloakUrl, String realm, 
+			String newUsername,
+			String newFirstname,
+			String newLastname,
+			String newEmail,
+			String newRealmRoles,
+			String newGroupRoles
+			) throws IOException {
+		
+		String json = "{ " 
+				+ "\"username\" : \""+newUsername+"\"," 
+				+ "\"email\" : \""+newEmail+"\" , " 
+				+ "\"enabled\" : true, " 
+				+ "\"emailVerified\" : true, " 
+				+ "\"firstName\" : \""+newFirstname+"\", " 
+				+ "\"lastName\" : \"\"+newLastname+\"\", " 
+				+ "\"groups\" : ["  
+				+  " \"\"+newGroupRoles+\"\" "  
+				+ "],"  
+				+ "\"realmRoles\" : [" 
+				+   "\"\"+newRealmRoles+\"\" " 
+				+ "]" 
+				+"}";
 
+
+		
 		HttpClient httpClient = new DefaultHttpClient();
 
 		try {
-			HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl + "/auth")
+			HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl + "/auth/admin/realms/"+realm+"/users")
 					.path(ServiceUrlConstants.TOKEN_PATH).build(realm));
-			System.out.println("url token post=" + keycloakUrl + "/auth" + ",tokenpath="
-					+ ServiceUrlConstants.TOKEN_PATH + ":realm=" + realm + ":clientid=" + clientId + ":secret" + secret
-					+ ":un:" + username + "pw:" + password);
-			;
-			post.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-			List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-			formParams.add(new BasicNameValuePair("username", username));
-			formParams.add(new BasicNameValuePair("password", password));
-			formParams.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, "password"));
-			formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_ID, clientId));
-			formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_SECRET, secret));
-			UrlEncodedFormEntity form = new UrlEncodedFormEntity(formParams, "UTF-8");
+			post.addHeader("Content-Type", "application/json");
+			post.addHeader("Authorization", "Bearer "+token);
+			
+			StringEntity postingString = new StringEntity(json);
+			post.setEntity(postingString);
 
-			post.setEntity(form);
-
+	
 			HttpResponse response = httpClient.execute(post);
 
 			int statusCode = response.getStatusLine().getStatusCode();
