@@ -98,7 +98,6 @@ public class MergeUtil {
 	public static Map<String, BaseEntity> getBaseEntWithChildrenForAttributeCode(String attributeCode, String token) {
 
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
-		System.out.println("url ::" + qwandaServiceUrl);
 		Map<String, BaseEntity> entityTemplateContextMap = new HashMap<String, BaseEntity>();
 
 
