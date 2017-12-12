@@ -28,6 +28,10 @@ import life.genny.qwanda.entity.BaseEntity;
 
 public class MergeUtil {
 	
+	public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_RED = "\u001B[31m";
+	
 	final static Gson gson = new GsonBuilder()
 	        .registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
 	          @Override
@@ -39,7 +43,7 @@ public class MergeUtil {
 
 	          public JsonElement serialize(final LocalDateTime date, final Type typeOfSrc,
 	              final JsonSerializationContext context) {
-	            return new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)); // "yyyy-mm-dd"
+	            return new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)); 
 	          }
 	        }).create();
 	
@@ -56,7 +60,6 @@ public class MergeUtil {
 		
 		while (match.find()) {
 
-			System.out.println("to be merged ::" + match.group(1));
 			Object mergedtext = wordMerge(templateEntityMap, match.group(1));
 			mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, mergedtext.toString());
 
@@ -109,8 +112,9 @@ public class MergeUtil {
 			JSONArray jsonarr;	
 
 			if(attributeString != null && !attributeString.isEmpty()) {
-				jsonarr = (JSONArray) parser.parse(attributeString);
+				System.out.println(ANSI_BLUE+"Got BEG string" + ANSI_RESET);
 
+				jsonarr = (JSONArray) parser.parse(attributeString);
 				jsonarr.forEach(item -> {
 					JSONObject obj = (JSONObject) item;
 					String baseEntAttributeCode = (String) obj.get("targetCode");
@@ -138,10 +142,11 @@ public class MergeUtil {
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 		String attributeString;
 		BaseEntity be = null;
-		System.out.println("base entity attribute code::"+baseEntAttributeCode);
 		try {
 			attributeString = QwandaUtils
 					.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode, token);
+			System.out.println(ANSI_BLUE + "Base entity attribute code::"+baseEntAttributeCode + ANSI_RESET);
+
 						
 			be = gson.fromJson(attributeString, BaseEntity.class);
 			
@@ -159,14 +164,10 @@ public class MergeUtil {
 		String attributeVal = "";
 		for(EntityAttribute ea : be.getBaseEntityAttributes()) {
 			if(ea.getAttributeCode().equals(attributeCode)) {
-				System.out.println("value string::"+ea.getValueString());
 				attributeVal = ea.getValueString();
 			}
 		}
 		return attributeVal;
-	}
-
-
-	
+	}	
 
 }
