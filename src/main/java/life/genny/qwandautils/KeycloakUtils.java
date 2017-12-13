@@ -18,6 +18,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -240,18 +241,28 @@ public class KeycloakUtils {
 			
 			HttpEntity entity = response.getEntity();
 			String content = null;
-			if (statusCode != 201) {
-				content = getContent(entity);
-				throw new IOException("" + statusCode);
-			}
-			if (entity == null) {
-				throw new IOException("Null Entity");
-			} else {
+			if (statusCode == 201) {
 				Header[] headers = response.getHeaders("Location");
 				String locationUrl = headers[0].getValue();
 				content = locationUrl.replaceFirst(".*/(\\w+)","$1");
+				return content;
+				} else if (statusCode == 204) {
+				Header[] headers = response.getHeaders("Location");
+				String locationUrl = headers[0].getValue();
+				content = locationUrl.replaceFirst(".*/(\\w+)","$1");
+				return content;
 			}
-			return content;
+				else if (statusCode == 409) {
+					throw new IOException("Already exists");
+				}
+			if (entity == null) {
+				throw new IOException("Null Entity");
+			} else {
+				content = getContent(entity);
+				throw new IOException(response+"");
+
+			}
+		
 		} 
 		
 		finally {
@@ -259,5 +270,44 @@ public class KeycloakUtils {
 		}
 	}
 
+	public static int setPassword(String token, String keycloakUrl, String realm, String userId, String password) throws IOException 
+	{
+	String json = "{\"type\": \"password\", " +
+		 "\"temporary\": false," + 
+		 "\"value\": \""+password+"\"" +
+		"}";
 	
+	HttpClient httpClient = new DefaultHttpClient();
+
+	try {
+		HttpPut put = new HttpPut(keycloakUrl+"/auth/admin/realms/"+realm+"/users/"+userId+"/reset-password");
+
+		put.addHeader("Content-Type", "application/json");
+		put.addHeader("Authorization", "Bearer "+token);
+		
+		StringEntity postingString = new StringEntity(json);
+		put.setEntity(postingString);
+
+
+		HttpResponse response = httpClient.execute(put);
+
+		int statusCode = response.getStatusLine().getStatusCode();
+		
+		HttpEntity entity = response.getEntity();
+		String content = null;
+		if (statusCode != 204) {
+			content = getContent(entity);
+			throw new IOException("" + statusCode);
+		}
+		if (statusCode == 403) {
+			throw new IOException("403 Forbidden");
+		}
+
+		return statusCode;
+	} 
+	
+	finally {
+		httpClient.getConnectionManager().shutdown();
+	}
+	}
 }
