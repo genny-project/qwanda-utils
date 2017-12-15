@@ -208,5 +208,26 @@ public class MergeUtil {
 
 		return template;
 	}
+	
+	
+	/**
+	 * 
+	 * @param baseEntityCode
+	 * @param attributeCode
+	 * @param token
+	 * @return atttribute value
+	 */
+	public String getAttrValue(String baseEntityCode, String attributeCode, String token) {
+		
+		String attrValue = null;
+		
+		if(baseEntityCode != null && token != null) {
+			
+			BaseEntity be = getBaseEntityForAttr(baseEntityCode, token);
+			attrValue = getBaseEntityAttrValue(be, attributeCode);			
+		}
+		
+		return attrValue;
+	}
 
 }
