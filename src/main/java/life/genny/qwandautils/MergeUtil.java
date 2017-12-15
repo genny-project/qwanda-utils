@@ -25,6 +25,7 @@ import com.google.gson.JsonSerializationContext;
 
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
+import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 
 public class MergeUtil {
 	
@@ -96,7 +97,12 @@ public class MergeUtil {
 	
 	}
 	
-	
+	/**
+	 * 
+	 * @param attributeCode
+	 * @param token
+	 * @return BaseEntity with children (alias code, code of the attributes for the BaseEntity) for the BaseEntity code
+	 */
 	@SuppressWarnings("unchecked")
 	public static Map<String, BaseEntity> getBaseEntWithChildrenForAttributeCode(String attributeCode, String token) {
 
@@ -137,6 +143,13 @@ public class MergeUtil {
 
 	}
 
+	
+	/**
+	 * 
+	 * @param baseEntAttributeCode
+	 * @param token
+	 * @return Deserialized BaseEntity model object with values for a BaseEntity code that is passed
+	 */
 	public static BaseEntity getBaseEntityForAttr(String baseEntAttributeCode, String token) {
 		
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
@@ -158,6 +171,12 @@ public class MergeUtil {
 		return be;
 	}
 	
+	/**
+	 * 
+	 * @param BaseEntity object
+	 * @param attributeCode
+	 * @return The attribute value for the BaseEntity attribute code passed
+	 */
 	public static String getBaseEntityAttrValue(BaseEntity be, String attributeCode) {
 		//return be.findEntityAttribute(attributeCode).get().getValueString();	
 		
@@ -168,6 +187,26 @@ public class MergeUtil {
 			}
 		}
 		return attributeVal;
-	}	
+	}
+	
+	
+	
+	public static QBaseMSGMessageTemplate getTemplate(String templateCode, String token) {
+
+		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
+		String attributeString;
+		QBaseMSGMessageTemplate template = null;
+		try {
+			attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/templates/" + templateCode,
+					token);
+			template = gson.fromJson(attributeString, QBaseMSGMessageTemplate.class);
+			System.out.println("template sms:"+template.getSms_template());
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return template;
+	}
 
 }
