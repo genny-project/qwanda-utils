@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
@@ -33,6 +35,7 @@ import org.keycloak.OAuth2Constants;
 import org.keycloak.common.util.KeycloakUriBuilder;
 import org.keycloak.constants.ServiceUrlConstants;
 import org.keycloak.representations.AccessTokenResponse;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.util.JsonSerialization;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -310,4 +313,7 @@ public class KeycloakUtils {
 		httpClient.getConnectionManager().shutdown();
 	}
 	}
+	
+
+	
 }
