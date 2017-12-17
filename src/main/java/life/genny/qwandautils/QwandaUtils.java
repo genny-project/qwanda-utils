@@ -43,6 +43,7 @@ import life.genny.qwanda.Link;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.Person;
+import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 
 
 
@@ -191,5 +192,30 @@ public class QwandaUtils {
 		postLink(qwandaUrl, token, new Link("GRP_PERSONS",code,"LNK_CORE"));
 		
 		return person;
+	}
+	
+	public static boolean checkUserTokenExists(final String qwandaUrl, final String userToken) throws IOException {
+		JSONObject decodedToken = KeycloakUtils.getDecodedToken(userToken);
+		
+		String username = decodedToken.getString("preferred_username");
+		
+		String code = "PER_" + username.toUpperCase();
+		System.out.println("code::"+code);
+		boolean tokenExists = false;
+		
+		String attributeString = QwandaUtils
+				.apiGet(qwandaUrl + "/qwanda/baseentitys/" +code, userToken);
+		
+		if(!attributeString.contains("Unauthorized")) {
+			tokenExists = true;
+		}
+		
+		/*BaseEntity be = MergeUtil.getBaseEntityForAttr(code, userToken);
+		if (be != null) {
+			tokenExists = true;
+		}*/
+		
+		
+		return tokenExists;
 	}
 }
