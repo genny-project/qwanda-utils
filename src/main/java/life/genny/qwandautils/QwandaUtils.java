@@ -194,8 +194,11 @@ public class QwandaUtils {
 		return person;
 	}
 	
-	public static boolean checkUserTokenExists(final String qwandaUrl, final String userToken) throws IOException {
+	public static Boolean checkUserTokenExists(final String qwandaUrl, final String userToken) throws IOException {
 		JSONObject decodedToken = KeycloakUtils.getDecodedToken(userToken);
+		String tokenSub = decodedToken.getString("sub");
+		System.out.println("sub token::"+tokenSub);
+		
 		
 		String username = decodedToken.getString("preferred_username");
 		
