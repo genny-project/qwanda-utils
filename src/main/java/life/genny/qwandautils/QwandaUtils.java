@@ -190,19 +190,21 @@ public class QwandaUtils {
 		System.out.println("code::"+code);
 		Boolean tokenExists = false;
 		
+		/*String attributeString = MergeUtil.getAttrValue(code, "PRI_KEYCLOAK_UUID", userToken);
+		System.out.println("attribute string::"+attributeString);
+		
+		if(tokenSub.equals(attributeString)) {
+			System.out.println("UUID matched");
+		}*/
+		
 		String attributeString = QwandaUtils
 				.apiGet(qwandaUrl + "/qwanda/baseentitys/" +code, userToken);
 		
 		if(!attributeString.contains("Unauthorized")) {
-			tokenExists = false;
+			tokenExists = true;
 		} else {
-			tokenExists = true;
+			tokenExists = false;
 		}
-		
-		/*BaseEntity be = MergeUtil.getBaseEntityForAttr(code, userToken);
-		if (be != null) {
-			tokenExists = true;
-		}*/
 		
 		
 		return tokenExists;
