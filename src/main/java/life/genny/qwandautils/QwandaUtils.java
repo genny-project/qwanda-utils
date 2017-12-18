@@ -1,7 +1,13 @@
 package life.genny.qwandautils;
 
 
-import org.apache.commons.lang3.StringUtils;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.invoke.MethodHandles;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -13,26 +19,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Map;
-import java.net.URLConnection;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.time.LocalDateTime;
-import java.io.InputStreamReader;
-import java.lang.invoke.MethodHandles;
-import java.io.BufferedReader;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
-import javax.xml.xpath.XPathConstants;
-import org.w3c.dom.Document;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -40,10 +26,8 @@ import com.google.gson.GsonBuilder;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.Link;
-import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.Person;
-import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 
 
 
@@ -204,12 +188,14 @@ public class QwandaUtils {
 		
 		String code = "PER_" + username.toUpperCase();
 		System.out.println("code::"+code);
-		boolean tokenExists = false;
+		Boolean tokenExists = false;
 		
 		String attributeString = QwandaUtils
 				.apiGet(qwandaUrl + "/qwanda/baseentitys/" +code, userToken);
 		
 		if(!attributeString.contains("Unauthorized")) {
+			tokenExists = false;
+		} else {
 			tokenExists = true;
 		}
 		

@@ -23,6 +23,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 
+import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
@@ -159,7 +160,7 @@ public class MergeUtil {
 			attributeString = QwandaUtils
 					.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode, token);
 			System.out.println(ANSI_BLUE + "Base entity attribute code::"+baseEntAttributeCode + ANSI_RESET);
-
+			System.out.println("attribute string ::"+attributeString);
 						
 			be = gson.fromJson(attributeString, BaseEntity.class);
 			
@@ -190,7 +191,12 @@ public class MergeUtil {
 	}
 	
 	
-	
+	/**
+	 * 
+	 * @param templateCode
+	 * @param token
+	 * @return template
+	 */
 	public static QBaseMSGMessageTemplate getTemplate(String templateCode, String token) {
 
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
@@ -215,7 +221,7 @@ public class MergeUtil {
 	 * @param baseEntityCode
 	 * @param attributeCode
 	 * @param token
-	 * @return atttribute value
+	 * @return attribute value
 	 */
 	public String getAttrValue(String baseEntityCode, String attributeCode, String token) {
 		
@@ -228,6 +234,29 @@ public class MergeUtil {
 		}
 		
 		return attrValue;
+	}
+	
+	public boolean createBaseEntity(String code, String name, Long id, String token ) {
+		
+		BaseEntity be = new BaseEntity(code, name);
+		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
+		
+		Gson gson1 = new Gson();
+		GsonBuilder gsonBuilder = new GsonBuilder();
+		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
+		gson1 = gsonBuilder.create();
+        
+        String jsonBE = gson1.toJson(be);
+        try {
+            String output= QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/baseentitys", jsonBE, token);
+            System.out.println("this is the output :: "+ output);
+            
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+		
+		return true;
+		
 	}
 
 }
