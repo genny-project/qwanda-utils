@@ -159,21 +159,21 @@ public class QwandaUtils {
 			) throws IOException
 	{
 
-		String uname = username.replaceAll("\\&", "_AND_").replaceAll("@", "_AT_").replaceAll("\\.", "").toLowerCase();
+		//String uname = username.replaceAll("\\&", "_AND_").replaceAll("@", "_AT_").replaceAll("\\.", "").toLowerCase();
+		//String code = "PER_" + username.substring(0, username.indexOf("@")).toUpperCase();
 		String code = "PER_" + username.toUpperCase();
-		
 		Person person = new Person(code, firstname + " " + lastname);
 		
 		postBaseEntity(qwandaUrl, token, person);
-		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_USERNAME",uname));
+		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_USERNAME",username));
 		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_FIRSTNAME",firstname));
 		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_LASTNAME",lastname));
 		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_EMAIL",email));
-		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_USERNAME",uname));
+		
 		
 					
 		postLink(qwandaUrl, token, new Link("GRP_USERS",code,"LNK_CORE"));
-		postLink(qwandaUrl, token, new Link("GRP_PERSONS",code,"LNK_CORE"));
+		postLink(qwandaUrl, token, new Link("GRP_PEOPLE",code,"LNK_CORE"));
 		
 		return person;
 	}
