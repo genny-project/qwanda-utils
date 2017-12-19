@@ -195,6 +195,10 @@ public class QwandaUtils {
 			System.out.println("baseentity not found");
 			tokenExists = false;
 		} else {
+			tokenExists = true;
+		}
+		
+		/*else {
 			String attributeVal = MergeUtil.getAttrValue(code, "PRI_KEYCLOAK_UUID", userToken);
 						
 			System.out.println("pri_keycloak_UUID for the code::"+attributeVal);
@@ -208,7 +212,7 @@ public class QwandaUtils {
 				System.out.println("baseentity code found but keycloak UUID not matched");
 				tokenExists = false;
 			}
-		}
+		}*/
 		
 		return tokenExists;
 	}
