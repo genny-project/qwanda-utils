@@ -153,6 +153,7 @@ public class MergeUtil {
 	 */
 	public static BaseEntity getBaseEntityForAttr(String baseEntAttributeCode, String token) {
 		
+		//String qwandaServiceUrl = "http://localhost:8280";
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 		String attributeString;
 		BaseEntity be = null;
@@ -223,7 +224,7 @@ public class MergeUtil {
 	 * @param token
 	 * @return attribute value
 	 */
-	public String getAttrValue(String baseEntityCode, String attributeCode, String token) {
+	public static String getAttrValue(String baseEntityCode, String attributeCode, String token) {
 		
 		String attrValue = null;
 		
@@ -236,7 +237,7 @@ public class MergeUtil {
 		return attrValue;
 	}
 	
-	public boolean createBaseEntity(String code, String name, Long id, String token ) {
+	public static boolean createBaseEntity(String code, String name, Long id, String token ) {
 		
 		BaseEntity be = new BaseEntity(code, name);
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
