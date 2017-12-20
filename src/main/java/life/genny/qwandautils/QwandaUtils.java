@@ -5,8 +5,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -22,12 +25,20 @@ import org.json.JSONObject;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
 
 import life.genny.qwanda.Answer;
+import life.genny.qwanda.Ask;
 import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.Link;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.Person;
+import life.genny.qwanda.message.QDataAskMessage;
 
 
 
@@ -35,6 +46,21 @@ public class QwandaUtils {
 
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+	
+	final static Gson gson = new GsonBuilder()
+	        .registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
+	          @Override
+	          public LocalDateTime deserialize(final JsonElement json, final Type type,
+	              final JsonDeserializationContext jsonDeserializationContext)
+	              throws JsonParseException {
+	            return LocalDateTime.parse(json.getAsJsonPrimitive().getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+	          }
+
+	          public JsonElement serialize(final LocalDateTime date, final Type typeOfSrc,
+	              final JsonSerializationContext context) {
+	            return new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)); 
+	          }
+	        }).create();
 
 	
 	public static String apiGet(final String getUrl, final String authToken)
@@ -216,4 +242,48 @@ public class QwandaUtils {
 		
 		return tokenExists;
 	}
+	
+	
+	public static Boolean isProfileCompleted(String baseEntityCode, String questionCode, final String userToken) {
+
+		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
+		//String qwandaServiceUrl = "http://localhost:8280";
+		try {
+
+			String attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + baseEntityCode
+					+ "/asks2/" + questionCode + "/" + baseEntityCode, userToken);
+			System.out.println("attribute string::" + attributeString);
+
+			QDataAskMessage askMsgs = gson.fromJson(attributeString, QDataAskMessage.class);
+			BaseEntity be = MergeUtil.getBaseEntityForAttr(baseEntityCode, userToken);
+
+			for (Ask parentAsk : askMsgs.getItems()) {
+				System.out.println("parent ask questionCode ::" + parentAsk.getQuestionCode());
+				for (Ask childAsk : parentAsk.getChildAsks()) {
+					System.out.println("parent-child ask questionCode ::" + childAsk.getQuestionCode());
+					for (Ask basicChildAsk : childAsk.getChildAsks()) {
+						System.out.println("child ask questionCode ::" + basicChildAsk.getAttributeCode()
+								+ ", isMandatory ::" + basicChildAsk.getMandatory());
+
+						if (basicChildAsk.getMandatory()) {
+							String attributeVal = MergeUtil.getBaseEntityAttrValue(be,
+									basicChildAsk.getAttributeCode());
+							System.out.println("attribute code ::" + basicChildAsk.getAttributeCode()
+									+ ", attribute value ::" + attributeVal);
+							if (attributeVal == null)
+								return false;
+						}
+
+					}
+				}
+			}
+
+			System.out.println("askMsgs ::" + askMsgs);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
+	
+	
 }
