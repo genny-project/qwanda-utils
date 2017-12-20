@@ -9,7 +9,6 @@ import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -18,7 +17,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -39,6 +38,7 @@ import life.genny.qwanda.Link;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.message.QDataAskMessage;
+import life.genny.qwanda.message.QDataBaseEntityMessage;
 
 
 
@@ -67,7 +67,7 @@ public class QwandaUtils {
 			throws ClientProtocolException, IOException {
 		String retJson = "";
 		log.debug("GET:" + getUrl + ":");
-		final HttpClient client = new DefaultHttpClient();
+		final HttpClient client = HttpClientBuilder.create().build();
 		final HttpGet request = new HttpGet(getUrl);
 		if (authToken != null) {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
@@ -86,7 +86,8 @@ public class QwandaUtils {
 	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken)
 			throws IOException {
 		String retJson = "";
-		final HttpClient client = new DefaultHttpClient();
+		//final HttpClient client = new DefaultHttpClient();
+		final HttpClient client = HttpClientBuilder.create().build();
 
 		final HttpPost post = new HttpPost(postUrl);
 		post.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
@@ -107,7 +108,7 @@ public class QwandaUtils {
 	public static String apiPost(final String postUrl, final ArrayList<BasicNameValuePair> nameValuePairs,
 			final String authToken) throws IOException {
 		String retJson = "";
-		final HttpClient client = new DefaultHttpClient();
+		final HttpClient client = HttpClientBuilder.create().build();
 		final HttpPost post = new HttpPost(postUrl);
 		post.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 
@@ -252,7 +253,6 @@ public class QwandaUtils {
 
 			String attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + baseEntityCode
 					+ "/asks2/" + questionCode + "/" + baseEntityCode, userToken);
-			System.out.println("attribute string::" + attributeString);
 
 			QDataAskMessage askMsgs = gson.fromJson(attributeString, QDataAskMessage.class);
 			BaseEntity be = MergeUtil.getBaseEntityForAttr(baseEntityCode, userToken);
@@ -283,6 +283,37 @@ public class QwandaUtils {
 			e.printStackTrace();
 		}
 		return true;
+	}
+	
+	
+	/**
+	 * 
+	 * @param username
+	 * @return baseEntity code for the userName passed
+	 */
+	public static String getBaseEntityCodeForUserName(String username, String userToken) {
+		
+		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
+		//String qwandaServiceUrl = "http://localhost:8280";
+		
+		String baseEntityCode = null;
+		try {
+			String attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/GRP_PEOPLE/linkcodes/LNK_CORE/attributes?PRI_USERNAME=" + username, userToken);
+			System.out.println("attribute string::" + attributeString);
+			
+			QDataBaseEntityMessage msg = gson.fromJson(attributeString, QDataBaseEntityMessage.class);
+			
+			for(BaseEntity be : msg.getItems()) {
+				baseEntityCode = be.getCode();
+				System.out.println("baseEntity code for username ::"+baseEntityCode);
+				return baseEntityCode;
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return baseEntityCode;		
+		
 	}
 	
 	
