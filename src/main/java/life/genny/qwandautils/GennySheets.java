@@ -565,7 +565,7 @@ public class GennySheets {
 	    try {
 	      obj = row2DoubleTuples("Messages");
 	    } catch (final IOException e) {
-	      e.printStackTrace();
+	      return null;
 	    }
 	    return obj.stream().map(object -> {
 	      final Map<String, Map> map = new HashMap<String, Map>();
