@@ -182,7 +182,7 @@ public class MergeUtil {
 	public static String getBaseEntityAttrValue(BaseEntity be, String attributeCode) {
 		//return be.findEntityAttribute(attributeCode).get().getValueString();	
 		
-		String attributeVal = "";
+		String attributeVal = null;
 		for(EntityAttribute ea : be.getBaseEntityAttributes()) {
 			if(ea.getAttributeCode().equals(attributeCode)) {
 				attributeVal = ea.getValueString();
