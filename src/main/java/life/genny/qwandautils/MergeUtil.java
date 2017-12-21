@@ -24,6 +24,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 
 import life.genny.qwanda.DateTimeDeserializer;
+import life.genny.qwanda.Link;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
@@ -237,9 +238,9 @@ public class MergeUtil {
 		return attrValue;
 	}
 	
-	public static boolean createBaseEntity(String code, String name, Long id, String token ) {
+	public static boolean createBaseEntity(String sourceCode, String linkCode, String targetCode, String name, Long id, String token) {
 		
-		BaseEntity be = new BaseEntity(code, name);
+		BaseEntity be = new BaseEntity(targetCode, name);
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 		
 		Gson gson1 = new Gson();
@@ -250,6 +251,8 @@ public class MergeUtil {
         String jsonBE = gson1.toJson(be);
         try {
             String output= QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/baseentitys", jsonBE, token);
+            
+            QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/entityentitys", gson.toJson(new Link(sourceCode, targetCode, linkCode)),token);
             System.out.println("this is the output :: "+ output);
             
         }catch (Exception e) {
