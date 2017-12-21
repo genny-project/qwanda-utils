@@ -258,20 +258,17 @@ public class QwandaUtils {
 			BaseEntity be = MergeUtil.getBaseEntityForAttr(baseEntityCode, userToken);
 
 			for (Ask parentAsk : askMsgs.getItems()) {
-				System.out.println("parent ask questionCode ::" + parentAsk.getQuestionCode());
 				for (Ask childAsk : parentAsk.getChildAsks()) {
-					System.out.println("parent-child ask questionCode ::" + childAsk.getQuestionCode());
 					for (Ask basicChildAsk : childAsk.getChildAsks()) {
-						System.out.println("child ask questionCode ::" + basicChildAsk.getAttributeCode()
-								+ ", isMandatory ::" + basicChildAsk.getMandatory());
 
 						if (basicChildAsk.getMandatory()) {
 							String attributeVal = MergeUtil.getBaseEntityAttrValue(be,
 									basicChildAsk.getAttributeCode());
-							System.out.println("attribute code ::" + basicChildAsk.getAttributeCode()
-									+ ", attribute value ::" + attributeVal);
-							if (attributeVal == null)
+							if (attributeVal == null) {
+								System.out.println("This attribute value of "+basicChildAsk.getAttributeCode() +" is not filled and is null");
 								return false;
+							}
+								
 						}
 
 					}
