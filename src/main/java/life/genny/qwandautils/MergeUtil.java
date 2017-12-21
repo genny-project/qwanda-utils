@@ -126,7 +126,7 @@ public class MergeUtil {
 					JSONObject obj = (JSONObject) item;
 					String baseEntAttributeCode = (String) obj.get("targetCode");
 					if(obj.get("linkValue") != null){
-						entityTemplateContextMap.put(obj.get("linkValue").toString(),getBaseEntityForAttr(baseEntAttributeCode, token));
+						entityTemplateContextMap.put(obj.get("linkValue").toString(), getBaseEntityForAttr(baseEntAttributeCode, token));
 					}
 					//BaseEntity be = getBaseEntityForAttr("PER_USER2", token); //this is for testing 
 				});
@@ -180,15 +180,17 @@ public class MergeUtil {
 	 * @return The attribute value for the BaseEntity attribute code passed
 	 */
 	public static String getBaseEntityAttrValue(BaseEntity be, String attributeCode) {
-		//return be.findEntityAttribute(attributeCode).get().getValueString();	
 		
-		String attributeVal = null;
+		/*String attributeVal = null;
 		for(EntityAttribute ea : be.getBaseEntityAttributes()) {
 			if(ea.getAttributeCode().equals(attributeCode)) {
 				attributeVal = ea.getValueString();
 			}
 		}
-		return attributeVal;
+		
+		return attributeVal;*/
+		
+		return be.findEntityAttribute(attributeCode).get().getValueString();
 	}
 	
 	
