@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -35,6 +36,7 @@ import life.genny.qwanda.Answer;
 import life.genny.qwanda.Ask;
 import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.Link;
+import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.message.QDataAskMessage;
@@ -262,10 +264,15 @@ public class QwandaUtils {
 					for (Ask basicChildAsk : childAsk.getChildAsks()) {
 
 						if (basicChildAsk.getMandatory()) {
-							String attributeVal = MergeUtil.getBaseEntityAttrValue(be,
-									basicChildAsk.getAttributeCode());
-							if (attributeVal == null) {
+							Optional<EntityAttribute> attributeVal = be.findEntityAttribute(basicChildAsk.getAttributeCode());
+//							String attributeVal = MergeUtil.getBaseEntityAttrValue(be,
+//									basicChildAsk.getAttributeCode());
+							if (attributeVal.isPresent()) {
+								if (attributeVal.get() == null) {
 								System.out.println("This attribute value of "+basicChildAsk.getAttributeCode() +" is not filled and is null");
+								return false;
+								}
+							} else {
 								return false;
 							}
 								

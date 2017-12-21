@@ -1,14 +1,17 @@
 package life.genny.qwandautils;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -31,6 +34,9 @@ import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 
 public class MergeUtil {
 	
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
 	public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLUE = "\u001B[34m";
     public static final String ANSI_RED = "\u001B[31m";
@@ -191,7 +197,16 @@ public class MergeUtil {
 		
 		return attributeVal;*/
 		
-		return be.findEntityAttribute(attributeCode).get().getValueString();
+		String value =  null;
+		
+		try {
+			value = be.findEntityAttribute(attributeCode).get().getValueString();
+		} catch (Exception e) {
+			log.error("Attribute not found");
+			return null;
+		}
+		
+		return value;
 	}
 	
 	
