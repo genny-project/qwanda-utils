@@ -181,6 +181,11 @@ public class QwandaUtils {
 		return link;
 	}	
 	
+	public static String getNormalisedUsername(final String rawUsername)
+	{
+		return 	rawUsername.replaceAll("\\&", "_AND_").replaceAll("@", "_AT_").replaceAll("\\.", "").toLowerCase();
+	}
+	
 	public static BaseEntity createUser(final String qwandaUrl, final String token, final String username, 
 			final String firstname,
 			final String lastname,
@@ -188,8 +193,8 @@ public class QwandaUtils {
 			) throws IOException
 	{
 
-		//String uname = username.replaceAll("\\&", "_AND_").replaceAll("@", "_AT_").replaceAll("\\.", "").toLowerCase();
-		String code = "PER_" + username.toUpperCase();
+		String uname = getNormalisedUsername(username);
+		String code = "PER_" + uname.toUpperCase();
 		
 		Person person = new Person(code, firstname + " " + lastname);
 		
@@ -256,6 +261,7 @@ public class QwandaUtils {
 			String attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + baseEntityCode
 					+ "/asks2/" + questionCode + "/" + baseEntityCode, userToken);
 
+			System.out.println("Attribute String="+attributeString);
 			QDataAskMessage askMsgs = gson.fromJson(attributeString, QDataAskMessage.class);
 			BaseEntity be = MergeUtil.getBaseEntityForAttr(baseEntityCode, userToken);
 
