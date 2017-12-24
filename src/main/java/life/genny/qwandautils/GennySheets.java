@@ -270,10 +270,16 @@ public class GennySheets {
       final String code = (String) object.get("code");
       final String name = (String) object.get("name");
       final String regex = (String) object.get("regex");
+      final String group_codes = (String) object.get("group_codes");
+      final String recursive = (String) object.get("recursive");
+      final String multi_allowed = (String) object.get("multi_allowed");
       Map<String, String> fields = new HashMap<String, String>();
       fields.put("code", code);
       fields.put("name", name);
       fields.put("regex", regex);
+      fields.put("group_codes", group_codes);
+      fields.put("recursive", recursive);     
+      fields.put("multi_allowed", multi_allowed);
       map.put(code, fields);
       return map;
     }).reduce((ac, acc) -> {
