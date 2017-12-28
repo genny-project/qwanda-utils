@@ -218,7 +218,13 @@ public class QwandaUtils {
 		
 		String username = decodedToken.getString("preferred_username");
 		
-		String code = "PER_" + username.toUpperCase();
+		String uname = getNormalisedUsername(username);
+		String code = "PER_" + uname.toUpperCase();
+		
+		System.out.println("username ::"+username);
+		System.out.println("uname::"+uname);
+		System.out.println("code::"+code);
+		
 		System.out.println("code::"+code);
 		Boolean tokenExists = false;
 		
