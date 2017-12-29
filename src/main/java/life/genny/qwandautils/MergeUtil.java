@@ -5,17 +5,11 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.Logger;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -30,7 +24,6 @@ import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.Link;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
-import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 
 public class MergeUtil {
 	
@@ -93,7 +86,7 @@ public class MergeUtil {
 					BaseEntity be = entitymap.get(baseent);
 
 					//return be.findEntityAttribute(entityArr[1]).get().getValueString();
-					return getBaseEntityAttrValue(be, entityArr[1]);
+					return getBaseEntityAttrValueAsString(be, entityArr[1]);
 				
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -103,52 +96,6 @@ public class MergeUtil {
 		}
 		return DEFAULT;	
 	
-	}
-	
-	/**
-	 * 
-	 * @param attributeCode
-	 * @param token
-	 * @return BaseEntity with children (alias code, code of the attributes for the BaseEntity) for the BaseEntity code
-	 */
-	@SuppressWarnings("unchecked")
-	public static Map<String, BaseEntity> getBaseEntWithChildrenForAttributeCode(String attributeCode, String token) {
-
-		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
-		Map<String, BaseEntity> entityTemplateContextMap = new HashMap<String, BaseEntity>();
-
-
-		try {
-			String attributeString = QwandaUtils
-					.apiGet(qwandaServiceUrl + "/qwanda/entityentitys/" + attributeCode + "/linkcodes/LNK_BEG/children", token);
-
-			JSONParser parser = new JSONParser();
-			JSONArray jsonarr;	
-
-			if(attributeString != null && !attributeString.isEmpty()) {
-				System.out.println(ANSI_BLUE+"Got BEG string" + ANSI_RESET);
-
-				jsonarr = (JSONArray) parser.parse(attributeString);
-				jsonarr.forEach(item -> {
-					JSONObject obj = (JSONObject) item;
-					String baseEntAttributeCode = (String) obj.get("targetCode");
-					if(obj.get("linkValue") != null){
-						entityTemplateContextMap.put(obj.get("linkValue").toString(), getBaseEntityForAttr(baseEntAttributeCode, token));
-					}
-					//BaseEntity be = getBaseEntityForAttr("PER_USER2", token); //this is for testing 
-				});
-						
-			}		
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		
-		System.out.println("base entity context map ::"+entityTemplateContextMap);
-		return entityTemplateContextMap;
-
 	}
 
 	
@@ -186,12 +133,12 @@ public class MergeUtil {
 	 * @param attributeCode
 	 * @return The attribute value for the BaseEntity attribute code passed
 	 */
-	public static String getBaseEntityAttrValue(BaseEntity be, String attributeCode) {
+	public static String getBaseEntityAttrValueAsString(BaseEntity be, String attributeCode) {
 		
 		String attributeVal = null;
 		for(EntityAttribute ea : be.getBaseEntityAttributes()) {
 			if(ea.getAttributeCode().equals(attributeCode)) {
-				attributeVal = ea.getValueString();
+				attributeVal = ea.getObjectAsString();
 			}
 		}
 		
@@ -200,38 +147,13 @@ public class MergeUtil {
 		/*String value =  null;
 		
 		try {
-			value = be.findEntityAttribute(attributeCode).get().getValueString();
+			value = be.findEntityAttribute(attributeCode).get().getObjectAsString();
 		} catch (Exception e) {
 			log.error("Attribute not found");
 			return null;
 		}
 		
 		return value;*/
-	}
-	
-	
-	/**
-	 * 
-	 * @param templateCode
-	 * @param token
-	 * @return template
-	 */
-	public static QBaseMSGMessageTemplate getTemplate(String templateCode, String token) {
-
-		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
-		String attributeString;
-		QBaseMSGMessageTemplate template = null;
-		try {
-			attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/templates/" + templateCode,
-					token);
-			template = gson.fromJson(attributeString, QBaseMSGMessageTemplate.class);
-			System.out.println("template sms:"+template.getSms_template());
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return template;
 	}
 	
 	
@@ -249,7 +171,7 @@ public class MergeUtil {
 		if(baseEntityCode != null && token != null) {
 			
 			BaseEntity be = getBaseEntityForAttr(baseEntityCode, token);
-			attrValue = getBaseEntityAttrValue(be, attributeCode);			
+			attrValue = getBaseEntityAttrValueAsString(be, attributeCode);			
 		}
 		
 		return attrValue;
@@ -278,6 +200,19 @@ public class MergeUtil {
 		
 		return true;
 		
+	}
+	
+	public static Object getBaseEntityAttrObjectValue(BaseEntity be, String attributeCode) {
+
+		Object attributeVal = null;
+		for (EntityAttribute ea : be.getBaseEntityAttributes()) {
+			if (ea.getAttributeCode().equals(attributeCode)) {
+				attributeVal = ea.getObject();
+			}
+		}
+
+		return attributeVal;
+
 	}
 
 }

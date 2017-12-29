@@ -9,7 +9,8 @@ import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -22,6 +23,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -36,15 +40,19 @@ import life.genny.qwanda.Answer;
 import life.genny.qwanda.Ask;
 import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.Link;
-import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.Person;
+import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QDataAskMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
 
 
 
 public class QwandaUtils {
+	
+	public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_RED = "\u001B[31m";
 
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
@@ -293,9 +301,7 @@ public class QwandaUtils {
 								return false;
 							}*/
 							
-							//Using this for enabling User-SignIn for now, currently working on creating a method to get a datatype-based value
-							String attributeVal = MergeUtil.getBaseEntityAttrValue(be,
-									basicChildAsk.getAttributeCode());
+							Object attributeVal = MergeUtil.getBaseEntityAttrObjectValue(be,basicChildAsk.getAttributeCode());
 							if(attributeVal == null) {
 								return false;
 							}
@@ -342,6 +348,78 @@ public class QwandaUtils {
 		}
 		return baseEntityCode;		
 		
+	}
+	
+	
+	/**
+	 * 
+	 * @param templateCode
+	 * @param token
+	 * @return template
+	 */
+	public static QBaseMSGMessageTemplate getTemplate(String templateCode, String token) {
+
+		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
+		String attributeString;
+		QBaseMSGMessageTemplate template = null;
+		try {
+			attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/templates/" + templateCode,
+					token);
+			template = gson.fromJson(attributeString, QBaseMSGMessageTemplate.class);
+			System.out.println("template sms:"+template.getSms_template());
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return template;
+	}
+	
+	
+	/**
+	 * 
+	 * @param attributeCode
+	 * @param token
+	 * @return BaseEntity with children (alias code, code of the attributes for the BaseEntity) for the BaseEntity code
+	 */
+	@SuppressWarnings("unchecked")
+	public static Map<String, BaseEntity> getBaseEntWithChildrenForAttributeCode(String attributeCode, String token) {
+
+		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
+		Map<String, BaseEntity> entityTemplateContextMap = new HashMap<String, BaseEntity>();
+
+
+		try {
+			String attributeString = QwandaUtils
+					.apiGet(qwandaServiceUrl + "/qwanda/entityentitys/" + attributeCode + "/linkcodes/LNK_BEG/children", token);
+
+			JSONParser parser = new JSONParser();
+			JSONArray jsonarr;	
+
+			if(attributeString != null && !attributeString.isEmpty()) {
+				System.out.println(ANSI_BLUE+"Got BEG string" + ANSI_RESET);
+
+				jsonarr = (JSONArray) parser.parse(attributeString);
+				jsonarr.forEach(item -> {
+					JSONObject obj = (JSONObject) item;
+					String baseEntAttributeCode = (String) obj.get("targetCode");
+					if(obj.get("linkValue") != null){
+						entityTemplateContextMap.put(obj.get("linkValue").toString(), MergeUtil.getBaseEntityForAttr(baseEntAttributeCode, token));
+					}
+					//BaseEntity be = getBaseEntityForAttr("PER_USER2", token); //this is for testing 
+				});
+						
+			}		
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("base entity context map ::"+entityTemplateContextMap);
+		return entityTemplateContextMap;
+
 	}
 	
 	
