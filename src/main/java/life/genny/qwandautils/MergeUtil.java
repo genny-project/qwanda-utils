@@ -188,16 +188,16 @@ public class MergeUtil {
 	 */
 	public static String getBaseEntityAttrValue(BaseEntity be, String attributeCode) {
 		
-		/*String attributeVal = null;
+		String attributeVal = null;
 		for(EntityAttribute ea : be.getBaseEntityAttributes()) {
 			if(ea.getAttributeCode().equals(attributeCode)) {
 				attributeVal = ea.getValueString();
 			}
 		}
 		
-		return attributeVal;*/
+		return attributeVal;
 		
-		String value =  null;
+		/*String value =  null;
 		
 		try {
 			value = be.findEntityAttribute(attributeCode).get().getValueString();
@@ -206,7 +206,7 @@ public class MergeUtil {
 			return null;
 		}
 		
-		return value;
+		return value;*/
 	}
 	
 	

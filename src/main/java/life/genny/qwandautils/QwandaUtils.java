@@ -276,15 +276,20 @@ public class QwandaUtils {
 					for (Ask basicChildAsk : childAsk.getChildAsks()) {
 
 						if (basicChildAsk.getMandatory()) {
-							Optional<EntityAttribute> attributeVal = be.findEntityAttribute(basicChildAsk.getAttributeCode());
-//							String attributeVal = MergeUtil.getBaseEntityAttrValue(be,
-//									basicChildAsk.getAttributeCode());
+							/*Optional<EntityAttribute> attributeVal = be.findEntityAttribute(basicChildAsk.getAttributeCode());
 							if (attributeVal.isPresent()) {
 								if (attributeVal.get() == null) {
 								System.out.println("This attribute value of "+basicChildAsk.getAttributeCode() +" is not filled and is null");
 								return false;
 								}
 							} else {
+								return false;
+							}*/
+							
+							//Using this for enabling User-SignIn for now, currently working on creating a method to get a datatype-based value
+							String attributeVal = MergeUtil.getBaseEntityAttrValue(be,
+									basicChildAsk.getAttributeCode());
+							if(attributeVal == null) {
 								return false;
 							}
 								
