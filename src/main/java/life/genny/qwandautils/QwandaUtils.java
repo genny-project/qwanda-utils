@@ -246,7 +246,7 @@ public class QwandaUtils {
 		String attributeString = QwandaUtils
 				.apiGet(qwandaUrl + "/qwanda/baseentitys/" +code, userToken);
 		
-		if(attributeString.contains("Error") || attributeString.contains("Unauthorized")) {
+		if((attributeString == null) || attributeString.contains("Error") || attributeString.contains("Unauthorized")) {
 			System.out.println("baseentity not found");
 			tokenExists = false;
 		} else {
