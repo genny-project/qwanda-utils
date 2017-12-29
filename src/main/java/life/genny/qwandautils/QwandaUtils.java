@@ -75,11 +75,18 @@ public class QwandaUtils {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 		}
 		final HttpResponse response = client.execute(request);
-		final BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-		String line = "";
-		while ((line = rd.readLine()) != null) {
-			retJson += line;
-			;
+		BufferedReader rd = null;
+		
+		try {
+			rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+			String line = "";
+			while ((line = rd.readLine()) != null) {
+				retJson += line;
+				;
+			}
+		} catch (NullPointerException e) {
+			// TODO Auto-generated catch block
+			return null;
 		}
 
 		return retJson;
