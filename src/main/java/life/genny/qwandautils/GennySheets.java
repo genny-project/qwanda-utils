@@ -301,10 +301,12 @@ public class GennySheets {
       final String code = (String) object.get("code");
       final String name = (String) object.get("name");
       final String validations = (String) object.get("validations");
+      final String inputmask = (String) object.get("inputmask");
       Map<String, String> fields = new HashMap<String, String>();
       fields.put("code", code);
       fields.put("name", name);
       fields.put("validations", validations);
+      fields.put("inputmask", inputmask);
       map.put(code, fields);
       return map;
     }).reduce((ac, acc) -> {
