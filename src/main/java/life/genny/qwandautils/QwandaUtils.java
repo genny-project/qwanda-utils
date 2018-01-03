@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -32,6 +33,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
@@ -53,7 +55,7 @@ public class QwandaUtils {
 	public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLUE = "\u001B[34m";
     public static final String ANSI_RED = "\u001B[31m";
-
+    
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
@@ -288,6 +290,7 @@ public class QwandaUtils {
 
 			for (Ask parentAsk : askMsgs.getItems()) {
 				for (Ask childAsk : parentAsk.getChildAsks()) {
+					System.out.println("parent ask code ::"+parentAsk.getAttributeCode());
 					for (Ask basicChildAsk : childAsk.getChildAsks()) {
 
 						if (basicChildAsk.getMandatory()) {
@@ -300,9 +303,14 @@ public class QwandaUtils {
 							} else {
 								return false;
 							}*/
-							
+							System.out.println("child ask attribute code ::"+basicChildAsk.getAttributeCode());
 							Object attributeVal = MergeUtil.getBaseEntityAttrObjectValue(be,basicChildAsk.getAttributeCode());
+							if(attributeVal!= null){
+								System.out.println("attribu6te value ::"+basicChildAsk.getAttributeCode()+"----"+attributeVal);
+							}
+							
 							if(attributeVal == null) {
+								System.out.println(basicChildAsk.getAttributeCode() + " is null");
 								return false;
 							}
 								
@@ -397,16 +405,39 @@ public class QwandaUtils {
 			JSONArray jsonarr;	
 
 			if(attributeString != null && !attributeString.isEmpty()) {
-				System.out.println(ANSI_BLUE+"Got BEG string" + ANSI_RESET);
+				System.out.println(ANSI_BLUE+"Got BEG string" + ANSI_RESET + attributeString);
 
 				jsonarr = (JSONArray) parser.parse(attributeString);
+				System.out.println("jsonarr ::"+jsonarr);
+				
+				
 				jsonarr.forEach(item -> {
-					JSONObject obj = (JSONObject) item;
+					org.json.simple.JSONObject obj = (org.json.simple.JSONObject) item;
 					String baseEntAttributeCode = (String) obj.get("targetCode");
+					System.out.println("base attribute target code ::"+baseEntAttributeCode);
 					if(obj.get("linkValue") != null){
+						
+						
+						/**
+						 * Creating a template : LinkValue -> BaseEntityForCorrespondingCode
+						 * <Example> DRIVER - PER_USER2, OWNER - PER_USER1 </example>
+						 */
 						entityTemplateContextMap.put(obj.get("linkValue").toString(), MergeUtil.getBaseEntityForAttr(baseEntAttributeCode, token));
+							
+						/*switch (obj.get("linkValue").toString()) {
+						case LOAD_LINKVALUE:
+							entityTemplateContextMap.put("LOAD", MergeUtil.getBaseEntityForAttr(baseEntAttributeCode, token));
+							break;
+
+						case DRIVER_LINKVALUE:
+							entityTemplateContextMap.put("DRIVER", MergeUtil.getBaseEntityForAttr(baseEntAttributeCode, token));
+							break;
+							
+						case OWNER_LINKVALUE:
+							entityTemplateContextMap.put("OWNER", MergeUtil.getBaseEntityForAttr(baseEntAttributeCode, token));
+							break;
+						}*/			
 					}
-					//BaseEntity be = getBaseEntityForAttr("PER_USER2", token); //this is for testing 
 				});
 						
 			}		
@@ -420,6 +451,13 @@ public class QwandaUtils {
 		System.out.println("base entity context map ::"+entityTemplateContextMap);
 		return entityTemplateContextMap;
 
+	}
+	
+	
+	public static String getUniqueId(String baseEntityCode, String questionId, String prefix, String token) {
+		
+		String uniqueID = UUID.randomUUID().toString().replaceAll("-", "");
+		return prefix + "_" + uniqueID;
 	}
 	
 	
