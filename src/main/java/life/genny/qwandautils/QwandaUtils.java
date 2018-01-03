@@ -457,7 +457,27 @@ public class QwandaUtils {
 	public static String getUniqueId(String baseEntityCode, String questionId, String prefix, String token) {
 		
 		String uniqueID = UUID.randomUUID().toString().replaceAll("-", "");
-		return prefix + "_" + uniqueID;
+		
+		BaseEntity be = MergeUtil.getBaseEntityForAttr(baseEntityCode, token);
+		String nameInitials = getInitials(be.getName().split("\\s+"));
+		
+		//working on it
+		//String companyCode = getCompanyCode(baseEntityCode, token);
+		
+		return prefix + "_" + nameInitials + "_" + uniqueID;
+	}
+	
+
+	public static String getInitials(String[] strarr) {
+
+		String initials = "";
+
+		for (String str : strarr) {
+			System.out.println("str :" + str);
+			initials = (str != null && (str.length() > 0)) ? initials.concat(str.substring(0, 2)) : initials.concat("");
+		}
+
+		return initials.toUpperCase();
 	}
 	
 	
