@@ -27,7 +27,16 @@ public class GPSUtils {
 	static String sourceAddress = null;
 	static String destAddress = null;
 	static JSONArray loadAttributes = new JSONArray();
-    //return the QCmdGeofenceMessage of either source or destination address based on the targetAddress
+ 
+	/**
+	 * 
+	 * @param sourceBaseEntityCode
+	 * @param begCode
+	 * @param radius
+	 * @param targetAddress
+	 * @param token
+	 * @return the QCmdGeofenceMessage of either source or destination address based on the targetAddress
+	 */
 	public static QCmdGeofenceMessage getGeoFenceOfAddress(String sourceBaseEntityCode, String begCode, Double radius, String targetAddress,
 			String token) {
 		 String latLong[] = null;
@@ -49,11 +58,11 @@ public class GPSUtils {
 					be.getBaseEntityAttributes().forEach(attribute -> {
 						switch(attribute.getAttributeCode()) {
 						case "PRI_FULL_PICKUP_ADDRESS":
-							sourceAddress = MergeUtil.getBaseEntityAttrValueAsString(be, "PRI_FULL_PICKUP_ADDRESS");
+							sourceAddress = attribute.getObjectAsString();
 							System.out.println("source address ::"+sourceAddress);
 							break;
 						case "PRI_FULL_DROPOFF_ADDRESS":
-							destAddress = MergeUtil.getBaseEntityAttrValueAsString(be, "PRI_FULL_DROPOFF_ADDRESS");
+							destAddress = attribute.getObjectAsString();
 							System.out.println("dest address ::"+destAddress);
 							break;
 						}
@@ -86,7 +95,12 @@ public class GPSUtils {
 		return cmdGeoFence;
 	}
 	
-	//Gives the latitude and longitude of the given address
+	/**
+	 * 
+	 * @param address
+	 * @return the latitude and longitude of the given address
+	 * @throws Exception
+	 */
 	public static String[] getLatLong(String address) throws Exception
 	{
 		int responseCode=0;

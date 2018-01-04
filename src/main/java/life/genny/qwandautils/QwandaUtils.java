@@ -41,6 +41,7 @@ import life.genny.qwanda.Answer;
 import life.genny.qwanda.Ask;
 import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.Link;
+import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
@@ -499,6 +500,59 @@ public class QwandaUtils {
 		
 	}
 	
+	
+	public static String getCompleteAddress(String code, String targetAttributeCode, String token) {
+		
+		BaseEntity be = MergeUtil.getBaseEntityForAttr(code, token);
+		
+		String street = "";
+		String city = "";
+		String state = "";
+		String postcode = "";
+		String country = "";
+		String address = null;
+		String targetCode = null;
+		
+		if(targetAttributeCode.equalsIgnoreCase("PRI_FULL_DROPOFF_ADDRESS")){
+			targetCode = "DROPOFF";
+		}else if(targetAttributeCode.equalsIgnoreCase("PRI_FULL_PICKUP_ADDRESS")) {
+			targetCode = "PICKUP";
+		}
+		
+		for(EntityAttribute ea : be.getBaseEntityAttributes()) {
+			if(ea.getAttributeCode().equals("PRI_"+targetCode+"_STREET_ADDRESS1")){
+				street = ea.getObjectAsString();
+				System.out.println("street ::"+street);
+			}
+			
+			if(ea.getAttributeCode().equals("PRI_"+targetCode+"_CITY")){
+				city = ea.getObjectAsString();
+				System.out.println("city ::"+city);
+			}
+			
+			if(ea.getAttributeCode().equals("PRI_"+targetCode+"_STATE")){
+				state = ea.getObjectAsString();
+				System.out.println("state ::"+state);
+			}
+			
+			if(ea.getAttributeCode().equals("PRI_"+targetCode+"_POSTCODE")){
+				postcode = ea.getObjectAsString();
+				System.out.println("postcode ::"+postcode);
+			}
+			
+			if(ea.getAttributeCode().equals("PRI_"+targetCode+"_COUNTRY")){
+				country = ea.getObjectAsString();
+				System.out.println("country ::"+country);
+			}
+		}
+		
+		if(targetCode != null){
+			address = street + ", " + city + ", " + state + " " + postcode + " " + country;
+		}
+		
+		return address;
+		
+	}
 	
 	
 }
