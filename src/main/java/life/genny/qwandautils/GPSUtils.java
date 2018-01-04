@@ -11,11 +11,12 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import life.genny.qwanda.GPS;
+import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QCmdGeofenceMessage;
+import life.genny.qwanda.message.QDataBaseEntityMessage;
 
 public class GPSUtils {
 	
@@ -33,59 +34,45 @@ public class GPSUtils {
 		 String entryCode = null;
 		 String exitCode = null;
 		 
-		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
-		//QCmdGeofenceMessage cmdGeoFence = new QCmdGeofenceMessage();
 		System.out.println("sourceBaseEntityCode-----> " + sourceBaseEntityCode);
 		System.out.println("BEG code ------> " + begCode);
 		
 		try {
-			JSONArray begChidrens = new JSONArray(QwandaUtils.apiGet(
-					qwandaServiceUrl+"/qwanda/entityentitys/" + begCode + "/linkcodes/LNK_BEG/children", token));
-			System.out.println("JSON childrens from GPSUtils: " + begChidrens.toString());
-
-			for (Object obj : begChidrens) {
-				if (((JSONObject) obj).get("linkValue").equals("LOAD")) {
-					System.out.println(">>>>>> Found!! LOAD <<<<<<<<");
-					loadId = (String) ((JSONObject) obj).get("targetCode");
-					System.out.println("The LOAD ID is : " + loadId);
+			
+			QDataBaseEntityMessage dataBEMessage = QwandaUtils.getDataBEMessage("GRP_APPROVED", "LNK_CORE", token);
+			BaseEntity[] beArray = dataBEMessage.getItems();
+			
+			for(BaseEntity be : beArray) {
+				
+				if(be.getCode().equals(begCode)) {
+					
+					be.getBaseEntityAttributes().forEach(attribute -> {
+						switch(attribute.getAttributeCode()) {
+						case "PRI_FULL_PICKUP_ADDRESS":
+							sourceAddress = MergeUtil.getBaseEntityAttrValueAsString(be, "PRI_FULL_PICKUP_ADDRESS");
+							System.out.println("source address ::"+sourceAddress);
+							break;
+						case "PRI_FULL_DROPOFF_ADDRESS":
+							destAddress = MergeUtil.getBaseEntityAttrValueAsString(be, "PRI_FULL_DROPOFF_ADDRESS");
+							System.out.println("dest address ::"+destAddress);
+							break;
+						}
+					});
+					
 				}
 			}
 			
-			JSONObject beg1 = new JSONObject(QwandaUtils.apiGet(qwandaServiceUrl+"/qwanda/baseentitys/" +begCode+ "/linkcodes/LNK_BEG/attributes", token));
-			System.out.println("JSON BEG from GPSUtils: " + beg1.toString());
-			JSONArray itemsArray = beg1.getJSONArray("items");
-
-			 itemsArray.forEach(items-> { 
-				 if( ((JSONObject) items).get("code").equals(loadId) ) {
-			       System.out.println(">>>>>> Found!! Load  "+loadId+" <<<<<<<<"); 			      
-			       loadAttributes = ((JSONObject) items).getJSONArray("baseEntityAttributes");
-			       System.out.println("JSON Array of Load Attributes: "+loadAttributes.toString()); 
-			     }			 
-			 });
-			 
-			 loadAttributes.forEach(attributes->{
-				 if( ((JSONObject) attributes).get("attributeCode").equals("PRI_FULL_PICKUP_ADDRESS") ) {
-				       System.out.println(">>>>>> Found!! attribute <<<<<<<<"); 				       
-				       sourceAddress = (String) ((JSONObject) attributes).get("valueString");
-				       System.out.println("The Source Address is "+sourceAddress);
-				 }
-				 if( ((JSONObject) attributes).get("attributeCode").equals("PRI_FULL_DROPOFF_ADDRESS") ) {
-				       System.out.println(">>>>>> Found!! attribute <<<<<<<<"); 				       
-				       destAddress = (String) ((JSONObject) attributes).get("valueString");
-				       System.out.println("The Destination Address is "+destAddress);
-				 }
-			 });
-		if (targetAddress.equals("Source")) {
-		      latLong = getLatLong(sourceAddress);
-		      entryCode = begCode+"_ENTER_SOURCE";
-			  exitCode = begCode+"_EXIT_SOURCE";
-			  System.out.println("The Lat Long of Source is "+latLong[0]+ latLong[1]);
-		 }else if(targetAddress.equals("Destination")) {
-			 latLong = getLatLong(destAddress);
-			 entryCode = begCode+"_ENTER_DESTINATION";
-			 exitCode = begCode+"_EXIT_DESTINATION";
-			 System.out.println("The Lat Long of Destination is "+latLong[0]+ latLong[1]);
-		}
+			if(sourceAddress != null && targetAddress.equalsIgnoreCase("Source")) {
+				latLong = getLatLong(sourceAddress);
+			    entryCode = begCode+"_ENTER_SOURCE";
+				exitCode = begCode+"_EXIT_SOURCE";
+				System.out.println("The Lat Long of Source is "+latLong[0]+ latLong[1]);
+			} else if(destAddress != null && targetAddress.equalsIgnoreCase("Destination")) {
+				latLong = getLatLong(destAddress);
+				 entryCode = begCode+"_ENTER_DESTINATION";
+				 exitCode = begCode+"_EXIT_DESTINATION";
+				 System.out.println("The Lat Long of Destination is "+latLong[0]+ latLong[1]);
+			}
 			 
 		} catch (Exception e) {
 			System.out.println("ERROR! " + e.toString());

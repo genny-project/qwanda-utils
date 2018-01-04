@@ -33,7 +33,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
@@ -479,6 +478,27 @@ public class QwandaUtils {
 
 		return initials.toUpperCase();
 	}
+	
+	
+	public static QDataBaseEntityMessage getDataBEMessage(String groupCode, String linkCode, String token) {
+		
+		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
+		QDataBaseEntityMessage dataBEMessage = null;
+		
+		try {
+			String attributeString = QwandaUtils
+					.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + groupCode + "/linkcodes/" +linkCode+ "/attributes", token);
+			dataBEMessage = gson.fromJson(attributeString, QDataBaseEntityMessage.class);
+			
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return dataBEMessage;
+		
+	}
+	
 	
 	
 }
