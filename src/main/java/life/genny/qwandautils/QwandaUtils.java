@@ -463,7 +463,7 @@ public class QwandaUtils {
 		//working on it
 		//String companyCode = getCompanyCode(baseEntityCode, token);
 		
-		return prefix + "_" + nameInitials + "_" + uniqueID;
+		return prefix + "_" + nameInitials  + uniqueID;
 	}
 	
 
