@@ -17,6 +17,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -133,6 +134,26 @@ public class QwandaUtils {
 
 		post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 		final HttpResponse response = client.execute(post);
+		final BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+		String line = "";
+		while ((line = rd.readLine()) != null) {
+			retJson += line;
+			;
+		}
+		return retJson;
+	}
+	
+	public static String apiDelete(final String deleteUrl,  final String entityString, final String authToken) throws IOException {
+		String retJson = "";
+		final HttpClient client = HttpClientBuilder.create().build();
+
+		HttpDeleteWithBody delete = new HttpDeleteWithBody(deleteUrl);
+		delete.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+
+		final StringEntity input = new StringEntity(entityString);
+		input.setContentType("application/json");
+		delete.setEntity(input);
+		final HttpResponse response = client.execute(delete);
 		final BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 		String line = "";
 		while ((line = rd.readLine()) != null) {
@@ -416,27 +437,13 @@ public class QwandaUtils {
 					String baseEntAttributeCode = (String) obj.get("targetCode");
 					System.out.println("base attribute target code ::"+baseEntAttributeCode);
 					if(obj.get("linkValue") != null){
-						
-						
+							
 						/**
-						 * Creating a template : LinkValue -> BaseEntityForCorrespondingCode
+						 * Creating a template : LinkValue -> BaseEntityForCorrespondingLinkCode
 						 * <Example> DRIVER - PER_USER2, OWNER - PER_USER1 </example>
 						 */
 						entityTemplateContextMap.put(obj.get("linkValue").toString(), MergeUtil.getBaseEntityForAttr(baseEntAttributeCode, token));
 							
-						/*switch (obj.get("linkValue").toString()) {
-						case LOAD_LINKVALUE:
-							entityTemplateContextMap.put("LOAD", MergeUtil.getBaseEntityForAttr(baseEntAttributeCode, token));
-							break;
-
-						case DRIVER_LINKVALUE:
-							entityTemplateContextMap.put("DRIVER", MergeUtil.getBaseEntityForAttr(baseEntAttributeCode, token));
-							break;
-							
-						case OWNER_LINKVALUE:
-							entityTemplateContextMap.put("OWNER", MergeUtil.getBaseEntityForAttr(baseEntAttributeCode, token));
-							break;
-						}*/			
 					}
 				});
 						
