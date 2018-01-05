@@ -554,5 +554,24 @@ public class QwandaUtils {
 		
 	}
 	
+	//creating new BaseEntity by only baseentityCode
+    public static BaseEntity createBaseEntityByCode(String entityCode, String name, String qwandaUrl, String token) {
+		BaseEntity beg = new BaseEntity(entityCode, name);		
+		Gson gson = new Gson();
+		GsonBuilder gsonBuilder = new GsonBuilder();
+		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
+		gson = gsonBuilder.create();
+        
+        String jsonBE = gson.toJson(beg);
+        try {
+        		// save BE
+            QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/baseentitys", jsonBE, token);                       
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+		
+		return beg;
+		
+	}
 	
 }
