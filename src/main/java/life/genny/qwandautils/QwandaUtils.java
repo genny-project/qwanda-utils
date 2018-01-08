@@ -589,17 +589,17 @@ public class QwandaUtils {
      * @return if links exists for childLinkCode and parentCode
      * <p> For parentCode : PER_USER, parentLinkCode : LNK_CODE, childLinkCode : OFFER_CODE, this API checks if there is a link LNK_CODE between PER_USER and OFFER_CODE.</p>
      */
-    public static Boolean checkIfLinkExistsForTarget(String parentCode, String parentLinkCode, String childLinkCode, String token) {
+    public static Boolean checkIfLinkExistsForTarget(String parentCode, String linkCode, String childCode, String token) {
     	
     	Boolean isLinkExists = false;
-		QDataBaseEntityMessage dataBEMessage = getDataBEMessage(parentCode, parentLinkCode, token);
+		QDataBaseEntityMessage dataBEMessage = getDataBEMessage(parentCode, linkCode, token);
 		
 		if(dataBEMessage != null) {
 			BaseEntity[] beArr = dataBEMessage.getItems();
 			
 			if(beArr.length > 0) {
 				for(BaseEntity be : beArr) {
-					if(be.getCode().equals(childLinkCode)) {
+					if(be.getCode().equals(childCode)) {
 						isLinkExists = true;
 						return isLinkExists;
 					}	
