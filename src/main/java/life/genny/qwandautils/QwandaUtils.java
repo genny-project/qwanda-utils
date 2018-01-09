@@ -295,18 +295,28 @@ public class QwandaUtils {
 	}
 	
 	
-	public static Boolean isProfileCompleted(String baseEntityCode, String questionCode, final String userToken) {
+	 /**
+     * 
+     * @param sourceBaseEntityCode
+     * @param targetBaseEntityCode
+     * @param questionCode
+     * @param token
+     * @return if mandatory fields of the form has been completed
+     * <p> For sourceBaseEntityCode : PER_USERXX, targetBaseEntityCode : BEG_XXX/LOD_XXXX, questionCode : Question grpCode, method checks if all the 
+     * mandatory fields in the Question Group has been entered</p>
+     */	
+	public static Boolean isMandatoryFieldsEntered(String sourceBaseEntityCode, String targetBaseEntityCode, String questionCode, final String userToken) {
 
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 		//String qwandaServiceUrl = "http://localhost:8280";
 		try {
 
-			String attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + baseEntityCode
-					+ "/asks2/" + questionCode + "/" + baseEntityCode, userToken);
+			String attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
+					+ "/asks2/" + questionCode + "/" + targetBaseEntityCode, userToken);
 
 			System.out.println("Attribute String="+attributeString);
 			QDataAskMessage askMsgs = gson.fromJson(attributeString, QDataAskMessage.class);
-			BaseEntity be = MergeUtil.getBaseEntityForAttr(baseEntityCode, userToken);
+			BaseEntity be = MergeUtil.getBaseEntityForAttr(targetBaseEntityCode, userToken);
 
 			for (Ask parentAsk : askMsgs.getItems()) {
 				for (Ask childAsk : parentAsk.getChildAsks()) {
