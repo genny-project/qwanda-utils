@@ -43,6 +43,7 @@ import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.Link;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
+import life.genny.qwanda.entity.EntityEntity;
 import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QDataAskMessage;
@@ -500,6 +501,7 @@ public class QwandaUtils {
 	public static QDataBaseEntityMessage getDataBEMessage(String groupCode, String linkCode, String token) {
 		
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
+		//String qwandaServiceUrl = "http://localhost:8280";
 		QDataBaseEntityMessage dataBEMessage = null;
 		
 		try {
@@ -622,6 +624,35 @@ public class QwandaUtils {
 		} 
 		
 		return isLinkExists;
+    }
+    
+    public static String getSourceForTarget(String groupCode, String attributeCode, String targetCode, String linkValue, String token) {
+    	
+    	QDataBaseEntityMessage dataBEMessage = getDataBEMessage(groupCode, "LNK_CORE", token);
+    	String sourceCode = null;
+    	
+    	if(dataBEMessage != null) {
+    		
+    		for(BaseEntity be : dataBEMessage.getItems()) {
+    			
+    			for(EntityEntity entityEntity : be.getLinks()) {
+    				Link link = entityEntity.getLink();
+    				if(link != null && link.getAttributeCode() != null && link.getTargetCode() != null && link.getLinkValue() != null){
+    					String linkAttributeCode = link.getAttributeCode();
+    					String linkTargetCode = link.getTargetCode();
+    					String linkLinkValue = link.getLinkValue();
+    					System.out.println(linkAttributeCode + ", " + linkTargetCode + ", " + linkLinkValue);
+    					if (attributeCode.equals(linkAttributeCode) && targetCode.equals(linkTargetCode) && linkValue.equals(linkLinkValue)){
+    						sourceCode = link.getSourceCode();
+    						return sourceCode;
+    					}
+    				}
+    			}
+    		}
+    		
+    	}
+    	
+    	return sourceCode;
     }
 	
 }
