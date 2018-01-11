@@ -1,14 +1,26 @@
 package life.genny.qwandautils;
 
 
-import static java.lang.System.out;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.Logger;
+
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -17,21 +29,7 @@ import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.gson.Gson;
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.Logger;
-import javax.persistence.NoResultException;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
 import life.genny.qwanda.Ask;
 import life.genny.qwanda.Question;
 import life.genny.qwanda.QuestionQuestion;
@@ -41,9 +39,7 @@ import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.datatype.DataType;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.EntityEntity;
-import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.validation.Validation;
-import life.genny.qwanda.validation.ValidationList;
 
 public class GennySheets {
   /**
