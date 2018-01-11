@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -417,6 +418,34 @@ public class QwandaUtils {
 	
 	/**
 	 * 
+	 * @param groupCode
+	 * @param token
+	 * @return all the children links for a given groupCode
+	 */
+	public static List getLinkList(String groupCode, String token) {
+		
+		//String qwandaServiceUrl = "http://localhost:8280";
+		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
+		List linkList = null;
+		
+		try {
+			String attributeString = QwandaUtils
+					.apiGet(qwandaServiceUrl + "/qwanda/entityentitys/" + groupCode + "/linkcodes/LNK_BEG/children", token);
+			if(attributeString != null) {
+				linkList = gson.fromJson(attributeString, List.class);
+			}
+			
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+				
+		return linkList;
+		
+	}	
+	
+	/**
+	 * 
 	 * @param attributeCode
 	 * @param token
 	 * @return BaseEntity with children (alias code, code of the attributes for the BaseEntity) for the BaseEntity code
@@ -424,45 +453,29 @@ public class QwandaUtils {
 	@SuppressWarnings("unchecked")
 	public static Map<String, BaseEntity> getBaseEntWithChildrenForAttributeCode(String attributeCode, String token) {
 
-		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
+		
 		Map<String, BaseEntity> entityTemplateContextMap = new HashMap<String, BaseEntity>();
 
+		List linkList = getLinkList(attributeCode , token);
 
-		try {
-			String attributeString = QwandaUtils
-					.apiGet(qwandaServiceUrl + "/qwanda/entityentitys/" + attributeCode + "/linkcodes/LNK_BEG/children", token);
-
-			JSONParser parser = new JSONParser();
-			JSONArray jsonarr;	
-
-			if(attributeString != null && !attributeString.isEmpty()) {
-				System.out.println(ANSI_BLUE+"Got BEG string" + ANSI_RESET + attributeString);
-
-				jsonarr = (JSONArray) parser.parse(attributeString);
-				System.out.println("jsonarr ::"+jsonarr);
-				
-				
-				jsonarr.forEach(item -> {
-					org.json.simple.JSONObject obj = (org.json.simple.JSONObject) item;
-					String baseEntAttributeCode = (String) obj.get("targetCode");
-					System.out.println("base attribute target code ::"+baseEntAttributeCode);
-					if(obj.get("linkValue") != null){
-							
-						/**
-						 * Creating a template : LinkValue -> BaseEntityForCorrespondingLinkCode
-						 * <Example> DRIVER - PER_USER2, OWNER - PER_USER1 </example>
-						 */
-						entityTemplateContextMap.put(obj.get("linkValue").toString(), MergeUtil.getBaseEntityForAttr(baseEntAttributeCode, token));
-							
-					}
-				});
+		if(linkList != null) {
+			System.out.println(ANSI_BLUE+"Got BEG string" + ANSI_RESET + linkList.toString());			
+			
+			linkList.forEach(item -> {
+				Link link = gson.fromJson(item.toString(), Link.class);
+				String baseEntAttributeCode = link.getTargetCode();
+				System.out.println("base attribute target code ::"+baseEntAttributeCode);
+				if(link.getLinkValue() != null){
 						
-			}		
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ParseException e) {
-			e.printStackTrace();
+					/**
+					 * Creating a template : LinkValue -> BaseEntityForCorrespondingLinkCode
+					 * <Example> DRIVER - PER_USER2, OWNER - PER_USER1 </example>
+					 */
+					entityTemplateContextMap.put(link.getLinkValue(), MergeUtil.getBaseEntityForAttr(baseEntAttributeCode, token));
+						
+				}
+			});
+					
 		}
 		
 		System.out.println("base entity context map ::"+entityTemplateContextMap);
@@ -633,10 +646,18 @@ public class QwandaUtils {
     	
     	if(dataBEMessage != null) {
     		
+    		
     		for(BaseEntity be : dataBEMessage.getItems()) {
     			
+    			//be.getLinks().stream().filter(entityEntity -> (entityEntity.getLink() != null && entityEntity.getLink().getAttributeCode() != null && entityEntity.getLink().getTargetCode() != null && entityEntity.getLink().getLinkValue() != null)).forEach(System.out.prin);
+    			
     			for(EntityEntity entityEntity : be.getLinks()) {
+    				
+    				
+    				
     				Link link = entityEntity.getLink();
+    				
+    				
     				if(link != null && link.getAttributeCode() != null && link.getTargetCode() != null && link.getLinkValue() != null){
     					String linkAttributeCode = link.getAttributeCode();
     					String linkTargetCode = link.getTargetCode();
@@ -653,6 +674,37 @@ public class QwandaUtils {
     	}
     	
     	return sourceCode;
+    }
+    
+    
+    /**
+     * 
+     * @param groupCode
+     * @param linkCode (which is the attributeCode in the Link model)
+     * @param targetCode
+     * @param linkValue
+     * @param token
+     * @return if the link exists between parent groupCode and a child for a given linkCode, linkValue
+     */
+    @SuppressWarnings("unchecked")
+	public static Boolean checkIfLinkExists(String groupCode, String linkCode, String targetCode, String linkValue, String token) {
+    	
+    	//gets all the children of a groupcode with their linkCode,linkValue and code as a list
+    	List linkList = getLinkList(groupCode, token);
+    	Boolean isLinkExists = false;
+    	
+    	//checks if a group has the child with the specified linkCode and linkValue
+    	if(linkList != null) {
+    		isLinkExists = linkList.stream().anyMatch(item -> {
+        		Boolean isExists = false;
+        		Link link = gson.fromJson(item.toString(), Link.class);
+        		if(link.getAttributeCode().equals(linkCode) && link.getTargetCode().equals(targetCode) && link.getLinkValue().equals(linkValue))
+        			isExists = true;
+    			return isExists;
+        	});
+    	}   	
+    	
+    	return isLinkExists;
     }
 	
 }
