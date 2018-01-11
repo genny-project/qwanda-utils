@@ -1,6 +1,21 @@
 package life.genny.qwandautils;
 
 import static java.lang.System.out;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.io.IOUtils;
+
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -15,19 +30,7 @@ import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.gson.Gson;
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.io.IOUtils;
-import javax.persistence.NoResultException;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
 import life.genny.qwanda.Ask;
 import life.genny.qwanda.Question;
 import life.genny.qwanda.attribute.Attribute;
@@ -423,9 +426,7 @@ public class GennySheets2 {
             getObjectByValue(findAttributeLinkByCode.get(linkCode));
         final Double weight = Double.valueOf(weightStr);
         sbe.addTarget(tbe, linkAttribute2, weight);
-      } catch (final NoResultException e) {
-        e.printStackTrace();
-      } catch (final IllegalAccessException e) {
+       } catch (final IllegalAccessException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       } catch (final InvocationTargetException e) {
