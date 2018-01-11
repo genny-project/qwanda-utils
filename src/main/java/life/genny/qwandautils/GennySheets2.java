@@ -13,8 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.NoResultException;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.IOUtils;
 
@@ -428,9 +426,7 @@ public class GennySheets2 {
             getObjectByValue(findAttributeLinkByCode.get(linkCode));
         final Double weight = Double.valueOf(weightStr);
         sbe.addTarget(tbe, linkAttribute2, weight);
-      } catch (final NoResultException e) {
-        e.printStackTrace();
-      } catch (final IllegalAccessException e) {
+       } catch (final IllegalAccessException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       } catch (final InvocationTargetException e) {
