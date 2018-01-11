@@ -79,7 +79,7 @@
 			<id>Sonatype repository</id>
 			<url>https://oss.sonatype.org/content/repositories/releases/</url>
 		</repository>
-		<repository> <id>life.genny</id> <url>https://nexus.outcome-hub.com/nexus/content/repositories/life.genny</url> 
+		<repository> <id>life.genny</id> <url>http://nexus.outcome-hub.com/nexus/content/repositories/life.genny</url> 
 			</repository> 
 	</repositories>
 
