@@ -313,7 +313,7 @@ public class QwandaUtils {
 		try {
 
 			String attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
-					+ "/asks2/" + questionCode + "/" + targetBaseEntityCode, userToken);
+					+ "/asks3/" + questionCode + "/" + targetBaseEntityCode, userToken);
 
 			System.out.println("Attribute String="+attributeString);
 			QDataAskMessage askMsgs = gson.fromJson(attributeString, QDataAskMessage.class);
