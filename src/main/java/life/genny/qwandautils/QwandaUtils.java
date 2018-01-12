@@ -18,10 +18,12 @@ import java.util.UUID;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
@@ -94,8 +96,15 @@ public class QwandaUtils {
 			throws ClientProtocolException, IOException {
 		String retJson = "";
 		log.debug("GET:" + getUrl + ":");
-		final HttpClient client = HttpClientBuilder.create().build();
-		final HttpGet request = new HttpGet(getUrl);
+		int timeout = 10;
+		RequestConfig config = RequestConfig.custom()
+		  .setConnectTimeout(timeout * 1000)
+		  .setConnectionRequestTimeout(timeout * 1000)
+		  .setSocketTimeout(timeout * 1000).build();
+		CloseableHttpClient client = 
+		  HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+		HttpGet request = new HttpGet(getUrl); // GET Request
+		
 		if (authToken != null) {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 		}
@@ -120,8 +129,13 @@ public class QwandaUtils {
 	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken)
 			throws IOException {
 		String retJson = "";
-		//final HttpClient client = new DefaultHttpClient();
-		final HttpClient client = HttpClientBuilder.create().build();
+		int timeout = 10;
+		RequestConfig config = RequestConfig.custom()
+				  .setConnectTimeout(timeout * 1000)
+				  .setConnectionRequestTimeout(timeout * 1000)
+				  .setSocketTimeout(timeout * 1000).build();
+				CloseableHttpClient client = 
+				  HttpClientBuilder.create().setDefaultRequestConfig(config).build();
 
 		final HttpPost post = new HttpPost(postUrl);
 		post.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
@@ -142,8 +156,15 @@ public class QwandaUtils {
 	public static String apiPost(final String postUrl, final ArrayList<BasicNameValuePair> nameValuePairs,
 			final String authToken) throws IOException {
 		String retJson = "";
-		final HttpClient client = HttpClientBuilder.create().build();
-		final HttpPost post = new HttpPost(postUrl);
+		int timeout = 10;
+		RequestConfig config = RequestConfig.custom()
+				  .setConnectTimeout(timeout * 1000)
+				  .setConnectionRequestTimeout(timeout * 1000)
+				  .setSocketTimeout(timeout * 1000).build();
+				CloseableHttpClient client = 
+				  HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+
+				final HttpPost post = new HttpPost(postUrl);
 		post.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 
 		post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
@@ -159,7 +180,13 @@ public class QwandaUtils {
 	
 	public static String apiDelete(final String deleteUrl,  final String entityString, final String authToken) throws IOException {
 		String retJson = "";
-		final HttpClient client = HttpClientBuilder.create().build();
+		int timeout = 10;
+		RequestConfig config = RequestConfig.custom()
+				  .setConnectTimeout(timeout * 1000)
+				  .setConnectionRequestTimeout(timeout * 1000)
+				  .setSocketTimeout(timeout * 1000).build();
+				CloseableHttpClient client = 
+				  HttpClientBuilder.create().setDefaultRequestConfig(config).build();
 
 		HttpDeleteWithBody delete = new HttpDeleteWithBody(deleteUrl);
 		delete.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
