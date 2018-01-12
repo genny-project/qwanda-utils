@@ -679,42 +679,66 @@ public class QwandaUtils {
 		return isLinkExists;
     }
     
-    public static String getSourceForTarget(String groupCode, String attributeCode, String targetCode, String linkValue, String token) {
-    	
-    	QDataBaseEntityMessage dataBEMessage = getDataBEMessage(groupCode, "LNK_CORE", token);
-    	String sourceCode = null;
-    	
-    	if(dataBEMessage != null) {
-    		
-    		
-    		for(BaseEntity be : dataBEMessage.getItems()) {
-    			
-    			//be.getLinks().stream().filter(entityEntity -> (entityEntity.getLink() != null && entityEntity.getLink().getAttributeCode() != null && entityEntity.getLink().getTargetCode() != null && entityEntity.getLink().getLinkValue() != null)).forEach(System.out.prin);
-    			
-    			for(EntityEntity entityEntity : be.getLinks()) {
-    				
-    				
-    				
-    				Link link = entityEntity.getLink();
-    				
-    				
-    				if(link != null && link.getAttributeCode() != null && link.getTargetCode() != null && link.getLinkValue() != null){
-    					String linkAttributeCode = link.getAttributeCode();
-    					String linkTargetCode = link.getTargetCode();
-    					String linkLinkValue = link.getLinkValue();
-    					System.out.println(linkAttributeCode + ", " + linkTargetCode + ", " + linkLinkValue);
-    					if (attributeCode.equals(linkAttributeCode) && targetCode.equals(linkTargetCode) && linkValue.equals(linkLinkValue)){
-    						sourceCode = link.getSourceCode();
-    						return sourceCode;
-    					}
-    				}
-    			}
-    		}
-    		
-    	}
-    	
-    	return sourceCode;
-    }
+    /**
+     * 
+     * @param groupCode
+     * @param attributeCode
+     * @param sourceOrTarget (The input code could be either the sourceCode or the targetCode of a groupLink)
+     * @param linkValue
+     * @param isSource (Determines if the input rule requires a sourceCode/targetCode)
+     * @param token
+     * @return sourceCode/targetCode if the link values match the input given
+     */
+	public static String getSourceOrTargetForGroupLink(String groupCode, String attributeCode, String sourceOrTarget,
+			String linkValue, Boolean isSource, String token) {
+
+		QDataBaseEntityMessage dataBEMessage = getDataBEMessage(groupCode, "LNK_CORE", token);
+		String code = null;
+
+		if (dataBEMessage != null) {
+
+			for (BaseEntity be : dataBEMessage.getItems()) {
+
+				for (EntityEntity entityEntity : be.getLinks()) {
+
+					Link link = entityEntity.getLink();
+
+					// When the rule want the sourceCode
+					if (isSource) {
+						if (link != null && link.getAttributeCode() != null && link.getTargetCode() != null
+								&& link.getLinkValue() != null) {
+							String linkAttributeCode = link.getAttributeCode();
+							String linkTargetCode = link.getTargetCode();
+							String linkLinkValue = link.getLinkValue();
+							
+							if (attributeCode.equals(linkAttributeCode) && sourceOrTarget.equals(linkTargetCode)
+									&& linkValue.equals(linkLinkValue)) {
+								code = link.getSourceCode();
+								return code;
+							}
+						}
+					} else { // When the rule wants targetCode
+						if (link != null && link.getAttributeCode() != null && link.getTargetCode() != null
+								&& link.getLinkValue() != null) {
+							String linkAttributeCode = link.getAttributeCode();
+							String linkSourceCode = link.getSourceCode();
+							String linkLinkValue = link.getLinkValue();
+							
+							if (attributeCode.equals(linkAttributeCode) && sourceOrTarget.equals(linkSourceCode)
+									&& linkValue.equals(linkLinkValue)) {
+								code = link.getTargetCode();
+								return code;
+							}
+						}
+					}
+
+				}
+			}
+
+		}
+
+		return code;
+	}
     
     
     /**
