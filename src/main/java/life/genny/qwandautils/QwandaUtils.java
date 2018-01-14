@@ -771,4 +771,19 @@ public class QwandaUtils {
     	return isLinkExists;
     }
 	
+    public static String getSystemEnvJson(final String prefix)
+    {
+    		String ret = "{";
+    		Map<String, String> env = System.getenv();
+    		for (String envName : env.keySet()) {
+    			if (envName.startsWith(prefix)) {
+    				ret += "\""+envName.substring(prefix.length()) + "\":\"" +  env.get(envName)+"\",";
+    			}
+    		}
+    		
+    		ret += "\"prefix\":"+prefix+"\"}";
+    		
+    		return ret;
+    }
+    
 }
