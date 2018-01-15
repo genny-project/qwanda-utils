@@ -22,6 +22,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -195,6 +196,28 @@ public class QwandaUtils {
 		input.setContentType("application/json");
 		delete.setEntity(input);
 		final HttpResponse response = client.execute(delete);
+		final BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+		String line = "";
+		while ((line = rd.readLine()) != null) {
+			retJson += line;
+			;
+		}
+		return retJson;
+	}
+	
+	public static String apiPutEntity(final String postUrl, final String entityString, final String authToken)
+			throws IOException {
+		String retJson = "";
+		//final HttpClient client = new DefaultHttpClient();
+		final HttpClient client = HttpClientBuilder.create().build();
+
+		final HttpPut put = new HttpPut(postUrl);
+		put.addHeader("Authorization", "Bearer " + authToken); 
+
+		final StringEntity input = new StringEntity(entityString);
+		input.setContentType("application/json");
+		put.setEntity(input);
+		final HttpResponse response = client.execute(put);
 		final BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 		String line = "";
 		while ((line = rd.readLine()) != null) {
@@ -562,10 +585,9 @@ public class QwandaUtils {
 					.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + groupCode + "/linkcodes/" +linkCode+ "/attributes", token);
 			dataBEMessage = gson.fromJson(attributeString, QDataBaseEntityMessage.class);
 			
-			
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}		
 		
 		return dataBEMessage;
 		
@@ -786,4 +808,5 @@ public class QwandaUtils {
     		return ret;
     }
     
+       
 }
