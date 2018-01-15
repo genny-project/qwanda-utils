@@ -9,7 +9,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -90,7 +94,7 @@ public class PaymentUtils {
 		String retJson = "";
 		//final HttpClient client = new DefaultHttpClient();
 		final HttpClient client = HttpClientBuilder.create().build();
-
+		System.out.println("http request payments ::"+postUrl);
 		final HttpPost post = new HttpPost(postUrl);
 		post.addHeader("Authorization", authToken); 
 
@@ -194,6 +198,7 @@ public class PaymentUtils {
 		return false;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static void createAssemblyUser(String assemblyUserId, String authToken, String token) { 
 		
 		Gson gson = new Gson();
@@ -201,42 +206,77 @@ public class PaymentUtils {
 		String userCode = getUserCode(token);
 		BaseEntity be = MergeUtil.getBaseEntityForAttr(userCode, token);
 
-		JSONObject userobj = new JSONObject();
-		JSONObject personalInfoObj = new JSONObject();
-		JSONObject contactInfoObj = new JSONObject();
-		JSONObject locationObj = new JSONObject();
-
-		personalInfoObj.put("firstName", MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_FIRSTNAME"));
-		personalInfoObj.put("lastName", MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_LASTNAME"));
+		org.json.simple.JSONObject userobj = new org.json.simple.JSONObject();
+		org.json.simple.JSONObject personalInfoObj = new org.json.simple.JSONObject();
+		org.json.simple.JSONObject contactInfoObj = new org.json.simple.JSONObject();
+		org.json.simple.JSONObject locationObj = new org.json.simple.JSONObject();
 		
-		personalInfoObj.put("dob", MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_DOB"));
-		
-		String dobString = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_DOB").toString();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		DateTimeFormatter assemblyDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		LocalDate date = LocalDate.parse(dobString, formatter);
-		String formattedDOBString = assemblyDateFormatter.format(date);
-		
-		personalInfoObj.put("dob", formattedDOBString);
+		if(be != null) {
+			
+			String firstName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_FIRSTNAME").toString();
+			String lastName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_LASTNAME").toString();
+			String dobString = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_DOB").toString();
+			String email = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_EMAIL").toString();
+			String phoneNumber = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_MOBILE").toString();
+			String addressLine1 = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_ADDRESS1").toString();
+			String city = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_CITY").toString();
+			String state = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_STATE").toString();
+			String country = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_COUNTRY").toString();
+			String postCode = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_POSTCODE").toString();
+			
+			if(firstName != null) {
+				personalInfoObj.put("firstName", firstName);
+			}
+			
+			if(lastName != null) {
+				personalInfoObj.put("lastName", lastName);
+			}
+			
+			if(dobString != null) {
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+				DateTimeFormatter assemblyDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+				LocalDate date = LocalDate.parse(dobString, formatter);
+				String formattedDOBString = assemblyDateFormatter.format(date);			
+				personalInfoObj.put("dob", formattedDOBString);
+			}
+			
+			if(email != null) {
+				contactInfoObj.put("email", email);
+			}
+			
+			if(phoneNumber != null) {
+				contactInfoObj.put("mobile", phoneNumber);
+			}
+			
+			if(addressLine1 != null) {
+				locationObj.put("addressLine1", addressLine1);
+			}
+			
+			if(city != null) {
+				locationObj.put("city", city);
+			}
+			
+			if(state != null) {
+				locationObj.put("state", state);
+			}
+			
+			if(country != null) {
+				locationObj.put("country", country);
+			}
+			
+			if(postCode != null) {
+				locationObj.put("postcode", postCode);
+			}
+		}
+	
 		//personalInfoObj.put("governmentNumber", "123456789");
-
-		contactInfoObj.put("email", MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_EMAIL"));
-		contactInfoObj.put("mobile", MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_MOBILE"));
-
-		locationObj.put("addressLine1", MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_ADDRESS1"));
-		//locationObj.put("addressLine2", MergeUtil.getBaseEntityAttrObjectValue(be, "PER_"));
-		locationObj.put("city", MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_CITY"));
-		locationObj.put("state", MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_STATE"));
-		locationObj.put("country", MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_COUNTRY"));
-		locationObj.put("postcode", MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_POSTCODE"));
-
 		userobj.put("personalInfo", personalInfoObj);
 		userobj.put("contactInfo", contactInfoObj);
 		userobj.put("location", locationObj);
 		userobj.put("id", assemblyUserId);
 		
+		System.out.println("user obj ::"+userobj);
 		PaymentEndpoint.createAssemblyUser(gson.toJson(userobj), authToken);
-
 	}
 
 }
