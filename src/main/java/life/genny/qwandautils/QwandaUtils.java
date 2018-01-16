@@ -61,6 +61,12 @@ public class QwandaUtils {
 	public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLUE = "\u001B[34m";
     public static final String ANSI_RED = "\u001B[31m";
+	public static final String ANSI_GREEN = "\u001B[32m";
+	public static final String ANSI_YELLOW = "\u001B[33m";
+	public static final String ANSI_PURPLE = "\u001B[35m";
+	public static final String ANSI_CYAN = "\u001B[36m";
+	public static final String ANSI_WHITE = "\u001B[37m";
+	public static final String ANSI_BOLD = "\u001b[1m";
     
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
@@ -808,5 +814,15 @@ public class QwandaUtils {
     		return ret;
     }
     
-       
+    public static String executeRuleLogger(String module) {
+    	String initialLogger = ANSI_YELLOW + "================================================================================================================================================" + ANSI_RESET;
+        String moduleLogger = "\n" + ANSI_GREEN + "RULE EXECUTED      ::  " +module + ANSI_RESET;
+        return initialLogger + moduleLogger;
+    }
+    
+    public static String terminateRuleLogger(String module) {
+    	String initialLogger = "\n \u001B[31m RULE TERMINATED    ::   " + module + " \u001B[0m ";
+        String moduleLogger = "\n \u001B[33m ------------------------------------------------------------------------------------------------------------------------------------------------  \u001B[0m";
+        return initialLogger + moduleLogger;
+    }   
 }
