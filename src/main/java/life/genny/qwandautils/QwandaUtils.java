@@ -29,9 +29,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
-import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -824,5 +821,32 @@ public class QwandaUtils {
     	String initialLogger = "\n \u001B[31m RULE TERMINATED    ::   " + module + " \u001B[0m ";
         String moduleLogger = "\n \u001B[33m ------------------------------------------------------------------------------------------------------------------------------------------------  \u001B[0m";
         return initialLogger + moduleLogger;
-    }   
+    }  
+    
+    /**
+     * 
+     * @param groupCode
+     * @param targetCode
+     * @param linkCode
+     * @param linkValue
+     * @param weight
+     * @param token
+     * @return response string after creating a link in the DataBase
+     */
+	public static String createLink(String groupCode, String targetCode, String linkCode, String linkValue,
+			Double weight, String token) {
+
+		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
+		Link link = new Link(groupCode, targetCode, linkCode, linkValue);
+		link.setWeight(weight);
+		String outputString = null;
+		try {
+			outputString = QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/entityentitys", gson.toJson(link),
+					token);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return outputString;
+	}
 }
