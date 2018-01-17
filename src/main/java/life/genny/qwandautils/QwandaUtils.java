@@ -833,20 +833,21 @@ public class QwandaUtils {
      * @param token
      * @return response string after creating a link in the DataBase
      */
-	public static String createLink(String groupCode, String targetCode, String linkCode, String linkValue,
+	public static Link createLink(String groupCode, String targetCode, String linkCode, String linkValue,
 			Double weight, String token) {
+		
+		log.info("CREATING LINK between "+ groupCode + "and" + targetCode + "with LINK VALUE = " + linkValue);
 
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 		Link link = new Link(groupCode, targetCode, linkCode, linkValue);
 		link.setWeight(weight);
-		String outputString = null;
+		
 		try {
-			outputString = QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/entityentitys", gson.toJson(link),
-					token);
+			postLink(qwandaServiceUrl, token, link);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		return outputString;
+		return link;
 	}
 }
