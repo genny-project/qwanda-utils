@@ -37,7 +37,7 @@ public class RulesUtils {
 	
 	public static String executeRuleLogger(final String status, final String module, final String topColour, final String bottomColour) {
     	String initialLogger = (devMode ? "":  topColour) + "================================================================================================================================================" + ANSI_RESET;
-        String moduleLogger = "\n" + (devMode ? "":  bottomColour) +  status  +  " ::  " +module +  ANSI_RESET;
+        String moduleLogger = "\n" + (devMode ? "":  bottomColour) +  status  +  " ::  " +module +  (devMode ? "":ANSI_RESET);
         return initialLogger + moduleLogger;
     }
     
@@ -49,6 +49,21 @@ public class RulesUtils {
     	return executeRuleLogger("EXECUTED", module, ANSI_RED, ANSI_YELLOW);
     }
     
+    public static void header(final String module) {
+    		if (devMode) { 
+    			System.out.println(headerRuleLogger(module)); 
+    		} else {
+    			log.info(headerRuleLogger(module));
+    		}
+    }
+    
+    public static void footer(final String module) {
+		if (devMode) { 
+			System.out.println(terminateRuleLogger(module)); 
+		} else {
+			log.info(terminateRuleLogger(module));
+		}
+}
     
     public static JsonObject createDataAnswerObj(Answer answer, String token) {
     	
