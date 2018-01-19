@@ -18,79 +18,83 @@ import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
 
 public class RulesUtils {
-	
+
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
-	
 	public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_BLUE = "\u001B[34m";
-    public static final String ANSI_RED = "\u001B[31m";
+	public static final String ANSI_BLUE = "\u001B[34m";
+	public static final String ANSI_RED = "\u001B[31m";
 	public static final String ANSI_GREEN = "\u001B[32m";
 	public static final String ANSI_YELLOW = "\u001B[33m";
 	public static final String ANSI_PURPLE = "\u001B[35m";
 	public static final String ANSI_CYAN = "\u001B[36m";
 	public static final String ANSI_WHITE = "\u001B[37m";
 	public static final String ANSI_BOLD = "\u001b[1m";
-	
+
 	public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 	public static final Boolean devMode = System.getenv("GENNY_DEV") == null ? false : true;
-	
-	public static final Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer()).create();
-	
-	
-	public static String executeRuleLogger(final String status, final String module, final String topColour, final String bottomColour) {
-    	String initialLogger = (devMode ? "":  topColour) + "================================================================================================================================================" + ANSI_RESET;
-        String moduleLogger = "\n" + (devMode ? "":  bottomColour) +  status  +  " ::  " +module +  ( devMode ? "":ANSI_RESET);
-        return initialLogger + moduleLogger;
-    }
-    
-    public static String terminateRuleLogger(String module) {
-    	return executeRuleLogger("TERMINATED", module, ANSI_YELLOW, ANSI_GREEN);
-    }
-    
-    public static String headerRuleLogger(String module) {
-    	return executeRuleLogger("EXECUTED", module, ANSI_RED, ANSI_YELLOW);
-    }
-    
-    public static void header(final String module) {
-    		if (devMode) { 
-    			System.out.println(headerRuleLogger(module)); 
-    		} else {
-    			log.info(headerRuleLogger(module));
-    		}
-    }
-    
-    public static void footer(final String module) {
-		if (devMode) { 
-			System.out.println(terminateRuleLogger(module)); 
+
+	public static final Gson gson = new GsonBuilder()
+			.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer()).create();
+
+	public static String executeRuleLogger(final String status, final String module, final String topColour,
+			final String bottomColour) {
+		String initialLogger = (devMode ? "" : topColour)
+				+ "================================================================================================================================================"
+				+ ANSI_RESET;
+		String moduleLogger = "\n" + (devMode ? "" : bottomColour) + status + " ::  " + module
+				+ (devMode ? "" : ANSI_RESET);
+		return initialLogger + moduleLogger;
+	}
+
+	public static String terminateRuleLogger(String module) {
+		return executeRuleLogger("TERMINATED", module, ANSI_YELLOW, ANSI_GREEN);
+	}
+
+	public static String headerRuleLogger(String module) {
+		return executeRuleLogger("EXECUTED", module, ANSI_RED, ANSI_YELLOW);
+	}
+
+	public static void header(final String module) {
+		println(headerRuleLogger(module));
+	}
+
+	public static void footer(final String module) {
+		println(terminateRuleLogger(module));
+	}
+
+	public static void println(final Object obj) {
+		if (devMode) {
+			System.out.println(obj);
 		} else {
-			log.info(terminateRuleLogger(module));
+			log.info(obj);
 		}
-}
-    
-    public static JsonObject createDataAnswerObj(Answer answer, String token) {
-    	
-    	 JsonObject data = new JsonObject();
-    	 data.put("value", answer.getValue());
-    	 
-    	 String jsonAnswerStr = gson.toJson(answer);
-    	 JsonObject jsonAnswer = new JsonObject(jsonAnswerStr);
-    	 
-    	 JsonArray items = new JsonArray();
-    	 items.add(jsonAnswer);
-    	 
-    	 /* Creating Answer DATA_MSG */
-    	 JsonObject obj= new JsonObject();
-    	 obj.put("msg_type", "DATA_MSG");
-    	 obj.put("data_type", "Answer");
-    	 obj.put("items", items); 
-    	 obj.put("token", token);
-    	 
-    	 return obj;
-    	
-    }
-	
+
+	}
+
+	public static JsonObject createDataAnswerObj(Answer answer, String token) {
+
+		JsonObject data = new JsonObject();
+		data.put("value", answer.getValue());
+
+		String jsonAnswerStr = gson.toJson(answer);
+		JsonObject jsonAnswer = new JsonObject(jsonAnswerStr);
+
+		JsonArray items = new JsonArray();
+		items.add(jsonAnswer);
+
+		/* Creating Answer DATA_MSG */
+		JsonObject obj = new JsonObject();
+		obj.put("msg_type", "DATA_MSG");
+		obj.put("data_type", "Answer");
+		obj.put("items", items);
+		obj.put("token", token);
+
+		return obj;
+
+	}
+
 	/**
 	 * 
 	 * @param qwandaServiceUrl
@@ -98,33 +102,33 @@ public class RulesUtils {
 	 * @param token
 	 * @return baseEntity user for the decodedToken passed
 	 */
-	public static BaseEntity getUser(final String qwandaServiceUrl, Map<String,Object> decodedToken, final String token) {
-		
-		
+	public static BaseEntity getUser(final String qwandaServiceUrl, Map<String, Object> decodedToken,
+			final String token) {
+
 		try {
 			String beJson = null;
-			String username = (String)decodedToken.get("preferred_username");
+			String username = (String) decodedToken.get("preferred_username");
 			if (username != null) {
 				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys?PRI_USERNAME=" + username, token);
 			} else {
-				String keycloakId = (String)decodedToken.get("sed");
-				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys?PRI_KEYCLOAKID=" + keycloakId, token);
-				
+				String keycloakId = (String) decodedToken.get("sed");
+				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys?PRI_KEYCLOAKID=" + keycloakId,
+						token);
+
 			}
 			QDataBaseEntityMessage msg = gson.fromJson(beJson, QDataBaseEntityMessage.class);
-			
-			for(BaseEntity be : msg.getItems()) {
+
+			for (BaseEntity be : msg.getItems()) {
 				return be;
 			}
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return null;	
-		
+		return null;
+
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param qwandaServiceUrl
@@ -132,23 +136,23 @@ public class RulesUtils {
 	 * @param token
 	 * @return baseEntity user for the decodedToken passed
 	 */
-	public static BaseEntity getBaseEntityByCode(final String qwandaServiceUrl, Map<String,Object> decodedToken, final String token, final String code) {
-		
-		
+	public static BaseEntity getBaseEntityByCode(final String qwandaServiceUrl, Map<String, Object> decodedToken,
+			final String token, final String code) {
+
 		try {
 			String beJson = null;
-				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + code, token);
+			beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + code, token);
 			QDataBaseEntityMessage msg = gson.fromJson(beJson, QDataBaseEntityMessage.class);
-			
-			for(BaseEntity be : msg.getItems()) {
+
+			for (BaseEntity be : msg.getItems()) {
 				return be;
 			}
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return null;	
-		
+		return null;
+
 	}
-	
+
 }
