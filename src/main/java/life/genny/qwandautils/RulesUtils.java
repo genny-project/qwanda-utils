@@ -6,6 +6,8 @@ import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
@@ -140,14 +142,16 @@ public class RulesUtils {
 			String beJson = null;
 			String username = (String) decodedToken.get("preferred_username");
 			if (username != null) {
-				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys?PRI_USERNAME=" + username, token);
+				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys?PRI_USERNAME=" + username+"&pageSize=1", token);
 			} else {
 				String keycloakId = (String) decodedToken.get("sed");
-				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys?PRI_KEYCLOAKID=" + keycloakId,
+				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys?PRI_KEYCLOAKID=" + keycloakId+"&pageSize=1",
 						token);
 
 			}
-			BaseEntity be = gson.fromJson(beJson, BaseEntity.class);
+			
+			List<BaseEntity> bes = Arrays.asList(gson.fromJson(beJson, BaseEntity[].class));
+			BaseEntity be = bes.get(0);
 
 			return be;
 
