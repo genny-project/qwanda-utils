@@ -262,6 +262,7 @@ public class QwandaUtils {
 	public static Answer postAnswer(final String qwandaUrl, final String token, final Answer answer
 			) throws IOException
 	{
+		if (answer.getValue() != null) {
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		Gson gson = null;
 
@@ -270,6 +271,7 @@ public class QwandaUtils {
 
 		String id = QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/answers", gson.toJson(answer),token);
 		// TODO check id is returned
+		}
 		return answer;
 	}
 
@@ -289,13 +291,26 @@ public class QwandaUtils {
 	
 	public static String getNormalisedUsername(final String rawUsername)
 	{
-		return 	rawUsername.replaceAll("\\&", "_AND_").replaceAll("@", "_AT_").replaceAll("\\.", "").replaceAll("+","PLUS").toLowerCase();
+		return 	rawUsername.replaceAll("\\&", "_AND_").replaceAll("@", "_AT_").replaceAll("\\.", "").replaceAll("\\+","_PLUS_").toLowerCase();
 	}
 	
 	public static BaseEntity createUser(final String qwandaUrl, final String token, final String username, 
 			final String firstname,
 			final String lastname,
 			final String email
+			) throws IOException
+	{
+
+		return createUser(qwandaUrl, token, username, firstname, lastname, email, "genny", firstname+" "+lastname,null);
+	}
+	
+	public static BaseEntity createUser(final String qwandaUrl, final String token, final String username, 
+			final String firstname,
+			final String lastname,
+			final String email,
+			final String realm,
+			final String name,
+			final String keycloakId
 			) throws IOException
 	{
 
@@ -309,7 +324,11 @@ public class QwandaUtils {
 		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_FIRSTNAME",firstname));
 		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_LASTNAME",lastname));
 		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_EMAIL",email));
-					
+		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_REALM",realm));
+		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_NAME",name));
+		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_KEYCLOAK_ID",keycloakId));
+			
+		
 		postLink(qwandaUrl, token, new Link("GRP_USERS",code,"LNK_CORE"));
 		postLink(qwandaUrl, token, new Link("GRP_PEOPLE",code,"LNK_CORE"));
 		
