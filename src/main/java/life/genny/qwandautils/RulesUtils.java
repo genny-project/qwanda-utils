@@ -142,10 +142,10 @@ public class RulesUtils {
 			String beJson = null;
 			String username = (String) decodedToken.get("preferred_username");
 			if (username != null) {
-				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/GRP_USERS/LNK_CORE/attributes?PRI_USERNAME=" + username+"&pageSize=1", token);
+				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/GRP_USERS/linkcodes/LNK_CORE/attributes?PRI_USERNAME=" + username+"&pageSize=1", token);
 			} else {
 				String keycloakId = (String) decodedToken.get("sed");
-				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/GRP_USERS/LNK_CORE/attributes?PRI_KEYCLOAKID=" + keycloakId+"&pageSize=1",
+				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/GRP_USERS/linkcodes/LNK_CORE/attributes?PRI_KEYCLOAKID=" + keycloakId+"&pageSize=1",
 						token);
 
 			}
