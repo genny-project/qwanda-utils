@@ -37,7 +37,7 @@ public class RulesUtils {
 	
 	public static String executeRuleLogger(final String status, final String module, final String topColour, final String bottomColour) {
     	String initialLogger = (devMode ? "":  topColour) + "================================================================================================================================================" + ANSI_RESET;
-        String moduleLogger = "\n" + (devMode ? "":  bottomColour) +  status  +  " ::  " +module +  (devMode ? "":ANSI_RESET);
+        String moduleLogger = "\n" + (devMode ? "":  bottomColour) +  status  +  " ::  " +module +  ( devMode ? "":ANSI_RESET);
         return initialLogger + moduleLogger;
     }
     
