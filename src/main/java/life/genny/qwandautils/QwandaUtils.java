@@ -256,6 +256,9 @@ public class QwandaUtils {
 	
 		
 		String retStr = QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/baseentitys", jsonBE,token);
+		if (retStr.equals("<html><head><title>Error</title></head><body>Internal Server Error</body></html>")) {
+			return null;
+		}
 		Long ret = Long.parseLong(retStr);
 		be.setId(ret);
 		return ret; 
