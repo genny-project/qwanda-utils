@@ -147,11 +147,9 @@ public class RulesUtils {
 						token);
 
 			}
-			QDataBaseEntityMessage msg = gson.fromJson(beJson, QDataBaseEntityMessage.class);
+			BaseEntity be = gson.fromJson(beJson, BaseEntity.class);
 
-			for (BaseEntity be : msg.getItems()) {
-				return be;
-			}
+			return be;
 
 		} catch (IOException e) {
 			e.printStackTrace();
