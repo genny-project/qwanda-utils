@@ -289,7 +289,7 @@ public class QwandaUtils {
 	
 	public static String getNormalisedUsername(final String rawUsername)
 	{
-		return 	rawUsername.replaceAll("\\&", "_AND_").replaceAll("@", "_AT_").replaceAll("\\.", "").toLowerCase();
+		return 	rawUsername.replaceAll("\\&", "_AND_").replaceAll("@", "_AT_").replaceAll("\\.", "").replaceAll("+","PLUS").toLowerCase();
 	}
 	
 	public static BaseEntity createUser(final String qwandaUrl, final String token, final String username, 
