@@ -99,12 +99,17 @@ public class RulesUtils {
 		println(terminateRuleLogger(module));
 	}
 
-	public static void println(final Object obj) {
+	public static void println(final Object obj, final String colour) {
 		if (devMode) {
 			System.out.println(obj);
 		} else {
-			log.info(obj);
+			log.info((devMode ? "" : colour) + obj + (devMode ? "" : ANSI_RESET));
 		}
+
+	}
+	
+	public static void println(final Object obj) {
+		println(obj,ANSI_RESET);
 
 	}
 
