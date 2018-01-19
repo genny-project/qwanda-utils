@@ -1,7 +1,9 @@
 package life.genny.qwandautils;
 
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
@@ -12,6 +14,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.DateTimeDeserializer;
+import life.genny.qwanda.entity.BaseEntity;
+import life.genny.qwanda.message.QDataBaseEntityMessage;
 
 public class RulesUtils {
 	
@@ -87,5 +91,64 @@ public class RulesUtils {
     	
     }
 	
-
+	/**
+	 * 
+	 * @param qwandaServiceUrl
+	 * @param decodedToken
+	 * @param token
+	 * @return baseEntity user for the decodedToken passed
+	 */
+	public static BaseEntity getUser(final String qwandaServiceUrl, Map<String,Object> decodedToken, final String token) {
+		
+		
+		try {
+			String beJson = null;
+			String username = (String)decodedToken.get("preferred_username");
+			if (username != null) {
+				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys?PRI_USERNAME=" + username, token);
+			} else {
+				String keycloakId = (String)decodedToken.get("sed");
+				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys?PRI_KEYCLOAKID=" + keycloakId, token);
+				
+			}
+			QDataBaseEntityMessage msg = gson.fromJson(beJson, QDataBaseEntityMessage.class);
+			
+			for(BaseEntity be : msg.getItems()) {
+				return be;
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;	
+		
+	}
+	
+	
+	/**
+	 * 
+	 * @param qwandaServiceUrl
+	 * @param decodedToken
+	 * @param token
+	 * @return baseEntity user for the decodedToken passed
+	 */
+	public static BaseEntity getBaseEntityByCode(final String qwandaServiceUrl, Map<String,Object> decodedToken, final String token, final String code) {
+		
+		
+		try {
+			String beJson = null;
+				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + code, token);
+			QDataBaseEntityMessage msg = gson.fromJson(beJson, QDataBaseEntityMessage.class);
+			
+			for(BaseEntity be : msg.getItems()) {
+				return be;
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;	
+		
+	}
+	
 }

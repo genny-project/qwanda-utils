@@ -457,66 +457,7 @@ public class QwandaUtils {
 		
 	}
 	
-	/**
-	 * 
-	 * @param qwandaServiceUrl
-	 * @param decodedToken
-	 * @param token
-	 * @return baseEntity user for the decodedToken passed
-	 */
-	public static BaseEntity getUser(final String qwandaServiceUrl, Map<String,Object> decodedToken, final String token) {
-		
-		
-		try {
-			String beJson = null;
-			String username = (String)decodedToken.get("preferred_username");
-			if (username != null) {
-				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys?PRI_USERNAME=" + username, token);
-			} else {
-				String keycloakId = (String)decodedToken.get("sed");
-				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys?PRI_KEYCLOAKID=" + keycloakId, token);
-				
-			}
-			QDataBaseEntityMessage msg = gson.fromJson(beJson, QDataBaseEntityMessage.class);
-			
-			for(BaseEntity be : msg.getItems()) {
-				return be;
-			}
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;	
-		
-	}
-	
-	
-	/**
-	 * 
-	 * @param qwandaServiceUrl
-	 * @param decodedToken
-	 * @param token
-	 * @return baseEntity user for the decodedToken passed
-	 */
-	public static BaseEntity getBaseEntityByCode(final String qwandaServiceUrl, Map<String,Object> decodedToken, final String token, final String code) {
-		
-		
-		try {
-			String beJson = null;
-				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + code, token);
-			QDataBaseEntityMessage msg = gson.fromJson(beJson, QDataBaseEntityMessage.class);
-			
-			for(BaseEntity be : msg.getItems()) {
-				return be;
-			}
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;	
-		
-	}
-	
+
 	/**
 	 * 
 	 * @param templateCode
