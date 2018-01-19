@@ -73,20 +73,22 @@ public class RulesUtils {
                 }).create();
 	public static String executeRuleLogger(final String status, final String module, final String topColour,
 			final String bottomColour) {
-		String initialLogger = (devMode ? "" : topColour)
-				+ "================================================================================================================================================"
-				+ ANSI_RESET;
 		String moduleLogger = "\n" + (devMode ? "" : bottomColour) + status + " ::  " + module
-				+ (devMode ? "" : ANSI_RESET);
-		return initialLogger + moduleLogger;
+				+ (devMode ? "" : ANSI_RESET)  ;
+		return moduleLogger;
 	}
 
 	public static String terminateRuleLogger(String module) {
-		return executeRuleLogger("TERMINATED", module, ANSI_YELLOW, ANSI_GREEN);
+		return executeRuleLogger("TERMINATED", module, ANSI_YELLOW, ANSI_GREEN) + "\n"+ (devMode ? "" : ANSI_YELLOW)	
+				+"======================================================================================================="
+				+ (devMode ? "" : ANSI_RESET);
+	
 	}
 
 	public static String headerRuleLogger(String module) {
-		return executeRuleLogger("EXECUTED", module, ANSI_RED, ANSI_YELLOW);
+		return "======================================================================================================="
+				+ executeRuleLogger("EXECUTED", module, ANSI_RED, ANSI_GREEN) + "\n"+ (devMode ? "" : ANSI_RED)	
+				+ (devMode ? "" : ANSI_RESET);
 	}
 
 	public static void header(final String module) {
@@ -141,9 +143,9 @@ public class RulesUtils {
 		try {
 			String beJson = null;
 			String username = (String) decodedToken.get("preferred_username");
-			
+			String uname = QwandaUtils.getNormalisedUsername(username);
+			String code = "PER_" + uname.toUpperCase();
 			// CHEAT TODO
-			String code = "PER_"+username.toUpperCase();
 			beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/"+code, token);
 			BaseEntity be = gson.fromJson(beJson, BaseEntity.class);
 

@@ -244,7 +244,7 @@ public class QwandaUtils {
 		return be;
 	}
 	
-	public static BaseEntity postBaseEntity(final String qwandaUrl, final String token, final BaseEntity be
+	public static Long postBaseEntity(final String qwandaUrl, final String token, final BaseEntity be
 			) throws IOException
 	{
 		GsonBuilder gsonBuilder = new GsonBuilder();
@@ -255,9 +255,10 @@ public class QwandaUtils {
 		String jsonBE = gson.toJson(be);
 	
 		
-		QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/baseentitys", jsonBE,token);
-		
-		return be; 
+		String retStr = QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/baseentitys", jsonBE,token);
+		Long ret = Long.parseLong(retStr);
+		be.setId(ret);
+		return ret; 
 	}
 	public static Answer postAnswer(final String qwandaUrl, final String token, final Answer answer
 			) throws IOException
