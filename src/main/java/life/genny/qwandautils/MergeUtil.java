@@ -194,6 +194,21 @@ public class MergeUtil {
 		return attrValue;
 	}
 	
+	public static String getFullName(String baseEntityCode, String token) {
+		
+		String fullName = null;
+
+		if(baseEntityCode != null && token != null) {
+
+			String firstName = MergeUtil.getAttrValue(baseEntityCode, "PRI_FIRSTNAME", token);
+			String lastName = MergeUtil.getAttrValue(baseEntityCode, "PRI_LASTNAME", token);
+			fullName = firstName + " " + lastName;
+			System.out.println("PRI_FULLNAME   ::   "+ fullName);		
+		}
+		
+		return fullName;
+	}
+
 	public static boolean createBaseEntity(String sourceCode, String linkCode, String targetCode, String name, Long id, String token) {
 		
 		BaseEntity be = new BaseEntity(targetCode, name);

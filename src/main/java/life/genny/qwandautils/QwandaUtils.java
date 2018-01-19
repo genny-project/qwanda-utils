@@ -822,6 +822,13 @@ public class QwandaUtils {
     	String initialLogger = "\n \u001B[31m RULE TERMINATED    ::   " + module + " \u001B[0m ";
         String moduleLogger = "\n \u001B[33m ------------------------------------------------------------------------------------------------------------------------------------------------  \u001B[0m";
         return initialLogger + moduleLogger;
+	}  
+	
+	public static String jsonLogger(String module, Object data) {
+    	String initialLogger = "------------------------------------------------------------------------\n";
+		String moduleLogger =  ANSI_YELLOW + module + "   ::   " + ANSI_RESET +  data + "\n";
+		String finalLogger = "------------------------------------------------------------------------\n";
+        return initialLogger + moduleLogger + finalLogger;
     }  
     
     /**
