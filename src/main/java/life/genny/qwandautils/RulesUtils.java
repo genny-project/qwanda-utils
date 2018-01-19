@@ -145,8 +145,8 @@ public class RulesUtils {
 			// CHEAT TODO
 			String code = "PER_"+username.toUpperCase();
 			beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/"+code, token);
-			List<BaseEntity> bes = Arrays.asList(gson.fromJson(beJson, BaseEntity[].class));
-			BaseEntity be = bes.get(0);
+			BaseEntity be = gson.fromJson(beJson, BaseEntity.class);
+
 //			if (username != null) {
 //				beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/GRP_USERS/linkcodes/LNK_CORE/attributes?PRI_USERNAME=" + username+"&pageSize=1", token);
 //			} else {
@@ -182,8 +182,7 @@ public class RulesUtils {
 		try {
 			String beJson = null;
 			beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + code, token);
-			List<BaseEntity> bes = Arrays.asList(gson.fromJson(beJson, BaseEntity[].class));
-			BaseEntity be = bes.get(0);
+			BaseEntity be = gson.fromJson(beJson, BaseEntity.class);
 			return be;
 
 		} catch (IOException e) {
