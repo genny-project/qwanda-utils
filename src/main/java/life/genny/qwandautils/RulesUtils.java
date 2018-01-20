@@ -27,6 +27,7 @@ import life.genny.qwanda.Answer;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QDataAnswerMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
+import life.genny.qwandautils.QwandaUtils;
 
 public class RulesUtils {
 
@@ -125,6 +126,7 @@ public class RulesUtils {
 
 	}
 	
+	
 	public static String getLayoutCacheURL(final String path) {
 		
 		String host = System.getenv("LAYOUT_CACHE_HOST");
@@ -133,6 +135,17 @@ public class RulesUtils {
 		}
 		
 		return String.format("%s/%s", host, path);
+	}
+	
+	public static String getLayout(final String path) {
+		String jsonStr = "";
+		try {
+		   String url = getLayoutCacheURL(path);
+		   jsonStr = QwandaUtils.apiGet(url, null);		
+		 }catch(Exception e) {
+			 e.printStackTrace();
+		  }		
+		return jsonStr;		
 	}
 	
 	public static JsonObject createDataAnswerObj(Answer answer, String token) {
