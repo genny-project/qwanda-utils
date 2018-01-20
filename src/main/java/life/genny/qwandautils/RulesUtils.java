@@ -98,6 +98,17 @@ public class RulesUtils {
 	public static void footer(final String module) {
 		println(terminateRuleLogger(module));
 	}
+	
+	public static String jsonLogger(String module, Object data) {
+        String initialLogger = "------------------------------------------------------------------------\n";
+        String moduleLogger =  ANSI_YELLOW + module + "   ::   " + ANSI_RESET +  data + "\n";
+        String finalLogger = "------------------------------------------------------------------------\n";
+        return initialLogger + moduleLogger + finalLogger;
+    }  
+
+	public static void ruleLogger(String module, Object data) {
+        println(jsonLogger(module, data));
+    }
 
 	public static void println(final Object obj, final String colour) {
 		if (devMode) {
