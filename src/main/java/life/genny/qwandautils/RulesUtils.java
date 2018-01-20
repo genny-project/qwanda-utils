@@ -6,6 +6,7 @@ import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -21,10 +22,10 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.entity.BaseEntity;
+import life.genny.qwanda.message.QDataAnswerMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
 
 public class RulesUtils {
@@ -115,23 +116,10 @@ public class RulesUtils {
 
 	public static JsonObject createDataAnswerObj(Answer answer, String token) {
 
-		JsonObject data = new JsonObject();
-		data.put("value", answer.getValue());
-
-		String jsonAnswerStr = gson.toJson(answer);
-		JsonObject jsonAnswer = new JsonObject(jsonAnswerStr);
-
-		JsonArray items = new JsonArray();
-		items.add(jsonAnswer);
-
-		/* Creating Answer DATA_MSG */
-		JsonObject obj = new JsonObject();
-		obj.put("msg_type", "DATA_MSG");
-		obj.put("data_type", "Answer");
-		obj.put("items", items);
-		obj.put("token", token);
-
-		return obj;
+		QDataAnswerMessage msg = new QDataAnswerMessage(answer);
+		msg.setToken(token);
+		
+		return toJsonObject(msg);
 
 	}
 
@@ -183,20 +171,124 @@ public class RulesUtils {
 	 * @param token
 	 * @return baseEntity user for the decodedToken passed
 	 */
-	public static BaseEntity getBaseEntityByCode(final String qwandaServiceUrl, Map<String, Object> decodedToken,
+	public static String getBaseEntityJsonByCode(final String qwandaServiceUrl, Map<String, Object> decodedToken,
 			final String token, final String code) {
 
 		try {
 			String beJson = null;
 			beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + code, token);
-			BaseEntity be = gson.fromJson(beJson, BaseEntity.class);
-			return be;
+			return beJson;
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return null;
 
+	}
+	
+	/**
+	 * 
+	 * @param qwandaServiceUrl
+	 * @param decodedToken
+	 * @param token
+	 * @return baseEntity user for the decodedToken passed
+	 */
+	public static String getBaseEntityJsonByAttributeAndValue(final String qwandaServiceUrl, Map<String, Object> decodedToken,
+			final String token, final String attributeCode, final String value) {
+
+		try {
+			String beJson = null;
+			beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/test2?pageSize=1&" + attributeCode+"="+value, token);
+			return beJson;
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+	
+	/**
+	 * 
+	 * @param qwandaServiceUrl
+	 * @param decodedToken
+	 * @param token
+	 * @return baseEntity user for the decodedToken passed
+	 */
+	public static List<BaseEntity> getBaseEntitysByAttributeAndValue(final String qwandaServiceUrl, Map<String, Object> decodedToken,
+			final String token, final String attributeCode, final String value) {
+
+			String beJson = getBaseEntityJsonByAttributeAndValue(qwandaServiceUrl, decodedToken, token, attributeCode, value);
+			QDataBaseEntityMessage be = fromJson(beJson, QDataBaseEntityMessage.class);
+			
+			List<BaseEntity> items = new ArrayList<BaseEntity>(Arrays.asList(be.getItems())); 
+			
+			return items;
+
+	}
+	
+	/**
+	 * 
+	 * @param qwandaServiceUrl
+	 * @param decodedToken
+	 * @param token
+	 * @return baseEntity user for the decodedToken passed
+	 */
+	public static BaseEntity getBaseEntityByAttributeAndValue(final String qwandaServiceUrl, Map<String, Object> decodedToken,
+			final String token, final String attributeCode, final String value) {
+
+				
+			List<BaseEntity> items = getBaseEntitysByAttributeAndValue(qwandaServiceUrl, decodedToken, token, attributeCode, value);
+			
+			if (items != null) {
+				if (!items.isEmpty())
+				return items.get(0);
+			}
+			
+			return null;
+
+	}
+	/**
+	 * 
+	 * @param qwandaServiceUrl
+	 * @param decodedToken
+	 * @param token
+	 * @return baseEntity user for the decodedToken passed
+	 */
+	public static BaseEntity getBaseEntityByCode(final String qwandaServiceUrl, Map<String, Object> decodedToken,
+			final String token, final String code) {
+
+			String beJson = getBaseEntityJsonByCode(qwandaServiceUrl, decodedToken, token, code);
+			BaseEntity be = fromJson(beJson, BaseEntity.class);
+			return be;
+
+	}
+	
+
+	
+	
+	public static <T> T fromJson(final String json, Class clazz)
+	{
+	        T item = null;
+	        if (json != null) {
+	                try {
+	                      item = (T)gson.fromJson(json, clazz);
+	                } catch (Exception e) {
+	                     log.error("Bad Deserialisation for "+clazz.getSimpleName());
+	                }
+	        }
+	        return item;
+	}
+	
+	public static String toJson(Object obj)
+	{
+		return gson.toJson(obj);
+	}
+	
+	public static JsonObject toJsonObject(Object obj)
+	{
+		JsonObject jsonObj = new JsonObject(toJson(obj));
+		return jsonObj;
 	}
 
 }
