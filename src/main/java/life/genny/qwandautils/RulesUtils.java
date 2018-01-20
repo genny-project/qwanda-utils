@@ -314,6 +314,21 @@ public class RulesUtils {
 
 		try {
 			String beJson = null;
+			beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/"+parentCode+"/linkcodes/"+linkCode, token);
+			return beJson;
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+	
+	public static String getBaseEntitysJsonByParentAndLinkCodeWithAttributes(final String qwandaServiceUrl, Map<String, Object> decodedToken,
+			final String token, final String parentCode, final String linkCode) {
+
+		try {
+			String beJson = null;
 			beJson = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/"+parentCode+"/linkcodes/"+linkCode+"/attributes", token);
 			return beJson;
 
