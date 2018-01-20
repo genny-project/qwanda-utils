@@ -359,5 +359,23 @@ public class RulesUtils {
 
 	}
 	
-	
+	/**
+	 * 
+	 * @param qwandaServiceUrl
+	 * @param decodedToken
+	 * @param token
+	 * @param parentCode
+	 * @param linkCode
+	 * @return baseEntitys
+	 */
+	public static List<BaseEntity> getBaseEntitysByParentAndLinkCodeWithAttributes(final String qwandaServiceUrl, Map<String, Object> decodedToken,
+			final String token, final String parentCode, final String linkCode) {
+
+			String beJson = getBaseEntitysJsonByParentAndLinkCodeWithAttributes(qwandaServiceUrl, decodedToken, token, parentCode, linkCode);
+			QDataBaseEntityMessage msg = gson.fromJson(beJson, QDataBaseEntityMessage.class);
+			BaseEntity[] beArray = msg.getItems();
+			ArrayList<BaseEntity> arrayList = new ArrayList<BaseEntity>(Arrays.asList(beArray)); 
+			return arrayList;
+
+	}
 }
