@@ -57,11 +57,11 @@ public class GPSUtils {
 					
 					be.getBaseEntityAttributes().forEach(attribute -> {
 						switch(attribute.getAttributeCode()) {
-						case "PRI_FULL_PICKUP_ADDRESS":
+						case "PRI_PICKUP_ADDRESS_FULL":
 							sourceAddress = attribute.getObjectAsString();
 							System.out.println("source address ::"+sourceAddress);
 							break;
-						case "PRI_FULL_DROPOFF_ADDRESS":
+						case "PRI_DROPOFF_ADDRESS_FULL":
 							destAddress = attribute.getObjectAsString();
 							System.out.println("dest address ::"+destAddress);
 							break;

@@ -124,7 +124,17 @@ public class RulesUtils {
 		println(obj,ANSI_RESET);
 
 	}
-
+	
+	public static String getLayoutCacheURL(final String path) {
+		
+		String host = System.getenv("LAYOUT_CACHE_HOST");
+		if(host == null) {
+			host = "http://localhost:2223";
+		}
+		
+		return String.format("%s/%s", host, path);
+	}
+	
 	public static JsonObject createDataAnswerObj(Answer answer, String token) {
 
 		QDataAnswerMessage msg = new QDataAnswerMessage(answer);
@@ -271,12 +281,9 @@ public class RulesUtils {
 
 			String beJson = getBaseEntityJsonByCode(qwandaServiceUrl, decodedToken, token, code);
 			BaseEntity be = fromJson(beJson, BaseEntity.class);
+			
 			return be;
-
 	}
-	
-
-	
 	
 	public static <T> T fromJson(final String json, Class clazz)
 	{
