@@ -18,7 +18,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -40,7 +40,7 @@ public class PaymentUtils {
 	    String paymentToken = System.getenv("PAYMENT_TOKEN");
 	    String paymentSecret = System.getenv("PAYMENT_SECRET"); 
 		
-		org.json.simple.JSONObject authObj = new org.json.simple.JSONObject();
+		JSONObject authObj = new JSONObject();
 		authObj.put("tenant", paymentMarketPlace);
 		authObj.put("token", paymentToken);
 		authObj.put("secret", paymentSecret);
@@ -62,16 +62,16 @@ public class PaymentUtils {
 		return encodedString;
 	}
 
-	public static org.json.simple.JSONObject base64Decoder(String plainString) {
+	public static JSONObject base64Decoder(String plainString) {
 
 		String decodedString = null;
 		JSONParser parser = new JSONParser();
-		org.json.simple.JSONObject authobj = new org.json.simple.JSONObject();
+		JSONObject authobj = new JSONObject();
 
 		decodedString = new String(Base64.getDecoder().decode(plainString));
 		
 		try {
-			authobj = (org.json.simple.JSONObject) parser.parse(decodedString);
+			authobj = (JSONObject) parser.parse(decodedString);
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
@@ -153,7 +153,7 @@ public class PaymentUtils {
 	
 	public static String getUserCode(String token) {
 		
-		JSONObject decodedToken = KeycloakUtils.getDecodedToken(token);
+		org.json.JSONObject decodedToken = KeycloakUtils.getDecodedToken(token);
 		System.out.println("decoded token object ::"+decodedToken);
 		
 		String username = decodedToken.getString("preferred_username");
@@ -168,7 +168,7 @@ public class PaymentUtils {
 		
 		String userCode = getUserCode(token);
 		
-		org.json.simple.JSONObject authobj = new org.json.simple.JSONObject();
+		JSONObject authobj = new JSONObject();
 		authobj.put("userCode", userCode);
 		//authobj.put("UUID", UUID.randomUUID().toString());
 
@@ -181,7 +181,7 @@ public class PaymentUtils {
 	public static Boolean checkIfAssemblyUserExists(String assemblyUserId, String authToken) {
 		
 		String assemblyUserString = PaymentEndpoint.getAssemblyUserById(assemblyUserId, authToken);
-		if(!assemblyUserString.contains("errors")) {
+		if(!assemblyUserString.contains("error")) {
 			return true;
 		} 
 		System.out.println("assembly user string ::"+assemblyUserString);
@@ -196,10 +196,10 @@ public class PaymentUtils {
 		String userCode = getUserCode(token);
 		BaseEntity be = MergeUtil.getBaseEntityForAttr(userCode, token);
 
-		org.json.simple.JSONObject userobj = new org.json.simple.JSONObject();
-		org.json.simple.JSONObject personalInfoObj = new org.json.simple.JSONObject();
-		org.json.simple.JSONObject contactInfoObj = new org.json.simple.JSONObject();
-		org.json.simple.JSONObject locationObj = new org.json.simple.JSONObject();
+		JSONObject userobj = new JSONObject();
+		JSONObject personalInfoObj = new JSONObject();
+		JSONObject contactInfoObj = new JSONObject();
+		JSONObject locationObj = new JSONObject();
 		
 		if(be != null) {
 			
@@ -256,6 +256,8 @@ public class PaymentUtils {
 			
 			if(country != null) {
 				locationObj.put("country", country.toString());
+			} else {
+				locationObj.put("country", "AU");
 			}
 			
 			if(postCode != null) {
@@ -281,27 +283,33 @@ public class PaymentUtils {
 	
 	
 	@SuppressWarnings("unchecked")
-	public static String updateUserPersonalInfo(String assemblyUserId, String attributeCode, String value, String authToken) {
+	public static String updateUserPersonalInfo(String companyId, String assemblyUserId, String attributeCode, String value, String authToken) {
 
 		System.out.println("attributeCode ::" + attributeCode + ", value ::" + value);
 		String responseString = null;
+		//String companyId = MergeUtil.getAttrValue(userCode, "PRI_ASSEMBLY_COMPANY_ID", token)
 
-		org.json.simple.JSONObject userobj = null;
-		org.json.simple.JSONObject personalInfoObj = null;
-		org.json.simple.JSONObject contactInfoObj = null;
-		org.json.simple.JSONObject locationObj = null;
+		/* Personal Info Update Objects */
+		JSONObject userobj = null;
+		JSONObject personalInfoObj = null;
+		JSONObject personalContactInfoObj = null;
+		JSONObject locationObj = null;
+		
+		/* Company Info Update Objects */
+		JSONObject companyObj = null;
+		JSONObject companyContactInfoObj = null;
 
 		switch (attributeCode) {
 		case "PRI_FIRSTNAME":
-			personalInfoObj = new org.json.simple.JSONObject();
+			personalInfoObj = new JSONObject();
 			personalInfoObj.put("firstName", value);
 			break;
 		case "PRI_LASTNAME":
-			personalInfoObj = new org.json.simple.JSONObject();
+			personalInfoObj = new JSONObject();
 			personalInfoObj.put("lastName", value);
 			break;
 		case "PRI_DOB":
-			personalInfoObj = new org.json.simple.JSONObject();
+			personalInfoObj = new JSONObject();
 			DateTimeFormatter assemblyDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 			LocalDate date = LocalDate.parse(value.toString(), formatter);
@@ -310,59 +318,148 @@ public class PaymentUtils {
 			personalInfoObj.put("dob", formattedDOBString.toString());
 			break;
 		case "PRI_EMAIL":
-			contactInfoObj = new org.json.simple.JSONObject();
-			contactInfoObj.put("email", value);
+			personalContactInfoObj = new JSONObject();
+			personalContactInfoObj.put("email", value);
 			break;
 		case "PRI_MOBILE":
-			contactInfoObj = new org.json.simple.JSONObject();
-			contactInfoObj.put("mobile", value);
+			personalContactInfoObj = new JSONObject();
+			personalContactInfoObj.put("mobile", value);
 			break;
 		case "PRI_ADDRESS_ADDRESS1":
-			contactInfoObj = new org.json.simple.JSONObject();
-			contactInfoObj.put("addressLine1", value);
+			personalContactInfoObj = new JSONObject();
+			personalContactInfoObj.put("addressLine1", value);
 			break;
 		case "PRI_ADDRESS_CITY":
-			locationObj = new org.json.simple.JSONObject();
+			locationObj = new JSONObject();
 			locationObj.put("city", value);
 			break;
 		case "PRI_ADDRESS_STATE":
-			locationObj = new org.json.simple.JSONObject();
+			locationObj = new JSONObject();
 			locationObj.put("state", value);
 			break;
 		case "PRI_ADDRESS_COUNTRY":
-			locationObj = new org.json.simple.JSONObject();
-			locationObj.put("country", value);
+			locationObj = new JSONObject();
+			locationObj.put("country", value);	
 			break;
 		case "PRI_ADDRESS_POSTCODE":
-			locationObj = new org.json.simple.JSONObject();
+			locationObj = new JSONObject();
 			locationObj.put("postcode", value);
 			break;
+		case "PRI_NAME":
+			companyObj = new JSONObject();
+			companyObj.put("name", value);
+			break;
+		case "PRI_GST":
+			companyObj = new JSONObject();
+			companyObj.put("chargesTax", value);
+			break;
+		case "PRI_LANDLINE":
+			companyContactInfoObj = new JSONObject();
+			companyContactInfoObj.put("phone", value);
+			break;
 		}
-
-		if (personalInfoObj != null) {
-			userobj = new org.json.simple.JSONObject();
+		
+		/* For Assembly Personal Information Update */
+		
+		if(personalInfoObj != null) {
+			userobj = new JSONObject();
 			userobj.put("personalInfo", personalInfoObj);
 			userobj.put("id", assemblyUserId);
 		}
 
-		if (contactInfoObj != null) {
-			userobj = new org.json.simple.JSONObject();
-			userobj.put("contactInfo", contactInfoObj);
-			userobj.put("id", assemblyUserId);
+		if (personalContactInfoObj != null) {
+			userobj = new JSONObject();
+			userobj.put("contactInfo", personalContactInfoObj);
+			userobj.put("id", assemblyUserId);	
 		}
 
 		if (locationObj != null) {
-			userobj = new org.json.simple.JSONObject();
+			userobj = new JSONObject();
 			userobj.put("location", locationObj);
 			userobj.put("id", assemblyUserId);
+			
+			companyObj = new JSONObject();
+			companyObj.put("location", locationObj);
 		}
 		
 		if(userobj != null) {
 			responseString = PaymentEndpoint.updateAssemblyUser(assemblyUserId, gson.toJson(userobj), authToken);
 		}
 		
+		/* For Assembly User Company Information Update */
+		if(companyContactInfoObj != null && companyId != null) {
+			companyObj = new JSONObject();
+			companyObj.put("contactInfo", companyContactInfoObj);
+			companyObj.put("id", companyId);
+		}
+		
+		
+		if(companyId != null && companyObj != null) {
+			responseString = PaymentEndpoint.updateCompany(companyId, gson.toJson(companyObj), authToken);
+		}
+		
 		return responseString;
 
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static String createCompany(String assemblyId, String authtoken,String tokenString) {
+		
+		String userCode = getUserCode(tokenString);
+		BaseEntity be = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
+		String createCompanyResponse = null;
+		
+		JSONObject companyObj = new JSONObject();
+		JSONObject userObj = new JSONObject();
+		JSONObject contactObj = new JSONObject();
+		JSONObject locationObj = new JSONObject();
+		
+		Object companyName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_NAME");
+		Object taxNumber = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ABN");
+		Object chargeTax = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_GST");
+		Object companyPhoneNumber = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_LANDLINE");
+		Object countryName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_COUNTRY");
+		Object assemblyUserId = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ASSEMBLY_USER_ID");
+		
+		if(companyName != null) {
+			companyObj.put("name", companyName.toString());
+		}
+		
+		if(taxNumber != null) {
+			companyObj.put("taxNumber", taxNumber);
+		}
+		
+		if(chargeTax != null) {
+			companyObj.put("chargesTax", (Boolean) chargeTax);
+		}
+		
+		if(companyPhoneNumber != null) {
+			contactObj.put("phone", companyPhoneNumber.toString());
+		}
+		
+		if(assemblyUserId != null) {
+			userObj.put("id", assemblyUserId.toString());
+		}
+		
+		if(countryName != null) {
+			locationObj.put("country", countryName.toString());
+		} else {
+			locationObj.put("country", "AU");
+		}
+		
+		companyObj.put("contactInfo", contactObj);
+		companyObj.put("user", userObj);
+		companyObj.put("location", locationObj);
+		
+		log.info("Company object ::"+companyObj);
+		
+		createCompanyResponse = PaymentEndpoint.createCompany(gson.toJson(companyObj), authtoken);
+		JSONObject companyResponseObj = gson.fromJson(createCompanyResponse, JSONObject.class);
+		String companyCode = companyResponseObj.get("id").toString();
+		
+		return companyCode;
+		
+	}
+	
 
 }
