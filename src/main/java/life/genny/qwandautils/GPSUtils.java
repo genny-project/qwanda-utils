@@ -20,9 +20,6 @@ import life.genny.qwanda.GPS;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QCmdGeofenceMessage;
-import life.genny.qwanda.message.QDataBaseEntityMessage;
-
-import life.genny.qwandautils.RulesUtils;
 
 public class GPSUtils {
 	
@@ -32,10 +29,9 @@ public class GPSUtils {
 	static 	String loadId = null;
 	static JSONArray loadAttributes = new JSONArray();
 	
-	public static QCmdGeofenceMessage[] geofenceJob(final String begCode, final String driverCode, Double radius,
+	public static QCmdGeofenceMessage[] geofenceJob(BaseEntity be, final String driverCode, Double radius,
 			final String qwandaServiceUrl, String token, Map<String, Object> decodedToken) {
 		
-		BaseEntity be = RulesUtils.getBaseEntityByCode(qwandaServiceUrl, decodedToken, token, begCode);
 		if(be != null) {
 			
 			String pickupLatitude = null;
@@ -65,12 +61,12 @@ public class GPSUtils {
 			if(pickupLatitude != null && pickupLongitude != null && deliveryLatitude != null && deliveryLongitude != null) {
 				
 				/* Send geofence CMD to driver for pickup */
-			    GPS gpsLocation = new GPS(begCode, pickupLatitude, pickupLongitude);        
-			    QCmdGeofenceMessage cmdGeoFence = new QCmdGeofenceMessage(gpsLocation, 10.0, begCode + "_ENTRY_CODE", begCode + "EXIT_CODE");	 
+			    GPS gpsLocation = new GPS(be.getCode(), pickupLatitude, pickupLongitude);        
+			    QCmdGeofenceMessage cmdGeoFence = new QCmdGeofenceMessage(gpsLocation, 10.0, be.getCode() + "_ENTRY_CODE", be.getCode() + "EXIT_CODE");	 
 				
 			    /* Send geofence CMD to driver for delivery */
-			    GPS gpsLocationDelivery = new GPS(begCode, deliveryLatitude, deliveryLongitude);        
-			    QCmdGeofenceMessage cmdGeoFenceDelivery = new QCmdGeofenceMessage(gpsLocation, 10.0, begCode + "_ENTRY_CODE", begCode + "EXIT_CODE");
+			    GPS gpsLocationDelivery = new GPS(be.getCode(), deliveryLatitude, deliveryLongitude);        
+			    QCmdGeofenceMessage cmdGeoFenceDelivery = new QCmdGeofenceMessage(gpsLocation, 10.0, be.getCode() + "_ENTRY_CODE", be.getCode() + "EXIT_CODE");
 			    
 			    QCmdGeofenceMessage[] cmds = new QCmdGeofenceMessage[2];
 			    cmds[0] = cmdGeoFence;
