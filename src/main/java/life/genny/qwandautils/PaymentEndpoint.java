@@ -81,9 +81,18 @@ public class PaymentEndpoint {
 
 	}
 
-	public static String createItem(String authToken) {
+	public static String createItem(String itemEntity, String authToken) {
 	
 		String createCompanyResponse = null;
+		
+		try {
+			createCompanyResponse = PaymentUtils.apiPostPaymentEntity(
+					paymentServiceUrl + "/" + paymentProvider + "/items",  itemEntity, authToken);
+			System.out.println("Response after editing a user ::" + createCompanyResponse);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+				
 		return createCompanyResponse;
 	}
 

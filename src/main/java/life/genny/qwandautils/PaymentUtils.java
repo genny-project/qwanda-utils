@@ -8,6 +8,7 @@ import java.lang.invoke.MethodHandles;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
+import java.util.Map;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -32,8 +33,10 @@ public class PaymentUtils {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
 	final static Gson gson = new Gson();
+	public static final String DEFAULT_CURRENCY = "AUD";
+	public static final String DEFAULT_PAYMENT_TYPE = "escrow";
 	
-	
+	@SuppressWarnings("unchecked")
 	public static String getAssemblyAuthKey() {
 		
 		String paymentMarketPlace = System.getenv("PAYMENT_MARKETPLACE_NAME");
@@ -164,6 +167,7 @@ public class PaymentUtils {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	public static String getAssemblyId(String token) {
 		
 		String userCode = getUserCode(token);
@@ -178,7 +182,9 @@ public class PaymentUtils {
 	}
 	
 	
-	public static Boolean checkIfAssemblyUserExists(String assemblyUserId, String authToken) {
+	public static Boolean checkIfAssemblyUserExists(String assemblyUserId) {
+		
+		String authToken = getAssemblyAuthKey();
 		
 		String assemblyUserString = PaymentEndpoint.getAssemblyUserById(assemblyUserId, authToken);
 		if(!assemblyUserString.contains("error")) {
@@ -459,6 +465,69 @@ public class PaymentUtils {
 		
 		return companyCode;
 		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static String createPaymentItem(String BEGGroupCode, String assemblyauthToken, String token) {
+		
+		String itemCode = null;
+		Map<String, BaseEntity> itemContextMap = QwandaUtils.getBaseEntWithChildrenForAttributeCode(BEGGroupCode, token);
+		JSONObject itemObj = new JSONObject();
+		JSONObject buyerObj = null;
+		JSONObject sellerObj = null;
+		
+		itemObj.put("paymentType", DEFAULT_PAYMENT_TYPE);
+		
+		if(itemContextMap.containsKey("LOAD")) {
+			BaseEntity loadBe = itemContextMap.get("LOAD");
+			
+			if(loadBe != null) {
+				itemObj.put("description", MergeUtil.getBaseEntityAttrValueAsString(loadBe, "PRI_LOAD_DESC"));
+				itemObj.put("name", MergeUtil.getBaseEntityAttrValueAsString(loadBe, "PRI_TITLE"));
+				itemObj.put("amount", MergeUtil.getBaseEntityAttrValueAsString(loadBe, "PRI_PRICE"));
+				itemObj.put("currency", DEFAULT_CURRENCY);
+			}	
+		}
+		
+		/* OWNER -> Buyer */
+		if(itemContextMap.containsKey("OWNER")) {
+			BaseEntity ownerBe = itemContextMap.get("OWNER");
+			
+			if(ownerBe != null) {
+				buyerObj = new JSONObject();
+				buyerObj.put("id", MergeUtil.getBaseEntityAttrValueAsString(ownerBe, "PRI_ASSEMBLY_USER_ID"));
+			}
+			
+		}
+		
+		/* DRIVER -> Seller */
+		if(itemContextMap.containsKey("DRIVER")) {
+			BaseEntity driverBe = itemContextMap.get("DRIVER");
+			
+			if(driverBe != null) {
+				sellerObj = new JSONObject();
+				sellerObj.put("id", MergeUtil.getBaseEntityAttrValueAsString(driverBe, "PRI_ASSEMBLY_USER_ID"));
+			}
+			
+		}
+		
+		/* If both buyer and seller is available for a particular BEG, Create Payment Item */
+		if(buyerObj != null && sellerObj != null) {
+			itemObj.put("buyer", buyerObj);
+			itemObj.put("seller", sellerObj);
+			
+			log.info("Item object ::"+itemObj);
+			
+			String itemCreationResponse = PaymentEndpoint.createItem(gson.toJson(itemObj), assemblyauthToken);
+			
+			log.info("Item creation response ::"+itemObj);
+			
+			JSONObject itemResponseObj = gson.fromJson(itemCreationResponse, JSONObject.class);
+			itemCode = itemResponseObj.get("id").toString();
+			
+		}			
+		
+		return itemCode;
 	}
 	
 
