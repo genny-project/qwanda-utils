@@ -2,6 +2,8 @@ package life.genny.qwandautils;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -13,10 +15,14 @@ import javax.xml.xpath.XPathFactory;
 import org.json.JSONArray;
 import org.w3c.dom.Document;
 
+import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.GPS;
+import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QCmdGeofenceMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
+
+import life.genny.qwandautils.RulesUtils;
 
 public class GPSUtils {
 	
@@ -24,75 +30,56 @@ public class GPSUtils {
    * Sends QCmdGeofenceMessage for the given beg, address and radius
    */
 	static 	String loadId = null;
-	static String sourceAddress = null;
-	static String destAddress = null;
 	static JSONArray loadAttributes = new JSONArray();
- 
-	/**
-	 * 
-	 * @param sourceBaseEntityCode
-	 * @param begCode
-	 * @param radius
-	 * @param targetAddress
-	 * @param token
-	 * @return the QCmdGeofenceMessage of either source or destination address based on the targetAddress
-	 */
-	public static QCmdGeofenceMessage getGeoFenceOfAddress(String sourceBaseEntityCode, String begCode, Double radius, String targetAddress,
-			String token) {
-		 String latLong[] = null;
-		 String entryCode = null;
-		 String exitCode = null;
-		 
-		System.out.println("sourceBaseEntityCode-----> " + sourceBaseEntityCode);
-		System.out.println("BEG code ------> " + begCode);
+	
+	public static QCmdGeofenceMessage[] geofenceJob(final String begCode, final String driverCode, Double radius,
+			final String qwandaServiceUrl, String token, Map<String, Object> decodedToken) {
 		
-		try {
+		BaseEntity be = RulesUtils.getBaseEntityByCode(qwandaServiceUrl, decodedToken, token, begCode);
+		if(be != null) {
 			
-			QDataBaseEntityMessage dataBEMessage = QwandaUtils.getDataBEMessage("GRP_APPROVED", "LNK_CORE", token);
-			BaseEntity[] beArray = dataBEMessage.getItems();
+			String pickupLatitude = null;
+			String pickupLongitude = null;
 			
-			for(BaseEntity be : beArray) {
+			String deliveryLatitude = null;
+			String deliveryLongitude = null;
+			
+			Set<EntityAttribute> attributes = be.getBaseEntityAttributes();
+			for(EntityAttribute attribute: attributes) {
 				
-				if(be.getCode().equals(begCode)) {
-					
-					be.getBaseEntityAttributes().forEach(attribute -> {
-						switch(attribute.getAttributeCode()) {
-						case "PRI_PICKUP_ADDRESS_FULL":
-							sourceAddress = attribute.getObjectAsString();
-							System.out.println("source address ::"+sourceAddress);
-							break;
-						case "PRI_DROPOFF_ADDRESS_FULL":
-							destAddress = attribute.getObjectAsString();
-							System.out.println("dest address ::"+destAddress);
-							break;
-						}
-					});
-					
+				switch(attribute.getAttributeCode()) {
+				case "PRI_PICKUP_ADDRESS_LATITUDE":
+					pickupLatitude = attribute.getObjectAsString();
+					break;
+				case "PRI_PICKUP_ADDRESS_LONGITUDE":
+					pickupLongitude = attribute.getObjectAsString();
+					break;
+				case "PRI_DROPOFF_ADDRESS_LATITUDE":
+					deliveryLatitude = attribute.getObjectAsString();
+					break;
+				case "PRI_DROPOFF_ADDRESS_LONGITUDE":
+					deliveryLongitude = attribute.getObjectAsString();
+					break;
 				}
 			}
-			
-			if(sourceAddress != null && targetAddress.equalsIgnoreCase("Source")) {
-				latLong = getLatLong(sourceAddress);
-			    entryCode = begCode+"_ENTER_SOURCE";
-				exitCode = begCode+"_EXIT_SOURCE";
-				System.out.println("The Lat Long of Source is "+latLong[0]+ latLong[1]);
-			} else if(destAddress != null && targetAddress.equalsIgnoreCase("Destination")) {
-				latLong = getLatLong(destAddress);
-				 entryCode = begCode+"_ENTER_DESTINATION";
-				 exitCode = begCode+"_EXIT_DESTINATION";
-				 System.out.println("The Lat Long of Destination is "+latLong[0]+ latLong[1]);
+			if(pickupLatitude != null && pickupLongitude != null && deliveryLatitude != null && deliveryLongitude != null) {
+				
+				/* Send geofence CMD to driver for pickup */
+			    GPS gpsLocation = new GPS(begCode, pickupLatitude, pickupLongitude);        
+			    QCmdGeofenceMessage cmdGeoFence = new QCmdGeofenceMessage(gpsLocation, 10.0, begCode + "_ENTRY_CODE", begCode + "EXIT_CODE");	 
+				
+			    /* Send geofence CMD to driver for delivery */
+			    GPS gpsLocationDelivery = new GPS(begCode, deliveryLatitude, deliveryLongitude);        
+			    QCmdGeofenceMessage cmdGeoFenceDelivery = new QCmdGeofenceMessage(gpsLocation, 10.0, begCode + "_ENTRY_CODE", begCode + "EXIT_CODE");
+			    
+			    QCmdGeofenceMessage[] cmds = new QCmdGeofenceMessage[2];
+			    cmds[0] = cmdGeoFence;
+			    cmds[0] = cmdGeoFenceDelivery;
+			    return cmds;
 			}
-			 
-		} catch (Exception e) {
-			System.out.println("ERROR! " + e.toString());
 		}
-		//Create GPS	    
-	    GPS gpsLocation = new GPS(begCode, latLong[0], latLong[1]);        
-	   
-	    //Create QCmdGeofenceMessage
-	    QCmdGeofenceMessage cmdGeoFence = new QCmdGeofenceMessage(gpsLocation, 10.0, entryCode, exitCode);	 
-        
-		return cmdGeoFence;
+		
+		return null;
 	}
 	
 	/**
