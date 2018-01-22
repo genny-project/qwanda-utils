@@ -63,9 +63,6 @@ public class MergeUtil {
 		        }).create();
     
     
-    
-    
-	
 	public static final String REGEX_START = "{{";
 	public static final String REGEX_END = "}}";
 	public static final String REGEX_START_PATTERN = Pattern.quote(REGEX_START);
