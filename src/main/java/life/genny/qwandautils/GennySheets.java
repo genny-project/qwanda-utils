@@ -324,10 +324,12 @@ public class GennySheets {
       final String code = (String) object.get("code");
       final String name = (String) object.get("name");
       final String dataType = (String) object.get("datatype");
+      final String privacy = (String) object.get("privacy");
       Map<String, String> fields = new HashMap<String, String>();
       fields.put("code", code);
       fields.put("name", name);
       fields.put("dataType", dataType);
+      fields.put("privacy", privacy);
       map.put(code, fields);
       return map;
     }).reduce((ac, acc) -> {
@@ -373,11 +375,13 @@ public class GennySheets {
       final String attributeCode = (String) object.get("attributeCode");
       final String weight = (String) object.get("weight");
       final String valueString = (String) object.get("valueString");
+      final String privacy = (String) object.get("privacy");
       Map<String, String> fields = new HashMap<String, String>();
       fields.put("baseEntityCode", baseEntityCode);
       fields.put("attributeCode", attributeCode);
       fields.put("weight", weight);
       fields.put("valueString", valueString);
+      fields.put("privacy", privacy);
       map.put(baseEntityCode + attributeCode, fields);
       return map;
     }).reduce((ac, acc) -> {
