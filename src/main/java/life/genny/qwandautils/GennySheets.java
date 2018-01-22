@@ -431,11 +431,13 @@ public class GennySheets {
       final Map<String, Map> map = new HashMap<String, Map>();
       final String code = (String) object.get("code");
       final String name = (String) object.get("name");
+      final String html = (String) object.get("html");
       final String attribute_code = (String) object.get("attribute_code");
       Map<String, String> fields = new HashMap<String, String>();
       fields.put("code", code);
       fields.put("name", name);
       fields.put("attribute_code", attribute_code);
+      fields.put("html", html);
       map.put(code, fields);
       return map;
     }).reduce((ac, acc) -> {

@@ -1,4 +1,5 @@
 package life.genny.qwandautils;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -12,9 +13,11 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.http.client.ClientProtocolException;
 import org.json.JSONArray;
 import org.w3c.dom.Document;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.GPS;
 import life.genny.qwanda.attribute.EntityAttribute;
@@ -59,18 +62,18 @@ public class GPSUtils {
 				}
 			}
 			if(pickupLatitude != null && pickupLongitude != null && deliveryLatitude != null && deliveryLongitude != null) {
-				
+					
 				/* Send geofence CMD to driver for pickup */
 			    GPS gpsLocation = new GPS(be.getCode(), pickupLatitude, pickupLongitude);        
-			    QCmdGeofenceMessage cmdGeoFence = new QCmdGeofenceMessage(gpsLocation, 10.0, be.getCode() + "_ENTRY_CODE", be.getCode() + "EXIT_CODE");	 
+			    QCmdGeofenceMessage cmdGeoFence = new QCmdGeofenceMessage(gpsLocation, radius, be.getCode() + "_PICKUP", be.getCode() + "_PICKUP");	 
 				
 			    /* Send geofence CMD to driver for delivery */
 			    GPS gpsLocationDelivery = new GPS(be.getCode(), deliveryLatitude, deliveryLongitude);        
-			    QCmdGeofenceMessage cmdGeoFenceDelivery = new QCmdGeofenceMessage(gpsLocation, 10.0, be.getCode() + "_ENTRY_CODE", be.getCode() + "EXIT_CODE");
+			    QCmdGeofenceMessage cmdGeoFenceDelivery = new QCmdGeofenceMessage(gpsLocationDelivery, radius, be.getCode() + "_DELIVERY", be.getCode() + "_DELIVERY");
 			    
 			    QCmdGeofenceMessage[] cmds = new QCmdGeofenceMessage[2];
 			    cmds[0] = cmdGeoFence;
-			    cmds[0] = cmdGeoFenceDelivery;
+			    cmds[1] = cmdGeoFenceDelivery;
 			    return cmds;
 			}
 		}
@@ -116,5 +119,75 @@ public class GPSUtils {
 	    }
 	    return null;
 	  }
+	
+	/**
+	 * 
+	 * @param Double[] coordinates1
+	 * @param Double[] coordinates2
+	 * @return the distance between passed coordinates in meters
+	 */
+	public static Double getDistance(Double[] coordinates1, Double[] coordinates2)
+	{
+		try {
+			
+			/* Call Google Maps API to know how far the driver is */
+			String response = QwandaUtils.apiGet("https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + coordinates1[0] + "," + coordinates1[1] + "&destinations=" + coordinates2[0] + "," + coordinates2[1] + "&mode=driving&language=pl-PL", null);
+
+			System.out.println(response);
+			if(response != null) {
+				
+				JsonObject distanceMatrix = new JsonObject(response);
+				JsonArray elements = distanceMatrix.getJsonArray("rows").getJsonObject(0).getJsonArray("elements");
+				JsonObject distance = elements.getJsonObject(0).getJsonObject("distance");
+				Integer distanceValue = distance.getInteger("value");
+				return distanceValue.doubleValue();
+			}
+		}
+		catch (Exception e) {
+			
+		}
+			
+	    return -1.0;
+	}
+	
+	/**
+	 * 
+	 * @param String latitude1
+	 * @param String longitude1
+	 * @param String latitude2
+	 * @param String longitude2
+	 * @return the distance between passed coordinates in meters
+	 */
+	public static Double getDistance(String latitude1String, String longitude1String, String latitude2String, String longitude2String)
+	{
+		try {
+			
+			if(latitude1String != null && longitude1String != null && latitude2String != null && longitude2String != null) {
+           		
+           		Double latitude1 = Double.parseDouble(latitude1String);
+           		Double longitude1 = Double.parseDouble(longitude1String);
+           		Double latitude2 = Double.parseDouble(latitude2String);
+           		Double longitude2 = Double.parseDouble(longitude2String);
+           		
+           		/* Call Google Maps API to know how far the driver is */
+	    			String response = QwandaUtils.apiGet("https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + latitude1 + "," + longitude1 + "&destinations=" + latitude2 + "," + longitude2 + "&mode=driving&language=pl-PL", null);
+	
+	    			if(response != null) {
+	    				
+	    				JsonObject distanceMatrix = new JsonObject(response);
+	    				JsonArray elements = distanceMatrix.getJsonArray("rows").getJsonObject(0).getJsonArray("elements");
+	    				JsonObject distance = elements.getJsonObject(0).getJsonObject("distance");
+	    				Integer distanceValue = distance.getInteger("value");
+	    				return distanceValue.doubleValue();
+	    			}
+           	}
+
+		}
+		catch (Exception e) {
+			
+		}
+			
+	    return -1.0;
+	}
 
 }

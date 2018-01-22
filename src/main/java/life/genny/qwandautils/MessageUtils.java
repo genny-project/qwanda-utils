@@ -69,7 +69,7 @@ public class MessageUtils {
 		}
 		
 		QMessageGennyMSG msgMessage = new QMessageGennyMSG("MSG_MESSAGE", type, templateCode, contextMap, recipientArray);
-		JsonObject jsonMessage = new JsonObject().mapFrom(msgMessage);
+		JsonObject jsonMessage = JsonObject.mapFrom(msgMessage);
 
 		log.info("------------------------------------------------------------------------");
 		log.info("MESSAGE TO OWNER   ::   " + jsonMessage.toString());
