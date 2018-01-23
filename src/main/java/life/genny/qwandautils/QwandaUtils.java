@@ -48,6 +48,7 @@ import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.EntityEntity;
 import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
+import life.genny.qwanda.message.QDataAnswerMessage;
 import life.genny.qwanda.message.QDataAskMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
 
@@ -324,17 +325,33 @@ public class QwandaUtils {
 		Person person = new Person(code, firstname + " " + lastname);
 		
 		postBaseEntity(qwandaUrl, token, person);
-		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_USERNAME",username));
-		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_FIRSTNAME",firstname));
-		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_LASTNAME",lastname));
-		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_EMAIL",email));
-		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_REALM",realm));
-		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_NAME",name));
-		postAnswer(qwandaUrl, token, new Answer(code,code,"PRI_KEYCLOAK_ID",keycloakId));
-			
+		
+		List<Answer> answers = new ArrayList<Answer>();
+
+		answers.add((new Answer(code,code,"PRI_USERNAME",username)));
+		answers.add((new Answer(code,code,"PRI_FIRSTNAME",firstname)));
+		answers.add(( new Answer(code,code,"PRI_LASTNAME",lastname)));
+		answers.add((new Answer(code,code,"PRI_EMAIL",email)));
+		answers.add((new Answer(code,code,"PRI_REALM",realm)));
+		answers.add(( new Answer(code,code,"PRI_NAME",name)));
+		answers.add((new Answer(code,code,"PRI_KEYCLOAK_ID",keycloakId)));
+
+	      Answer items[] = new Answer[answers.size()];
+	      items = answers.toArray(items);
+		QDataAnswerMessage msg = new QDataAnswerMessage(items);
+		
+		Gson gson = new Gson();
+		GsonBuilder gsonBuilder = new GsonBuilder();
+		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
+		gson = gsonBuilder.create();
+        
+        String jsonAnswer = gson.toJson(msg);
+		QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/answers/bulk", jsonAnswer,token);
+
 		
 		postLink(qwandaUrl, token, new Link("GRP_USERS",code,"LNK_CORE"));
 		postLink(qwandaUrl, token, new Link("GRP_PEOPLE",code,"LNK_CORE"));
+		
 		
 		return person;
 	}
@@ -479,6 +496,7 @@ public class QwandaUtils {
 		return baseEntityCode;		
 		
 	}
+	
 	
 
 	/**
