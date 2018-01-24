@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>life.genny</groupId>
 	<artifactId>qwanda-utils</artifactId>
-	<version>0.9.11</version>
+	<version>0.9.12</version>
 	<name>qwanda-utils</name>
 	<description>Question and Answer Engine Utilities</description>
 
@@ -16,6 +16,7 @@
 	</licenses>
 
 	<properties>
+		<qwanda.version>0.9.12</qwanda.version>
 		<jar.finalName>${project.name}</jar.finalName>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -25,7 +26,6 @@
 		<junit-version>4.12</junit-version>
 		<log4j-core-version>2.5</log4j-core-version>
 
-		<qwanda.version>0.9.11</qwanda.version>
 
 		<!-- plugin versions -->
 		<ejb-plugin-version>2.3</ejb-plugin-version>

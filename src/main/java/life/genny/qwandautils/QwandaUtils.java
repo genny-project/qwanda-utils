@@ -148,7 +148,12 @@ public class QwandaUtils {
 		final StringEntity input = new StringEntity(entityString);
 		input.setContentType("application/json");
 		post.setEntity(input);
-		final HttpResponse response = client.execute(post);
+		HttpResponse response = null;
+		try {
+			response = client.execute(post);
+		} catch (Exception e) {
+			throw new IOException("Socket error");
+		}
 		final BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 		String line = "";
 		while ((line = rd.readLine()) != null) {
