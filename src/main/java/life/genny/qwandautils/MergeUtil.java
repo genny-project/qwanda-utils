@@ -128,9 +128,7 @@ public class MergeUtil {
 		try {
 			attributeString = QwandaUtils
 					.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode, token);
-			System.out.println(ANSI_BLUE + "Base entity attribute code::"+baseEntAttributeCode + ANSI_RESET);
-			System.out.println("attribute string ::"+attributeString);
-						
+			System.out.println(ANSI_BLUE + "Base entity attribute code::"+baseEntAttributeCode + ANSI_RESET);					
 			be = gson.fromJson(attributeString, BaseEntity.class);
 			
 		} catch (IOException e) {
@@ -152,6 +150,7 @@ public class MergeUtil {
 		String attributeVal = null;
 		for(EntityAttribute ea : be.getBaseEntityAttributes()) {
 			if(ea.getAttributeCode().equals(attributeCode)) {
+				System.out.println("MERGE UTIL ::"+attributeCode);
 				attributeVal = ea.getObjectAsString();
 			}
 		}
