@@ -150,7 +150,6 @@ public class MergeUtil {
 		String attributeVal = null;
 		for(EntityAttribute ea : be.getBaseEntityAttributes()) {
 			if(ea.getAttributeCode().equals(attributeCode)) {
-				System.out.println("MERGE UTIL ::"+attributeCode);
 				attributeVal = ea.getObjectAsString();
 			}
 		}
