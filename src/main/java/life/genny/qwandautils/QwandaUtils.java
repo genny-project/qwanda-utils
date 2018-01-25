@@ -97,10 +97,20 @@ public class QwandaUtils {
 		        }).create();
 
 	
-	public static String apiGet(final String getUrl, final String authToken)
+	public static String apiGet(String getUrl, final String authToken)
 			throws ClientProtocolException, IOException {
 		String retJson = "";
 		log.debug("GET:" + getUrl + ":");
+		if (authToken != null) {
+			if (authToken.contains(":")) {
+				if (getUrl.startsWith("https://")) {
+					getUrl = "https://"+System.getenv("GIT_USERNAME_PASSWORD")+"@"+getUrl.substring(8);
+				} else if (getUrl.startsWith("http://")) {
+					getUrl = "http://"+System.getenv("GIT_USERNAME_PASSWORD")+"@"+getUrl.substring(7);
+				}
+			
+			}
+		}
 		int timeout = 10;
 		RequestConfig config = RequestConfig.custom()
 		  .setConnectTimeout(timeout * 1000)
@@ -111,8 +121,8 @@ public class QwandaUtils {
 		HttpGet request = new HttpGet(getUrl); // GET Request
 		
 		if (authToken != null) {
-			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
-		}
+				request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+		} 
 		final HttpResponse response = client.execute(request);
 		BufferedReader rd = null;
 		
@@ -130,7 +140,10 @@ public class QwandaUtils {
 
 		return retJson;
 	}
+	
+	
 
+	
 	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken)
 			throws IOException {
 		String retJson = "";
