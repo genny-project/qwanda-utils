@@ -63,24 +63,26 @@ public class MergeUtil {
 		        }).create();
     
     
-	public static final String REGEX_START = "{{";
-	public static final String REGEX_END = "}}";
+	public static final String REGEX_START = "[";
+	public static final String REGEX_END = "]";
 	public static final String REGEX_START_PATTERN = Pattern.quote(REGEX_START);
     public static final String REGEX_END_PATTERN = Pattern.quote(REGEX_END);
-    public static final Pattern PATTERN = Pattern.compile(REGEX_START_PATTERN + "(.*?)" + REGEX_END_PATTERN);
+    public static final Pattern PATTERN = Pattern.compile(REGEX_START_PATTERN + "(?s)(.*?)" + REGEX_END_PATTERN);
     public static final String DEFAULT = "";
-	
+    
+    public static final String NEWPATTERN1 = REGEX_START_PATTERN + "(?s)(.*?)" + REGEX_END_PATTERN;
+    public static final Pattern PATTEN_MATCHER = Pattern.compile(NEWPATTERN1);
+   
+    
 	public static String merge(String mergeStr, Map<String, BaseEntity> templateEntityMap) {
-				
-		Matcher match = PATTERN.matcher(mergeStr);	
+
+		Matcher match = PATTEN_MATCHER.matcher(mergeStr);
 		
 		while (match.find()) {
-
 			Object mergedtext = wordMerge(templateEntityMap, match.group(1));
-			mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, mergedtext.toString());
-
+			log.info("merge text ::"+mergedtext);
+			mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, mergedtext.toString());			
 		}
-		
 		return mergeStr;
 		
 	}

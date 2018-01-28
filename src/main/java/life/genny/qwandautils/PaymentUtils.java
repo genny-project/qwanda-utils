@@ -8,7 +8,9 @@ import java.lang.invoke.MethodHandles;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -25,6 +27,7 @@ import org.json.simple.parser.ParseException;
 
 import com.google.gson.Gson;
 
+import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.entity.BaseEntity;
 
 public class PaymentUtils {
@@ -470,28 +473,39 @@ public class PaymentUtils {
 	@SuppressWarnings("unchecked")
 	public static String createPaymentItem(String BEGGroupCode, String assemblyauthToken, String token) {
 		
-		String itemCode = null;
+		String itemId = null;
 		Map<String, BaseEntity> itemContextMap = QwandaUtils.getBaseEntWithChildrenForAttributeCode(BEGGroupCode, token);
+		BaseEntity begBe = MergeUtil.getBaseEntityForAttr(BEGGroupCode, token);
+		
 		JSONObject itemObj = new JSONObject();
 		JSONObject buyerObj = null;
 		JSONObject sellerObj = null;
 		
+		System.out.println("item context Map ::"+itemContextMap);
 		itemObj.put("paymentType", DEFAULT_PAYMENT_TYPE);
+		itemObj.put("currency", DEFAULT_CURRENCY);
 		
-		if(itemContextMap.containsKey("LOAD")) {
-			BaseEntity loadBe = itemContextMap.get("LOAD");
+		
+		if(begBe != null) {
+			Object begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
+			Object begPrice = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_PRICE");
 			
-			if(loadBe != null) {
-				itemObj.put("description", MergeUtil.getBaseEntityAttrValueAsString(loadBe, "PRI_LOAD_DESC"));
-				itemObj.put("name", MergeUtil.getBaseEntityAttrValueAsString(loadBe, "PRI_TITLE"));
-				itemObj.put("amount", MergeUtil.getBaseEntityAttrValueAsString(loadBe, "PRI_PRICE"));
-				itemObj.put("currency", DEFAULT_CURRENCY);
-			}	
+			//350 Dollars sent to Assembly as 3.50$
+			Integer assemblyPrice = (int)begPrice * 100;
+			
+			Object begDescription = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_DESCRIPTION");
+			
+			itemObj.put("name", begTitle);
+			itemObj.put("amount", assemblyPrice.toString());
+			itemObj.put("description", begDescription);
+			itemObj.put("currency", DEFAULT_CURRENCY);
 		}
+		
 		
 		/* OWNER -> Buyer */
 		if(itemContextMap.containsKey("OWNER")) {
 			BaseEntity ownerBe = itemContextMap.get("OWNER");
+			System.out.println("Context map contains OWNER");
 			
 			if(ownerBe != null) {
 				buyerObj = new JSONObject();
@@ -503,6 +517,7 @@ public class PaymentUtils {
 		/* DRIVER -> Seller */
 		if(itemContextMap.containsKey("DRIVER")) {
 			BaseEntity driverBe = itemContextMap.get("DRIVER");
+			System.out.println("Context map contains DRIVER");
 			
 			if(driverBe != null) {
 				sellerObj = new JSONObject();
@@ -515,19 +530,74 @@ public class PaymentUtils {
 		if(buyerObj != null && sellerObj != null) {
 			itemObj.put("buyer", buyerObj);
 			itemObj.put("seller", sellerObj);
+			itemObj.put("id", UUID.randomUUID().toString());
 			
-			log.info("Item object ::"+itemObj);
+			System.out.println("Item object ::"+itemObj);
 			
 			String itemCreationResponse = PaymentEndpoint.createItem(gson.toJson(itemObj), assemblyauthToken);
 			
-			log.info("Item creation response ::"+itemObj);
+			if(!itemCreationResponse.contains("error")) {
+				itemId = itemObj.get("id").toString();
+				log.info("Item object ::"+itemObj);
+			}
 			
-			JSONObject itemResponseObj = gson.fromJson(itemCreationResponse, JSONObject.class);
-			itemCode = itemResponseObj.get("id").toString();
+			log.info("Item creation response ::"+itemCreationResponse);		
 			
 		}			
 		
-		return itemCode;
+		return itemId;
+	}
+	
+	/*@SuppressWarnings("unchecked")
+	public static			log.info("Item creation response ::"+itemCreationResponse);		
+thToken) {
+		
+		String userCode = getUserCode(tokenString);
+		BaseEntity userBe = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
+		BaseEntity begCode = MergeUtil.getBaseEntityForAttr(BEGCode, tokenString);
+		
+		Object ipAddress = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_IP_ADDRESS");
+		Object deviceId = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_DEVICE_ID");
+		Object itemId = MergeUtil.getBaseEntityAttrObjectValue(begCode, "PRI_ITEM_ID");
+		
+		JSONObject paymentObj = new JSONObject();
+		paymentObj.put("id", itemId.toString());
+		paymentObj.put("accountId", null);
+		paymentObj.put("ipAddress", ipAddress.toString());
+		paymentObj.put("deviceId", deviceId);
+		paymentObj.put("itemId", itemId.toString());
+		
+		String paymentResponse = PaymentEndpoint.makePayment(gson.toJson(paymentObj), authToken);
+		
+		log.info("Item creation response ::"+paymentResponse);
+		
+		return paymentResponse;
+	}*/
+	
+	
+	public static String getBegCode(String offerCode, String tokenString) {
+		
+		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
+		String begCode = null;
+		List entityAttributeList = null;
+		try {
+			String attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + offerCode + "/attributes", tokenString);
+			entityAttributeList = QwandaUtils.gson.fromJson(attributeString, List.class);
+			
+			System.out.println("Entity Attribute List:"+entityAttributeList);
+			
+			for(Object eaObj : entityAttributeList) {
+				
+				JsonObject offerObj = (JsonObject) eaObj;
+                String attributeCode = offerObj.getString("attributeCode");
+                String attributeValue = offerObj.getString("valueString");
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}	
+		
+		return begCode;
 	}
 	
 
