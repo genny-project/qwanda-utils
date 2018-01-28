@@ -96,4 +96,9 @@ public class PaymentEndpoint {
 		return createCompanyResponse;
 	}
 
+	public static String makePayment(String json, String authToken) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

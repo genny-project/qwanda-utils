@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
@@ -26,8 +27,11 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import io.vertx.core.json.JsonObject;
+import life.genny.qwanda.Answer;
+import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.entity.BaseEntity;
 
 public class PaymentUtils {
@@ -548,9 +552,7 @@ public class PaymentUtils {
 		return itemId;
 	}
 	
-	/*@SuppressWarnings("unchecked")
-	public static			log.info("Item creation response ::"+itemCreationResponse);		
-thToken) {
+	public static String makePayment(String BEGCode, String authToken, String tokenString){
 		
 		String userCode = getUserCode(tokenString);
 		BaseEntity userBe = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
@@ -572,7 +574,7 @@ thToken) {
 		log.info("Item creation response ::"+paymentResponse);
 		
 		return paymentResponse;
-	}*/
+	}
 	
 	
 	public static String getBegCode(String offerCode, String tokenString) {
@@ -598,6 +600,20 @@ thToken) {
 		}	
 		
 		return begCode;
+	}
+	
+	public static void saveAnswer(String qwandaServiceUrl, Answer answer, String token) {
+		
+		Gson gson = new Gson();
+	    GsonBuilder gsonBuilder = new GsonBuilder();
+	    gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
+	    gson = gsonBuilder.create();
+		
+		try {
+			QwandaUtils.apiPostEntity(qwandaServiceUrl+"/qwanda/answers",gson.toJson(answer), token);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 
