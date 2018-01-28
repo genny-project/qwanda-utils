@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.http.HttpResponse;
@@ -916,5 +917,26 @@ public class QwandaUtils {
 		}
 
 		return link;
+	}
+	
+	
+	public static BaseEntity getBaseEntityForAttribute(String groupCode, String linkCode, String attributeCode, String attributeValue, String tokenString) {
+		QDataBaseEntityMessage entityMessage = getDataBEMessage(groupCode, linkCode, tokenString);
+		
+		BaseEntity[] beArr = entityMessage.getItems();
+		BaseEntity resultBe = null;
+		
+		if(beArr != null) {
+			
+			for(BaseEntity be : beArr) {
+				if(attributeValue.equals(MergeUtil.getBaseEntityAttrObjectValue(be, attributeCode))) {
+					resultBe = be;
+					return resultBe;
+				}
+			}
+			
+		}
+		return resultBe;	
+		
 	}
 }
