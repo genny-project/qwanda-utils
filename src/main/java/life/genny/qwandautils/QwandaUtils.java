@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -431,22 +432,28 @@ public class QwandaUtils {
      * <p> For sourceBaseEntityCode : PER_USERXX, targetBaseEntityCode : BEG_XXX/LOD_XXXX, questionCode : Question grpCode, method checks if all the 
      * mandatory fields in the Question Group has been entered</p>
      */	
+	static Map<String,String> askMap = new ConcurrentHashMap<String,String>();
 	public static Boolean isMandatoryFieldsEntered(String sourceBaseEntityCode, String targetBaseEntityCode, String questionCode, final String userToken) {
 
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 		//String qwandaServiceUrl = "http://localhost:8280";
 		try {
-
-			String attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
+			String attributeString = null;
+			String key = sourceBaseEntityCode+":"+questionCode+":"+targetBaseEntityCode + userToken.substring(0,8); // get first 8 chars
+			if (askMap.containsKey(key)) {
+				attributeString = askMap.get(key);
+			} else {
+			 attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
 					+ "/asks3/" + questionCode + "/" + targetBaseEntityCode, userToken);
-
-			System.out.println("Attribute String="+attributeString);
+			 askMap.put(key, attributeString);
+			}
+			log.debug("Attribute String="+attributeString);
 			QDataAskMessage askMsgs = gson.fromJson(attributeString, QDataAskMessage.class);
 			BaseEntity be = MergeUtil.getBaseEntityForAttr(targetBaseEntityCode, userToken);
 
 			for (Ask parentAsk : askMsgs.getItems()) {
 				for (Ask childAsk : parentAsk.getChildAsks()) {
-					System.out.println("parent ask code ::"+parentAsk.getAttributeCode());
+					//log.info("parent ask code ::"+parentAsk.getAttributeCode());
 					for (Ask basicChildAsk : childAsk.getChildAsks()) {
 
 						if (basicChildAsk.getMandatory()) {
@@ -459,14 +466,14 @@ public class QwandaUtils {
 							} else {
 								return false;
 							}*/
-							System.out.println("child ask attribute code ::"+basicChildAsk.getAttributeCode());
+						//	System.out.println("child ask attribute code ::"+basicChildAsk.getAttributeCode());
 							Object attributeVal = MergeUtil.getBaseEntityAttrObjectValue(be,basicChildAsk.getAttributeCode());
 							if(attributeVal!= null){
 								System.out.println("attribu6te value ::"+basicChildAsk.getAttributeCode()+"----"+attributeVal);
 							}
 							
 							if(attributeVal == null) {
-								System.out.println(basicChildAsk.getAttributeCode() + " is null");
+								//System.out.println(basicChildAsk.getAttributeCode() + " is null");
 								return false;
 							}
 								
