@@ -42,6 +42,7 @@ public class PaymentUtils {
 	final static Gson gson = new Gson();
 	public static final String DEFAULT_CURRENCY = "AUD";
 	public static final String DEFAULT_PAYMENT_TYPE = "escrow";
+	public static final String PROVIDER_TYPE_BANK = "bank"; 
 	
 	@SuppressWarnings("unchecked")
 	public static String getAssemblyAuthKey() {
@@ -191,21 +192,22 @@ public class PaymentUtils {
 	
 	public static Boolean checkIfAssemblyUserExists(String assemblyUserId) {
 		
-		String authToken = getAssemblyAuthKey();
+		if(assemblyUserId != null) {
+			String authToken = getAssemblyAuthKey();
+			
+			String assemblyUserString = PaymentEndpoint.getAssemblyUserById(assemblyUserId, authToken);
+			if(!assemblyUserString.contains("error")) {
+				return true;
+			} 
+			System.out.println("assembly user string ::"+assemblyUserString);
+		}
 		
-		String assemblyUserString = PaymentEndpoint.getAssemblyUserById(assemblyUserId, authToken);
-		if(!assemblyUserString.contains("error")) {
-			return true;
-		} 
-		System.out.println("assembly user string ::"+assemblyUserString);
 		return false;
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static void createAssemblyUser(String assemblyUserId, String authToken, String token) { 
 		
-		Gson gson = new Gson();
-
 		String userCode = getUserCode(token);
 		BaseEntity be = MergeUtil.getBaseEntityForAttr(userCode, token);
 
@@ -214,7 +216,7 @@ public class PaymentUtils {
 		JSONObject contactInfoObj = new JSONObject();
 		JSONObject locationObj = new JSONObject();
 		
-		if(be != null) {
+		if(be != null && assemblyUserId != null) {
 			
 			Object firstName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_FIRSTNAME");
 			Object lastName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_LASTNAME");
@@ -300,7 +302,6 @@ public class PaymentUtils {
 
 		System.out.println("attributeCode ::" + attributeCode + ", value ::" + value);
 		String responseString = null;
-		//String companyId = MergeUtil.getAttrValue(userCode, "PRI_ASSEMBLY_COMPANY_ID", token)
 
 		/* Personal Info Update Objects */
 		JSONObject userobj = null;
@@ -374,19 +375,19 @@ public class PaymentUtils {
 		
 		/* For Assembly Personal Information Update */
 		
-		if(personalInfoObj != null) {
+		if(personalInfoObj != null  && assemblyUserId != null) {
 			userobj = new JSONObject();
 			userobj.put("personalInfo", personalInfoObj);
 			userobj.put("id", assemblyUserId);
 		}
 
-		if (personalContactInfoObj != null) {
+		if (personalContactInfoObj != null && assemblyUserId != null) {
 			userobj = new JSONObject();
 			userobj.put("contactInfo", personalContactInfoObj);
 			userobj.put("id", assemblyUserId);	
 		}
 
-		if (locationObj != null) {
+		if (locationObj != null && assemblyUserId != null) {
 			userobj = new JSONObject();
 			userobj.put("location", locationObj);
 			userobj.put("id", assemblyUserId);
@@ -395,7 +396,7 @@ public class PaymentUtils {
 			companyObj.put("location", locationObj);
 		}
 		
-		if(userobj != null) {
+		if(userobj != null && assemblyUserId!= null) {
 			responseString = PaymentEndpoint.updateAssemblyUser(assemblyUserId, gson.toJson(userobj), authToken);
 			System.out.println("response string from payments user updation ::"+responseString);
 		}
@@ -417,7 +418,7 @@ public class PaymentUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static String createCompany(String assemblyId, String authtoken,String tokenString) {
+	public static String createCompany(String authtoken, String tokenString) {
 		
 		String userCode = getUserCode(tokenString);
 		BaseEntity be = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
@@ -585,7 +586,6 @@ public class PaymentUtils {
 		JsonArray entityAttributeArray = null;
 		try {
 			entityAttributeArray = new JsonArray(QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + offerCode + "/attributes", tokenString));
-			//entityAttributeList = QwandaUtils.gson.fromJson(attributeString, JsonArray.class);
 			
 			System.out.println("Entity Attribute List:"+entityAttributeArray);
 			
@@ -593,7 +593,11 @@ public class PaymentUtils {
 				
 				JsonObject offerObj = (JsonObject) eaObj;
                 String attributeCode = offerObj.getString("attributeCode");
-                String attributeValue = offerObj.getString("valueString");
+                
+                if(attributeCode.equals("PRI_BEG_CODE")) {
+                	begCode = offerObj.getString("valueString");
+                	return begCode;
+                }
 			}
 
 		} catch (IOException e) {
@@ -615,6 +619,55 @@ public class PaymentUtils {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static void saveTokenAnswers(String qwandaServiceUrl, String userId, String tokenString, String assemblyId,
+			String assemblyAuthToken) {
+
+		JSONParser parser = new JSONParser();
+
+		if (assemblyId != null) {
+
+			String tokenResponse = authenticatePaymentProvider(assemblyId, assemblyAuthToken);
+
+			if (!tokenResponse.contains("error")) {
+				try {
+					JSONObject tokenObj = (JSONObject) parser.parse(tokenResponse);
+					System.out.println("token object ::" + tokenObj);
+
+					String providerToken = tokenObj.get("token").toString();
+
+					Answer cardTokenAnswer = new Answer(userId, userId, "PRI_ASSEMBLY_CARD_TOKEN", providerToken);
+					saveAnswer(qwandaServiceUrl, cardTokenAnswer, tokenString);
+
+					Answer bankTokenAnswer = new Answer(userId, userId, "PRI_ASSEMBLY_BANK_TOKEN", providerToken);
+					saveAnswer(qwandaServiceUrl, bankTokenAnswer, tokenString);
+
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			}
+		} else {
+			log.error("ASSEMBLY USER ID IS NULL");
+		}
+
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	private static String authenticatePaymentProvider(String assemblyId, String assemblyAuthToken) {
+		
+		JSONObject paymentProviderObj = new JSONObject();
+		JSONObject userObj = new JSONObject();
+		
+		userObj.put("id", assemblyId);
+		
+		paymentProviderObj.put("type", PROVIDER_TYPE_BANK);
+		paymentProviderObj.put("user", userObj);
+		
+		String tokenResponse = PaymentEndpoint.authenticatePaymentProvider(gson.toJson(paymentProviderObj), assemblyAuthToken);
+		
+		return tokenResponse;
 	}
 	
 
