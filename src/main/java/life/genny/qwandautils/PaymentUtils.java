@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -29,6 +28,7 @@ import org.json.simple.parser.ParseException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.DateTimeDeserializer;
@@ -397,6 +397,7 @@ public class PaymentUtils {
 		
 		if(userobj != null) {
 			responseString = PaymentEndpoint.updateAssemblyUser(assemblyUserId, gson.toJson(userobj), authToken);
+			System.out.println("response string from payments user updation ::"+responseString);
 		}
 		
 		/* For Assembly User Company Information Update */
@@ -581,14 +582,14 @@ public class PaymentUtils {
 		
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 		String begCode = null;
-		List entityAttributeList = null;
+		JsonArray entityAttributeArray = null;
 		try {
-			String attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + offerCode + "/attributes", tokenString);
-			entityAttributeList = QwandaUtils.gson.fromJson(attributeString, List.class);
+			entityAttributeArray = new JsonArray(QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + offerCode + "/attributes", tokenString));
+			//entityAttributeList = QwandaUtils.gson.fromJson(attributeString, JsonArray.class);
 			
-			System.out.println("Entity Attribute List:"+entityAttributeList);
+			System.out.println("Entity Attribute List:"+entityAttributeArray);
 			
-			for(Object eaObj : entityAttributeList) {
+			for(Object eaObj : entityAttributeArray) {
 				
 				JsonObject offerObj = (JsonObject) eaObj;
                 String attributeCode = offerObj.getString("attributeCode");
