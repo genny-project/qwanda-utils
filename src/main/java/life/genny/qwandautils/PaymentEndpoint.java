@@ -15,7 +15,6 @@ public class PaymentEndpoint {
 		try {
 			newpaymentsUserResponse = PaymentUtils.apiPostPaymentEntity(
 					paymentServiceUrl + "/" + paymentProvider + "/users", entityString, authToken);
-			System.out.println("create users - payments response ::" + newpaymentsUserResponse);
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -30,7 +29,6 @@ public class PaymentEndpoint {
 		try {
 			userResponse = PaymentUtils.apiGetPaymentResponse(
 					paymentServiceUrl + "/" + paymentProvider + "/users/" + assemblyUserId, authToken);
-			System.out.println("get a particular user detail ::" + userResponse);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -44,7 +42,6 @@ public class PaymentEndpoint {
 		try {
 			editPaymentResponse = PaymentUtils.apiPutPaymentEntity(
 					paymentServiceUrl + "/" + paymentProvider + "/users/" + assemblyUserId, entityString, authToken);
-			System.out.println("Response after editing a user ::" + editPaymentResponse);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -58,7 +55,6 @@ public class PaymentEndpoint {
 		try {
 			createCompanyResponse = PaymentUtils.apiPostPaymentEntity(
 					paymentServiceUrl + "/" + paymentProvider + "/companies", companyEntityString, authToken);
-			System.out.println("Response after creating a new company ::" + createCompanyResponse);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -73,7 +69,6 @@ public class PaymentEndpoint {
 		try {
 			updateCompanyResponse = PaymentUtils.apiPostPaymentEntity(
 					paymentServiceUrl + "/" + paymentProvider + "/users/" + companyId, companyEntityString, authToken);
-			System.out.println("Response after editing a user ::" + updateCompanyResponse);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -88,7 +83,6 @@ public class PaymentEndpoint {
 		try {
 			createCompanyResponse = PaymentUtils.apiPostPaymentEntity(
 					paymentServiceUrl + "/" + paymentProvider + "/items",  itemEntity, authToken);
-			System.out.println("Response after editing a user ::" + createCompanyResponse);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -97,7 +91,6 @@ public class PaymentEndpoint {
 	}
 
 	public static String makePayment(String json, String authToken) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
