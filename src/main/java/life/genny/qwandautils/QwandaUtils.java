@@ -282,8 +282,7 @@ public class QwandaUtils {
 		be.setId(ret);
 		return ret; 
 	}
-	public static Answer postAnswer(final String qwandaUrl, final String token, final Answer answer
-			) throws IOException
+	public static Answer postAnswer(final String qwandaUrl, final String token, final Answer answer) throws IOException
 	{
 		if (answer.getValue() != null) {
 		GsonBuilder gsonBuilder = new GsonBuilder();
@@ -295,6 +294,7 @@ public class QwandaUtils {
 		String id = QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/answers", gson.toJson(answer),token);
 		// TODO check id is returned
 		}
+				
 		return answer;
 	}
 
@@ -366,10 +366,8 @@ public class QwandaUtils {
         String jsonAnswer = gson.toJson(msg);
 		QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/answers/bulk", jsonAnswer,token);
 
-		
 		postLink(qwandaUrl, token, new Link("GRP_USERS",code,"LNK_CORE"));
 		postLink(qwandaUrl, token, new Link("GRP_PEOPLE",code,"LNK_CORE"));
-		
 		
 		return person;
 	}
