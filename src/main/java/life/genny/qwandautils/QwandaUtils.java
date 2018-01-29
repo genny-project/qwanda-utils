@@ -447,6 +447,7 @@ public class QwandaUtils {
 			} else {
 			 attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
 					+ "/asks3/" + questionCode + "/" + targetBaseEntityCode, userToken);
+			 askMap.put(key, attributeString);
 			}
 			log.debug("Attribute String="+attributeString);
 			QDataAskMessage askMsgs = gson.fromJson(attributeString, QDataAskMessage.class);
