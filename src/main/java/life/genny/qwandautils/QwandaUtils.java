@@ -435,6 +435,7 @@ public class QwandaUtils {
      * mandatory fields in the Question Group has been entered</p>
      */	
 	static Map<String,String> askMap = new ConcurrentHashMap<String,String>();
+	
 	public static Boolean isMandatoryFieldsEntered(String sourceBaseEntityCode, String targetBaseEntityCode, String questionCode, final String userToken) {
 
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
