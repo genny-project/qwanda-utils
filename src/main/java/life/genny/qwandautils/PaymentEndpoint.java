@@ -68,7 +68,7 @@ public class PaymentEndpoint {
 
 		try {
 			updateCompanyResponse = PaymentUtils.apiPostPaymentEntity(
-					paymentServiceUrl + "/" + paymentProvider + "/users/" + companyId, companyEntityString, authToken);
+					paymentServiceUrl + "/" + paymentProvider + "/companies/" + companyId, companyEntityString, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -92,6 +92,21 @@ public class PaymentEndpoint {
 
 	public static String makePayment(String json, String authToken) {
 		return null;
+	}
+	
+	
+	public static String authenticatePaymentProvider(String paymentProviderEntity, String authToken) {
+		String authenticateResponse = null;
+		
+		try {
+			authenticateResponse = PaymentUtils.apiPostPaymentEntity(
+					paymentServiceUrl + "/" + paymentProvider + "/tokens",  paymentProviderEntity, authToken);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+				
+		return authenticateResponse;
+		
 	}
 
 }
