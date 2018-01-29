@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -37,12 +39,14 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.Ask;
+import life.genny.qwanda.CodedEntity;
 import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.Link;
 import life.genny.qwanda.attribute.EntityAttribute;
@@ -57,6 +61,9 @@ import life.genny.qwanda.message.QDataBaseEntityMessage;
 
 
 public class QwandaUtils {
+	
+	private static int apiPort =  System.getenv("API_PORT") != null ? (Integer.parseInt(System.getenv("API_PORT"))) : 8088;
+	private static String hostIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : "127.0.0.1";	
 	
 	public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLUE = "\u001B[34m";
@@ -947,4 +954,91 @@ public class QwandaUtils {
 		return resultBe;	
 		
 	}
+	
+	
+	public static <T extends CodedEntity> String  apiPutCodedEntity(T codedEntity, final String authToken)
+			throws IOException {
+		
+        String code = codedEntity.getCode();
+        String realm = codedEntity.getRealm();
+        String key = realm+":"+code;
+        String json = gson.toJson(codedEntity);
+        String uuJson = URLEncoder.encode(json, "UTF-8");
+		
+		String retJson = "";
+		int timeout = 10;
+		RequestConfig config = RequestConfig.custom()
+				  .setConnectTimeout(timeout * 1000)
+				  .setConnectionRequestTimeout(timeout * 1000)
+				  .setSocketTimeout(timeout * 1000).build();
+				CloseableHttpClient client = 
+				  HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+
+		final HttpPost post = new HttpPost("http://"+hostIP+":"+apiPort+"/"+key+"/"+uuJson);
+		post.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+
+		final StringEntity input = new StringEntity(json); // Do this to test out
+		input.setContentType("application/json");
+		post.setEntity(input);
+		HttpResponse response = null;
+		try {
+			response = client.execute(post);
+		} catch (Exception e) {
+			throw new IOException("Socket error");
+		}
+		final BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+		String line = "";
+		while ((line = rd.readLine()) != null) {
+			retJson += line;
+			;
+		}
+		return retJson;
+	}
+
+	public static <T extends CodedEntity> T  apiGetCodedEntity(String key, final Class clazz,String authToken)
+			throws ClientProtocolException, IOException {
+		String retJson = "";
+
+		int timeout = 10;
+		RequestConfig config = RequestConfig.custom()
+		  .setConnectTimeout(timeout * 1000)
+		  .setConnectionRequestTimeout(timeout * 1000)
+		  .setSocketTimeout(timeout * 1000).build();
+		CloseableHttpClient client = 
+		  HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+		HttpGet request = new HttpGet("http://"+hostIP+":"+apiPort+"/"+key); // GET Request
+		
+		if (authToken != null) {
+				request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+		} 
+		final HttpResponse response = client.execute(request);
+		BufferedReader rd = null;
+		
+		try {
+			rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+			String line = "";
+			while ((line = rd.readLine()) != null) {
+				retJson += line;
+				;
+			}
+		} catch (NullPointerException e) {
+			// TODO Auto-generated catch block
+			return null;
+		}
+
+		JsonObject json = gson.fromJson(retJson, JsonObject.class);
+		if (json.get("status").getAsString().equals("ok")) {
+			String value = json.get("value").getAsString();
+			String decodedValue = URLDecoder.decode(value);
+			T entity = (T)gson.fromJson(decodedValue, clazz);
+			return entity;
+		} else {
+			// fetch from api
+			
+			return null;
+		}
+	}
+	
+	
+	
 }
