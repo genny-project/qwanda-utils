@@ -90,8 +90,17 @@ public class PaymentEndpoint {
 		return createCompanyResponse;
 	}
 
-	public static String makePayment(String json, String authToken) {
-		return null;
+	public static String makePayment(String paymentId, String paymentEntity, String authToken) {
+		String makePaymentResponse = null;
+		
+		try {
+			makePaymentResponse = PaymentUtils.apiPostPaymentEntity(
+					paymentServiceUrl + "/" + paymentProvider + "/items/" + paymentId + "/payment",  paymentEntity, authToken);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+				
+		return makePaymentResponse;
 	}
 	
 	
@@ -107,6 +116,19 @@ public class PaymentEndpoint {
 				
 		return authenticateResponse;
 		
+	}
+	
+	public static String createFees(String feeEntity, String authToken) {
+		String feeResponse = null;
+		
+		try {
+			feeResponse = PaymentUtils.apiPostPaymentEntity(
+					paymentServiceUrl + "/" + paymentProvider + "/fees",  feeEntity, authToken);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+				
+		return feeResponse;
 	}
 
 }

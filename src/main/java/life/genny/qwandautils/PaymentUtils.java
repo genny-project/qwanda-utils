@@ -21,6 +21,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jgit.api.MergeCommand.FastForwardMode.Merge;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -493,18 +494,25 @@ public class PaymentUtils {
 		
 		
 		if(begBe != null) {
+			
+			String feeId = getPaymentFeeId(begBe, assemblyauthToken);
+				
 			Object begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
 			Object begPrice = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_PRICE");
 			
-			//350 Dollars sent to Assembly as 3.50$
-			Integer assemblyPrice = (int)begPrice * 100;
+			//350 Dollars sent to Assembly as 3.50$ --> Need to check
 			
 			Object begDescription = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_DESCRIPTION");
 			
 			itemObj.put("name", begTitle);
-			itemObj.put("amount", assemblyPrice.toString());
+			itemObj.put("amount", begPrice);
 			itemObj.put("description", begDescription);
 			itemObj.put("currency", DEFAULT_CURRENCY);
+			
+			if(feeId != null) {
+				String[] feeArr = {feeId};
+				itemObj.put("fees", feeArr);
+			}
 		}
 		
 		
@@ -554,26 +562,32 @@ public class PaymentUtils {
 		return itemId;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static String makePayment(String BEGCode, String authToken, String tokenString){
 		
 		String userCode = getUserCode(tokenString);
 		BaseEntity userBe = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
 		BaseEntity begCode = MergeUtil.getBaseEntityForAttr(BEGCode, tokenString);
 		
+		String paymentResponse = null;
+		
 		Object ipAddress = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_IP_ADDRESS");
 		Object deviceId = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_DEVICE_ID");
 		Object itemId = MergeUtil.getBaseEntityAttrObjectValue(begCode, "PRI_ITEM_ID");
 		
-		JSONObject paymentObj = new JSONObject();
-		paymentObj.put("id", itemId.toString());
-		paymentObj.put("accountId", null);
-		paymentObj.put("ipAddress", ipAddress.toString());
-		paymentObj.put("deviceId", deviceId);
-		paymentObj.put("itemId", itemId.toString());
+		if(itemId != null) {
+			JSONObject paymentObj = new JSONObject();
+			paymentObj.put("id", itemId.toString());
+			paymentObj.put("accountId", null);
+			paymentObj.put("ipAddress", ipAddress.toString());
+			paymentObj.put("deviceId", deviceId);
+			paymentObj.put("itemId", itemId.toString());
+			
+			paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), gson.toJson(paymentObj), authToken);
+			
+			log.info("Item creation response ::"+paymentResponse);
+		}
 		
-		String paymentResponse = PaymentEndpoint.makePayment(gson.toJson(paymentObj), authToken);
-		
-		log.info("Item creation response ::"+paymentResponse);
 		
 		return paymentResponse;
 	}
@@ -668,6 +682,48 @@ public class PaymentUtils {
 		String tokenResponse = PaymentEndpoint.authenticatePaymentProvider(gson.toJson(paymentProviderObj), assemblyAuthToken);
 		
 		return tokenResponse;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public static String getPaymentFeeId(BaseEntity begBe, String assemblyAuthToken) {
+		
+		JSONParser parser = new JSONParser();
+		String feeId = null;
+		
+		Object fee = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_FEE");
+		
+		if(fee != null) {
+			JSONObject feeObj = new JSONObject();
+			feeObj.put("name", "Channel40 fee");
+			feeObj.put("type", 1);
+			feeObj.put("amount", fee);
+			feeObj.put("cap", null);
+			feeObj.put("min", null);
+			feeObj.put("max", null);
+			feeObj.put("to", "buyer");
+			
+			String feeResponse = PaymentEndpoint.createFees(gson.toJson(feeObj), assemblyAuthToken);
+			
+			if(feeResponse != null) {
+				JSONObject feeResponseObj;
+				try {
+					feeResponseObj = (JSONObject) parser.parse(feeResponse);
+					
+					if(feeResponseObj.get("id") != null) {
+						feeId = feeResponseObj.get("id").toString();
+						return feeId;
+					}
+					
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				
+			}
+			
+		}
+		return feeId;	
+		
 	}
 	
 
