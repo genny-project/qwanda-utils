@@ -32,6 +32,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
+import org.javamoney.moneta.Money;
 import org.json.JSONObject;
 
 import com.google.gson.Gson;
@@ -49,6 +50,7 @@ import life.genny.qwanda.Ask;
 import life.genny.qwanda.CodedEntity;
 import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.Link;
+import life.genny.qwanda.MoneyDeserializer;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.EntityEntity;
@@ -78,7 +80,7 @@ public class QwandaUtils {
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
-	final static Gson gson = new GsonBuilder()
+	final static Gson gson = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer())
 	        .registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
 	          @Override
 	          public LocalDate deserialize(final JsonElement json, final Type type,
@@ -275,7 +277,7 @@ public class QwandaUtils {
 	public static Long postBaseEntity(final String qwandaUrl, final String token, final BaseEntity be
 			) throws IOException
 	{
-		GsonBuilder gsonBuilder = new GsonBuilder();
+		GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer());
 		Gson gson = null;
 
 		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
@@ -294,7 +296,7 @@ public class QwandaUtils {
 	public static Answer postAnswer(final String qwandaUrl, final String token, final Answer answer) throws IOException
 	{
 		if (answer.getValue() != null) {
-		GsonBuilder gsonBuilder = new GsonBuilder();
+		GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer());
 		Gson gson = null;
 
 		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
@@ -310,7 +312,7 @@ public class QwandaUtils {
 	public static Link postLink(final String qwandaUrl, final String token, final Link link
 			) throws IOException
 	{
-		GsonBuilder gsonBuilder = new GsonBuilder();
+		GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer());
 		Gson gson = null;
 
 		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
@@ -368,7 +370,7 @@ public class QwandaUtils {
 		QDataAnswerMessage msg = new QDataAnswerMessage(items);
 		
 		Gson gson = new Gson();
-		GsonBuilder gsonBuilder = new GsonBuilder();
+		GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer());
 		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
 		gson = gsonBuilder.create();
         
@@ -728,7 +730,7 @@ public class QwandaUtils {
     public static BaseEntity createBaseEntityByCode(String entityCode, String name, String qwandaUrl, String token) {
 		BaseEntity beg = new BaseEntity(entityCode, name);		
 		Gson gson = new Gson();
-		GsonBuilder gsonBuilder = new GsonBuilder();
+		GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer());
 		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
 		gson = gsonBuilder.create();
         

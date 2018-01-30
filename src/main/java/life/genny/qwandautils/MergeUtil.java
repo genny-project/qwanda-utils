@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.Logger;
+import org.javamoney.moneta.Money;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -23,6 +24,7 @@ import com.google.gson.JsonSerializationContext;
 
 import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.Link;
+import life.genny.qwanda.MoneyDeserializer;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 
@@ -35,7 +37,7 @@ public class MergeUtil {
     public static final String ANSI_BLUE = "\u001B[34m";
     public static final String ANSI_RED = "\u001B[31m";
 	
-    final static Gson gson = new GsonBuilder()
+    final static Gson gson = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer())
 	        .registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
 	          @Override
 	          public LocalDate deserialize(final JsonElement json, final Type type,
@@ -212,7 +214,7 @@ public class MergeUtil {
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 		
 		Gson gson1 = new Gson();
-		GsonBuilder gsonBuilder = new GsonBuilder();
+		GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer());
 		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
 		gson1 = gsonBuilder.create();
         
