@@ -89,19 +89,6 @@ public class PaymentEndpoint {
 				
 		return createCompanyResponse;
 	}
-
-	public static String makePayment(String paymentId, String paymentEntity, String authToken) {
-		String makePaymentResponse = null;
-		
-		try {
-			makePaymentResponse = PaymentUtils.apiPostPaymentEntity(
-					paymentServiceUrl + "/" + paymentProvider + "/items/" + paymentId + "/payment",  paymentEntity, authToken);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-				
-		return makePaymentResponse;
-	}
 	
 	
 	public static String authenticatePaymentProvider(String paymentProviderEntity, String authToken) {
@@ -129,6 +116,34 @@ public class PaymentEndpoint {
 		}
 				
 		return feeResponse;
+	}
+	
+	
+	public static String makePayment(String paymentItemId, String paymentEntity, String authToken) {
+		String makePaymentResponse = null;
+		
+		try {
+			makePaymentResponse = PaymentUtils.apiPostPaymentEntity(
+					paymentServiceUrl + "/" + paymentProvider + "/items/" + paymentItemId + "/payment",  paymentEntity, authToken);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+				
+		return makePaymentResponse;
+	}
+	
+	
+	public static String releasePayment(String paymentItemId, String authToken) {
+		String releasePaymentResponse = null;
+		
+		try {
+			releasePaymentResponse = PaymentUtils.apiPostPaymentEntity(
+					paymentServiceUrl + "/" + paymentProvider + "/items/" + paymentItemId + "/release-payment", null, authToken);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+				
+		return releasePaymentResponse;
 	}
 
 }

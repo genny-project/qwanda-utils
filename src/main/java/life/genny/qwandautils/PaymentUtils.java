@@ -21,7 +21,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jgit.api.MergeCommand.FastForwardMode.Merge;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -34,6 +33,7 @@ import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.entity.BaseEntity;
+import life.genny.qwanda.message.QDataAnswerMessage;
 
 public class PaymentUtils {
 	
@@ -562,36 +562,6 @@ public class PaymentUtils {
 		return itemId;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static String makePayment(String BEGCode, String authToken, String tokenString){
-		
-		String userCode = getUserCode(tokenString);
-		BaseEntity userBe = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
-		BaseEntity begCode = MergeUtil.getBaseEntityForAttr(BEGCode, tokenString);
-		
-		String paymentResponse = null;
-		
-		Object ipAddress = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_IP_ADDRESS");
-		Object deviceId = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_DEVICE_ID");
-		Object itemId = MergeUtil.getBaseEntityAttrObjectValue(begCode, "PRI_ITEM_ID");
-		
-		if(itemId != null) {
-			JSONObject paymentObj = new JSONObject();
-			paymentObj.put("id", itemId.toString());
-			paymentObj.put("accountId", null);
-			paymentObj.put("ipAddress", ipAddress.toString());
-			paymentObj.put("deviceId", deviceId);
-			paymentObj.put("itemId", itemId.toString());
-			
-			paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), gson.toJson(paymentObj), authToken);
-			
-			log.info("Item creation response ::"+paymentResponse);
-		}
-		
-		
-		return paymentResponse;
-	}
-	
 	
 	public static String getBegCode(String offerCode, String tokenString) {
 		
@@ -629,7 +599,7 @@ public class PaymentUtils {
 	    gson = gsonBuilder.create();
 		
 		try {
-			QwandaUtils.apiPostEntity(qwandaServiceUrl+"/qwanda/answers",gson.toJson(answer), token);
+			QwandaUtils.apiPostEntity(qwandaServiceUrl+"/qwanda/answers", gson.toJson(answer), token);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -724,6 +694,114 @@ public class PaymentUtils {
 		}
 		return feeId;	
 		
+	}
+	
+	
+	public static String processPaymentAnswers(String qwandaServiceUrl, QDataAnswerMessage m, String tokenString) {
+		
+		String begCode = null;
+
+		try {
+			
+			System.out.println("----> Payments attributes Answers <------");
+
+			Answer[] answers = m.getItems();
+			for (Answer answer : answers) {
+
+				String targetCode = answer.getTargetCode();
+				String sourceCode = answer.getSourceCode();
+				String attributeCode = answer.getAttributeCode();
+				String value = answer.getValue();
+				
+				begCode = targetCode;
+
+				log.debug("Payments value ::" + value + "attribute code ::" + attributeCode);
+
+				/* if this answer is actually an address another rule will be triggered */
+				if (attributeCode.contains("PRI_PAYMENT_METHOD")) {
+					
+					JSONParser parser = new JSONParser();
+					JSONObject paymentValues = (JSONObject) parser.parse(value);
+					
+					/*{ ipAddress, deviceID, accountID }*/
+					Object ipAddress = paymentValues.get("ipAddress");
+					Object accountId = paymentValues.get("accountID");
+					Object deviceId = paymentValues.get("deviceID");
+					
+					if(ipAddress != null){
+						Answer ipAnswer = new Answer(sourceCode, sourceCode, "PRI_IP_ADDRESS", ipAddress.toString());
+						saveAnswer(qwandaServiceUrl, ipAnswer, tokenString);
+					}
+					
+					if(accountId != null) {
+						Answer accountIdAnswer = new Answer(sourceCode, targetCode, "PRI_ACCOUNT_ID", accountId.toString());
+						saveAnswer(qwandaServiceUrl, accountIdAnswer, tokenString);
+					}
+					
+					if(deviceId != null) {
+						Answer deviceIdAnswer = new Answer(sourceCode, sourceCode, "PRI_DEVICE_ID", deviceId.toString());
+						saveAnswer(qwandaServiceUrl, deviceIdAnswer, tokenString);	
+					}
+									
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return begCode;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public static String makePayment(String begCode, String authToken, String tokenString){
+		
+		String userCode = getUserCode(tokenString);
+		BaseEntity userBe = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
+		BaseEntity begBe = MergeUtil.getBaseEntityForAttr(begCode, tokenString);
+		
+		String paymentResponse = null;
+		
+		Object ipAddress = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_IP_ADDRESS");
+		Object deviceId = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_DEVICE_ID");
+		Object itemId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ITEM_ID");
+		Object accountId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ACCOUNT_ID");
+		
+		if(itemId != null && deviceId != null && ipAddress != null && accountId != null) {
+			JSONObject paymentObj = new JSONObject();
+			paymentObj.put("id", itemId);
+			
+			JSONObject accountObj = new JSONObject();
+			accountObj.put("id", accountId);
+			
+			paymentObj.put("ipAddress", ipAddress);
+			paymentObj.put("deviceID", deviceId);
+			paymentObj.put("account", accountObj);
+			
+			paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), gson.toJson(paymentObj), authToken);
+			
+			log.debug("Make payment response ::"+paymentResponse);
+		} else {
+			log.error("One of the attribute for making payment is null ! PAYMENT CANNOT BE MADE");
+		}
+		
+		
+		return paymentResponse;
+	}
+	
+	public static String releasePayment(String begCode, String authToken, String tokenString) {
+		
+		System.out.println("BEG Code for release payment ::"+begCode);
+		BaseEntity begBe = MergeUtil.getBaseEntityForAttr(begCode, tokenString);
+		
+		String paymentResponse = null;
+		Object itemId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ITEM_ID");
+		
+		if(itemId != null) {
+			paymentResponse = PaymentEndpoint.releasePayment(itemId.toString(), authToken);
+			log.debug("release payment response ::"+paymentResponse);
+		}
+		
+		return paymentResponse;
 	}
 	
 
