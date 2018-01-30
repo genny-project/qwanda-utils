@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1039,6 +1040,43 @@ public class QwandaUtils {
 		}
 	}
 	
-	
+	/*
+	 * Checks if all the mandatory fields are completed
+	 */
+	public static Boolean isMandatoryFieldsCompleted(QDataAskMessage asks, List<BaseEntity> baseEntityList) {
+		return isMandatoryFieldsCompleted(asks.getItems(), baseEntityList);
+	}
+
+	public static Boolean isMandatoryFieldsCompleted(Ask[] askArray, List<BaseEntity> baseEntityList) {
+
+		for (Ask parentAsk : askArray) {
+			if (parentAsk.getAttributeCode().startsWith("QQQ_")) {
+				// This is the Question GRP
+              Ask[] childAsks = parentAsk.getChildAsks();
+              Boolean result = isMandatoryFieldsCompleted(childAsks, baseEntityList);
+        
+               if(result == false) {
+            	       return false;
+               }
+			} else {
+				Boolean mandatory = parentAsk.getMandatory();
+				if (mandatory) {
+					for (BaseEntity be : baseEntityList) {
+						if (parentAsk.getTargetCode().equals(be.getCode())) {
+							Optional<EntityAttribute> ea = be.findEntityAttribute(parentAsk.getAttributeCode());
+							if (ea.isPresent()) {
+								Object value = ea.get().getValue();
+								if(value == null) {
+									return false;
+								}
+							}
+						}
+					}
+				}
+			}
+
+		}
+		return true;
+	}	
 	
 }

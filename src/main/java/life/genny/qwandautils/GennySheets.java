@@ -455,9 +455,14 @@ public class GennySheets {
       return null;
     }
     return obj.stream().map(object -> {
+    	
       final Map<String, Map> map = new HashMap<String, Map>();
       final String parentCode = (String) object.get("parentCode");
       final String targetCode = (String) object.get("targetCode");
+      if ("QUE_USER_SELECT_ROLE".equals(targetCode))
+      {
+    	  	System.out.println("dummy");
+      }
       final String weight = (String) object.get("weight");
       final String mandatory = (String) object.get("mandatory");
       Map<String, String> fields = new HashMap<String, String>();
