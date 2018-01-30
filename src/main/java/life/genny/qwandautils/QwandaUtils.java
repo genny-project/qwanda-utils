@@ -455,7 +455,7 @@ public class QwandaUtils {
 					+ "/asks3/" + questionCode + "/" + targetBaseEntityCode, userToken);
 			 askMap.put(key, attributeString);
 			}
-			log.debug("Attribute String="+attributeString);
+//			log.debug("Attribute String="+attributeString);
 			QDataAskMessage askMsgs = gson.fromJson(attributeString, QDataAskMessage.class);
 			BaseEntity be = MergeUtil.getBaseEntityForAttr(targetBaseEntityCode, userToken);
 
@@ -477,7 +477,7 @@ public class QwandaUtils {
 						//	System.out.println("child ask attribute code ::"+basicChildAsk.getAttributeCode());
 							Object attributeVal = MergeUtil.getBaseEntityAttrObjectValue(be,basicChildAsk.getAttributeCode());
 							if(attributeVal!= null){
-								System.out.println("attribu6te value ::"+basicChildAsk.getAttributeCode()+"----"+attributeVal);
+//								System.out.println("attribu6te value ::"+basicChildAsk.getAttributeCode()+"----"+attributeVal);
 							}
 							
 							if(attributeVal == null) {
@@ -491,7 +491,7 @@ public class QwandaUtils {
 				}
 			}
 
-			System.out.println("askMsgs ::" + askMsgs);
+//			System.out.println("askMsgs ::" + askMsgs);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
