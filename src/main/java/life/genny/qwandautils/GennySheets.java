@@ -350,11 +350,14 @@ public class GennySheets {
       final Map<String, Map> map = new HashMap<String, Map>();
       final String code = (String) object.get("code");
       final String name = (String) object.get("name");
+      final String dataType = (String) object.get("datatype");
+      final String privacy = (String) object.get("privacy");
       Map<String, String> fields = new HashMap<String, String>();
       fields.put("code", code);
       fields.put("name", name);
-      map.put(code, fields);
-      return map;
+      fields.put("dataType", dataType);
+      fields.put("privacy", privacy);
+      map.put(code, fields);      return map;
     }).reduce((ac, acc) -> {
       ac.putAll(acc);
       return ac;
@@ -459,10 +462,10 @@ public class GennySheets {
       final Map<String, Map> map = new HashMap<String, Map>();
       final String parentCode = (String) object.get("parentCode");
       final String targetCode = (String) object.get("targetCode");
-      if ("QUE_USER_SELECT_ROLE".equals(targetCode))
-      {
-    	  	System.out.println("dummy");
-      }
+//      if ("QUE_USER_SELECT_ROLE".equals(targetCode))
+//      {
+//    	  	System.out.println("dummy");
+//      }
       final String weight = (String) object.get("weight");
       final String mandatory = (String) object.get("mandatory");
       Map<String, String> fields = new HashMap<String, String>();
