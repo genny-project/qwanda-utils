@@ -16,7 +16,7 @@
 	</licenses>
 
 	<properties>
-		<qwanda.version>0.9.22</qwanda.version>
+		<qwanda.version>0.9.23</qwanda.version>
 		<jar.finalName>${project.name}</jar.finalName>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
