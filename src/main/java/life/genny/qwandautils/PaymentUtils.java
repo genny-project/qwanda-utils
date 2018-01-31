@@ -616,6 +616,7 @@ public class PaymentUtils {
 			String tokenResponse = authenticatePaymentProvider(assemblyId, assemblyAuthToken);
 
 			if (!tokenResponse.contains("error")) {
+				
 				try {
 					JSONObject tokenObj = (JSONObject) parser.parse(tokenResponse);
 					System.out.println("token object ::" + tokenObj);
@@ -714,7 +715,6 @@ public class PaymentUtils {
 		return isAnswerContainsPaymentAttribute;
 	}
 	
-	
 	public static String processPaymentAnswers(String qwandaServiceUrl, QDataAnswerMessage m, String tokenString) {
 		
 		String begCode = null;
@@ -722,6 +722,8 @@ public class PaymentUtils {
 		try {
 			
 			System.out.println("----> Payments attributes Answers <------");
+			
+			String userCode = getUserCode(tokenString);
 
 			Answer[] answers = m.getItems();
 			for (Answer answer : answers) {
@@ -738,26 +740,25 @@ public class PaymentUtils {
 				/* if this answer is actually an Payment_method, this rule will be triggered */
 				if (attributeCode.contains("PRI_PAYMENT_METHOD")) {
 					
-					JSONParser parser = new JSONParser();
-					JSONObject paymentValues = (JSONObject) parser.parse(value);
+					JsonObject paymentValues = new JsonObject(value);
 					
 					/*{ ipAddress, deviceID, accountID }*/
-					Object ipAddress = paymentValues.get("ipAddress");
-					Object accountId = paymentValues.get("accountID");
-					Object deviceId = paymentValues.get("deviceID");
+					String ipAddress = paymentValues.getString("ipAddress");
+					String accountId = paymentValues.getString("accountID");
+					String deviceId = paymentValues.getString("deviceID");
 					
 					if(ipAddress != null){
-						Answer ipAnswer = new Answer(sourceCode, sourceCode, "PRI_IP_ADDRESS", ipAddress.toString());
+						Answer ipAnswer = new Answer(sourceCode, userCode, "PRI_IP_ADDRESS", ipAddress);
 						saveAnswer(qwandaServiceUrl, ipAnswer, tokenString);
 					}
 					
 					if(accountId != null) {
-						Answer accountIdAnswer = new Answer(sourceCode, targetCode, "PRI_ACCOUNT_ID", accountId.toString());
+						Answer accountIdAnswer = new Answer(sourceCode, userCode, "PRI_ACCOUNT_ID", accountId);
 						saveAnswer(qwandaServiceUrl, accountIdAnswer, tokenString);
 					}
 					
 					if(deviceId != null) {
-						Answer deviceIdAnswer = new Answer(sourceCode, sourceCode, "PRI_DEVICE_ID", deviceId.toString());
+						Answer deviceIdAnswer = new Answer(sourceCode, userCode, "PRI_DEVICE_ID", deviceId);
 						saveAnswer(qwandaServiceUrl, deviceIdAnswer, tokenString);	
 					}
 									
@@ -769,9 +770,8 @@ public class PaymentUtils {
 		return begCode;
 	}
 	
-	
 	@SuppressWarnings("unchecked")
-	public static String makePayment(String begCode, String authToken, String tokenString){
+	public static String makePayment(String begCode, String authToken, String tokenString) {
 		
 		String userCode = getUserCode(tokenString);
 		BaseEntity userBe = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
@@ -785,6 +785,7 @@ public class PaymentUtils {
 		Object accountId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ACCOUNT_ID");
 		
 		if(itemId != null && deviceId != null && ipAddress != null && accountId != null) {
+			
 			JSONObject paymentObj = new JSONObject();
 			paymentObj.put("id", itemId);
 			
@@ -798,7 +799,26 @@ public class PaymentUtils {
 			paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), gson.toJson(paymentObj), authToken);
 			
 			log.debug("Make payment response ::"+paymentResponse);
+			return paymentResponse;
+			
 		} else {
+			
+			if(itemId == null) {
+				log.error("ITEM ID");
+			}
+			
+			if(deviceId == null) {
+				log.error("deviceId ID");
+			}
+			
+			if(ipAddress == null) {
+				log.error("ipAddress ID");
+			}
+			
+			if(accountId == null) {
+				log.error("accountId ID");
+			}
+			
 			log.error("One of the attribute for making payment is null ! PAYMENT CANNOT BE MADE");
 		}
 		
