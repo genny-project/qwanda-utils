@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -501,12 +502,14 @@ public class PaymentUtils {
 			Object begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
 			Object begPrice = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_PRICE");
 			
-			//350 Dollars sent to Assembly as 3.50$ --> Need to check
+			//350 Dollars sent to Assembly as 3.50$, so multiplying with 100 
+			BigDecimal finalPrice = ((BigDecimal) begPrice).multiply(new BigDecimal(100));
 			
 			Object begDescription = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_DESCRIPTION");
 			
+			
 			itemObj.put("name", begTitle);
-			itemObj.put("amount", begPrice);
+			itemObj.put("amount", finalPrice.toString());
 			itemObj.put("description", begDescription);
 			itemObj.put("currency", DEFAULT_CURRENCY);
 			
