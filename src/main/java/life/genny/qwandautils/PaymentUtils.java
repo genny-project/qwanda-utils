@@ -366,7 +366,7 @@ public class PaymentUtils {
 			break;
 		case "PRI_GST":
 			companyObj = new JSONObject();
-			companyObj.put("chargesTax", value);
+			companyObj.put("chargesTax", Boolean.valueOf(value));
 			break;
 		case "PRI_LANDLINE":
 			companyContactInfoObj = new JSONObject();
@@ -411,6 +411,7 @@ public class PaymentUtils {
 		
 		
 		if(companyId != null && companyObj != null) {
+			System.out.println("updating company object in assembly ::"+companyObj);
 			responseString = PaymentEndpoint.updateCompany(companyId, gson.toJson(companyObj), authToken);
 		}
 		
@@ -696,6 +697,23 @@ public class PaymentUtils {
 		
 	}
 	
+	public static Boolean checkIfAnswerContainsPaymentAttribute(QDataAnswerMessage m) {
+		
+		Boolean isAnswerContainsPaymentAttribute = false;
+		
+		if(m != null) {
+			Answer[] answers = m.getItems();
+			for(Answer answer : answers) {
+				String attributeCode = answer.getAttributeCode();
+				if(attributeCode.contains("PRI_PAYMENT_METHOD")) {
+					isAnswerContainsPaymentAttribute = true;
+				}
+			}
+		}	
+		
+		return isAnswerContainsPaymentAttribute;
+	}
+	
 	
 	public static String processPaymentAnswers(String qwandaServiceUrl, QDataAnswerMessage m, String tokenString) {
 		
@@ -717,7 +735,7 @@ public class PaymentUtils {
 
 				log.debug("Payments value ::" + value + "attribute code ::" + attributeCode);
 
-				/* if this answer is actually an address another rule will be triggered */
+				/* if this answer is actually an Payment_method, this rule will be triggered */
 				if (attributeCode.contains("PRI_PAYMENT_METHOD")) {
 					
 					JSONParser parser = new JSONParser();
