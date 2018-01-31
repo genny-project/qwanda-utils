@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -40,7 +41,6 @@ public class PaymentUtils {
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
-	final static Gson gson = new Gson();
 	public static final String DEFAULT_CURRENCY = "AUD";
 	public static final String DEFAULT_PAYMENT_TYPE = "escrow";
 	public static final String PROVIDER_TYPE_BANK = "bank"; 
@@ -289,7 +289,7 @@ public class PaymentUtils {
 		
 		System.out.println("user obj ::"+userobj);
 	
-		PaymentEndpoint.createAssemblyUser(gson.toJson(userobj), authToken);		
+		PaymentEndpoint.createAssemblyUser(JsonUtils.toJson(userobj), authToken);		
 	}
 	
 	public static String getPaymentsUser(String assemblyUserId, String authToken){
@@ -398,7 +398,7 @@ public class PaymentUtils {
 		}
 		
 		if(userobj != null && assemblyUserId!= null) {
-			responseString = PaymentEndpoint.updateAssemblyUser(assemblyUserId, gson.toJson(userobj), authToken);
+			responseString = PaymentEndpoint.updateAssemblyUser(assemblyUserId, JsonUtils.toJson(userobj), authToken);
 			System.out.println("response string from payments user updation ::"+responseString);
 		}
 		
@@ -412,7 +412,7 @@ public class PaymentUtils {
 		
 		if(companyId != null && companyObj != null) {
 			System.out.println("updating company object in assembly ::"+companyObj);
-			responseString = PaymentEndpoint.updateCompany(companyId, gson.toJson(companyObj), authToken);
+			responseString = PaymentEndpoint.updateCompany(companyId, JsonUtils.toJson(companyObj), authToken);
 		}
 		
 		return responseString;
@@ -470,8 +470,8 @@ public class PaymentUtils {
 		
 		log.info("Company object ::"+companyObj);
 		
-		createCompanyResponse = PaymentEndpoint.createCompany(gson.toJson(companyObj), authtoken);
-		JSONObject companyResponseObj = gson.fromJson(createCompanyResponse, JSONObject.class);
+		createCompanyResponse = PaymentEndpoint.createCompany(JsonUtils.toJson(companyObj), authtoken);
+		JSONObject companyResponseObj = JsonUtils.fromJson(createCompanyResponse, JSONObject.class);
 		String companyCode = companyResponseObj.get("id").toString();
 		
 		return companyCode;
@@ -501,12 +501,14 @@ public class PaymentUtils {
 			Object begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
 			Object begPrice = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_PRICE");
 			
-			//350 Dollars sent to Assembly as 3.50$ --> Need to check
+			//350 Dollars sent to Assembly as 3.50$, so multiplying with 100 
+			BigDecimal finalPrice = ((BigDecimal) begPrice).multiply(new BigDecimal(100));
 			
 			Object begDescription = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_DESCRIPTION");
 			
+			
 			itemObj.put("name", begTitle);
-			itemObj.put("amount", begPrice);
+			itemObj.put("amount", finalPrice.toString());
 			itemObj.put("description", begDescription);
 			itemObj.put("currency", DEFAULT_CURRENCY);
 			
@@ -549,7 +551,7 @@ public class PaymentUtils {
 			
 			System.out.println("Item object ::"+itemObj);
 			
-			String itemCreationResponse = PaymentEndpoint.createItem(gson.toJson(itemObj), assemblyauthToken);
+			String itemCreationResponse = PaymentEndpoint.createItem(JsonUtils.toJson(itemObj), assemblyauthToken);
 			
 			if(!itemCreationResponse.contains("error")) {
 				itemId = itemObj.get("id").toString();
@@ -600,7 +602,7 @@ public class PaymentUtils {
 	    gson = gsonBuilder.create();
 		
 		try {
-			QwandaUtils.apiPostEntity(qwandaServiceUrl+"/qwanda/answers", gson.toJson(answer), token);
+			QwandaUtils.apiPostEntity(qwandaServiceUrl+"/qwanda/answers", JsonUtils.toJson(answer), token);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -651,7 +653,7 @@ public class PaymentUtils {
 		paymentProviderObj.put("type", PROVIDER_TYPE_BANK);
 		paymentProviderObj.put("user", userObj);
 		
-		String tokenResponse = PaymentEndpoint.authenticatePaymentProvider(gson.toJson(paymentProviderObj), assemblyAuthToken);
+		String tokenResponse = PaymentEndpoint.authenticatePaymentProvider(JsonUtils.toJson(paymentProviderObj), assemblyAuthToken);
 		
 		return tokenResponse;
 	}
@@ -675,7 +677,7 @@ public class PaymentUtils {
 			feeObj.put("max", null);
 			feeObj.put("to", "buyer");
 			
-			String feeResponse = PaymentEndpoint.createFees(gson.toJson(feeObj), assemblyAuthToken);
+			String feeResponse = PaymentEndpoint.createFees(JsonUtils.toJson(feeObj), assemblyAuthToken);
 			
 			if(feeResponse != null) {
 				JSONObject feeResponseObj;
@@ -796,7 +798,7 @@ public class PaymentUtils {
 			paymentObj.put("deviceID", deviceId);
 			paymentObj.put("account", accountObj);
 			
-			paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), gson.toJson(paymentObj), authToken);
+			paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), JsonUtils.toJson(paymentObj), authToken);
 			
 			log.debug("Make payment response ::"+paymentResponse);
 			return paymentResponse;
