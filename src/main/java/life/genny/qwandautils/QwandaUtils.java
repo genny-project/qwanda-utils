@@ -81,32 +81,6 @@ public class QwandaUtils {
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
-	final static Gson gson = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer())
-	        .registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
-	          @Override
-	          public LocalDate deserialize(final JsonElement json, final Type type,
-	              final JsonDeserializationContext jsonDeserializationContext)
-	              throws JsonParseException {
-	            return LocalDate.parse(json.getAsJsonPrimitive().getAsString(), DateTimeFormatter.ISO_LOCAL_DATE);
-	          }
-
-	          public JsonElement serialize(final LocalDate date, final Type typeOfSrc,
-	              final JsonSerializationContext context) {
-	            return new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE)); 
-	          }
-	        }).registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
-		          @Override
-		          public LocalDateTime deserialize(final JsonElement json, final Type type,
-		              final JsonDeserializationContext jsonDeserializationContext)
-		              throws JsonParseException {
-		            return LocalDateTime.parse(json.getAsJsonPrimitive().getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-		          }
-
-		          public JsonElement serialize(final LocalDateTime date, final Type typeOfSrc,
-		              final JsonSerializationContext context) {
-		            return new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)); 
-		          }
-		        }).create();
 
 	
 	public static String apiGet(String getUrl, final String authToken)
@@ -278,12 +252,8 @@ public class QwandaUtils {
 	public static Long postBaseEntity(final String qwandaUrl, final String token, final BaseEntity be
 			) throws IOException
 	{
-		GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer());
-		Gson gson = null;
 
-		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
-		gson = gsonBuilder.create();
-		String jsonBE = gson.toJson(be);
+		String jsonBE = JsonUtils.toJson(be);
 	
 		
 		String retStr = QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/baseentitys", jsonBE,token);
@@ -297,13 +267,9 @@ public class QwandaUtils {
 	public static Answer postAnswer(final String qwandaUrl, final String token, final Answer answer) throws IOException
 	{
 		if (answer.getValue() != null) {
-		GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer());
-		Gson gson = null;
 
-		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
-		gson = gsonBuilder.create();
 
-		String id = QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/answers", gson.toJson(answer),token);
+		String id = QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/answers", JsonUtils.toJson(answer),token);
 		// TODO check id is returned
 		}
 				
@@ -313,13 +279,9 @@ public class QwandaUtils {
 	public static Link postLink(final String qwandaUrl, final String token, final Link link
 			) throws IOException
 	{
-		GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer());
-		Gson gson = null;
 
-		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
-		gson = gsonBuilder.create();
 
-		QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/entityentitys", gson.toJson(link),token);
+		QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/entityentitys", JsonUtils.toJson(link),token);
 
 		return link;
 	}	
@@ -370,12 +332,9 @@ public class QwandaUtils {
 	      items = answers.toArray(items);
 		QDataAnswerMessage msg = new QDataAnswerMessage(items);
 		
-		Gson gson = new Gson();
-		GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer());
-		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
-		gson = gsonBuilder.create();
+
         
-        String jsonAnswer = gson.toJson(msg);
+        String jsonAnswer = JsonUtils.toJson(msg);
 		QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/answers/bulk", jsonAnswer,token);
 
 		postLink(qwandaUrl, token, new Link("GRP_USERS",code,"LNK_CORE"));
@@ -459,7 +418,7 @@ public class QwandaUtils {
 			 askMap.put(key, attributeString);
 			}
 //			log.debug("Attribute String="+attributeString);
-			QDataAskMessage askMsgs = gson.fromJson(attributeString, QDataAskMessage.class);
+			QDataAskMessage askMsgs = JsonUtils.fromJson(attributeString, QDataAskMessage.class);
 			BaseEntity be = MergeUtil.getBaseEntityForAttr(targetBaseEntityCode, userToken);
 
 			for (Ask parentAsk : askMsgs.getItems()) {
@@ -517,7 +476,7 @@ public class QwandaUtils {
 			String attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/GRP_PEOPLE/linkcodes/LNK_CORE/attributes?PRI_USERNAME=" + username, userToken);
 			System.out.println("attribute string::" + attributeString);
 			
-			QDataBaseEntityMessage msg = gson.fromJson(attributeString, QDataBaseEntityMessage.class);
+			QDataBaseEntityMessage msg = JsonUtils.fromJson(attributeString, QDataBaseEntityMessage.class);
 			
 			for(BaseEntity be : msg.getItems()) {
 				baseEntityCode = be.getCode();
@@ -548,7 +507,7 @@ public class QwandaUtils {
 		try {
 			attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/templates/" + templateCode,
 					token);
-			template = gson.fromJson(attributeString, QBaseMSGMessageTemplate.class);
+			template = JsonUtils.fromJson(attributeString, QBaseMSGMessageTemplate.class);
 			System.out.println("template sms:"+template.getSms_template());
 
 		} catch (IOException e) {
@@ -575,7 +534,7 @@ public class QwandaUtils {
 			String attributeString = QwandaUtils
 					.apiGet(qwandaServiceUrl + "/qwanda/entityentitys/" + groupCode + "/linkcodes/LNK_BEG/children", token);
 			if(attributeString != null) {
-				linkList = gson.fromJson(attributeString, List.class);
+				linkList = JsonUtils.fromJson(attributeString, List.class);
 			}
 			
 			
@@ -605,7 +564,7 @@ public class QwandaUtils {
 			System.out.println(ANSI_BLUE+"Got BEG string" + ANSI_RESET + linkList.toString());			
 			
 			linkList.forEach(item -> {
-				Link link = gson.fromJson(item.toString(), Link.class);
+				Link link = JsonUtils.fromJson(item.toString(), Link.class);
 				String baseEntAttributeCode = link.getTargetCode();
 				System.out.println("base attribute target code ::"+baseEntAttributeCode);
 				if(link.getLinkValue() != null){
@@ -663,7 +622,7 @@ public class QwandaUtils {
 		try {
 			String attributeString = QwandaUtils
 					.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + groupCode + "/linkcodes/" +linkCode+ "/attributes", token);
-			dataBEMessage = gson.fromJson(attributeString, QDataBaseEntityMessage.class);
+			dataBEMessage = JsonUtils.fromJson(attributeString, QDataBaseEntityMessage.class);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -730,12 +689,8 @@ public class QwandaUtils {
 	//creating new BaseEntity by only baseentityCode
     public static BaseEntity createBaseEntityByCode(String entityCode, String name, String qwandaUrl, String token) {
 		BaseEntity beg = new BaseEntity(entityCode, name);		
-		Gson gson = new Gson();
-		GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer());
-		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
-		gson = gsonBuilder.create();
-        
-        String jsonBE = gson.toJson(beg);
+       
+        String jsonBE = JsonUtils.toJson(beg);
         try {
         		// save BE
             QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/baseentitys", jsonBE, token);                       
@@ -863,7 +818,7 @@ public class QwandaUtils {
     	if(linkList != null) {
     		isLinkExists = linkList.stream().anyMatch(item -> {
         		Boolean isExists = false;
-        		Link link = gson.fromJson(item.toString(), Link.class);
+        		Link link = JsonUtils.fromJson(item.toString(), Link.class);
         		if(link.getAttributeCode().equals(linkCode) && link.getTargetCode().equals(targetCode) && link.getLinkValue().equals(linkValue))
         			isExists = true;
     			return isExists;
@@ -963,7 +918,7 @@ public class QwandaUtils {
         String code = codedEntity.getCode();
         String realm = codedEntity.getRealm();
         String key = realm+":"+code;
-        String json = gson.toJson(codedEntity);
+        String json = JsonUtils.toJson(codedEntity);
         String uuJson = URLEncoder.encode(json, "UTF-8");
 		
 		String retJson = "";
@@ -1027,11 +982,11 @@ public class QwandaUtils {
 			return null;
 		}
 
-		JsonObject json = gson.fromJson(retJson, JsonObject.class);
+		JsonObject json = JsonUtils.fromJson(retJson, JsonObject.class);
 		if (json.get("status").getAsString().equals("ok")) {
 			String value = json.get("value").getAsString();
 			String decodedValue = URLDecoder.decode(value);
-			T entity = (T)gson.fromJson(decodedValue, clazz);
+			T entity = (T)JsonUtils.fromJson(decodedValue, clazz);
 			return entity;
 		} else {
 			// fetch from api
