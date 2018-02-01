@@ -17,6 +17,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.MoneyDeserializer;
@@ -27,9 +28,17 @@ public class JsonUtils {
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
-	static GsonBuilder gsonBuilder = new GsonBuilder();
+	static GsonBuilder gsonBuilder = new GsonBuilder();       
+
 	static public Gson gson = gsonBuilder.registerTypeAdapter(Money.class, new MoneyDeserializer())
-			.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer()).setPrettyPrinting()
+			.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer()).registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
+			    @Override
+			    public LocalDate deserialize(JsonElement json, java.lang.reflect.Type typeOfT,
+			        JsonDeserializationContext context) throws JsonParseException {
+
+			      return LocalDate.parse(json.getAsJsonPrimitive().getAsString(), DateTimeFormatter.ISO_DATE);     
+			    }
+			}).setPrettyPrinting()
 			.registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
 				@Override
 				public LocalDate deserialize(final JsonElement json, final Type type,
@@ -57,6 +66,7 @@ public class JsonUtils {
 	                      item = (T)gson.fromJson(json, clazz);
 	                	}
 	                } catch (Exception e) {
+	                	     System.out.println("The JSON file received is  :::  "+json);;
 	                     log.error("Bad Deserialisation for "+clazz.getSimpleName());
 	                }
 	        }
@@ -70,3 +80,4 @@ public class JsonUtils {
 		return ret;
 	}
 }
+
