@@ -493,31 +493,33 @@ public class PaymentUtils {
 		itemObj.put("paymentType", DEFAULT_PAYMENT_TYPE);
 		itemObj.put("currency", DEFAULT_CURRENCY);
 		
-		
 		if(begBe != null) {
 			
 			String feeId = getPaymentFeeId(begBe, assemblyauthToken);
 				
-			Object begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
-			Object begPrice = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_PRICE");
+			String begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
+			String begPriceString = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_PRICE");
 			
-			//350 Dollars sent to Assembly as 3.50$, so multiplying with 100 
-			BigDecimal finalPrice = ((BigDecimal) begPrice).multiply(new BigDecimal(100));
-			
-			Object begDescription = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_DESCRIPTION");
-			
-			
-			itemObj.put("name", begTitle);
-			itemObj.put("amount", finalPrice.toString());
-			itemObj.put("description", begDescription);
-			itemObj.put("currency", DEFAULT_CURRENCY);
-			
-			if(feeId != null) {
-				String[] feeArr = {feeId};
-				itemObj.put("fees", feeArr);
+			if(begPriceString != null) {
+				
+				BigDecimal begPrice = new BigDecimal(begPriceString);
+				
+				//350 Dollars sent to Assembly as 3.50$, so multiplying with 100 
+				BigDecimal finalPrice = begPrice.multiply(new BigDecimal(100));
+				
+				String begDescription = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_DESCRIPTION");
+				
+				itemObj.put("name", begTitle);
+				itemObj.put("amount", finalPrice.toString());
+				itemObj.put("description", begDescription);
+				itemObj.put("currency", DEFAULT_CURRENCY);
+				
+				if(feeId != null) {
+					String[] feeArr = {feeId};
+					itemObj.put("fees", feeArr);
+				}
 			}
 		}
-		
 		
 		/* OWNER -> Buyer */
 		if(itemContextMap.containsKey("OWNER")) {
@@ -528,23 +530,23 @@ public class PaymentUtils {
 				buyerObj = new JSONObject();
 				buyerObj.put("id", MergeUtil.getBaseEntityAttrValueAsString(ownerBe, "PRI_ASSEMBLY_USER_ID"));
 			}
-			
 		}
 		
 		/* DRIVER -> Seller */
-		if(itemContextMap.containsKey("DRIVER")) {
-			BaseEntity driverBe = itemContextMap.get("DRIVER");
-			System.out.println("Context map contains DRIVER");
+		if(itemContextMap.containsKey("QUOTER")) {
+			
+			BaseEntity driverBe = itemContextMap.get("QUOTER");
+			System.out.println("Context map contains QUOTER");
 			
 			if(driverBe != null) {
 				sellerObj = new JSONObject();
 				sellerObj.put("id", MergeUtil.getBaseEntityAttrValueAsString(driverBe, "PRI_ASSEMBLY_USER_ID"));
 			}
-			
 		}
 		
 		/* If both buyer and seller is available for a particular BEG, Create Payment Item */
 		if(buyerObj != null && sellerObj != null) {
+			
 			itemObj.put("buyer", buyerObj);
 			itemObj.put("seller", sellerObj);
 			itemObj.put("id", UUID.randomUUID().toString());
@@ -602,7 +604,7 @@ public class PaymentUtils {
 	    gson = gsonBuilder.create();
 		
 		try {
-			QwandaUtils.apiPostEntity(qwandaServiceUrl+"/qwanda/answers", JsonUtils.toJson(answer), token);
+			QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/answers", JsonUtils.toJson(answer), token);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -700,23 +702,6 @@ public class PaymentUtils {
 		
 	}
 	
-	public static Boolean checkIfAnswerContainsPaymentAttribute(QDataAnswerMessage m) {
-		
-		Boolean isAnswerContainsPaymentAttribute = false;
-		
-		if(m != null) {
-			Answer[] answers = m.getItems();
-			for(Answer answer : answers) {
-				String attributeCode = answer.getAttributeCode();
-				if(attributeCode.contains("PRI_PAYMENT_METHOD")) {
-					isAnswerContainsPaymentAttribute = true;
-				}
-			}
-		}	
-		
-		return isAnswerContainsPaymentAttribute;
-	}
-	
 	public static String processPaymentAnswers(String qwandaServiceUrl, QDataAnswerMessage m, String tokenString) {
 		
 		String begCode = null;
@@ -755,20 +740,20 @@ public class PaymentUtils {
 					}
 					
 					if(accountId != null) {
-						Answer accountIdAnswer = new Answer(sourceCode, userCode, "PRI_ACCOUNT_ID", accountId);
+						Answer accountIdAnswer = new Answer(sourceCode, begCode, "PRI_ACCOUNT_ID", accountId);
 						saveAnswer(qwandaServiceUrl, accountIdAnswer, tokenString);
 					}
 					
 					if(deviceId != null) {
 						Answer deviceIdAnswer = new Answer(sourceCode, userCode, "PRI_DEVICE_ID", deviceId);
 						saveAnswer(qwandaServiceUrl, deviceIdAnswer, tokenString);	
-					}
-									
+					}	
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 		return begCode;
 	}
 	
