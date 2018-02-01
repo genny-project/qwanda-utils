@@ -706,6 +706,7 @@ public class PaymentUtils {
 				String attributeCode = answer.getAttributeCode();
 				if(attributeCode.contains("PRI_PAYMENT_METHOD")) {
 					isAnswerContainsPaymentAttribute = true;
+					break;
 				}
 			}
 		}	
