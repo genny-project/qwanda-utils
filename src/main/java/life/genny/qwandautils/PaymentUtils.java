@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -492,29 +493,33 @@ public class PaymentUtils {
 		itemObj.put("paymentType", DEFAULT_PAYMENT_TYPE);
 		itemObj.put("currency", DEFAULT_CURRENCY);
 		
-		
 		if(begBe != null) {
 			
 			String feeId = getPaymentFeeId(begBe, assemblyauthToken);
 				
-			Object begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
-			Object begPrice = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_PRICE");
+			String begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
+			String begPriceString = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_PRICE");
 			
-			//350 Dollars sent to Assembly as 3.50$ --> Need to check
-			
-			Object begDescription = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_DESCRIPTION");
-			
-			itemObj.put("name", begTitle);
-			itemObj.put("amount", begPrice);
-			itemObj.put("description", begDescription);
-			itemObj.put("currency", DEFAULT_CURRENCY);
-			
-			if(feeId != null) {
-				String[] feeArr = {feeId};
-				itemObj.put("fees", feeArr);
+			if(begPriceString != null) {
+				
+				BigDecimal begPrice = new BigDecimal(begPriceString);
+				
+				//350 Dollars sent to Assembly as 3.50$, so multiplying with 100 
+				BigDecimal finalPrice = begPrice.multiply(new BigDecimal(100));
+				
+				String begDescription = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_DESCRIPTION");
+				
+				itemObj.put("name", begTitle);
+				itemObj.put("amount", finalPrice.toString());
+				itemObj.put("description", begDescription);
+				itemObj.put("currency", DEFAULT_CURRENCY);
+				
+				if(feeId != null) {
+					String[] feeArr = {feeId};
+					itemObj.put("fees", feeArr);
+				}
 			}
 		}
-		
 		
 		/* OWNER -> Buyer */
 		if(itemContextMap.containsKey("OWNER")) {
@@ -525,23 +530,23 @@ public class PaymentUtils {
 				buyerObj = new JSONObject();
 				buyerObj.put("id", MergeUtil.getBaseEntityAttrValueAsString(ownerBe, "PRI_ASSEMBLY_USER_ID"));
 			}
-			
 		}
 		
 		/* DRIVER -> Seller */
-		if(itemContextMap.containsKey("DRIVER")) {
-			BaseEntity driverBe = itemContextMap.get("DRIVER");
-			System.out.println("Context map contains DRIVER");
+		if(itemContextMap.containsKey("QUOTER")) {
+			
+			BaseEntity driverBe = itemContextMap.get("QUOTER");
+			System.out.println("Context map contains QUOTER");
 			
 			if(driverBe != null) {
 				sellerObj = new JSONObject();
 				sellerObj.put("id", MergeUtil.getBaseEntityAttrValueAsString(driverBe, "PRI_ASSEMBLY_USER_ID"));
 			}
-			
 		}
 		
 		/* If both buyer and seller is available for a particular BEG, Create Payment Item */
 		if(buyerObj != null && sellerObj != null) {
+			
 			itemObj.put("buyer", buyerObj);
 			itemObj.put("seller", sellerObj);
 			itemObj.put("id", UUID.randomUUID().toString());
@@ -599,7 +604,7 @@ public class PaymentUtils {
 	    gson = gsonBuilder.create();
 		
 		try {
-			QwandaUtils.apiPostEntity(qwandaServiceUrl+"/qwanda/answers", JsonUtils.toJson(answer), token);
+			QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/answers", JsonUtils.toJson(answer), token);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -615,6 +620,7 @@ public class PaymentUtils {
 			String tokenResponse = authenticatePaymentProvider(assemblyId, assemblyAuthToken);
 
 			if (!tokenResponse.contains("error")) {
+				
 				try {
 					JSONObject tokenObj = (JSONObject) parser.parse(tokenResponse);
 					System.out.println("token object ::" + tokenObj);
@@ -696,6 +702,7 @@ public class PaymentUtils {
 		
 	}
 	
+
 	public static Boolean checkIfAnswerContainsPaymentAttribute(QDataAnswerMessage m) {
 		
 		Boolean isAnswerContainsPaymentAttribute = false;
@@ -715,6 +722,7 @@ public class PaymentUtils {
 	}
 	
 	
+
 	public static String processPaymentAnswers(String qwandaServiceUrl, QDataAnswerMessage m, String tokenString) {
 		
 		String begCode = null;
@@ -722,6 +730,8 @@ public class PaymentUtils {
 		try {
 			
 			System.out.println("----> Payments attributes Answers <------");
+			
+			String userCode = getUserCode(tokenString);
 
 			Answer[] answers = m.getItems();
 			for (Answer answer : answers) {
@@ -738,40 +748,38 @@ public class PaymentUtils {
 				/* if this answer is actually an Payment_method, this rule will be triggered */
 				if (attributeCode.contains("PRI_PAYMENT_METHOD")) {
 					
-					JSONParser parser = new JSONParser();
-					JSONObject paymentValues = (JSONObject) parser.parse(value);
+					JsonObject paymentValues = new JsonObject(value);
 					
 					/*{ ipAddress, deviceID, accountID }*/
-					Object ipAddress = paymentValues.get("ipAddress");
-					Object accountId = paymentValues.get("accountID");
-					Object deviceId = paymentValues.get("deviceID");
+					String ipAddress = paymentValues.getString("ipAddress");
+					String accountId = paymentValues.getString("accountID");
+					String deviceId = paymentValues.getString("deviceID");
 					
 					if(ipAddress != null){
-						Answer ipAnswer = new Answer(sourceCode, sourceCode, "PRI_IP_ADDRESS", ipAddress.toString());
+						Answer ipAnswer = new Answer(sourceCode, userCode, "PRI_IP_ADDRESS", ipAddress);
 						saveAnswer(qwandaServiceUrl, ipAnswer, tokenString);
 					}
 					
 					if(accountId != null) {
-						Answer accountIdAnswer = new Answer(sourceCode, targetCode, "PRI_ACCOUNT_ID", accountId.toString());
+						Answer accountIdAnswer = new Answer(sourceCode, begCode, "PRI_ACCOUNT_ID", accountId);
 						saveAnswer(qwandaServiceUrl, accountIdAnswer, tokenString);
 					}
 					
 					if(deviceId != null) {
-						Answer deviceIdAnswer = new Answer(sourceCode, sourceCode, "PRI_DEVICE_ID", deviceId.toString());
+						Answer deviceIdAnswer = new Answer(sourceCode, userCode, "PRI_DEVICE_ID", deviceId);
 						saveAnswer(qwandaServiceUrl, deviceIdAnswer, tokenString);	
-					}
-									
+					}	
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 		return begCode;
 	}
 	
-	
 	@SuppressWarnings("unchecked")
-	public static String makePayment(String begCode, String authToken, String tokenString){
+	public static String makePayment(String begCode, String authToken, String tokenString) {
 		
 		String userCode = getUserCode(tokenString);
 		BaseEntity userBe = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
@@ -785,6 +793,7 @@ public class PaymentUtils {
 		Object accountId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ACCOUNT_ID");
 		
 		if(itemId != null && deviceId != null && ipAddress != null && accountId != null) {
+			
 			JSONObject paymentObj = new JSONObject();
 			paymentObj.put("id", itemId);
 			
@@ -798,7 +807,26 @@ public class PaymentUtils {
 			paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), JsonUtils.toJson(paymentObj), authToken);
 			
 			log.debug("Make payment response ::"+paymentResponse);
+			return paymentResponse;
+			
 		} else {
+			
+			if(itemId == null) {
+				log.error("ITEM ID");
+			}
+			
+			if(deviceId == null) {
+				log.error("deviceId ID");
+			}
+			
+			if(ipAddress == null) {
+				log.error("ipAddress ID");
+			}
+			
+			if(accountId == null) {
+				log.error("accountId ID");
+			}
+			
 			log.error("One of the attribute for making payment is null ! PAYMENT CANNOT BE MADE");
 		}
 		
