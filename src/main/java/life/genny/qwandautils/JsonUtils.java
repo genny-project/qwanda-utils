@@ -43,7 +43,14 @@ public class JsonUtils {
 				@Override
 				public LocalDate deserialize(final JsonElement json, final Type type,
 						final JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-					return LocalDate.parse(json.getAsJsonPrimitive().getAsString(), DateTimeFormatter.ISO_LOCAL_DATE);
+					LocalDate ret = null;
+					try {
+						String str = json.getAsJsonPrimitive().getAsString();
+					} catch (Exception e) {
+						return null;
+					}
+					ret = LocalDate.parse(json.getAsJsonPrimitive().getAsString(), DateTimeFormatter.ISO_LOCAL_DATE);
+					return ret;
 				}
 
 				public JsonElement serialize(final LocalDate date, final Type typeOfSrc,
