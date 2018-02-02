@@ -382,6 +382,9 @@ public class GennySheets {
 
 				final String baseEntityCode = (String) object.get("baseEntityCode");
 				final String attributeCode = (String) object.get("attributeCode");
+				if ("PRI_PRICE".equalsIgnoreCase(attributeCode)) {
+					System.out.println("dummy");
+				}
 				final String weight = (String) object.get("weight");
 				final String valueString = (String) object.get("valueString");
 				final String privacy = (String) object.get("privacy");
