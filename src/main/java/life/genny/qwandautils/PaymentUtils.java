@@ -7,7 +7,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Map;
@@ -26,13 +25,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.Answer;
-import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QDataAnswerMessage;
 
@@ -163,23 +158,13 @@ public class PaymentUtils {
 		return retJson;
 	}
 	
-	public static String getUserCode(String token) {
-		
-		org.json.JSONObject decodedToken = KeycloakUtils.getDecodedToken(token);
-		System.out.println("decoded token object ::"+decodedToken);
-		
-		String username = decodedToken.getString("preferred_username");
-		String uname = QwandaUtils.getNormalisedUsername(username);
-		String code = "PER_" + uname.toUpperCase();
-		
-		return code;
-	}
+
 	
 	
 	@SuppressWarnings("unchecked")
 	public static String getAssemblyId(String token) {
 		
-		String userCode = getUserCode(token);
+		String userCode = QwandaUtils.getUserCode(token);
 		
 		JSONObject authobj = new JSONObject();
 		authobj.put("userCode", userCode);
@@ -209,7 +194,7 @@ public class PaymentUtils {
 	@SuppressWarnings("unchecked")
 	public static void createAssemblyUser(String assemblyUserId, String authToken, String token) { 
 		
-		String userCode = getUserCode(token);
+		String userCode = QwandaUtils.getUserCode(token);
 		BaseEntity be = MergeUtil.getBaseEntityForAttr(userCode, token);
 
 		JSONObject userobj = new JSONObject();
@@ -422,7 +407,7 @@ public class PaymentUtils {
 	@SuppressWarnings("unchecked")
 	public static String createCompany(String authtoken, String tokenString) {
 		
-		String userCode = getUserCode(tokenString);
+		String userCode = QwandaUtils.getUserCode(tokenString);
 		BaseEntity be = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
 		String createCompanyResponse = null;
 		
@@ -598,10 +583,6 @@ public class PaymentUtils {
 	
 	public static void saveAnswer(String qwandaServiceUrl, Answer answer, String token) {
 		
-		Gson gson = new Gson();
-	    GsonBuilder gsonBuilder = new GsonBuilder();
-	    gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
-	    gson = gsonBuilder.create();
 		
 		try {
 			QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/answers", JsonUtils.toJson(answer), token);
@@ -731,7 +712,7 @@ public class PaymentUtils {
 			
 			System.out.println("----> Payments attributes Answers <------");
 			
-			String userCode = getUserCode(tokenString);
+			String userCode = QwandaUtils.getUserCode(tokenString);
 
 			Answer[] answers = m.getItems();
 			for (Answer answer : answers) {
@@ -781,7 +762,7 @@ public class PaymentUtils {
 	@SuppressWarnings("unchecked")
 	public static String makePayment(String begCode, String authToken, String tokenString) {
 		
-		String userCode = getUserCode(tokenString);
+		String userCode = QwandaUtils.getUserCode(tokenString);
 		BaseEntity userBe = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
 		BaseEntity begBe = MergeUtil.getBaseEntityForAttr(begCode, tokenString);
 		

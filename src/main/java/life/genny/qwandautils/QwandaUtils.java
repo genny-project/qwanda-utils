@@ -1034,4 +1034,15 @@ public class QwandaUtils {
 		return true;
 	}	
 	
+	public static String getUserCode(String token) {
+		
+		org.json.JSONObject decodedToken = KeycloakUtils.getDecodedToken(token);
+		System.out.println("decoded token object ::"+decodedToken);
+		
+		String username = decodedToken.getString("preferred_username");
+		String uname = QwandaUtils.getNormalisedUsername(username);
+		String code = "PER_" + uname.toUpperCase();
+		
+		return code;
+	}
 }
