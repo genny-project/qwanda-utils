@@ -456,7 +456,7 @@ public class PaymentUtils {
 
 		log.info("Company object ::" + companyObj);
 
-		if (companyObj != null) {
+		if (companyObj != null && userObj != null) {
 			createCompanyResponse = PaymentEndpoint.createCompany(JsonUtils.toJson(companyObj), authtoken);
 			if ("{\"error\":\"Invalid token and / or secret.\"}".equalsIgnoreCase(createCompanyResponse)) {
 				return createCompanyResponse;
