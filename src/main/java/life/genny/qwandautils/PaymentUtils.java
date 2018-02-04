@@ -406,65 +406,68 @@ public class PaymentUtils {
 	
 	@SuppressWarnings("unchecked")
 	public static String createCompany(String authtoken, String tokenString) {
-		
+
 		String userCode = QwandaUtils.getUserCode(tokenString);
 		BaseEntity be = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
 		String createCompanyResponse = null;
-		
+		String companyCode = null;
+
 		JSONObject companyObj = new JSONObject();
 		JSONObject userObj = new JSONObject();
 		JSONObject contactObj = new JSONObject();
 		JSONObject locationObj = new JSONObject();
-		
+
 		Object companyName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_NAME");
 		Object taxNumber = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ABN");
 		Object chargeTax = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_GST");
 		Object companyPhoneNumber = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_LANDLINE");
 		Object countryName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_COUNTRY");
 		Object assemblyUserId = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ASSEMBLY_USER_ID");
-		
-		if(companyName != null) {
+
+		if (companyName != null) {
 			companyObj.put("name", companyName.toString());
 		}
-		
-		if(taxNumber != null) {
+
+		if (taxNumber != null) {
 			companyObj.put("taxNumber", taxNumber);
 		}
-		
-		if(chargeTax != null) {
+
+		if (chargeTax != null) {
 			companyObj.put("chargesTax", (Boolean) chargeTax);
 		}
-		
-		if(companyPhoneNumber != null) {
+
+		if (companyPhoneNumber != null) {
 			contactObj.put("phone", companyPhoneNumber.toString());
 		}
-		
-		if(assemblyUserId != null) {
+
+		if (assemblyUserId != null) {
 			userObj.put("id", assemblyUserId.toString());
 		}
-		
-		if(countryName != null) {
+
+		if (countryName != null) {
 			locationObj.put("country", countryName.toString());
 		} else {
 			locationObj.put("country", "AU");
 		}
-		
+
 		companyObj.put("contactInfo", contactObj);
 		companyObj.put("user", userObj);
 		companyObj.put("location", locationObj);
-		
-		log.info("Company object ::"+companyObj);
-		
-		createCompanyResponse = PaymentEndpoint.createCompany(JsonUtils.toJson(companyObj), authtoken);
-		if ("{\"error\":\"Invalid token and / or secret.\"}".equalsIgnoreCase(createCompanyResponse) ) {
-			return createCompanyResponse;
-		} else {
-		JSONObject companyResponseObj = JsonUtils.fromJson(createCompanyResponse, JSONObject.class);
-		String companyCode = companyResponseObj.get("id").toString();
-		
-		return companyCode;
+
+		log.info("Company object ::" + companyObj);
+
+		if (companyObj != null) {
+			createCompanyResponse = PaymentEndpoint.createCompany(JsonUtils.toJson(companyObj), authtoken);
+			if ("{\"error\":\"Invalid token and / or secret.\"}".equalsIgnoreCase(createCompanyResponse)) {
+				return createCompanyResponse;
+			} else {
+				JSONObject companyResponseObj = JsonUtils.fromJson(createCompanyResponse, JSONObject.class);
+				companyCode = companyResponseObj.get("id").toString();
+			}
 		}
 		
+		return companyCode;
+
 	}
 	
 	@SuppressWarnings("unchecked")
