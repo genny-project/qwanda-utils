@@ -456,10 +456,14 @@ public class PaymentUtils {
 		log.info("Company object ::"+companyObj);
 		
 		createCompanyResponse = PaymentEndpoint.createCompany(JsonUtils.toJson(companyObj), authtoken);
+		if ("{\"error\":\"Invalid token and / or secret.\"}".equalsIgnoreCase(createCompanyResponse) ) {
+			return createCompanyResponse;
+		} else {
 		JSONObject companyResponseObj = JsonUtils.fromJson(createCompanyResponse, JSONObject.class);
 		String companyCode = companyResponseObj.get("id").toString();
 		
 		return companyCode;
+		}
 		
 	}
 	
