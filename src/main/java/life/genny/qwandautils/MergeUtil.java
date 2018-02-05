@@ -2,10 +2,7 @@ package life.genny.qwandautils;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Type;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,12 +12,6 @@ import org.javamoney.moneta.Money;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
 
 import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.Link;
@@ -108,6 +99,7 @@ public class MergeUtil {
 					.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode, token);
 		//	System.out.println(ANSI_BLUE + "Base entity attribute code::"+baseEntAttributeCode + ANSI_RESET);					
 			be = JsonUtils.fromJson(attributeString, BaseEntity.class);
+			//be = JsonUtils.gson.fromJson(attributeString, BaseEntity.class);
 			
 		} catch (IOException e) {
 			e.printStackTrace();

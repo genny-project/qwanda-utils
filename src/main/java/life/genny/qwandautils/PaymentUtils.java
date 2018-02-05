@@ -21,6 +21,8 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jgit.api.MergeCommand.FastForwardMode.Merge;
+import org.javamoney.moneta.Money;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -30,13 +32,14 @@ import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QDataAnswerMessage;
+import life.genny.qwanda.message.QDataBaseEntityMessage;
 
 public class PaymentUtils {
 	
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
-	public static final String DEFAULT_CURRENCY = "AUD";
+	//public static final String DEFAULT_CURRENCY = "AUD";
 	public static final String DEFAULT_PAYMENT_TYPE = "escrow";
 	public static final String PROVIDER_TYPE_BANK = "bank"; 
 	
@@ -273,6 +276,7 @@ public class PaymentUtils {
 		userobj.put("id", assemblyUserId);
 		
 		System.out.println("user obj ::"+userobj);
+
 	
 		PaymentEndpoint.createAssemblyUser(JsonUtils.toJson(userobj), authToken);		
 	}
@@ -492,7 +496,6 @@ public class PaymentUtils {
 		
 		System.out.println("item context Map ::"+itemContextMap);
 		itemObj.put("paymentType", DEFAULT_PAYMENT_TYPE);
-		itemObj.put("currency", DEFAULT_CURRENCY);
 		
 		if(begBe != null) {
 			
@@ -500,10 +503,20 @@ public class PaymentUtils {
 				
 			String begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
 			String begPriceString = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_PRICE");
+			Object begPriceObj = MergeUtil.getAttrValue(BEGGroupCode, "PRI_PRICE", token);
 			
-			if(begPriceString != null) {
+			if(begPriceString != null) {	
 				
-				BigDecimal begPrice = new BigDecimal(begPriceString);
+				System.out.println("begpriceString ::"+begPriceString);
+				
+				JSONObject priceObject = JsonUtils.fromJson(begPriceString, JSONObject.class); 
+				String currency = priceObject.get("currency").toString();
+				String amount = priceObject.get("amount").toString();
+				/*Money moneyprice = (Money) begPriceObj;
+				String currency = moneyprice.getCurrency().toString();
+				System.out.println("Money ::"+moneyprice);*/
+				
+				BigDecimal begPrice = new BigDecimal(amount);
 				
 				//350 Dollars sent to Assembly as 3.50$, so multiplying with 100 
 				BigDecimal finalPrice = begPrice.multiply(new BigDecimal(100));
@@ -513,7 +526,7 @@ public class PaymentUtils {
 				itemObj.put("name", begTitle);
 				itemObj.put("amount", finalPrice.toString());
 				itemObj.put("description", begDescription);
-				itemObj.put("currency", DEFAULT_CURRENCY);
+				itemObj.put("currency", currency);
 				
 				if(feeId != null) {
 					String[] feeArr = {feeId};
@@ -574,8 +587,8 @@ public class PaymentUtils {
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 		String begCode = null;
 		JsonArray entityAttributeArray = null;
-		try {
-			entityAttributeArray = new JsonArray(QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + offerCode + "/attributes", tokenString));
+		
+			/*entityAttributeArray = new JsonArray(QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + offerCode + "/attributes", tokenString));
 			
 			System.out.println("Entity Attribute List:"+entityAttributeArray);
 			
@@ -588,11 +601,10 @@ public class PaymentUtils {
                 	begCode = offerObj.getString("valueString");
                 	return begCode;
                 }
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}	
+			}*/
+			
+		
+		begCode = MergeUtil.getAttrValue(offerCode, "PRI_BEG_CODE", tokenString);
 		
 		return begCode;
 	}
@@ -845,6 +857,28 @@ public class PaymentUtils {
 		}
 		
 		return paymentResponse;
+	}
+	
+	
+	public static String publishBaseEntityByCode(final String be, String token) {
+		
+		/*String[] recipientArray = new String[1];
+		recipientArray[0] = be;
+		publishBaseEntityByCode(be, null,
+			     null, recipientArray);*/
+		String[] recipientArray = new String[1];
+		recipientArray[0] = be;
+
+		BaseEntity item = MergeUtil.getBaseEntityForAttr(be, token);
+		BaseEntity[]  itemArray = new BaseEntity[1];
+		itemArray[0] = item;
+		QDataBaseEntityMessage msg = new QDataBaseEntityMessage(itemArray, null,
+			      null);
+		msg.setRecipientCodeArray(recipientArray);
+		msg.setToken(token);
+		String msgStr = JsonUtils.toJson(msg);
+		return msgStr;
+	
 	}
 	
 
