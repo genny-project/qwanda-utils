@@ -458,12 +458,21 @@ public class PaymentUtils {
 
 		if (companyObj != null && userObj != null) {
 			createCompanyResponse = PaymentEndpoint.createCompany(JsonUtils.toJson(companyObj), authtoken);
-			if ("{\"error\":\"Invalid token and / or secret.\"}".equalsIgnoreCase(createCompanyResponse)) {
+			
+			if(!createCompanyResponse.contains("error")) {
+				JSONObject companyResponseObj = JsonUtils.fromJson(createCompanyResponse, JSONObject.class);
+				
+				if(companyResponseObj.get("id") != null) {
+					companyCode = companyResponseObj.get("id").toString();
+				}		
+			}
+			
+			/*if ("{\"error\":\"Invalid token and / or secret.\"}".equalsIgnoreCase(createCompanyResponse)) {
 				return createCompanyResponse;
 			} else {
 				JSONObject companyResponseObj = JsonUtils.fromJson(createCompanyResponse, JSONObject.class);
 				companyCode = companyResponseObj.get("id").toString();
-			}
+			}*/
 		}
 		
 		return companyCode;
