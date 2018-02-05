@@ -503,7 +503,6 @@ public class PaymentUtils {
 				
 			String begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
 			String begPriceString = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_PRICE");
-			Object begPriceObj = MergeUtil.getAttrValue(BEGGroupCode, "PRI_PRICE", token);
 			
 			if(begPriceString != null) {	
 				
@@ -512,9 +511,6 @@ public class PaymentUtils {
 				JSONObject priceObject = JsonUtils.fromJson(begPriceString, JSONObject.class); 
 				String currency = priceObject.get("currency").toString();
 				String amount = priceObject.get("amount").toString();
-				/*Money moneyprice = (Money) begPriceObj;
-				String currency = moneyprice.getCurrency().toString();
-				System.out.println("Money ::"+moneyprice);*/
 				
 				BigDecimal begPrice = new BigDecimal(amount);
 				
@@ -584,26 +580,7 @@ public class PaymentUtils {
 	
 	public static String getBegCode(String offerCode, String tokenString) {
 		
-		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
-		String begCode = null;
-		JsonArray entityAttributeArray = null;
-		
-			/*entityAttributeArray = new JsonArray(QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + offerCode + "/attributes", tokenString));
-			
-			System.out.println("Entity Attribute List:"+entityAttributeArray);
-			
-			for(Object eaObj : entityAttributeArray) {
-				
-				JsonObject offerObj = (JsonObject) eaObj;
-                String attributeCode = offerObj.getString("attributeCode");
-                
-                if(attributeCode.equals("PRI_BEG_CODE")) {
-                	begCode = offerObj.getString("valueString");
-                	return begCode;
-                }
-			}*/
-			
-		
+		String begCode = null;	
 		begCode = MergeUtil.getAttrValue(offerCode, "PRI_BEG_CODE", tokenString);
 		
 		return begCode;
@@ -676,37 +653,50 @@ public class PaymentUtils {
 		JSONParser parser = new JSONParser();
 		String feeId = null;
 		
-		Object fee = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_FEE");
+		//Object fee = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_FEE");
+		String begFeeString = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_FEE_INC_GST");
 		
-		if(fee != null) {
+		if (begFeeString != null) {
+			System.out.println("begpriceString ::" + begFeeString);
+
+			JSONObject priceObject = JsonUtils.fromJson(begFeeString, JSONObject.class);
+			String currency = priceObject.get("currency").toString();
+			String amount = priceObject.get("amount").toString();
+
+			BigDecimal begPrice = new BigDecimal(amount);
+
+			// 350 Dollars sent to Assembly as 3.50$, so multiplying with 100
+			BigDecimal finalFee = begPrice.multiply(new BigDecimal(100));
+
 			JSONObject feeObj = new JSONObject();
 			feeObj.put("name", "Channel40 fee");
 			feeObj.put("type", 1);
-			feeObj.put("amount", fee);
+			feeObj.put("amount", finalFee);
 			feeObj.put("cap", null);
 			feeObj.put("min", null);
 			feeObj.put("max", null);
 			feeObj.put("to", "buyer");
-			
+
 			String feeResponse = PaymentEndpoint.createFees(JsonUtils.toJson(feeObj), assemblyAuthToken);
-			
-			if(feeResponse != null) {
+
+			if (feeResponse != null) {
 				JSONObject feeResponseObj;
 				try {
 					feeResponseObj = (JSONObject) parser.parse(feeResponse);
-					
-					if(feeResponseObj.get("id") != null) {
+
+					if (feeResponseObj.get("id") != null) {
 						feeId = feeResponseObj.get("id").toString();
 						return feeId;
 					}
-					
+
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
-				
+
 			}
-			
+
 		}
+		
 		return feeId;	
 		
 	}
