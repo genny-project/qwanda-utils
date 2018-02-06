@@ -68,9 +68,39 @@ public class MergeUtil {
 
 					BaseEntity be = entitymap.get(baseent);
 
-					//return be.findEntityAttribute(entityArr[1]).get().getValueString();
-					return getBaseEntityAttrValueAsString(be, entityArr[1]);
-				
+					// return
+					// be.findEntityAttribute(entityArr[1]).get().getValueString();
+					String attributeCode = entityArr[1];
+					
+					if (!(attributeCode.equals("PRI_PRICE")
+							|| attributeCode.equals("PRI_LOAD_PRICE") || attributeCode.equals("PRI_OFFER_PRICE")
+							|| attributeCode.equals("PRI_FEE") || attributeCode.equals("PRI_OWNER_PRICE")
+							|| attributeCode.equals("PRI_DRIVER_PRICE") || attributeCode.equals("PRI_OFFER_FEE")
+							|| attributeCode.equals("PRI_OFFER_OWNER_PRICE")
+							|| attributeCode.equals("PRI_OFFER_DRIVER_PRICE") || attributeCode.equals("PRI_FEE_INC_GST")
+							|| attributeCode.equals("PRI_FEE_EXC_GST") || attributeCode.equals("PRI_OFFER_FEE_INC_GST")
+							|| attributeCode.equals("PRI_OFFER_FEE_EXC_GST")
+							|| attributeCode.equals("PRI_OWNER_PRICE_INC_GST")
+							|| attributeCode.equals("PRI_OWNER_PRICE_EXC_GST")
+							|| attributeCode.equals("PRI_OFFER_OWNER_PRICE_INC_GST")
+							|| attributeCode.equals("PRI_OFFER_OWNER_PRICE_EXC_GST")
+							|| attributeCode.equals("PRI_DRIVER_PRICE_INC_GST")
+							|| attributeCode.equals("PRI_DRIVER_PRICE_EXC_GST")
+							|| attributeCode.equals("PRI_OFFER_DRIVER_PRICE_INC_GST")
+							|| attributeCode.equals("PRI_OFFER_DRIVER_PRICE_EXC_GST"))) {
+						
+						return getBaseEntityAttrValueAsString(be, attributeCode);
+						
+					} else {
+						System.out.println("price attributes");
+						String priceString = getBaseEntityAttrValueAsString(be, attributeCode);
+						
+						String amount = QwandaUtils.getAmountAsString(priceString);
+						String currency = QwandaUtils.getCurrencyAsString(priceString);
+
+						return amount + " " + currency;
+					}
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
