@@ -21,13 +21,10 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jgit.api.MergeCommand.FastForwardMode.Merge;
-import org.javamoney.moneta.Money;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.entity.BaseEntity;
@@ -502,15 +499,16 @@ public class PaymentUtils {
 			String feeId = getPaymentFeeId(begBe, assemblyauthToken);
 				
 			String begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
-			String begPriceString = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_PRICE");
+			
+			/* driverPriceIncGST = ownerPriceIncGST.subtract(feePriceIncGST), Creating Payments Fee with feePriceIncGST */
+			String begPriceString = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_OFFER_DRIVER_PRICE_INC_GST");
 			
 			if(begPriceString != null) {	
 				
-				System.out.println("begpriceString ::"+begPriceString);
+				System.out.println("begpriceString ::"+begPriceString);	
 				
-				JSONObject priceObject = JsonUtils.fromJson(begPriceString, JSONObject.class); 
-				String currency = priceObject.get("currency").toString();
-				String amount = priceObject.get("amount").toString();
+				String currency = QwandaUtils.getCurrencyAsString(begPriceString);
+				String amount = QwandaUtils.getAmountAsString(begPriceString);
 				
 				BigDecimal begPrice = new BigDecimal(amount);
 				
@@ -659,9 +657,9 @@ public class PaymentUtils {
 		if (begFeeString != null) {
 			System.out.println("begpriceString ::" + begFeeString);
 
-			JSONObject priceObject = JsonUtils.fromJson(begFeeString, JSONObject.class);
-			String currency = priceObject.get("currency").toString();
-			String amount = priceObject.get("amount").toString();
+			
+			String currency = QwandaUtils.getCurrencyAsString(begFeeString);
+			String amount = QwandaUtils.getAmountAsString(begFeeString);
 
 			BigDecimal begPrice = new BigDecimal(amount);
 
@@ -856,6 +854,8 @@ public class PaymentUtils {
 		recipientArray[0] = be;
 		publishBaseEntityByCode(be, null,
 			     null, recipientArray);*/
+		
+		
 		String[] recipientArray = new String[1];
 		recipientArray[0] = be;
 
@@ -864,6 +864,7 @@ public class PaymentUtils {
 		itemArray[0] = item;
 		QDataBaseEntityMessage msg = new QDataBaseEntityMessage(itemArray, null,
 			      null);
+		
 		msg.setRecipientCodeArray(recipientArray);
 		msg.setToken(token);
 		String msgStr = JsonUtils.toJson(msg);

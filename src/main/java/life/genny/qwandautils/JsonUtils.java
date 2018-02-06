@@ -8,6 +8,9 @@ import java.time.format.DateTimeFormatter;
 
 import org.apache.logging.log4j.Logger;
 import org.javamoney.moneta.Money;
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -85,6 +88,22 @@ public class JsonUtils {
 	
 		String ret =  gson.toJson(obj);
 		return ret;
+	}
+	
+	
+	public static org.json.simple.JSONObject jsonStringParser(String stringifiedJsonObject) {
+		
+		org.json.simple.JSONObject obj = null;
+		if(stringifiedJsonObject != null) {
+			
+			JSONParser parser = new JSONParser();
+			try {
+				obj = (org.json.simple.JSONObject) parser.parse(stringifiedJsonObject);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+		return obj;	
 	}
 }
 

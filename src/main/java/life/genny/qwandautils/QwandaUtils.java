@@ -5,18 +5,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Type;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,23 +30,15 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
 import org.javamoney.moneta.Money;
 import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
 
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.Ask;
 import life.genny.qwanda.CodedEntity;
-import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.Link;
-import life.genny.qwanda.MoneyDeserializer;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.EntityEntity;
@@ -1044,5 +1031,67 @@ public class QwandaUtils {
 		String code = "PER_" + uname.toUpperCase();
 		
 		return code;
+	}
+	
+	
+	/**
+	 * 
+	 * @param inputMoney
+	 * @return stringified Money JSONObject
+	 */
+	public static String getMoneyString(Money inputMoney) {
+		
+		String moneyString = null;
+		if(inputMoney != null) {
+			moneyString = "{\"amount\":" + inputMoney.getNumber().toString() + ",\"currency\":\""+ inputMoney.getCurrency().toString() + "\"}";
+		}
+		
+		return moneyString;
+	}
+	
+	/**
+	 * 
+	 * @param stringifiedMoneyJson
+	 * @return Amount as a string
+	 */
+	public static String getAmountAsString(String stringifiedMoneyJson) {
+		
+		String amount = null;
+		
+		if(stringifiedMoneyJson != null) {
+			//JSONObject priceObject = JsonUtils.fromJson(stringifiedMoneyJson, JSONObject.class);
+			JSONParser parser = new JSONParser();
+			
+			try {
+				org.json.simple.JSONObject priceObject = (org.json.simple.JSONObject) parser.parse(stringifiedMoneyJson);
+				amount = priceObject.get("amount").toString();
+				System.out.println("amount ::"+amount);
+				
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			
+		}
+		
+		return amount;
+	}
+	
+	/**
+	 * 
+	 * @param stringifiedMoneyJson
+	 * @return Currency as a string
+	 */
+	public static String getCurrencyAsString(String stringifiedMoneyJson) {
+		
+		String currency = null;
+		
+		if (stringifiedMoneyJson != null) {
+
+			org.json.simple.JSONObject priceObject = JsonUtils.jsonStringParser(stringifiedMoneyJson);
+			currency = priceObject.get("currency").toString();
+
+		}
+		
+		return currency;
 	}
 }
