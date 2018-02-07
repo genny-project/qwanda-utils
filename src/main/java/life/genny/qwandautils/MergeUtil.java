@@ -122,7 +122,7 @@ public class MergeUtil {
 		
 		//String qwandaServiceUrl = "http://localhost:8280";
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
-		String attributeString;
+		String attributeString = null;
 		BaseEntity be = null;
 		try {
 			attributeString = QwandaUtils
@@ -209,12 +209,8 @@ public class MergeUtil {
 		BaseEntity be = new BaseEntity(targetCode, name);
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 		
-		Gson gson1 = new Gson();
-		GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer());
-		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
-		gson1 = gsonBuilder.create();
-        
-        String jsonBE = gson1.toJson(be);
+	      
+        String jsonBE = JsonUtils.toJson(be);
         try {
             String output= QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/baseentitys", jsonBE, token);
             
