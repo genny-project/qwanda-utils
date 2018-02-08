@@ -1039,7 +1039,7 @@ public class QwandaUtils {
 
 		String moneyString = null;
 		if (inputMoney != null) {
-			moneyString = "{\"amount\":" + inputMoney.getNumber().toString() + ",\"currency\":\""
+			moneyString = "{\"amount\":" + String.valueOf(inputMoney.getNumber().doubleValue()) + ",\"currency\":\""
 					+ inputMoney.getCurrency().toString() + "\"}";
 		}
 
