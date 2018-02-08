@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -556,7 +557,7 @@ public class QwandaUtils {
 	public static QDataBaseEntityMessage getDataBEMessage(String groupCode, String linkCode, String token) {
 
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
-		// String qwandaServiceUrl = "http://localhost:8280";
+		 //String qwandaServiceUrl = "http://localhost:8280";
 		QDataBaseEntityMessage dataBEMessage = null;
 
 		try {
@@ -703,8 +704,45 @@ public class QwandaUtils {
 		if (dataBEMessage != null) {
 
 			for (BaseEntity be : dataBEMessage.getItems()) {
+				
+				Set<EntityEntity> eeSet = be.getLinks();
+				
+				for(EntityEntity ee : eeSet) {
+					Link finalLink = ee.getLink();
+					
+					if (isSource) {
+						if (finalLink != null && finalLink.getAttributeCode() != null && finalLink.getTargetCode() != null
+								&& finalLink.getLinkValue() != null) {
+							String linkAttributeCode = finalLink.getAttributeCode();
+							String linkTargetCode = finalLink.getTargetCode();
+							String linkLinkValue = finalLink.getLinkValue();
 
-				for (EntityEntity entityEntity : be.getLinks()) {
+							if (attributeCode.equals(linkAttributeCode) && sourceOrTarget.equals(linkTargetCode)
+									&& linkValue.equals(linkLinkValue)) {
+								code = finalLink.getSourceCode();
+								return code;
+							}
+						}
+					} else { // When the rule wants targetCode
+						if (finalLink != null && finalLink.getAttributeCode() != null && finalLink.getTargetCode() != null
+								&& finalLink.getLinkValue() != null) {
+							String linkAttributeCode = finalLink.getAttributeCode();
+							String linkSourceCode = finalLink.getSourceCode();
+							String linkLinkValue = finalLink.getLinkValue();
+
+							if (attributeCode.equals(linkAttributeCode) && sourceOrTarget.equals(linkSourceCode)
+									&& linkValue.equals(linkLinkValue)) {
+								code = finalLink.getTargetCode();
+								return code;
+							}
+						}
+					}
+					
+				}
+				
+				/*for (EntityEntity entityEntity : be.getLinks()) {
+					
+					
 
 					Link link = entityEntity.getLink();
 
@@ -737,7 +775,7 @@ public class QwandaUtils {
 						}
 					}
 
-				}
+				}*/
 			}
 
 		}
