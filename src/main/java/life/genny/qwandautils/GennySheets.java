@@ -620,12 +620,21 @@ public class GennySheets {
 			final String subject = (String) object.get("subject");
 			final String email = (String) object.get("email");
 			final String sms = (String) object.get("sms");
+			final String toast = (String) object.get("toast");
+			
 			Map<String, String> fields = new HashMap<String, String>();
 			fields.put("code", code);
 			fields.put("description", description);
 			fields.put("subject", subject);
 			fields.put("email", email);
 			fields.put("sms", sms);
+			
+			if(toast != null) {
+				fields.put("toast", toast.toString());
+			} else {
+				fields.put("toast", "");
+			}	
+			
 			map.put(code, fields);
 			System.out.println("**********************templates*****************************");
 			System.out.println(map);
