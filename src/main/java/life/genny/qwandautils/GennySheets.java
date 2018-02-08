@@ -62,8 +62,6 @@ public class GennySheets {
 	 */
 	private String sheetId;
 
-	/** Global instance of the {@link Gson}. */
-	private Gson g = new Gson();
 
 	private FileDataStoreFactory DATA_STORE_FACTORY;
 
@@ -174,7 +172,7 @@ public class GennySheets {
 				mapper.put(keys.get(counter), row.get(counter));
 			}
 			// out.println(mapper);
-			final T lo = (T) g.fromJson(mapper.toString(), object);
+			final T lo = (T) JsonUtils.fromJson(mapper.toString(), object);
 			k.add(lo);
 		}
 		return k;
@@ -325,11 +323,20 @@ public class GennySheets {
 				final String name = (String) object.get("name");
 				final String dataType = (String) object.get("datatype");
 				final String privacy = (String) object.get("privacy");
+				final String description = (String) object.get("description");
+				final String help = (String) object.get("help");
+				final String placeholder = (String) object.get("placeholder");
+				final String defaultValue = (String) object.get("defaultValue");
+				
 				Map<String, String> fields = new HashMap<String, String>();
 				fields.put("code", code);
 				fields.put("name", name);
 				fields.put("dataType", dataType);
 				fields.put("privacy", privacy);
+				fields.put("description", description);
+				fields.put("help", help);
+				fields.put("placeholder", placeholder);
+				fields.put("defaultValue", defaultValue);
 				map.put(code, fields);
 			}
 			return map;
