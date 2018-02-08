@@ -24,6 +24,7 @@ import com.google.gson.JsonSerializer;
 
 import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.MoneyDeserializer;
+import life.genny.qwanda.datatype.LocalDateConverter;
 import life.genny.qwanda.entity.BaseEntity;
 
 public class JsonUtils {
@@ -34,33 +35,28 @@ public class JsonUtils {
 	static GsonBuilder gsonBuilder = new GsonBuilder();       
 
 	static public Gson gson = gsonBuilder.registerTypeAdapter(Money.class, new MoneyDeserializer())
-			.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer()).registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
-			    @Override
-			    public LocalDate deserialize(JsonElement json, java.lang.reflect.Type typeOfT,
-			        JsonDeserializationContext context) throws JsonParseException {
-
-			      return LocalDate.parse(json.getAsJsonPrimitive().getAsString(), DateTimeFormatter.ISO_DATE);     
-			    }
-			}).setPrettyPrinting()
-			.registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
-				@Override
-				public LocalDate deserialize(final JsonElement json, final Type type,
-						final JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-					LocalDate ret = null;
-					try {
-						String str = json.getAsJsonPrimitive().getAsString();
-					} catch (Exception e) {
-						return null;
-					}
-					ret = LocalDate.parse(json.getAsJsonPrimitive().getAsString(), DateTimeFormatter.ISO_LOCAL_DATE);
-					return ret;
-				}
-
-				public JsonElement serialize(final LocalDate date, final Type typeOfSrc,
-						final JsonSerializationContext context) {
-					return new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE));
-				}
-			})
+			.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer()).setPrettyPrinting()
+			.registerTypeAdapter(LocalDate.class, new LocalDateConverter())
+//			.registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
+//				@Override
+//				public LocalDate deserialize(final JsonElement json, final Type type,
+//						final JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+//					LocalDate ret = null;
+//					try {
+//						String str = json.getAsJsonPrimitive().getAsString();
+//					} catch (Exception e) {
+//						return null;
+//					}
+//					ret = LocalDate.parse(json.getAsJsonPrimitive().getAsString(), DateTimeFormatter.ISO_LOCAL_DATE);
+//					return ret;
+//				}
+//
+//				public JsonElement serialize(final LocalDate date, final Type typeOfSrc,
+//						final JsonSerializationContext context) {
+//					JsonPrimitive json = new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE));
+//					return json;
+//				}
+//			})
 			// .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
 			.excludeFieldsWithoutExposeAnnotation().create();
 	
