@@ -497,8 +497,12 @@ public class PaymentUtils {
 		if(begBe != null) {
 			
 			String feeId = getPaymentFeeId(begBe, assemblyauthToken);
+			System.out.println("fee Id ::"+feeId);
 				
 			String begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
+			String begDescription = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_DESCRIPTION");
+			itemObj.put("name", begTitle);
+			itemObj.put("description", begDescription);
 			
 			/* driverPriceIncGST = ownerPriceIncGST.subtract(feePriceIncGST), Creating Payments Fee with feePriceIncGST */
 			String begPriceString = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_OFFER_DRIVER_PRICE_INC_GST");
@@ -514,12 +518,8 @@ public class PaymentUtils {
 				
 				//350 Dollars sent to Assembly as 3.50$, so multiplying with 100 
 				BigDecimal finalPrice = begPrice.multiply(new BigDecimal(100));
-				
-				String begDescription = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_DESCRIPTION");
-				
-				itemObj.put("name", begTitle);
-				itemObj.put("amount", finalPrice.toString());
-				itemObj.put("description", begDescription);
+							
+				itemObj.put("amount", finalPrice.toString());		
 				itemObj.put("currency", currency);
 				
 				if(feeId != null) {
