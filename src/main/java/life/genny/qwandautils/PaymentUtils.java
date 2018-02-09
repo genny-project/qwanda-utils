@@ -907,20 +907,26 @@ public class PaymentUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static String disburseAccount(String assembyUserId, String accountId, String authToken) {
+	public static String disburseAccount(String assembyUserId, String paymentMethodString, String authToken) {
+		
 				
 		String disburseAccountResponse = null;
 		
-		if(assembyUserId != null && accountId != null) {
+		if(assembyUserId != null && paymentMethodString != null) {
+			
+			log.info("Payment account method string is not null");
+			
+			JSONObject paymentMethodObj = JsonUtils.fromJson(paymentMethodString, JSONObject.class);
+			String paymentAccountId = paymentMethodObj.get("accountNumber").toString();
 			
 			JSONObject disburseAccObj = new JSONObject();			
 			
 			JSONObject accObj = new JSONObject();
-			accObj.put("id", accountId);
+			accObj.put("id", paymentAccountId);
 			disburseAccObj.put("account", accObj);
 			
 			disburseAccountResponse = PaymentEndpoint.disburseAccount(assembyUserId, JsonUtils.toJson(disburseAccObj), authToken);
-			log.debug("release payment response ::"+disburseAccountResponse);
+			log.debug("disburse payment response ::"+disburseAccountResponse);
 		}
 		
 		return disburseAccountResponse;
