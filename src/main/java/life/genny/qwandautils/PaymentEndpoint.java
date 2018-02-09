@@ -145,5 +145,20 @@ public class PaymentEndpoint {
 				
 		return releasePaymentResponse;
 	}
+	
+	
+	public static String disburseAccount(String assemblyUserId, String disburseEntity, String authToken) {
+		
+		String disbursementResponse = null;
+		try {
+			disbursementResponse = PaymentUtils.apiPostPaymentEntity(
+					paymentServiceUrl + "/" + paymentProvider + "/users/" + assemblyUserId + "/disbursement_account", disburseEntity, authToken);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+				
+		return disbursementResponse;
+		
+	}
 
 }
