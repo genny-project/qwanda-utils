@@ -872,5 +872,25 @@ public class PaymentUtils {
 	
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static String disburseAccount(String assembyUserId, String accountId, String authToken) {
+				
+		String disburseAccountResponse = null;
+		
+		if(assembyUserId != null && accountId != null) {
+			
+			JSONObject disburseAccObj = new JSONObject();			
+			
+			JSONObject accObj = new JSONObject();
+			accObj.put("id", accountId);
+			disburseAccObj.put("account", accObj);
+			
+			disburseAccountResponse = PaymentEndpoint.disburseAccount(assembyUserId, JsonUtils.toJson(disburseAccObj), authToken);
+			log.debug("release payment response ::"+disburseAccountResponse);
+		}
+		
+		return disburseAccountResponse;
+	}
+	
 
 }
