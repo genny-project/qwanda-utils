@@ -481,11 +481,12 @@ public class PaymentUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static String createPaymentItem(String BEGGroupCode, String assemblyauthToken, String token) {
+	public static String createPaymentItem(String offerCode, String BEGGroupCode, String assemblyauthToken, String token) {
 		
 		String itemId = null;
 		Map<String, BaseEntity> itemContextMap = QwandaUtils.getBaseEntWithChildrenForAttributeCode(BEGGroupCode, token);
 		BaseEntity begBe = MergeUtil.getBaseEntityForAttr(BEGGroupCode, token);
+		BaseEntity offerBe = MergeUtil.getBaseEntityForAttr(offerCode, token);
 		
 		JSONObject itemObj = new JSONObject();
 		JSONObject buyerObj = null;
@@ -494,40 +495,68 @@ public class PaymentUtils {
 		System.out.println("item context Map ::"+itemContextMap);
 		itemObj.put("paymentType", DEFAULT_PAYMENT_TYPE);
 		
-		if(begBe != null) {
-			
-			String feeId = getPaymentFeeId(begBe, assemblyauthToken);
-			System.out.println("fee Id ::"+feeId);
-				
+		if (begBe != null) {
+
+			String feeId = getPaymentFeeId(offerBe, assemblyauthToken);
+			System.out.println("fee Id ::" + feeId);
+
 			String begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
 			String begDescription = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_DESCRIPTION");
-			itemObj.put("name", begTitle);
-			itemObj.put("description", begDescription);
-			
-			/* driverPriceIncGST = ownerPriceIncGST.subtract(feePriceIncGST), Creating Payments Fee with feePriceIncGST */
-			String begPriceString = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_OFFER_DRIVER_PRICE_INC_GST");
-			
-			if(begPriceString != null) {	
-				
-				System.out.println("begpriceString ::"+begPriceString);	
-				
-				String currency = QwandaUtils.getCurrencyAsString(begPriceString);
-				String amount = QwandaUtils.getAmountAsString(begPriceString);
-				
-				BigDecimal begPrice = new BigDecimal(amount);
-				
-				//350 Dollars sent to Assembly as 3.50$, so multiplying with 100 
-				BigDecimal finalPrice = begPrice.multiply(new BigDecimal(100));
-							
-				itemObj.put("amount", finalPrice.toString());		
-				itemObj.put("currency", currency);
-				
-				if(feeId != null) {
-					String[] feeArr = {feeId};
-					itemObj.put("fees", feeArr);
-				}
+
+			if (begTitle != null) {
+				itemObj.put("name", begTitle);
 			}
+
+			if (begDescription != null) {
+				itemObj.put("description", begDescription);
+			}
+
+			if (feeId != null) {
+				String[] feeArr = { feeId };
+				itemObj.put("fees", feeArr);
+			}
+
+			/*
+			 * driverPriceIncGST = ownerPriceIncGST.subtract(feePriceIncGST),
+			 * Creating Payments Fee with feePriceIncGST
+			 */
+			String offerOwnerPriceString = MergeUtil.getBaseEntityAttrValueAsString(offerBe, "PRI_OFFER_DRIVER_PRICE_INC_GST");
+
+			System.out.println("begpriceString ::" + offerOwnerPriceString);
+
+			String amount = null;
+			String currency = null;
+			if(offerOwnerPriceString != null) {
+				System.out.println("begPriceString is not null");
+				JSONObject moneyobj = JsonUtils.fromJson(offerOwnerPriceString, JSONObject.class);
+				amount = moneyobj.get("amount").toString();
+				currency = moneyobj.get("currency").toString();
+			} else {
+				log.error("PRI_DRIVER_PRICE_INC_GST IS NULL");
+			}
+			
+			if(amount != null) {
+				System.out.println("amount is not null");
+				BigDecimal begPrice = new BigDecimal(amount);
+
+				// 350 Dollars sent to Assembly as 3.50$, so multiplying with 100
+				BigDecimal finalPrice = begPrice.multiply(new BigDecimal(100));
+				itemObj.put("amount", finalPrice.toString());		
+			} else {
+				log.error("AMOUNT IS NULL");
+			}
+			
+			if(currency != null) {
+				System.out.println("currency is not null");
+				itemObj.put("currency", currency);
+			} else {
+				log.error("CURRENCY IS NULL");
+			}
+
+		} else {
+			log.error("BEG BASEENTITY IS NULL");
 		}
+		
 		
 		/* OWNER -> Buyer */
 		if(itemContextMap.containsKey("OWNER")) {
@@ -538,6 +567,8 @@ public class PaymentUtils {
 				buyerObj = new JSONObject();
 				buyerObj.put("id", MergeUtil.getBaseEntityAttrValueAsString(ownerBe, "PRI_ASSEMBLY_USER_ID"));
 			}
+		} else {
+			log.error("BEG CONTEXT MAP HAS NO OWNER LINK, SO BUYER OBJECT IS NULL");
 		}
 		
 		/* DRIVER -> Seller */
@@ -550,6 +581,8 @@ public class PaymentUtils {
 				sellerObj = new JSONObject();
 				sellerObj.put("id", MergeUtil.getBaseEntityAttrValueAsString(driverBe, "PRI_ASSEMBLY_USER_ID"));
 			}
+		} else {
+			log.error("BEG CONTEXT MAP HAS NO QUOTER LINK, SO SELLER OBJECT IS NULL");
 		}
 		
 		/* If both buyer and seller is available for a particular BEG, Create Payment Item */
@@ -646,13 +679,13 @@ public class PaymentUtils {
 	
 	
 	@SuppressWarnings("unchecked")
-	public static String getPaymentFeeId(BaseEntity begBe, String assemblyAuthToken) {
+	public static String getPaymentFeeId(BaseEntity offerBe, String assemblyAuthToken) {
 		
 		JSONParser parser = new JSONParser();
 		String feeId = null;
 		
 		//Object fee = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_FEE");
-		String begFeeString = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_FEE_INC_GST");
+		String begFeeString = MergeUtil.getBaseEntityAttrValueAsString(offerBe, "PRI_OFFER_FEE_INC_GST");
 		
 		if (begFeeString != null) {
 			System.out.println("begpriceString ::" + begFeeString);
@@ -665,6 +698,7 @@ public class PaymentUtils {
 
 			// 350 Dollars sent to Assembly as 3.50$, so multiplying with 100
 			BigDecimal finalFee = begPrice.multiply(new BigDecimal(100));
+			System.out.println("fees for feeId creation in Assembly::"+finalFee);
 
 			JSONObject feeObj = new JSONObject();
 			feeObj.put("name", "Channel40 fee");
