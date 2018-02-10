@@ -1,8 +1,12 @@
 package life.genny.qwandautils;
+
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,33 +24,37 @@ import org.w3c.dom.Document;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.GPS;
+import life.genny.qwanda.GPSLeg;
+import life.genny.qwanda.GPSLocation;
+import life.genny.qwanda.GPSRoute;
+import life.genny.qwanda.GPSStep;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QCmdGeofenceMessage;
 
 public class GPSUtils {
-	
-  /*
-   * Sends QCmdGeofenceMessage for the given beg, address and radius
-   */
-	static 	String loadId = null;
+
+	/*
+	 * Sends QCmdGeofenceMessage for the given beg, address and radius
+	 */
+	static String loadId = null;
 	static JSONArray loadAttributes = new JSONArray();
-	
+
 	public static QCmdGeofenceMessage[] geofenceJob(BaseEntity be, final String driverCode, Double radius,
 			final String qwandaServiceUrl, String token, Map<String, Object> decodedToken) {
-		
-		if(be != null) {
-			
+
+		if (be != null) {
+
 			String pickupLatitude = null;
 			String pickupLongitude = null;
-			
+
 			String deliveryLatitude = null;
 			String deliveryLongitude = null;
-			
+
 			Set<EntityAttribute> attributes = be.getBaseEntityAttributes();
-			for(EntityAttribute attribute: attributes) {
-				
-				switch(attribute.getAttributeCode()) {
+			for (EntityAttribute attribute : attributes) {
+
+				switch (attribute.getAttributeCode()) {
 				case "PRI_PICKUP_ADDRESS_LATITUDE":
 					pickupLatitude = attribute.getObjectAsString();
 					break;
@@ -61,133 +69,239 @@ public class GPSUtils {
 					break;
 				}
 			}
-			if(pickupLatitude != null && pickupLongitude != null && deliveryLatitude != null && deliveryLongitude != null) {
-					
+			if (pickupLatitude != null && pickupLongitude != null && deliveryLatitude != null
+					&& deliveryLongitude != null) {
+
 				/* Send geofence CMD to driver for pickup */
-			    GPS gpsLocation = new GPS(be.getCode(), pickupLatitude, pickupLongitude);        
-			    QCmdGeofenceMessage cmdGeoFence = new QCmdGeofenceMessage(gpsLocation, radius, be.getCode() + "_PICKUP", be.getCode() + "_PICKUP");	 
-				
-			    /* Send geofence CMD to driver for delivery */
-			    GPS gpsLocationDelivery = new GPS(be.getCode(), deliveryLatitude, deliveryLongitude);        
-			    QCmdGeofenceMessage cmdGeoFenceDelivery = new QCmdGeofenceMessage(gpsLocationDelivery, radius, be.getCode() + "_DELIVERY", be.getCode() + "_DELIVERY");
-			    
-			    QCmdGeofenceMessage[] cmds = new QCmdGeofenceMessage[2];
-			    cmds[0] = cmdGeoFence;
-			    cmds[1] = cmdGeoFenceDelivery;
-			    return cmds;
+				GPS gpsLocation = new GPS(be.getCode(), pickupLatitude, pickupLongitude);
+				QCmdGeofenceMessage cmdGeoFence = new QCmdGeofenceMessage(gpsLocation, radius, be.getCode() + "_PICKUP",
+						be.getCode() + "_PICKUP");
+
+				/* Send geofence CMD to driver for delivery */
+				GPS gpsLocationDelivery = new GPS(be.getCode(), deliveryLatitude, deliveryLongitude);
+				QCmdGeofenceMessage cmdGeoFenceDelivery = new QCmdGeofenceMessage(gpsLocationDelivery, radius,
+						be.getCode() + "_DELIVERY", be.getCode() + "_DELIVERY");
+
+				QCmdGeofenceMessage[] cmds = new QCmdGeofenceMessage[2];
+				cmds[0] = cmdGeoFence;
+				cmds[1] = cmdGeoFenceDelivery;
+				return cmds;
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * 
 	 * @param address
 	 * @return the latitude and longitude of the given address
 	 * @throws Exception
 	 */
-	public static String[] getLatLong(String address) throws Exception
-	{
-		int responseCode=0;
-		String api = "http://maps.googleapis.com/maps/api/geocode/xml?address=" + URLEncoder.encode(address, "UTF-8") + "&sensor=true";
-	    System.out.println("API URL : "+api);
-	    URL url = new URL(api);
-	    HttpURLConnection httpConnection = (HttpURLConnection)url.openConnection();
-	    httpConnection.connect();
-	    responseCode = httpConnection.getResponseCode();
-	    if(responseCode == 200)
-	    {
-	      DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();;
-	      Document document = dBuilder.parse(httpConnection.getInputStream());
-	      XPathFactory xPathfactory = XPathFactory.newInstance();
-	      XPath xpath = xPathfactory.newXPath();
-	      XPathExpression expr = xpath.compile("/GeocodeResponse/status");
-	      String status = (String)expr.evaluate(document, XPathConstants.STRING);
-	      if(status.equals("OK"))
-	      {
-	         expr = xpath.compile("//geometry/location/lat");
-	         String latitude = (String)expr.evaluate(document, XPathConstants.STRING);
-	         expr = xpath.compile("//geometry/location/lng");
-	         String longitude = (String)expr.evaluate(document, XPathConstants.STRING);
-	         return new String[] {latitude, longitude};
-	      }
-	      else
-	      {
-	         throw new Exception("Error from the API - response status: "+status);
-	      }
-	    }
-	    return null;
-	  }
-	
+	public static String[] getLatLong(String address) throws Exception {
+		int responseCode = 0;
+		String api = "http://maps.googleapis.com/maps/api/geocode/xml?address=" + URLEncoder.encode(address, "UTF-8")
+				+ "&sensor=true";
+		System.out.println("API URL : " + api);
+		URL url = new URL(api);
+		HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
+		httpConnection.connect();
+		responseCode = httpConnection.getResponseCode();
+		if (responseCode == 200) {
+			DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			;
+			Document document = dBuilder.parse(httpConnection.getInputStream());
+			XPathFactory xPathfactory = XPathFactory.newInstance();
+			XPath xpath = xPathfactory.newXPath();
+			XPathExpression expr = xpath.compile("/GeocodeResponse/status");
+			String status = (String) expr.evaluate(document, XPathConstants.STRING);
+			if (status.equals("OK")) {
+				expr = xpath.compile("//geometry/location/lat");
+				String latitude = (String) expr.evaluate(document, XPathConstants.STRING);
+				expr = xpath.compile("//geometry/location/lng");
+				String longitude = (String) expr.evaluate(document, XPathConstants.STRING);
+				return new String[] { latitude, longitude };
+			} else {
+				throw new Exception("Error from the API - response status: " + status);
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * 
-	 * @param Double[] coordinates1
-	 * @param Double[] coordinates2
+	 * @param Double[]
+	 *            coordinates1
+	 * @param Double[]
+	 *            coordinates2
 	 * @return the distance between passed coordinates in meters
 	 */
-	public static Double getDistance(Double[] coordinates1, Double[] coordinates2)
-	{
+	public static Double getDistance(Double[] coordinates1, Double[] coordinates2) {
 		try {
-			
+
 			/* Call Google Maps API to know how far the driver is */
-			String response = QwandaUtils.apiGet("https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + coordinates1[0] + "," + coordinates1[1] + "&destinations=" + coordinates2[0] + "," + coordinates2[1] + "&mode=driving&language=pl-PL", null);
+			String response = QwandaUtils.apiGet("https://maps.googleapis.com/maps/api/distancematrix/json?origins="
+					+ coordinates1[0] + "," + coordinates1[1] + "&destinations=" + coordinates2[0] + ","
+					+ coordinates2[1] + "&mode=driving&language=pl-PL", null);
 
 			System.out.println(response);
-			if(response != null) {
-				
+			if (response != null) {
+
 				JsonObject distanceMatrix = new JsonObject(response);
 				JsonArray elements = distanceMatrix.getJsonArray("rows").getJsonObject(0).getJsonArray("elements");
 				JsonObject distance = elements.getJsonObject(0).getJsonObject("distance");
 				Integer distanceValue = distance.getInteger("value");
 				return distanceValue.doubleValue();
 			}
-		}
-		catch (Exception e) {
-			
-		}
-			
-	    return -1.0;
-	}
-	
-	/**
-	 * 
-	 * @param String latitude1
-	 * @param String longitude1
-	 * @param String latitude2
-	 * @param String longitude2
-	 * @return the distance between passed coordinates in meters
-	 */
-	public static Double getDistance(String latitude1String, String longitude1String, String latitude2String, String longitude2String)
-	{
-		try {
-			
-			if(latitude1String != null && longitude1String != null && latitude2String != null && longitude2String != null) {
-           		
-           		Double latitude1 = Double.parseDouble(latitude1String);
-           		Double longitude1 = Double.parseDouble(longitude1String);
-           		Double latitude2 = Double.parseDouble(latitude2String);
-           		Double longitude2 = Double.parseDouble(longitude2String);
-           		
-           		/* Call Google Maps API to know how far the driver is */
-	    			String response = QwandaUtils.apiGet("https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + latitude1 + "," + longitude1 + "&destinations=" + latitude2 + "," + longitude2 + "&mode=driving&language=pl-PL", null);
-	
-	    			if(response != null) {
-	    				
-	    				JsonObject distanceMatrix = new JsonObject(response);
-	    				JsonArray elements = distanceMatrix.getJsonArray("rows").getJsonObject(0).getJsonArray("elements");
-	    				JsonObject distance = elements.getJsonObject(0).getJsonObject("distance");
-	    				Integer distanceValue = distance.getInteger("value");
-	    				return distanceValue.doubleValue();
-	    			}
-           	}
+		} catch (Exception e) {
 
 		}
-		catch (Exception e) {
-			
+
+		return -1.0;
+	}
+
+	/**
+	 * 
+	 * @param String
+	 *            latitude1
+	 * @param String
+	 *            longitude1
+	 * @param String
+	 *            latitude2
+	 * @param String
+	 *            longitude2
+	 * @return the distance between passed coordinates in meters
+	 */
+	public static Double getDistance(String latitude1String, String longitude1String, String latitude2String,
+			String longitude2String) {
+		try {
+
+			if (latitude1String != null && longitude1String != null && latitude2String != null
+					&& longitude2String != null) {
+
+				Double latitude1 = Double.parseDouble(latitude1String);
+				Double longitude1 = Double.parseDouble(longitude1String);
+				Double latitude2 = Double.parseDouble(latitude2String);
+				Double longitude2 = Double.parseDouble(longitude2String);
+
+				/* Call Google Maps API to know how far the driver is */
+				String response = QwandaUtils.apiGet("https://maps.googleapis.com/maps/api/distancematrix/json?origins="
+						+ latitude1 + "," + longitude1 + "&destinations=" + latitude2 + "," + longitude2
+						+ "&mode=driving&language=pl-PL", null);
+
+				if (response != null) {
+
+					JsonObject distanceMatrix = new JsonObject(response);
+					JsonArray elements = distanceMatrix.getJsonArray("rows").getJsonObject(0).getJsonArray("elements");
+					JsonObject distance = elements.getJsonObject(0).getJsonObject("distance");
+					Integer distanceValue = distance.getInteger("value");
+					return distanceValue.doubleValue();
+				}
+			}
+
+		} catch (Exception e) {
+
 		}
-			
-	    return -1.0;
+
+		return -1.0;
+	}
+
+	public static GPSLocation getGPSLocation(final String address, final String googleApiKey) {
+		GPSLocation result = null;
+		String addressStr = null;
+		try {
+			addressStr = URLEncoder.encode(address, "UTF-8");
+			final String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + addressStr + "&key="
+					+ googleApiKey;
+			String json = QwandaUtils.apiGet(url, null);
+			JsonObject jsonObject = new JsonObject(json);
+			if ("OK".equalsIgnoreCase(jsonObject.getString("status"))) {
+				JsonArray results = jsonObject.getJsonArray("results");
+				JsonObject firstResult = results.getJsonObject(0);
+				JsonObject geometry = firstResult.getJsonObject("geometry");
+				JsonObject location = geometry.getJsonObject("location");
+				Double lat = location.getDouble("lat");
+				Double lng = location.getDouble("lng");
+				System.out.println(lat + "," + lng);
+				result = new GPSLocation(lat, lng);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	public static GPSRoute getRoute(final GPSLocation origin, final GPSLocation end, final String apiKey) {
+		GPSRoute routeResult = null;
+		String originStr = origin.getLatitude() + "," + origin.getLongitude();
+		String endStr = end.getLatitude() + "," + end.getLongitude();
+		String apiUrl = "https://maps.googleapis.com/maps/api/directions/json?origin=" + originStr + "&destination="
+				+ endStr + "&key=" + apiKey;
+		String json;
+		try {
+			json = QwandaUtils.apiGet(apiUrl, null);
+			JsonObject jsonObject = new JsonObject(json);
+			if ("OK".equalsIgnoreCase(jsonObject.getString("status"))) {
+				JsonArray routes = jsonObject.getJsonArray("routes");
+				for (Object route : routes) {
+					List<GPSLeg> legs = new ArrayList<GPSLeg>();
+					JsonObject routeObj = (JsonObject) route;
+					JsonArray legsJson = routeObj.getJsonArray("legs");
+
+					routeResult = new GPSRoute(origin, end);
+
+					for (Object legObj : legsJson) {
+						JsonObject legJson = (JsonObject) legObj;
+						JsonObject distanceJson2 = legJson.getJsonObject("distance");
+						Long distanceLong2 = distanceJson2.getLong("value"); // in m
+						JsonObject durationJson2 = legJson.getJsonObject("duration");
+						Long durationLong2 = durationJson2.getLong("value"); // in s
+						Double distance_m2 = Double.valueOf(distanceLong2+"");
+						Double duration_s2 = Double.valueOf(durationLong2+"");
+						String start_address = legJson.getString("start_address");
+						JsonObject start_location = legJson.getJsonObject("start_location");
+						GPSLocation startLoc = new GPSLocation(start_location.getDouble("lat"),start_location.getDouble("lng"));
+						String end_address = legJson.getString("end_address");
+						JsonObject end_location = legJson.getJsonObject("end_location");
+						GPSLocation endLoc = new GPSLocation(end_location.getDouble("lat"),end_location.getDouble("lng"));
+						JsonArray stepsArray = legJson.getJsonArray("steps");
+						
+						GPSLeg gpsLeg = new GPSLeg(startLoc, endLoc, distance_m2, duration_s2);
+
+						for (Object step : stepsArray) {
+							JsonObject stepJson = (JsonObject) step;
+							JsonObject distanceJson3 = stepJson.getJsonObject("distance");
+							Long distanceLong3 = distanceJson3.getLong("value"); // in m
+							JsonObject durationJson3 = stepJson.getJsonObject("duration");
+							Long durationLong3 = durationJson3.getLong("value"); // in s
+							Double distance_m3 = Double.valueOf(distanceLong3+"");
+							JsonObject start_location3 = stepJson.getJsonObject("start_location");
+							JsonObject end_location3 = stepJson.getJsonObject("end_location");
+							Double duration_s3 = Double.valueOf(durationLong3+"");
+							GPSLocation startLoc3 = new GPSLocation(start_location3.getDouble("lat"),start_location3.getDouble("lng"));
+							GPSLocation endLoc3 = new GPSLocation(end_location3.getDouble("lat"),end_location3.getDouble("lng"));
+							String html_instructions = stepJson.getString("html_instructions");
+							System.out.println(stepJson);
+							GPSStep gpsStep = new GPSStep(startLoc3, endLoc3, distance_m3, duration_s3);
+							gpsStep.setHtmlInstruction(html_instructions);
+							gpsLeg.add(gpsStep);
+						}
+						
+						routeResult.add(gpsLeg);
+						
+					}
+					
+					break;
+				}
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(apiUrl);
+		return routeResult;
 	}
 
 }
