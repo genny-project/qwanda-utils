@@ -164,14 +164,12 @@ public class PaymentUtils {
 	@SuppressWarnings("unchecked")
 	public static String getAssemblyId(String token) {
 		
-		String userCode = QwandaUtils.getUserCode(token);
+		/*String userCode = QwandaUtils.getUserCode(token);
 		
 		JSONObject authobj = new JSONObject();
 		authobj.put("userCode", userCode);
-		//authobj.put("UUID", UUID.randomUUID().toString());
-
-		String encodedAuthString = base64Encoder(authobj.toJSONString());
-		return encodedAuthString;
+		String encodedAuthString = base64Encoder(authobj.toJSONString());*/
+		return UUID.randomUUID().toString();
 		
 	}
 	
@@ -458,6 +456,7 @@ public class PaymentUtils {
 		log.info("Company object ::" + companyObj);
 
 		if (companyObj != null && userObj != null) {
+			System.out.println("company obj is not null, company object ::"+companyObj);
 			createCompanyResponse = PaymentEndpoint.createCompany(JsonUtils.toJson(companyObj), authtoken);
 			
 			if(!createCompanyResponse.contains("error")) {
@@ -907,20 +906,27 @@ public class PaymentUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static String disburseAccount(String assembyUserId, String accountId, String authToken) {
+	public static String disburseAccount(String assembyUserId, String paymentMethodString, String authToken) {
+		
 				
 		String disburseAccountResponse = null;
 		
-		if(assembyUserId != null && accountId != null) {
+		if(assembyUserId != null && paymentMethodString != null) {
+			
+			System.out.println( "Payment account method string is not null");
+			
+			JSONObject paymentMethodObj = JsonUtils.fromJson(paymentMethodString, JSONObject.class);
+			String paymentAccountId = paymentMethodObj.get("accountNumber").toString();
 			
 			JSONObject disburseAccObj = new JSONObject();			
 			
 			JSONObject accObj = new JSONObject();
-			accObj.put("id", accountId);
+			accObj.put("id", paymentAccountId);
 			disburseAccObj.put("account", accObj);
 			
 			disburseAccountResponse = PaymentEndpoint.disburseAccount(assembyUserId, JsonUtils.toJson(disburseAccObj), authToken);
-			log.debug("release payment response ::"+disburseAccountResponse);
+			log.debug("disburse payment response ::"+disburseAccountResponse);
+			System.out.println("disburse payment response ::"+disburseAccountResponse);
 		}
 		
 		return disburseAccountResponse;
