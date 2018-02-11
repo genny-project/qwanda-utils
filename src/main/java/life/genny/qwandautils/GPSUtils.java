@@ -27,6 +27,7 @@ import life.genny.qwanda.GPS;
 import life.genny.qwanda.GPSLeg;
 import life.genny.qwanda.GPSLocation;
 import life.genny.qwanda.GPSRoute;
+import life.genny.qwanda.GPSRouteStatus;
 import life.genny.qwanda.GPSStep;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
@@ -302,6 +303,119 @@ public class GPSUtils {
 		}
 		System.out.println(apiUrl);
 		return routeResult;
+	}
+
+
+	static public GPSRouteStatus fetchCurrentRouteStatusByDuration(final GPSRoute route, final Double currentSeconds)
+	{
+		GPSRouteStatus result = null;
+		GPSLocation currentLocation = null;
+		// Loop through route legs and steps until currentSeconds reached
+		Double secondsSum = 0.0;
+		Double distanceSum = 0.0;
+		
+		for (GPSLeg leg : route.getLegList()) {
+			Double legSecs = leg.getDuration_s();
+			if ((secondsSum+legSecs) > currentSeconds) {
+				// go into leg
+				Double stepSum = 0.0;
+				Double stepDistanceSum = 0.0;
+				for (GPSStep step : leg.getStepList()) {
+					stepSum += step.getDuration();
+					if ((secondsSum+stepSum) > currentSeconds) {
+						// work out ratio
+						// apply dumb time ratio to distance
+						Double currentStepSecs = currentSeconds - (secondsSum + stepSum - step.getDuration());
+						Double timeRatio =  currentStepSecs / step.getDuration();
+						Double stepDuration = timeRatio * step.getDuration();
+						Double stepdistance = timeRatio * step.getDistance();
+						stepDistanceSum += stepdistance;
+						stepSum += stepDuration;
+						distanceSum += stepDistanceSum;
+						// Ideally a google api could map to an actual GPS location on the route (road).
+					//	currentLocation = step.getStart();
+						GPSLocation stepEndLoc = step.getEnd();
+						// interpolate between the start and end GPS (ignore sticking to road)
+						Double latDiff = stepEndLoc.getLatitude() - step.getStart().getLatitude();
+						Double lngDiff = stepEndLoc.getLongitude() - step.getStart().getLongitude();
+						Double guessLat = step.getStart().getLatitude() + (latDiff * timeRatio);
+						Double guessLng = step.getStart().getLongitude() + (lngDiff * timeRatio);
+						currentLocation = new GPSLocation(guessLat, guessLng);
+						break;
+						
+					} else {
+			
+						stepDistanceSum += step.getDistance();
+					}
+				}
+			} else {
+				secondsSum += legSecs;
+				distanceSum += leg.getDistance_m();
+			}
+			
+			
+		}
+		Double totalDistance = route.getDistance_m();
+		Double percentage = distanceSum/totalDistance;
+		result = new GPSRouteStatus(currentLocation, distanceSum, currentSeconds, percentage);
+		return result;
+	}
+
+	static public GPSRouteStatus fetchCurrentRouteStatusByPercentageDistance(final GPSRoute route, final Double percentage100)
+	{
+		GPSRouteStatus result = null;
+		GPSLocation currentLocation = null;
+		// Loop through route legs and steps until currentSeconds reached
+		Double durationSum = 0.0;
+		Double distanceSum = 0.0;
+		
+		Double targetDistance = route.getDistance_m()*percentage100/100.0;
+		
+		for (GPSLeg leg : route.getLegList()) {
+			Double legM = leg.getDistance_m();
+			if ((distanceSum+legM) > targetDistance) {
+				// go into leg
+				Double stepSum = 0.0;
+				Double stepDurationSum = 0.0;
+				for (GPSStep step : leg.getStepList()) {
+					stepSum += step.getDistance();
+					if ((distanceSum+stepSum) > targetDistance) {
+						// work out ratio
+						// apply dumb time ratio to distance
+						Double currentStepM = targetDistance - (distanceSum + stepSum - step.getDistance());
+						Double distanceRatio =  currentStepM / step.getDistance();
+						Double stepDuration = distanceRatio * step.getDuration();
+						Double stepdistance = distanceRatio * step.getDistance();
+						distanceSum += stepdistance + (stepSum - step.getDistance());
+						durationSum += stepDuration;
+
+						// Ideally a google api could map to an actual GPS location on the route (road).
+					//	currentLocation = step.getStart();
+						GPSLocation stepEndLoc = step.getEnd();
+						// interpolate between the start and end GPS (ignore sticking to road)
+						Double latDiff = stepEndLoc.getLatitude() - step.getStart().getLatitude();
+						Double lngDiff = stepEndLoc.getLongitude() - step.getStart().getLongitude();
+						Double guessLat = step.getStart().getLatitude() + (latDiff * distanceRatio);
+						Double guessLng = step.getStart().getLongitude() + (lngDiff * distanceRatio);
+						currentLocation = new GPSLocation(guessLat, guessLng);
+						break;
+						
+					} else {
+			
+						durationSum += step.getDuration();
+					}
+				}
+			} else {
+				distanceSum += legM;
+				durationSum += leg.getDuration_s();
+			}
+			
+			
+		}
+		Double totalDuration = route.getDuration_s();
+		Double percentage = durationSum/totalDuration;
+		result = new GPSRouteStatus(currentLocation, distanceSum, durationSum, percentage);
+		return result;
 	}
 
 }
