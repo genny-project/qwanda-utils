@@ -623,6 +623,7 @@ public class GennySheets {
 		return obj.stream().map(object -> {
 			final Map<String, Map> map = new HashMap<String, Map>();
 			final String code = (String) object.get("code");
+			final String name = (String) object.get("name");
 			final String description = (String) object.get("description");
 			final String subject = (String) object.get("subject");
 			final String email = (String) object.get("email");
@@ -631,6 +632,7 @@ public class GennySheets {
 			
 			Map<String, String> fields = new HashMap<String, String>();
 			fields.put("code", code);
+			fields.put("name", name);
 			fields.put("description", description);
 			fields.put("subject", subject);
 			fields.put("email", email);
