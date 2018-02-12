@@ -2,7 +2,6 @@ package life.genny.qwandautils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
 import java.net.URLDecoder;
@@ -16,13 +15,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.persistence.NoResultException;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -424,7 +420,7 @@ public class QwandaUtils {
 	 * @return Deserialized BaseEntity model object with values for a BaseEntity code that is passed
 	 * @throws IOException 
 	 */
-	public static BaseEntity getBaseEntityByCode(String baseEntAttributeCode, String token) throws NoResultException, IOException {
+	public static BaseEntity getBaseEntityByCode(String baseEntAttributeCode, String token) throws  IOException {
 		
 		String attributeString = null;
 		BaseEntity be = null;
@@ -433,7 +429,7 @@ public class QwandaUtils {
 					.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode, token);
 			be = JsonUtils.fromJson(attributeString, BaseEntity.class);
 			if (be == null) {
-				throw new NoResultException("Cannot find BE "+baseEntAttributeCode);
+				throw new IOException("Cannot find BE "+baseEntAttributeCode);
 			}
 			
 		} catch (IOException e)  {
