@@ -596,14 +596,18 @@ public class PaymentUtils {
 			String itemCreationResponse = PaymentEndpoint.createItem(JsonUtils.toJson(itemObj), assemblyauthToken);
 			
 			if(!itemCreationResponse.contains("error")) {
+				
+				log.info("Item object ::" + itemObj);
+				log.info( itemObj.get("id") );
 				itemId = itemObj.get("id").toString();
-				log.info("Item object ::"+itemObj);
+				log.info("Item ID found ::" + itemId);
+				return itemId;
+			}	else {
+				
 			}
-			
-			log.info("Item creation response ::"+itemCreationResponse);		
-			
-		}			
+		}	
 		
+		log.info("returning");		
 		return itemId;
 	}
 	

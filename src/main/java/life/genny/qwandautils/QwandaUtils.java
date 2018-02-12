@@ -224,9 +224,14 @@ public class QwandaUtils {
 		if (retStr.equals("<html><head><title>Error</title></head><body>Internal Server Error</body></html>")) {
 			return null;
 		}
-		Long ret = Long.parseLong(retStr);
-		be.setId(ret);
-		return ret;
+		try {
+			Long ret = Long.parseLong(retStr);
+			be.setId(ret);
+			return ret;
+		} catch (NumberFormatException e) {
+			log.error("Error in posting BaseEntity "+retStr);
+			return -1L;
+		}
 	}
 
 	public static Answer postAnswer(final String qwandaUrl, final String token, final Answer answer)
