@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.persistence.NoResultException;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -59,6 +61,9 @@ public class QwandaUtils {
 	private static int apiPort = System.getenv("API_PORT") != null ? (Integer.parseInt(System.getenv("API_PORT")))
 			: 8088;
 	private static String hostIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : "127.0.0.1";
+	
+	private static String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
+
 
 	public static final String ANSI_RESET = "\u001B[0m";
 	public static final String ANSI_BLUE = "\u001B[34m";
@@ -407,6 +412,33 @@ public class QwandaUtils {
 		return true;
 	}
 
+	/**
+	 * 
+	 * @param baseEntAttributeCode
+	 * @param token
+	 * @return Deserialized BaseEntity model object with values for a BaseEntity code that is passed
+	 * @throws IOException 
+	 */
+	public static BaseEntity getBaseEntityByCode(String baseEntAttributeCode, String token) throws NoResultException, IOException {
+		
+		String attributeString = null;
+		BaseEntity be = null;
+		try {
+			attributeString = QwandaUtils
+					.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode, token);
+			be = JsonUtils.fromJson(attributeString, BaseEntity.class);
+			if (be == null) {
+				throw new NoResultException("Cannot find BE "+baseEntAttributeCode);
+			}
+			
+		} catch (IOException e)  {
+			throw new IOException("Cannot connect to QwandaURL "+qwandaServiceUrl);
+		}
+		
+		
+		return be;
+	}
+	
 	/**
 	 * 
 	 * @param username
