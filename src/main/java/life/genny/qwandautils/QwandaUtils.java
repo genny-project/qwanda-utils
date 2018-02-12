@@ -1021,7 +1021,7 @@ public class QwandaUtils {
 	public static String getUserCode(String token) {
 
 		org.json.JSONObject decodedToken = KeycloakUtils.getDecodedToken(token);
-		System.out.println("decoded token object ::" + decodedToken);
+	//	System.out.println("decoded token object ::" + decodedToken);
 
 		String username = decodedToken.getString("preferred_username");
 		String uname = QwandaUtils.getNormalisedUsername(username);
