@@ -35,6 +35,7 @@ public class PaymentUtils {
 	
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
 	
 	//public static final String DEFAULT_CURRENCY = "AUD";
 	public static final String DEFAULT_PAYMENT_TYPE = "escrow";
@@ -554,6 +555,7 @@ public class PaymentUtils {
 
 		} else {
 			log.error("BEG BASEENTITY IS NULL");
+			System.out.println("BEG BASEENTITY IS NULL");
 		}
 		
 		
@@ -568,6 +570,7 @@ public class PaymentUtils {
 			}
 		} else {
 			log.error("BEG CONTEXT MAP HAS NO OWNER LINK, SO BUYER OBJECT IS NULL");
+			System.out.println("BEG CONTEXT MAP HAS NO OWNER LINK, SO BUYER OBJECT IS NULL");
 		}
 		
 		/* DRIVER -> Seller */
@@ -582,6 +585,7 @@ public class PaymentUtils {
 			}
 		} else {
 			log.error("BEG CONTEXT MAP HAS NO QUOTER LINK, SO SELLER OBJECT IS NULL");
+			System.out.println("BEG CONTEXT MAP HAS NO QUOTER LINK, SO SELLER OBJECT IS NULL");
 		}
 		
 		/* If both buyer and seller is available for a particular BEG, Create Payment Item */
@@ -603,9 +607,13 @@ public class PaymentUtils {
 				log.info("Item ID found ::" + itemId);
 				return itemId;
 			}	else {
-				
+				System.out.println("ITEM CREATION FAILED," +itemCreationResponse);
+				log.error("ITEM CREATION FAILED," +itemCreationResponse);
 			}
-		}	
+		} else {
+			log.error("PAYMENT ITEM CREATION FAILED, BUYER OR SELLER OBJECT IS NULL");
+			System.out.println("PAYMENT ITEM CREATION FAILED, BUYER OR SELLER OBJECT IS NULL");
+		}
 		
 		log.info("returning");		
 		return itemId;
