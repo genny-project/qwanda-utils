@@ -8,6 +8,7 @@ import java.lang.invoke.MethodHandles;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
@@ -191,7 +192,7 @@ public class PaymentUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static void createAssemblyUser(String assemblyUserId, String authToken, String token) { 
+	public static String createAssemblyUser(String assemblyUserId, String authToken, String token) { 
 		
 		String userCode = QwandaUtils.getUserCode(token);
 		BaseEntity be = MergeUtil.getBaseEntityForAttr(userCode, token);
@@ -273,8 +274,13 @@ public class PaymentUtils {
 		
 		System.out.println("user obj ::"+userobj);
 
+		String paymentUserCreationResponse = PaymentEndpoint.createAssemblyUser(JsonUtils.toJson(userobj), authToken);	
+		if(paymentUserCreationResponse.contains("error")) {
+				return null;
+		} else {
+			return assemblyUserId;
+		}
 	
-		PaymentEndpoint.createAssemblyUser(JsonUtils.toJson(userobj), authToken);		
 	}
 	
 	public static String getPaymentsUser(String assemblyUserId, String authToken){
@@ -942,6 +948,46 @@ public class PaymentUtils {
 		}
 		
 		return disburseAccountResponse;
+	}
+	
+	public static String findExistingAssemblyUserAndSetAttribute(String userId, String tokenString, String authToken) {
+
+		BaseEntity userBe = MergeUtil.getBaseEntityForAttr(userId, tokenString);
+		Object email = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_EMAIL");
+
+		if (email != null) {
+			
+			String paymentUsersResponse = PaymentEndpoint.searchUser(email.toString(), authToken);
+			System.out.println("payment user search response ::" + paymentUsersResponse);
+
+			if (!paymentUsersResponse.contains("error")) {
+				JSONObject userObj = JsonUtils.fromJson(paymentUsersResponse, JSONObject.class);
+				ArrayList<Map> userList = (ArrayList<Map>) userObj.get("users");
+				for (Map userDetails : userList) {
+
+					Map<String, Object> contactInfoMap = (Map<String, Object>) userDetails.get("contactInfo");
+
+					Object contactEmail = contactInfoMap.get("email");
+
+					if (contactEmail != null && contactEmail.equals(email)) {
+
+						String assemblyUserId = userDetails.get("id").toString();
+						return assemblyUserId;
+
+					} else {
+						log.error("USER HAS NOT SET ASSEMBLY EMAIL ID");
+					}
+				}
+
+			} else {
+				log.error("PAYMENT USER SEARCH RESPONSE RETURNED NULL RESPONSE");
+			}
+
+		} else {
+			log.error("BASEENTITY HAS NULL EMAIL ATTRIBUTE");
+		}
+
+		return null;
 	}
 	
 
