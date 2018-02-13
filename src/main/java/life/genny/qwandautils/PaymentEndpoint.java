@@ -160,5 +160,20 @@ public class PaymentEndpoint {
 		return disbursementResponse;
 		
 	}
+	
+	public static String searchUser(String emailId, String authToken) {
+		
+		String searchUserResponse = null;
+		
+		try {
+			searchUserResponse = PaymentUtils.apiGetPaymentResponse(
+					paymentServiceUrl + "/" + paymentProvider + "/users?search=" + emailId + "&limit=200", authToken);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+				
+		return searchUserResponse;
+		
+	}
 
 }
