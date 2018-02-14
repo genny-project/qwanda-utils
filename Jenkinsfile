@@ -3,7 +3,7 @@ pipeline {
   tools {
       maven 'mvn 3.5'
   }
-	properties([
+	options([
 		pipelineTriggers([
 			upstream(
         threshold: hudson.model.Result.SUCCESS,
