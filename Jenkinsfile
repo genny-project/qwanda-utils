@@ -4,7 +4,7 @@ pipeline {
       maven 'mvn 3.5'
   }
 	triggers {
-  	upstream(upstreamProjects: "Qwanda", threshold: hudson.model.Result.SUCCESS)
+  	upstream(upstreamProjects: "qwanda", threshold: hudson.model.Result.SUCCESS)
 	}
 	stages {
 		stage('Build') {
