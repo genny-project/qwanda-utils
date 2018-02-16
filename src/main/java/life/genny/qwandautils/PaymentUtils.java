@@ -22,6 +22,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.Logger;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -29,6 +30,7 @@ import org.json.simple.parser.ParseException;
 import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.entity.BaseEntity;
+import life.genny.qwanda.exception.PaymentException;
 import life.genny.qwanda.message.QDataAnswerMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
 
@@ -90,7 +92,7 @@ public class PaymentUtils {
 	
 	
 	public static String apiPostPaymentEntity(final String postUrl, final String entityString, final String authToken)
-			throws IOException {
+			throws IOException, PaymentException {
 		String retJson = "";
 		//final HttpClient client = new DefaultHttpClient();
 		final HttpClient client = HttpClientBuilder.create().build();
@@ -102,18 +104,28 @@ public class PaymentUtils {
 		input.setContentType("application/json");
 		post.setEntity(input);
 		final HttpResponse response = client.execute(post);
+		
 		final BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 		String line = "";
 		while ((line = rd.readLine()) != null) {
 			retJson += line;
 			;
 		}
+		
+		int responseCode = response.getStatusLine().getStatusCode();
+		
+		System.out.println("response code ::"+responseCode);
+		System.out.println("response ::"+response.getStatusLine());
+		
+		if(responseCode != 200) {
+			throw new PaymentException("Payment exception");
+		}
 		return retJson;
 	}
 	
 	
 	public static String apiGetPaymentResponse(final String getUrl, final String authToken)
-			throws ClientProtocolException, IOException {
+			throws ClientProtocolException, IOException, PaymentException {
 		String retJson = "";
 		log.debug("GET:" + getUrl + ":");
 		final HttpClient client = HttpClientBuilder.create().build();
@@ -122,6 +134,7 @@ public class PaymentUtils {
 			request.addHeader("Authorization", authToken);
 		}
 		final HttpResponse response = client.execute(request);
+			
 		BufferedReader rd = null;
 		
 		try {
@@ -134,13 +147,22 @@ public class PaymentUtils {
 		} catch (NullPointerException e) {
 			return null;
 		}
+		
+		int responseCode = response.getStatusLine().getStatusCode();
+		
+		System.out.println("response code ::"+responseCode);
+		System.out.println("response ::"+response.getStatusLine());
+		
+		if(responseCode != 200) {
+			throw new PaymentException("Payment exception");
+		}
 
 		return retJson;
 	}
 	
 	
 	public static String apiPutPaymentEntity(final String postUrl, final String entityString, final String authToken)
-			throws IOException {
+			throws IOException, PaymentException {
 		String retJson = "";
 		final HttpClient client = HttpClientBuilder.create().build();
 
@@ -151,12 +173,23 @@ public class PaymentUtils {
 		input.setContentType("application/json");
 		put.setEntity(input);
 		final HttpResponse response = client.execute(put);
+		
 		final BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 		String line = "";
 		while ((line = rd.readLine()) != null) {
 			retJson += line;
 			;
 		}
+		
+		int responseCode = response.getStatusLine().getStatusCode();
+		
+		System.out.println("response code ::"+responseCode);
+		System.out.println("response ::"+response.getStatusLine());
+		
+		if(responseCode != 200) {
+			throw new PaymentException("Payment exception");
+		}
+		
 		return retJson;
 	}
 	
@@ -840,42 +873,75 @@ public class PaymentUtils {
 		Object itemId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ITEM_ID");
 		Object accountId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ACCOUNT_ID");
 		
-		if(itemId != null && deviceId != null && ipAddress != null && accountId != null) {
+		if(itemId != null) {
 			
-			JSONObject paymentObj = new JSONObject();
-			paymentObj.put("id", itemId);
+			Object paymentMethods = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_USER_PAYMENT_METHODS");
+			JSONArray array = JsonUtils.fromJson(paymentMethods.toString(), JSONArray.class);
+			String paymentType = null;
 			
-			JSONObject accountObj = new JSONObject();
-			accountObj.put("id", accountId);
+			for(int i = 0 ; i < array.size(); i++) {
+				Map<String, String> methodObj = (Map<String, String>) array.get(i);
+				if(accountId.equals(methodObj.get("id"))) {
+					paymentType = methodObj.get("BANK_ACCOUNT");
+				}
+				
+			}
 			
-			paymentObj.put("ipAddress", ipAddress);
-			paymentObj.put("deviceID", deviceId);
-			paymentObj.put("account", accountObj);
+			if(paymentType.equals("BANK_ACCOUNT")) {
+				
+				/* Add Call to Matt's direct debit API */
+				String debitAuthorityResponse = null;
+				
+				JSONObject paymentObj = new JSONObject();
+				JSONObject accountObj = null;
+				paymentObj.put("id", itemId);
+				
+				if(accountId != null) {
+					accountObj = new JSONObject();
+					accountObj.put("id", accountId);
+				}
+					
+				if(ipAddress != null) {
+					paymentObj.put("ipAddress", ipAddress);
+				} else {
+					log.error("IP ADDRESS is NULL");
+				}
+				
+				if(deviceId != null) {
+					paymentObj.put("deviceID", deviceId);
+				} else {
+					log.error("DEVICE ID is NULL");
+				}
+				
+				
+				if(accountObj != null) {
+					paymentObj.put("account", accountObj);
+				}
+				
+				log.debug("Make payment object ::"+paymentObj.toJSONString());	
+				paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), JsonUtils.toJson(paymentObj), authToken);	
+				log.debug("Make payment response ::"+paymentResponse);
+				
+			} else {
+				
+				JSONObject paymentObj = new JSONObject();
+				paymentObj.put("id", itemId);
+				
+				JSONObject accountObj = new JSONObject();
+				accountObj.put("id", accountId);
+				
+				paymentObj.put("ipAddress", ipAddress);
+				paymentObj.put("deviceID", deviceId);
+				paymentObj.put("account", accountObj);
+				
+				
+				paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), JsonUtils.toJson(paymentObj), authToken);
+				log.debug("Make payment response ::"+paymentResponse);
+			}
 			
-			paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), JsonUtils.toJson(paymentObj), authToken);
 			
-			log.debug("Make payment response ::"+paymentResponse);
 			return paymentResponse;
 			
-		} else {
-			
-			if(itemId == null) {
-				log.error("ITEM ID");
-			}
-			
-			if(deviceId == null) {
-				log.error("deviceId ID");
-			}
-			
-			if(ipAddress == null) {
-				log.error("ipAddress ID");
-			}
-			
-			if(accountId == null) {
-				log.error("accountId ID");
-			}
-			
-			log.error("One of the attribute for making payment is null ! PAYMENT CANNOT BE MADE");
 		}
 		
 		
@@ -893,6 +959,12 @@ public class PaymentUtils {
 		if(itemId != null) {
 			paymentResponse = PaymentEndpoint.releasePayment(itemId.toString(), authToken);
 			log.debug("release payment response ::"+paymentResponse);
+		} else {
+			try {
+				throw new PaymentException("Item ID is null or invalid, hence payment cannot be released");
+			} catch (PaymentException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		return paymentResponse;
