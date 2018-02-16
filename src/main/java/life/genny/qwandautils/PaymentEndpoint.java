@@ -1,10 +1,17 @@
 package life.genny.qwandautils;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 
+import org.apache.logging.log4j.Logger;
+
+import life.genny.qwanda.exception.PaymentException;
 import life.genny.qwandautils.PaymentUtils;
 
 public class PaymentEndpoint {
+	
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	public static final String paymentServiceUrl = System.getenv("PAYMENT_SERVICE_API_URL");
 	public static final String paymentProvider = System.getenv("PAYMENT_PROVIDER");
@@ -17,6 +24,10 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/users", entityString, authToken);
 
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (PaymentException e) {
+			 
+			log.error("Exception on creation of new Assembly user ::"+newpaymentsUserResponse);
 			e.printStackTrace();
 		}
 
@@ -31,6 +42,10 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/users/" + assemblyUserId, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (PaymentException e) {
+			
+			log.error("Exception on finding assembly user Id ::"+userResponse);
+			e.printStackTrace();
 		}
 		return userResponse;
 	}
@@ -44,6 +59,10 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/users/" + assemblyUserId, entityString, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (PaymentException e) {
+			
+			log.error("Exception on Assembly user updation ::"+editPaymentResponse);
+			e.printStackTrace();
 		}
 		return editPaymentResponse;
 	}
@@ -56,6 +75,9 @@ public class PaymentEndpoint {
 			createCompanyResponse = PaymentUtils.apiPostPaymentEntity(
 					paymentServiceUrl + "/" + paymentProvider + "/companies", companyEntityString, authToken);
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (PaymentException e) {
+			log.error("Exception on Assembly company creation ::"+createCompanyResponse);
 			e.printStackTrace();
 		}
 
@@ -71,6 +93,9 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/companies/" + companyId, companyEntityString, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (PaymentException e) {
+			log.error("Exception on Assembly Company Updation ::"+updateCompanyResponse);
+			e.printStackTrace();
 		}
 		return updateCompanyResponse;
 
@@ -84,6 +109,9 @@ public class PaymentEndpoint {
 			createCompanyResponse = PaymentUtils.apiPostPaymentEntity(
 					paymentServiceUrl + "/" + paymentProvider + "/items",  itemEntity, authToken);
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (PaymentException e) {
+			log.error("Exception on Payments Item creation ::"+createCompanyResponse);
 			e.printStackTrace();
 		}
 				
@@ -99,6 +127,9 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/tokens",  paymentProviderEntity, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (PaymentException e) {
+			log.error("Exception on Payments Provider authentication ::"+authenticateResponse);
+			e.printStackTrace();
 		}
 				
 		return authenticateResponse;
@@ -112,6 +143,9 @@ public class PaymentEndpoint {
 			feeResponse = PaymentUtils.apiPostPaymentEntity(
 					paymentServiceUrl + "/" + paymentProvider + "/fees",  feeEntity, authToken);
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (PaymentException e) {
+			log.error("Exception on Payments Fees creation ::"+feeResponse);
 			e.printStackTrace();
 		}
 				
@@ -127,6 +161,10 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/items/" + paymentItemId + "/payment",  paymentEntity, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (PaymentException e) {
+			
+			log.error("Exception on Make Payment ::"+makePaymentResponse);
+			e.printStackTrace();
 		}
 				
 		return makePaymentResponse;
@@ -140,6 +178,9 @@ public class PaymentEndpoint {
 			releasePaymentResponse = PaymentUtils.apiPostPaymentEntity(
 					paymentServiceUrl + "/" + paymentProvider + "/items/" + paymentItemId + "/release-payment", "OK", authToken);
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (PaymentException e) {
+			log.error("Exception on Release Payments ::"+releasePaymentResponse);
 			e.printStackTrace();
 		}
 				
@@ -155,6 +196,9 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/users/" + assemblyUserId + "/disbursement-account", disburseEntity, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (PaymentException e) {
+			log.error("Exception on Disburse Account ::"+disbursementResponse);
+			e.printStackTrace();
 		}
 				
 		return disbursementResponse;
@@ -169,6 +213,9 @@ public class PaymentEndpoint {
 			searchUserResponse = PaymentUtils.apiGetPaymentResponse(
 					paymentServiceUrl + "/" + paymentProvider + "/users?search=" + emailId + "&limit=200", authToken);
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (PaymentException e) {
+			log.error("Exception on Search User ::"+searchUserResponse);
 			e.printStackTrace();
 		}
 				
