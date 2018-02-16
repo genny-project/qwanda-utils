@@ -118,7 +118,7 @@ public class PaymentUtils {
 		System.out.println("response ::"+response.getStatusLine());
 		
 		if(responseCode != 200) {
-			throw new PaymentException("Payment exception");
+			throw new PaymentException("Payment exception, "+response.getEntity().getContent());
 		}
 		return retJson;
 	}
@@ -154,7 +154,7 @@ public class PaymentUtils {
 		System.out.println("response ::"+response.getStatusLine());
 		
 		if(responseCode != 200) {
-			throw new PaymentException("Payment exception");
+			throw new PaymentException("Payment exception,"+response.getEntity().getContent());
 		}
 
 		return retJson;
@@ -187,23 +187,16 @@ public class PaymentUtils {
 		System.out.println("response ::"+response.getStatusLine());
 		
 		if(responseCode != 200) {
-			throw new PaymentException("Payment exception");
+			throw new PaymentException("Payment exception, "+response.getEntity().getContent());
 		}
 		
 		return retJson;
 	}
 	
 
-	
-	
-	@SuppressWarnings("unchecked")
+		
 	public static String getAssemblyId(String token) {
-		
-		/*String userCode = QwandaUtils.getUserCode(token);
-		
-		JSONObject authobj = new JSONObject();
-		authobj.put("userCode", userCode);
-		String encodedAuthString = base64Encoder(authobj.toJSONString());*/
+	
 		return UUID.randomUUID().toString();
 		
 	}
@@ -740,8 +733,6 @@ public class PaymentUtils {
 		if (begFeeString != null) {
 			System.out.println("begpriceString ::" + begFeeString);
 
-			
-			String currency = QwandaUtils.getCurrencyAsString(begFeeString);
 			String amount = QwandaUtils.getAmountAsString(begFeeString);
 
 			BigDecimal begPrice = new BigDecimal(amount);
@@ -882,12 +873,14 @@ public class PaymentUtils {
 			for(int i = 0 ; i < array.size(); i++) {
 				Map<String, String> methodObj = (Map<String, String>) array.get(i);
 				if(accountId.equals(methodObj.get("id"))) {
-					paymentType = methodObj.get("BANK_ACCOUNT");
+					paymentType = methodObj.get("type");
 				}
 				
 			}
 			
 			if(paymentType.equals("BANK_ACCOUNT")) {
+				
+				System.out.println("Bank account..Need to be authorized to release payment");
 				
 				/* Add Call to Matt's direct debit API */
 				String debitAuthorityResponse = null;
@@ -923,6 +916,8 @@ public class PaymentUtils {
 				log.debug("Make payment response ::"+paymentResponse);
 				
 			} else {
+				
+				System.out.println("Credit card payment");
 				
 				JSONObject paymentObj = new JSONObject();
 				paymentObj.put("id", itemId);
