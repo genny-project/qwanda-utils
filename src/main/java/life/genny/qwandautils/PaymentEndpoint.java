@@ -16,7 +16,7 @@ public class PaymentEndpoint {
 	public static final String paymentServiceUrl = System.getenv("PAYMENT_SERVICE_API_URL");
 	public static final String paymentProvider = System.getenv("PAYMENT_PROVIDER");
 
-	public static String createAssemblyUser(final String entityString, final String authToken) {
+	public static String createAssemblyUser(final String entityString, final String authToken) throws PaymentException {
 
 		String newpaymentsUserResponse = null;
 		try {
@@ -25,16 +25,12 @@ public class PaymentEndpoint {
 
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (PaymentException e) {
-			 
-			log.error("Exception on creation of new Assembly user ::"+newpaymentsUserResponse);
-			e.printStackTrace();
 		}
 
 		return newpaymentsUserResponse;
 	}
 
-	public static String getAssemblyUserById(final String assemblyUserId, final String authToken) {
+	public static String getAssemblyUserById(final String assemblyUserId, final String authToken) throws PaymentException {
 
 		String userResponse = null;
 		try {
@@ -42,16 +38,12 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/users/" + assemblyUserId, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (PaymentException e) {
-			
-			log.error("Exception on finding assembly user Id ::"+userResponse);
-			e.printStackTrace();
-		}
+		} 
 		return userResponse;
 	}
 
 	public static String updateAssemblyUser(final String assemblyUserId, final String entityString,
-			final String authToken) {
+			final String authToken) throws PaymentException {
 
 		String editPaymentResponse = null;
 		try {
@@ -59,15 +51,11 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/users/" + assemblyUserId, entityString, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (PaymentException e) {
-			
-			log.error("Exception on Assembly user updation ::"+editPaymentResponse);
-			e.printStackTrace();
 		}
 		return editPaymentResponse;
 	}
 
-	public static String createCompany(String companyEntityString, String authToken) {
+	public static String createCompany(String companyEntityString, String authToken) throws PaymentException {
 
 		String createCompanyResponse = null;
 
@@ -76,15 +64,12 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/companies", companyEntityString, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (PaymentException e) {
-			log.error("Exception on Assembly company creation ::"+createCompanyResponse);
-			e.printStackTrace();
 		}
-
+		
 		return createCompanyResponse;
 	}
 
-	public static String updateCompany(String companyId, String companyEntityString, String authToken) {
+	public static String updateCompany(String companyId, String companyEntityString, String authToken) throws PaymentException {
 
 		String updateCompanyResponse = null;
 
@@ -93,33 +78,27 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/companies/" + companyId, companyEntityString, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (PaymentException e) {
-			log.error("Exception on Assembly Company Updation ::"+updateCompanyResponse);
-			e.printStackTrace();
 		}
+		
 		return updateCompanyResponse;
 
 	}
 
-	public static String createItem(String itemEntity, String authToken) {
+	public static String createItem(String itemEntity, String authToken) throws PaymentException {
 	
-		String createCompanyResponse = null;
+		String createItemResponse = null;
 		
 		try {
-			createCompanyResponse = PaymentUtils.apiPostPaymentEntity(
+			createItemResponse = PaymentUtils.apiPostPaymentEntity(
 					paymentServiceUrl + "/" + paymentProvider + "/items",  itemEntity, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (PaymentException e) {
-			log.error("Exception on Payments Item creation ::"+createCompanyResponse);
-			e.printStackTrace();
-		}
-				
-		return createCompanyResponse;
+		} 	
+		return createItemResponse;
 	}
 	
 	
-	public static String authenticatePaymentProvider(String paymentProviderEntity, String authToken) {
+	public static String authenticatePaymentProvider(String paymentProviderEntity, String authToken) throws PaymentException {
 		String authenticateResponse = null;
 		
 		try {
@@ -127,16 +106,13 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/tokens",  paymentProviderEntity, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (PaymentException e) {
-			log.error("Exception on Payments Provider authentication ::"+authenticateResponse);
-			e.printStackTrace();
 		}
 				
 		return authenticateResponse;
 		
 	}
 	
-	public static String createFees(String feeEntity, String authToken) {
+	public static String createFees(String feeEntity, String authToken) throws PaymentException {
 		String feeResponse = null;
 		
 		try {
@@ -144,16 +120,13 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/fees",  feeEntity, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (PaymentException e) {
-			log.error("Exception on Payments Fees creation ::"+feeResponse);
-			e.printStackTrace();
 		}
 				
 		return feeResponse;
 	}
 	
 	
-	public static String makePayment(String paymentItemId, String paymentEntity, String authToken) {
+	public static String makePayment(String paymentItemId, String paymentEntity, String authToken) throws PaymentException {
 		String makePaymentResponse = null;
 		
 		try {
@@ -161,17 +134,13 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/items/" + paymentItemId + "/payment",  paymentEntity, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (PaymentException e) {
-			
-			log.error("Exception on Make Payment ::"+makePaymentResponse);
-			e.printStackTrace();
 		}
 				
 		return makePaymentResponse;
 	}
 	
 	
-	public static String releasePayment(String paymentItemId, String authToken) {
+	public static String releasePayment(String paymentItemId, String authToken) throws PaymentException {
 		String releasePaymentResponse = null;
 		
 		try {
@@ -179,16 +148,13 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/items/" + paymentItemId + "/release-payment", "OK", authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (PaymentException e) {
-			log.error("Exception on Release Payments ::"+releasePaymentResponse);
-			e.printStackTrace();
-		}
+		} 
 				
 		return releasePaymentResponse;
 	}
 	
 	
-	public static String disburseAccount(String assemblyUserId, String disburseEntity, String authToken) {
+	public static String disburseAccount(String assemblyUserId, String disburseEntity, String authToken) throws PaymentException {
 		
 		String disbursementResponse = null;
 		try {
@@ -196,26 +162,20 @@ public class PaymentEndpoint {
 					paymentServiceUrl + "/" + paymentProvider + "/users/" + assemblyUserId + "/disbursement-account", disburseEntity, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (PaymentException e) {
-			log.error("Exception on Disburse Account ::"+disbursementResponse);
-			e.printStackTrace();
 		}
 				
 		return disbursementResponse;
 		
 	}
 	
-	public static String searchUser(String emailId, String authToken) {
+	public static String searchUser(String emailId, String authToken) throws PaymentException {
 		
 		String searchUserResponse = null;
 		
 		try {
 			searchUserResponse = PaymentUtils.apiGetPaymentResponse(
-					paymentServiceUrl + "/" + paymentProvider + "/users?search=" + emailId + "&limit=200", authToken);
+					paymentServiceUrl + "/" + paymentProvider + "/users?search=" + emailId + "&limit=500", authToken);
 		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (PaymentException e) {
-			log.error("Exception on Search User ::"+searchUserResponse);
 			e.printStackTrace();
 		}
 				

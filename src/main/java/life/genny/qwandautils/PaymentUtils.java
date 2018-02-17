@@ -204,17 +204,25 @@ public class PaymentUtils {
 	
 	public static Boolean checkIfAssemblyUserExists(String assemblyUserId) {
 		
+		Boolean isExists = false;
+		
 		if(assemblyUserId != null) {
 			String authToken = getAssemblyAuthKey();
 			
-			String assemblyUserString = PaymentEndpoint.getAssemblyUserById(assemblyUserId, authToken);
-			if(!assemblyUserString.contains("error")) {
-				return true;
-			} 
-			System.out.println("assembly user string ::"+assemblyUserString);
+			String assemblyUserString;
+			try {
+				assemblyUserString = PaymentEndpoint.getAssemblyUserById(assemblyUserId, authToken);
+				if(!assemblyUserString.contains("error")) {
+					System.out.println("assembly user string ::"+assemblyUserString);
+					isExists = true;
+				} 
+			} catch (PaymentException e) {
+				log.error("Assembly user not found, returning isExists=false in exception handler");
+				isExists = false;
+			}
 		}
 		
-		return false;
+		return isExists;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -222,6 +230,7 @@ public class PaymentUtils {
 		
 		String userCode = QwandaUtils.getUserCode(token);
 		BaseEntity be = MergeUtil.getBaseEntityForAttr(userCode, token);
+		String assemblyId = null;
 
 		JSONObject userobj = new JSONObject();
 		JSONObject personalInfoObj = new JSONObject();
@@ -300,17 +309,27 @@ public class PaymentUtils {
 		
 		System.out.println("user obj ::"+userobj);
 
-		String paymentUserCreationResponse = PaymentEndpoint.createAssemblyUser(JsonUtils.toJson(userobj), authToken);	
-		if(paymentUserCreationResponse.contains("error")) {
-				return null;
-		} else {
-			return assemblyUserId;
-		}
-	
+		String paymentUserCreationResponse;
+		try {
+			paymentUserCreationResponse = PaymentEndpoint.createAssemblyUser(JsonUtils.toJson(userobj), authToken);
+			if(!paymentUserCreationResponse.contains("error") && paymentUserCreationResponse != null) {
+				assemblyId = assemblyUserId;
+			}
+		} catch (PaymentException e) {
+			log.error("Assembly user not found, returning null in exception handler");
+			assemblyId = null;
+		}	
+		
+		return assemblyId;
 	}
 	
 	public static String getPaymentsUser(String assemblyUserId, String authToken){
-		String responseString = PaymentEndpoint.getAssemblyUserById(assemblyUserId, authToken);
+		String responseString = null;
+		try {
+			responseString = PaymentEndpoint.getAssemblyUserById(assemblyUserId, authToken);
+		} catch (PaymentException e) {
+			e.printStackTrace();
+		}
 		return responseString;
 	}
 	
@@ -415,8 +434,13 @@ public class PaymentUtils {
 		}
 		
 		if(userobj != null && assemblyUserId!= null) {
-			responseString = PaymentEndpoint.updateAssemblyUser(assemblyUserId, JsonUtils.toJson(userobj), authToken);
-			System.out.println("response string from payments user updation ::"+responseString);
+			try {
+				responseString = PaymentEndpoint.updateAssemblyUser(assemblyUserId, JsonUtils.toJson(userobj), authToken);
+				System.out.println("response string from payments user updation ::"+responseString);
+			} catch (PaymentException e) {
+				log.error("Exception occured user updation");
+				e.printStackTrace();
+			}
 		}
 		
 		/* For Assembly User Company Information Update */
@@ -429,7 +453,12 @@ public class PaymentUtils {
 		
 		if(companyId != null && companyObj != null) {
 			System.out.println("updating company object in assembly ::"+companyObj);
-			responseString = PaymentEndpoint.updateCompany(companyId, JsonUtils.toJson(companyObj), authToken);
+			try {
+				responseString = PaymentEndpoint.updateCompany(companyId, JsonUtils.toJson(companyObj), authToken);
+			} catch (PaymentException e) {
+				log.error("Exception occured company updation");
+				e.printStackTrace();
+			}
 		}
 		
 		return responseString;
@@ -490,22 +519,18 @@ public class PaymentUtils {
 
 		if (companyObj != null && userObj != null) {
 			System.out.println("company obj is not null, company object ::"+companyObj);
-			createCompanyResponse = PaymentEndpoint.createCompany(JsonUtils.toJson(companyObj), authtoken);
-			
-			if(!createCompanyResponse.contains("error")) {
-				JSONObject companyResponseObj = JsonUtils.fromJson(createCompanyResponse, JSONObject.class);
-				
-				if(companyResponseObj.get("id") != null) {
-					companyCode = companyResponseObj.get("id").toString();
-				}		
+			try {
+				createCompanyResponse = PaymentEndpoint.createCompany(JsonUtils.toJson(companyObj), authtoken);
+				if(!createCompanyResponse.contains("error")) {
+					JSONObject companyResponseObj = JsonUtils.fromJson(createCompanyResponse, JSONObject.class);
+					
+					if(companyResponseObj.get("id") != null) {
+						companyCode = companyResponseObj.get("id").toString();
+					}		
+				}
+			} catch (PaymentException e) {
+				companyCode = null;
 			}
-			
-			/*if ("{\"error\":\"Invalid token and / or secret.\"}".equalsIgnoreCase(createCompanyResponse)) {
-				return createCompanyResponse;
-			} else {
-				JSONObject companyResponseObj = JsonUtils.fromJson(createCompanyResponse, JSONObject.class);
-				companyCode = companyResponseObj.get("id").toString();
-			}*/
 		}
 		
 		return companyCode;
@@ -587,7 +612,10 @@ public class PaymentUtils {
 
 		} else {
 			log.error("BEG BASEENTITY IS NULL");
-			System.out.println("BEG BASEENTITY IS NULL");
+			try {
+				throw new PaymentException("Payment Item creation will not succeed since Beg baseentity is null");
+			} catch (PaymentException e) {
+			}
 		}
 		
 		
@@ -602,7 +630,10 @@ public class PaymentUtils {
 			}
 		} else {
 			log.error("BEG CONTEXT MAP HAS NO OWNER LINK, SO BUYER OBJECT IS NULL");
-			System.out.println("BEG CONTEXT MAP HAS NO OWNER LINK, SO BUYER OBJECT IS NULL");
+			try {
+				throw new PaymentException("Payment Item creation will not succeed since Beg has no owner link");
+			} catch (PaymentException e) {
+			}
 		}
 		
 		/* DRIVER -> Seller */
@@ -617,11 +648,14 @@ public class PaymentUtils {
 			}
 		} else {
 			log.error("BEG CONTEXT MAP HAS NO QUOTER LINK, SO SELLER OBJECT IS NULL");
-			System.out.println("BEG CONTEXT MAP HAS NO QUOTER LINK, SO SELLER OBJECT IS NULL");
+			try {
+				throw new PaymentException("Payment Item creation will not succeed since Beg has no quoter link");
+			} catch (PaymentException e) {
+			}
 		}
 		
 		/* If both buyer and seller is available for a particular BEG, Create Payment Item */
-		if(buyerObj != null && sellerObj != null) {
+		if(itemObj != null && buyerObj != null && sellerObj != null) {
 			
 			itemObj.put("buyer", buyerObj);
 			itemObj.put("seller", sellerObj);
@@ -629,25 +663,25 @@ public class PaymentUtils {
 			
 			System.out.println("Item object ::"+itemObj);
 			
-			String itemCreationResponse = PaymentEndpoint.createItem(JsonUtils.toJson(itemObj), assemblyauthToken);
-			
-			if(!itemCreationResponse.contains("error")) {
-				
-				log.info("Item object ::" + itemObj);
-				log.info( itemObj.get("id") );
-				itemId = itemObj.get("id").toString();
-				log.info("Item ID found ::" + itemId);
-				return itemId;
-			}	else {
-				System.out.println("ITEM CREATION FAILED," +itemCreationResponse);
-				log.error("ITEM CREATION FAILED," +itemCreationResponse);
+			String itemCreationResponse;
+			try {
+				itemCreationResponse = PaymentEndpoint.createItem(JsonUtils.toJson(itemObj), assemblyauthToken);
+				if(!itemCreationResponse.contains("error")) {
+					
+					log.info("Item object ::" + itemObj);
+					log.info( itemObj.get("id") );
+					itemId = itemObj.get("id").toString();
+					log.info("Item ID found ::" + itemId);
+					return itemId;
+				}
+			} catch (PaymentException e) {
+				log.error("PAYMENT ITEM CREATION FAILED, ITEM/BUYER/SELLER OBJECT IS NULL");
+				itemId = null;
+				e.printStackTrace();
 			}
-		} else {
-			log.error("PAYMENT ITEM CREATION FAILED, BUYER OR SELLER OBJECT IS NULL");
-			System.out.println("PAYMENT ITEM CREATION FAILED, BUYER OR SELLER OBJECT IS NULL");
+			
 		}
 		
-		log.info("returning");		
 		return itemId;
 	}
 	
@@ -715,7 +749,13 @@ public class PaymentUtils {
 		paymentProviderObj.put("type", PROVIDER_TYPE_BANK);
 		paymentProviderObj.put("user", userObj);
 		
-		String tokenResponse = PaymentEndpoint.authenticatePaymentProvider(JsonUtils.toJson(paymentProviderObj), assemblyAuthToken);
+		String tokenResponse = null;
+		try {
+			tokenResponse = PaymentEndpoint.authenticatePaymentProvider(JsonUtils.toJson(paymentProviderObj), assemblyAuthToken);
+		} catch (PaymentException e) {
+			log.error("Exception occured during Payment authentication Token provision");
+			e.printStackTrace();
+		}
 		
 		return tokenResponse;
 	}
@@ -723,13 +763,13 @@ public class PaymentUtils {
 	
 	@SuppressWarnings("unchecked")
 	public static String getPaymentFeeId(BaseEntity offerBe, String assemblyAuthToken) {
-		
+
 		JSONParser parser = new JSONParser();
 		String feeId = null;
-		
-		//Object fee = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_FEE");
+
+		// Object fee = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_FEE");
 		String begFeeString = MergeUtil.getBaseEntityAttrValueAsString(offerBe, "PRI_OFFER_FEE_INC_GST");
-		
+
 		if (begFeeString != null) {
 			System.out.println("begpriceString ::" + begFeeString);
 
@@ -739,7 +779,7 @@ public class PaymentUtils {
 
 			// 350 Dollars sent to Assembly as 3.50$, so multiplying with 100
 			BigDecimal finalFee = begPrice.multiply(new BigDecimal(100));
-			System.out.println("fees for feeId creation in Assembly::"+finalFee);
+			System.out.println("fees for feeId creation in Assembly::" + finalFee);
 
 			JSONObject feeObj = new JSONObject();
 			feeObj.put("name", "Channel40 fee");
@@ -750,11 +790,12 @@ public class PaymentUtils {
 			feeObj.put("max", null);
 			feeObj.put("to", "buyer");
 
-			String feeResponse = PaymentEndpoint.createFees(JsonUtils.toJson(feeObj), assemblyAuthToken);
+			String feeResponse;
+			try {
+				feeResponse = PaymentEndpoint.createFees(JsonUtils.toJson(feeObj), assemblyAuthToken);
+				if (feeResponse != null) {
+					JSONObject feeResponseObj;
 
-			if (feeResponse != null) {
-				JSONObject feeResponseObj;
-				try {
 					feeResponseObj = (JSONObject) parser.parse(feeResponse);
 
 					if (feeResponseObj.get("id") != null) {
@@ -762,16 +803,19 @@ public class PaymentUtils {
 						return feeId;
 					}
 
-				} catch (ParseException e) {
-					e.printStackTrace();
 				}
 
+			} catch (PaymentException e1) {
+				log.error("Exception occured during Payment Fee creation");
+				e1.printStackTrace();
+			} catch (ParseException e) {
+				e.printStackTrace();
 			}
 
 		}
-		
-		return feeId;	
-		
+
+		return feeId;
+
 	}
 	
 
@@ -816,6 +860,8 @@ public class PaymentUtils {
 				begCode = targetCode;
 
 				log.debug("Payments value ::" + value + "attribute code ::" + attributeCode);
+				System.out.println("Payments value ::" + value + "attribute code ::" + attributeCode);
+				System.out.println("Beg code ::"+begCode);
 
 				/* if this answer is actually an Payment_method, this rule will be triggered */
 				if (attributeCode.contains("PRI_PAYMENT_METHOD")) {
@@ -851,100 +897,164 @@ public class PaymentUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static String makePayment(String begCode, String authToken, String tokenString) {
+	public static Boolean makePayment(String begCode, String authToken, String tokenString) {
 		
+		System.out.println("inside make payment");
+
+		Boolean isMakePaymentSuccess = false;
 		String userCode = QwandaUtils.getUserCode(tokenString);
 		BaseEntity userBe = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
 		BaseEntity begBe = MergeUtil.getBaseEntityForAttr(begCode, tokenString);
-		
+
 		String paymentResponse = null;
-		
+
 		Object ipAddress = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_IP_ADDRESS");
 		Object deviceId = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_DEVICE_ID");
 		Object itemId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ITEM_ID");
 		Object accountId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ACCOUNT_ID");
-		
-		if(itemId != null) {
-			
-			Object paymentMethods = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_USER_PAYMENT_METHODS");
-			JSONArray array = JsonUtils.fromJson(paymentMethods.toString(), JSONArray.class);
-			String paymentType = null;
-			
-			for(int i = 0 ; i < array.size(); i++) {
-				Map<String, String> methodObj = (Map<String, String>) array.get(i);
-				if(accountId.equals(methodObj.get("id"))) {
-					paymentType = methodObj.get("type");
-				}
-				
+
+		JSONObject paymentObj = new JSONObject();
+		JSONObject accountObj = null;
+
+		if (itemId != null) {
+			paymentObj.put("id", itemId);
+			System.out.println("item is in make payment not null");
+		} else {
+			log.error("Make Payment - Item ID is NULL");
+			try {
+				throw new PaymentException("Item ID is null, so Make payment will not succeed");
+			} catch (PaymentException e) {
+				isMakePaymentSuccess = false;
 			}
+		}
+
+		if (accountId != null) {
+			accountObj = new JSONObject();
+			accountObj.put("id", accountId);
+			System.out.println("account id in make payment not null");
+		} else {
+			log.error("Make payment - accound Id is NULL");
+			try {
+				throw new PaymentException("Account ID is null, so Make payment will not succeed");
+			} catch (PaymentException e) {
+				isMakePaymentSuccess = false;
+			}
+		}
+
+		if (accountObj != null) {
+			paymentObj.put("account", accountObj);
+		}
+
+		if (ipAddress != null) {
+			System.out.println("ip address in make payment not null");
+			paymentObj.put("ipAddress", ipAddress);
+		} else {
+			log.error("Make payment - IP ADDRESS is NULL");
+			try {
+				throw new PaymentException("IP Address is null, so Make payment will not succeed");
+			} catch (PaymentException e) {
+				isMakePaymentSuccess = false;
+			}
+		}
+
+		if (deviceId != null) {
+			System.out.println("device id in make payment not null");
+			paymentObj.put("deviceID", deviceId);
+		} else {
+			log.error("Make payment - DEVICE ID is NULL");
+			try {
+				throw new PaymentException("deviceID is null, so Make payment will not succeed");
+			} catch (PaymentException e) {
+				isMakePaymentSuccess = false;
+			}
+		}
+
+		if (paymentObj.get("id") != null) {
+			System.out.println("payment obj not null");
 			
-			if(paymentType.equals("BANK_ACCOUNT")) {
-				
-				System.out.println("Bank account..Need to be authorized to release payment");
-				
+			String paymentType = getPaymentMethodType(userBe, accountId);
+
+			if (paymentType != null && paymentType.equals("BANK_ACCOUNT")) {
+
+				System.out.println("Bank account..Need to be authorized to make payment");
+
 				/* Add Call to Matt's direct debit API */
 				String debitAuthorityResponse = null;
-				
-				JSONObject paymentObj = new JSONObject();
-				JSONObject accountObj = null;
-				paymentObj.put("id", itemId);
-				
-				if(accountId != null) {
-					accountObj = new JSONObject();
-					accountObj.put("id", accountId);
+
+				log.debug("Make payment object ::" + paymentObj.toJSONString());
+				System.out.println("Make payment object ::" + paymentObj.toJSONString());
+				try {
+					paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), JsonUtils.toJson(paymentObj),
+							authToken);
+					log.debug("Make payment response ::" + paymentResponse);
+					if (!paymentResponse.contains("error")) {
+						isMakePaymentSuccess = true;
+					}
+
+				} catch (PaymentException e) {
+					isMakePaymentSuccess = false;
+					log.error("Exception occured during making payment with " + paymentType);
+					e.printStackTrace();
 				}
-					
-				if(ipAddress != null) {
-					paymentObj.put("ipAddress", ipAddress);
-				} else {
-					log.error("IP ADDRESS is NULL");
-				}
-				
-				if(deviceId != null) {
-					paymentObj.put("deviceID", deviceId);
-				} else {
-					log.error("DEVICE ID is NULL");
-				}
-				
-				
-				if(accountObj != null) {
-					paymentObj.put("account", accountObj);
-				}
-				
-				log.debug("Make payment object ::"+paymentObj.toJSONString());	
-				paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), JsonUtils.toJson(paymentObj), authToken);	
-				log.debug("Make payment response ::"+paymentResponse);
-				
-			} else {
-				
+
+			} else if (paymentType != null && paymentType.equals("CARD")) {
+
 				System.out.println("Credit card payment");
-				
-				JSONObject paymentObj = new JSONObject();
-				paymentObj.put("id", itemId);
-				
-				JSONObject accountObj = new JSONObject();
-				accountObj.put("id", accountId);
-				
-				paymentObj.put("ipAddress", ipAddress);
-				paymentObj.put("deviceID", deviceId);
-				paymentObj.put("account", accountObj);
-				
-				
-				paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), JsonUtils.toJson(paymentObj), authToken);
-				log.debug("Make payment response ::"+paymentResponse);
+
+				try {
+					paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), JsonUtils.toJson(paymentObj),
+							authToken);
+					log.debug("Make payment response ::" + paymentResponse);
+					if (!paymentResponse.contains("error")) {
+						isMakePaymentSuccess = true;
+					}
+
+				} catch (PaymentException e) {
+					isMakePaymentSuccess = false;
+					log.error("Exception occured during making payment with " + paymentType);
+					e.printStackTrace();
+				}
+
 			}
-			
-			
-			return paymentResponse;
-			
+
+			return isMakePaymentSuccess;
+
+		} else {
+			try {
+				throw new PaymentException("Item ID is null, so Make Payment will not succeed");
+			} catch (PaymentException e) {
+				e.printStackTrace();
+			}
 		}
-		
-		
-		return paymentResponse;
+
+		return isMakePaymentSuccess;
 	}
 	
-	public static String releasePayment(String begCode, String authToken, String tokenString) {
+	private static String getPaymentMethodType(BaseEntity userBe, Object accountId) {
 		
+		System.out.println("in getPaymentMethodType method");
+
+		Object paymentMethods = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_USER_PAYMENT_METHODS");
+		JSONArray array = JsonUtils.fromJson(paymentMethods.toString(), JSONArray.class);
+		String paymentType = null;
+
+		if (paymentMethods != null) {
+			for (int i = 0; i < array.size(); i++) {
+				Map<String, String> methodObj = (Map<String, String>) array.get(i);
+				if (accountId.equals(methodObj.get("id"))) {
+					paymentType = methodObj.get("type");
+				}
+
+			}
+		}
+		System.out.println("payment method type is ::"+paymentType);
+		return paymentType;
+
+	}
+	
+	public static Boolean releasePayment(String begCode, String authToken, String tokenString) {
+		
+		Boolean isReleasePaymentSuccess = false;
 		System.out.println("BEG Code for release payment ::"+begCode);
 		BaseEntity begBe = MergeUtil.getBaseEntityForAttr(begCode, tokenString);
 		
@@ -952,17 +1062,28 @@ public class PaymentUtils {
 		Object itemId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ITEM_ID");
 		
 		if(itemId != null) {
-			paymentResponse = PaymentEndpoint.releasePayment(itemId.toString(), authToken);
-			log.debug("release payment response ::"+paymentResponse);
+			try {
+				paymentResponse = PaymentEndpoint.releasePayment(itemId.toString(), authToken);
+				if(!paymentResponse.contains("error")) {
+					log.debug("release payment response ::"+paymentResponse);
+					isReleasePaymentSuccess = true;
+				}
+			} catch (PaymentException e) {
+				log.error("Exception occured during release payment");
+				isReleasePaymentSuccess = false;
+				e.printStackTrace();
+			}
+			
 		} else {
 			try {
+				log.error("Exception occured during release payment");
 				throw new PaymentException("Item ID is null or invalid, hence payment cannot be released");
 			} catch (PaymentException e) {
-				e.printStackTrace();
+				isReleasePaymentSuccess = false;
 			}
 		}
 		
-		return paymentResponse;
+		return isReleasePaymentSuccess;
 	}
 	
 	
@@ -992,8 +1113,7 @@ public class PaymentUtils {
 	
 	@SuppressWarnings("unchecked")
 	public static String disburseAccount(String assembyUserId, String paymentMethodString, String authToken) {
-		
-				
+						
 		String disburseAccountResponse = null;
 		
 		if(assembyUserId != null && paymentMethodString != null) {
@@ -1009,9 +1129,22 @@ public class PaymentUtils {
 			accObj.put("id", paymentAccountId);
 			disburseAccObj.put("account", accObj);
 			
-			disburseAccountResponse = PaymentEndpoint.disburseAccount(assembyUserId, JsonUtils.toJson(disburseAccObj), authToken);
-			log.debug("disburse payment response ::"+disburseAccountResponse);
-			System.out.println("disburse payment response ::"+disburseAccountResponse);
+			try {
+				disburseAccountResponse = PaymentEndpoint.disburseAccount(assembyUserId, JsonUtils.toJson(disburseAccObj), authToken);
+				System.out.println("disburse payment response ::"+disburseAccountResponse);
+				
+			} catch (PaymentException e) {
+				log.error("Payment exception during payment disimbursement response");
+				e.printStackTrace();
+			}		
+			
+		} else {
+			try {
+				throw new PaymentException("Payment Disimbursement failed because of null values, assemblyUserId ::"+assembyUserId+", payment method string ::"+paymentMethodString);
+			} catch (PaymentException e) {
+				log.error("Payment exception caught during payment disimbursement");
+				e.printStackTrace();
+			}
 		}
 		
 		return disburseAccountResponse;
@@ -1024,31 +1157,42 @@ public class PaymentUtils {
 
 		if (email != null) {
 			
-			String paymentUsersResponse = PaymentEndpoint.searchUser(email.toString(), authToken);
-			System.out.println("payment user search response ::" + paymentUsersResponse);
+			String paymentUsersResponse;
+			try {
+				paymentUsersResponse = PaymentEndpoint.searchUser(email.toString(), authToken);
+				
+				if (!paymentUsersResponse.contains("error")) {
+					
+					System.out.println("payment user search response ::" + paymentUsersResponse);
+					JSONObject userObj = JsonUtils.fromJson(paymentUsersResponse, JSONObject.class);
+					
+					ArrayList<Map> userList = (ArrayList<Map>) userObj.get("users");
+					
+					if (userList.size() > 0) {
+						for (Map userDetails : userList) {
 
-			if (!paymentUsersResponse.contains("error")) {
-				JSONObject userObj = JsonUtils.fromJson(paymentUsersResponse, JSONObject.class);
-				ArrayList<Map> userList = (ArrayList<Map>) userObj.get("users");
-				for (Map userDetails : userList) {
+							Map<String, Object> contactInfoMap = (Map<String, Object>) userDetails.get("contactInfo");
+							Object contactEmail = contactInfoMap.get("email");
 
-					Map<String, Object> contactInfoMap = (Map<String, Object>) userDetails.get("contactInfo");
+							if (contactEmail != null && contactEmail.equals(email)) {
 
-					Object contactEmail = contactInfoMap.get("email");
+								String assemblyUserId = userDetails.get("id").toString();
+								return assemblyUserId;
 
-					if (contactEmail != null && contactEmail.equals(email)) {
-
-						String assemblyUserId = userDetails.get("id").toString();
-						return assemblyUserId;
-
+							} else {
+								log.error("USER HAS NOT SET ASSEMBLY EMAIL ID");
+							}
+						}
 					} else {
-						log.error("USER HAS NOT SET ASSEMBLY EMAIL ID");
+						log.error("No user found in assembly user");
 					}
-				}
-
-			} else {
-				log.error("PAYMENT USER SEARCH RESPONSE RETURNED NULL RESPONSE");
+				} 
+				
+			} catch (PaymentException e) {
+				log.error("Payment user search has returned a null response");
+				e.printStackTrace();
 			}
+			
 
 		} else {
 			log.error("BASEENTITY HAS NULL EMAIL ATTRIBUTE");
