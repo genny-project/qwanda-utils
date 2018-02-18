@@ -123,6 +123,35 @@ public class PaymentUtils {
 		return retJson;
 	}
 	
+	public static String apiPostPaymentEntity(final String postUrl, final String authToken)
+			throws IOException, PaymentException {
+		String retJson = "";
+		//final HttpClient client = new DefaultHttpClient();
+		final HttpClient client = HttpClientBuilder.create().build();
+		System.out.println("http request payments ::"+postUrl);
+		final HttpPost post = new HttpPost(postUrl);
+		post.addHeader("Authorization", authToken); 
+
+		final HttpResponse response = client.execute(post);
+		
+		final BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+		String line = "";
+		while ((line = rd.readLine()) != null) {
+			retJson += line;
+			;
+		}
+		
+		int responseCode = response.getStatusLine().getStatusCode();
+		
+		System.out.println("response code ::"+responseCode);
+		System.out.println("response ::"+response.getStatusLine());
+		
+		if(responseCode != 200) {
+			throw new PaymentException("Payment exception, "+response.getEntity().getContent());
+		}
+		return retJson;
+	}
+	
 	
 	public static String apiGetPaymentResponse(final String getUrl, final String authToken)
 			throws ClientProtocolException, IOException, PaymentException {

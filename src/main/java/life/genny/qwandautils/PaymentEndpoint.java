@@ -145,7 +145,7 @@ public class PaymentEndpoint {
 		
 		try {
 			releasePaymentResponse = PaymentUtils.apiPostPaymentEntity(
-					paymentServiceUrl + "/" + paymentProvider + "/items/" + paymentItemId + "/release-payment", "OK", authToken);
+					paymentServiceUrl + "/" + paymentProvider + "/items/" + paymentItemId + "/release-payment", authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
