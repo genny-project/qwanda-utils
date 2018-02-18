@@ -588,28 +588,29 @@ public class PaymentUtils {
 				JSONObject moneyobj = JsonUtils.fromJson(offerOwnerPriceString, JSONObject.class);
 				amount = moneyobj.get("amount").toString();
 				currency = moneyobj.get("currency").toString();
+				
+				if(amount != null) {
+					System.out.println("amount is not null");
+					BigDecimal begPrice = new BigDecimal(amount);
+
+					// 350 Dollars sent to Assembly as 3.50$, so multiplying with 100
+					BigDecimal finalPrice = begPrice.multiply(new BigDecimal(100));
+					itemObj.put("amount", finalPrice.toString());		
+				} else {
+					log.error("AMOUNT IS NULL");
+				}
+				
+				if(currency != null) {
+					System.out.println("currency is not null");
+					itemObj.put("currency", currency);
+				} else {
+					log.error("CURRENCY IS NULL");
+				}
+					
 			} else {
 				log.error("PRI_DRIVER_PRICE_INC_GST IS NULL");
 			}
 			
-			if(amount != null) {
-				System.out.println("amount is not null");
-				BigDecimal begPrice = new BigDecimal(amount);
-
-				// 350 Dollars sent to Assembly as 3.50$, so multiplying with 100
-				BigDecimal finalPrice = begPrice.multiply(new BigDecimal(100));
-				itemObj.put("amount", finalPrice.toString());		
-			} else {
-				log.error("AMOUNT IS NULL");
-			}
-			
-			if(currency != null) {
-				System.out.println("currency is not null");
-				itemObj.put("currency", currency);
-			} else {
-				log.error("CURRENCY IS NULL");
-			}
-
 		} else {
 			log.error("BEG BASEENTITY IS NULL");
 			try {
@@ -897,7 +898,7 @@ public class PaymentUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Boolean makePayment(String begCode, String authToken, String tokenString) {
+	public static Boolean makePayment(String qwandaUrl, String offerCode, String begCode, String authToken, String tokenString) {
 		
 		System.out.println("inside make payment");
 
@@ -905,6 +906,7 @@ public class PaymentUtils {
 		String userCode = QwandaUtils.getUserCode(tokenString);
 		BaseEntity userBe = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
 		BaseEntity begBe = MergeUtil.getBaseEntityForAttr(begCode, tokenString);
+		BaseEntity offerBe = MergeUtil.getBaseEntityForAttr(offerCode, tokenString);
 
 		String paymentResponse = null;
 
@@ -979,23 +981,32 @@ public class PaymentUtils {
 				System.out.println("Bank account..Need to be authorized to make payment");
 
 				/* Add Call to Matt's direct debit API */
-				String debitAuthorityResponse = null;
+				Boolean debitAuthorityResponse = getDebitAuthority(offerBe, begBe, accountId, authToken);
+				
+				if(debitAuthorityResponse) {
+					log.debug("Make payment object ::" + paymentObj.toJSONString());
+					System.out.println("Make payment object ::" + paymentObj.toJSONString());
+					try {
+						paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), JsonUtils.toJson(paymentObj),
+								authToken);
+						log.debug("Make payment response ::" + paymentResponse);
+						if (!paymentResponse.contains("error")) {
+							isMakePaymentSuccess = true;
+							
+							/* Saving deposit reference as an answer to beg */
+							saveDepositReference(qwandaUrl, paymentResponse, userCode, begCode, tokenString);
+							
+						}
 
-				log.debug("Make payment object ::" + paymentObj.toJSONString());
-				System.out.println("Make payment object ::" + paymentObj.toJSONString());
-				try {
-					paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), JsonUtils.toJson(paymentObj),
-							authToken);
-					log.debug("Make payment response ::" + paymentResponse);
-					if (!paymentResponse.contains("error")) {
-						isMakePaymentSuccess = true;
+					} catch (PaymentException e) {
+						isMakePaymentSuccess = false;
+						log.error("Exception occured during making payment with " + paymentType);
+						e.printStackTrace();
 					}
-
-				} catch (PaymentException e) {
+				} else {
 					isMakePaymentSuccess = false;
-					log.error("Exception occured during making payment with " + paymentType);
-					e.printStackTrace();
 				}
+				
 
 			} else if (paymentType != null && paymentType.equals("CARD")) {
 
@@ -1007,6 +1018,9 @@ public class PaymentUtils {
 					log.debug("Make payment response ::" + paymentResponse);
 					if (!paymentResponse.contains("error")) {
 						isMakePaymentSuccess = true;
+						
+						/* Save deposit reference as an answer to beg */
+						saveDepositReference(qwandaUrl, paymentResponse, userCode, begCode, tokenString);
 					}
 
 				} catch (PaymentException e) {
@@ -1030,6 +1044,78 @@ public class PaymentUtils {
 		return isMakePaymentSuccess;
 	}
 	
+	private static void saveDepositReference(String qwandaServiceUrl, String paymentResponse, String userCode, String begCode,
+			String tokenString) {
+		
+		JSONObject depositReference = JsonUtils.fromJson(paymentResponse, JSONObject.class);
+		String depositReferenceId = depositReference.get("depositReference").toString();
+		
+		Answer answer = new Answer(userCode, begCode, "PRI_DEPOSIT_REFERENCE_ID", depositReferenceId);
+		saveAnswer(qwandaServiceUrl, answer, tokenString);
+		
+	}
+
+	private static Boolean getDebitAuthority(BaseEntity offerBe, BaseEntity begBe, Object accountId, String authToken) {
+		
+		Boolean isDebitAuthority = false;
+		String getDebitAuthorityResponse = null;
+		String offerOwnerPriceString = MergeUtil.getBaseEntityAttrValueAsString(offerBe, "PRI_OFFER_DRIVER_PRICE_INC_GST");
+
+		System.out.println("begpriceString ::" + offerOwnerPriceString);
+
+		String amount = null;
+		if(offerOwnerPriceString != null) {
+			System.out.println("begPriceString is not null");
+			JSONObject moneyobj = JsonUtils.fromJson(offerOwnerPriceString, JSONObject.class);
+			amount = moneyobj.get("amount").toString();
+			
+			if(amount != null) {
+				System.out.println("amount is not null");
+				BigDecimal begPrice = new BigDecimal(amount);
+
+				// 350 Dollars sent to Assembly as 3.50$, so multiplying with 100
+				BigDecimal finalPrice = begPrice.multiply(new BigDecimal(100));
+				
+				JSONObject debitAuthorityObj = new JSONObject();
+				JSONObject accountObj = new JSONObject();
+				
+				/*{
+					  "account": {
+					    "id": "dkjgsxdkfesw345fidsfdsf"
+					  },
+					  "amount": 1000
+					}*/
+				
+				accountObj.put("id", accountId);
+				debitAuthorityObj.put("amount", finalPrice.toString());
+				debitAuthorityObj.put("account", accountObj);
+				
+				try {
+					getDebitAuthorityResponse = PaymentEndpoint.getdebitAuthorization(JsonUtils.toJson(debitAuthorityObj), authToken); 
+					if(!getDebitAuthorityResponse.contains("error")) {
+						isDebitAuthority = true;
+					}
+				} catch (PaymentException e) {
+					isDebitAuthority = false;
+					log.error("Exception occured during debit authorization, Make Payment will not succeed");
+					e.printStackTrace();
+				}
+				
+				
+			} else {
+				isDebitAuthority = false;
+				log.error("AMOUNT IS NULL");
+			}
+			
+			
+		} else {
+			isDebitAuthority = false;
+			log.error("PRI_DRIVER_PRICE_INC_GST IS NULL");
+		}
+		
+		return isDebitAuthority;
+	}
+
 	private static String getPaymentMethodType(BaseEntity userBe, Object accountId) {
 		
 		System.out.println("in getPaymentMethodType method");

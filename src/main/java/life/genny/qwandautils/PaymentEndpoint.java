@@ -182,5 +182,19 @@ public class PaymentEndpoint {
 		return searchUserResponse;
 		
 	}
+	
+	public static String getdebitAuthorization(String debitEntity, String authToken) throws PaymentException {
+		
+		String searchUserResponse = null;
+		
+		try {
+			searchUserResponse = PaymentUtils.apiPostPaymentEntity(paymentServiceUrl + "/" + paymentProvider + "/payment-authority", debitEntity, authToken);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+				
+		return searchUserResponse;
+		
+	}
 
 }
