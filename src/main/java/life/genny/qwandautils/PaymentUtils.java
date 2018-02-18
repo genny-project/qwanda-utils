@@ -741,25 +741,32 @@ public class PaymentUtils {
 
 		if (assemblyId != null) {
 
-			String tokenResponse = authenticatePaymentProvider(assemblyId, assemblyAuthToken);
+			String tokenResponse = null;
+			
+			try {
+				tokenResponse  = authenticatePaymentProvider(assemblyId, assemblyAuthToken);
 
-			if (!tokenResponse.contains("error")) {
-				
-				try {
-					JSONObject tokenObj = (JSONObject) parser.parse(tokenResponse);
-					System.out.println("token object ::" + tokenObj);
+				if (!tokenResponse.contains("error")) {
+					
+					try {
+						JSONObject tokenObj = (JSONObject) parser.parse(tokenResponse);
+						System.out.println("token object ::" + tokenObj);
 
-					String providerToken = tokenObj.get("token").toString();
+						String providerToken = tokenObj.get("token").toString();
 
-					Answer cardTokenAnswer = new Answer(userId, userId, "PRI_ASSEMBLY_CARD_TOKEN", providerToken);
-					saveAnswer(qwandaServiceUrl, cardTokenAnswer, tokenString);
+						Answer cardTokenAnswer = new Answer(userId, userId, "PRI_ASSEMBLY_CARD_TOKEN", providerToken);
+						saveAnswer(qwandaServiceUrl, cardTokenAnswer, tokenString);
 
-					Answer bankTokenAnswer = new Answer(userId, userId, "PRI_ASSEMBLY_BANK_TOKEN", providerToken);
-					saveAnswer(qwandaServiceUrl, bankTokenAnswer, tokenString);
+						Answer bankTokenAnswer = new Answer(userId, userId, "PRI_ASSEMBLY_BANK_TOKEN", providerToken);
+						saveAnswer(qwandaServiceUrl, bankTokenAnswer, tokenString);
 
-				} catch (ParseException e) {
-					e.printStackTrace();
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
 				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				log.error("PaymentUtils Exception occured during Payment authentication Token provision");
 			}
 		} else {
 			log.error("ASSEMBLY USER ID IS NULL");
