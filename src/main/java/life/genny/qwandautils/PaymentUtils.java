@@ -741,6 +741,42 @@ public class PaymentUtils {
 		}
 	}
 	
+	public static String fetchOneTimeAssemblyToken(String qwandaServiceUrl, String userId, String tokenString, String assemblyId,
+			String assemblyAuthToken)
+	{
+		String transactionToken = null;
+		JSONParser parser = new JSONParser();
+
+		if (assemblyId != null) {
+
+			String tokenResponse = null;
+			
+			try {
+				tokenResponse  = PaymentEndpoint.authenticatePaymentProvider(assemblyId, assemblyAuthToken);
+
+				if (!tokenResponse.contains("error")) {
+					
+					try {
+						JSONObject tokenObj = (JSONObject) parser.parse(tokenResponse);
+						System.out.println("token object ::" + tokenObj);
+
+						String providerToken = tokenObj.get("token").toString();
+
+						return providerToken;
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+				}
+			} catch (Exception e) {
+				log.error("PaymentUtils Exception occured during Payment authentication Token provision");
+			}
+		} else {
+			log.error("ASSEMBLY USER ID IS NULL");
+		}
+		
+		return transactionToken;
+	}
+	
 	public static void saveTokenAnswers(String qwandaServiceUrl, String userId, String tokenString, String assemblyId,
 			String assemblyAuthToken) {
 
@@ -782,7 +818,7 @@ public class PaymentUtils {
 	
 	
 	@SuppressWarnings("unchecked")
-	private static String authenticatePaymentProvider(String assemblyId, String assemblyAuthToken) {
+	private static String authenticatePaymentProvider(String assemblyId, String assemblyAuthToken) throws PaymentException {
 		
 		JSONObject paymentProviderObj = new JSONObject();
 		JSONObject userObj = new JSONObject();
@@ -793,12 +829,9 @@ public class PaymentUtils {
 		paymentProviderObj.put("user", userObj);
 		
 		String tokenResponse = null;
-		try {
-			tokenResponse = PaymentEndpoint.authenticatePaymentProvider(JsonUtils.toJson(paymentProviderObj), assemblyAuthToken);
-		} catch (PaymentException e) {
-			log.error("Exception occured during Payment authentication Token provision");
-			e.printStackTrace();
-		}
+
+		tokenResponse = PaymentEndpoint.authenticatePaymentProvider(JsonUtils.toJson(paymentProviderObj), assemblyAuthToken);
+	
 		
 		return tokenResponse;
 	}
