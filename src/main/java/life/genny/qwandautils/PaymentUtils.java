@@ -27,6 +27,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.entity.BaseEntity;
@@ -116,6 +118,7 @@ public class PaymentUtils {
 		
 		System.out.println("response code ::"+responseCode);
 		System.out.println("response ::"+response.getStatusLine());
+		System.out.println("response body::"+response.getEntity().toString());
 		
 		if(responseCode != 200) {
 			throw new PaymentException("Payment exception, "+response.getEntity().getContent());
@@ -145,6 +148,8 @@ public class PaymentUtils {
 		
 		System.out.println("response code ::"+responseCode);
 		System.out.println("response ::"+response.getStatusLine());
+		
+		System.out.println("response body::"+response.getEntity().toString());
 		
 		if(responseCode != 200) {
 			throw new PaymentException("Payment exception, "+response.getEntity().getContent());
@@ -181,6 +186,7 @@ public class PaymentUtils {
 		
 		System.out.println("response code ::"+responseCode);
 		System.out.println("response ::"+response.getStatusLine());
+		System.out.println("response body::"+response.getEntity().toString());
 		
 		if(responseCode != 200) {
 			throw new PaymentException("Payment exception,"+response.getEntity().getContent());
@@ -214,6 +220,7 @@ public class PaymentUtils {
 		
 		System.out.println("response code ::"+responseCode);
 		System.out.println("response ::"+response.getStatusLine());
+		System.out.println("response body::"+response.getEntity().toString());
 		
 		if(responseCode != 200) {
 			throw new PaymentException("Payment exception, "+response.getEntity().getContent());
@@ -238,10 +245,10 @@ public class PaymentUtils {
 		if(assemblyUserId != null) {
 			String authToken = getAssemblyAuthKey();
 			
-			String assemblyUserString;
+			String assemblyUserString = null;
 			try {
 				assemblyUserString = PaymentEndpoint.getAssemblyUserById(assemblyUserId, authToken);
-				if(!assemblyUserString.contains("error")) {
+				if(assemblyUserString != null && !assemblyUserString.contains("error")) {
 					System.out.println("assembly user string ::"+assemblyUserString);
 					isExists = true;
 				} 
@@ -1252,11 +1259,13 @@ public class PaymentUtils {
 			disburseAccObj.put("account", accObj);
 			
 			try {
+				System.out.println("disbursement account object ::"+disburseAccObj);
 				disburseAccountResponse = PaymentEndpoint.disburseAccount(assembyUserId, JsonUtils.toJson(disburseAccObj), authToken);
 				System.out.println("disburse payment response ::"+disburseAccountResponse);
 				
 			} catch (PaymentException e) {
 				log.error("Payment exception during payment disimbursement response");
+				log.error("disburse payment response ::"+disburseAccountResponse);
 				e.printStackTrace();
 			}		
 			
