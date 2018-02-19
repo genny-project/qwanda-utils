@@ -742,17 +742,25 @@ public class PaymentUtils {
 	}
 	
 	public static String fetchOneTimeAssemblyToken(String qwandaServiceUrl, String userId, String tokenString, String assemblyId,
-			String assemblyAuthToken)
+			String assemblyAuthToken, String type)
 	{
 		String transactionToken = null;
 		JSONParser parser = new JSONParser();
+		JSONObject authenticationEntityObj = new JSONObject();
+		
 
 		if (assemblyId != null) {
 
 			String tokenResponse = null;
 			
 			try {
-				tokenResponse  = PaymentEndpoint.authenticatePaymentProvider(assemblyId, assemblyAuthToken);
+				
+				authenticationEntityObj.put("type", type);
+				JSONObject userObj = new JSONObject();
+				userObj.put("id", assemblyId);
+				authenticationEntityObj.put("user", userObj);
+								
+				tokenResponse  = PaymentEndpoint.authenticatePaymentProvider(JsonUtils.toJson(authenticationEntityObj), assemblyAuthToken);
 
 				if (!tokenResponse.contains("error")) {
 					
