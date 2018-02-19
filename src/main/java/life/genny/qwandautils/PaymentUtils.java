@@ -777,45 +777,45 @@ public class PaymentUtils {
 		return transactionToken;
 	}
 	
-	public static void saveTokenAnswers(String qwandaServiceUrl, String userId, String tokenString, String assemblyId,
-			String assemblyAuthToken) {
-
-		JSONParser parser = new JSONParser();
-
-		if (assemblyId != null) {
-
-			String tokenResponse = null;
-			
-			try {
-				tokenResponse  = authenticatePaymentProvider(assemblyId, assemblyAuthToken);
-
-				if (!tokenResponse.contains("error")) {
-					
-					try {
-						JSONObject tokenObj = (JSONObject) parser.parse(tokenResponse);
-						System.out.println("token object ::" + tokenObj);
-
-						String providerToken = tokenObj.get("token").toString();
-
-						Answer cardTokenAnswer = new Answer(userId, userId, "PRI_ASSEMBLY_CARD_TOKEN", providerToken);
-						saveAnswer(qwandaServiceUrl, cardTokenAnswer, tokenString);
-
-						Answer bankTokenAnswer = new Answer(userId, userId, "PRI_ASSEMBLY_BANK_TOKEN", providerToken);
-						saveAnswer(qwandaServiceUrl, bankTokenAnswer, tokenString);
-
-					} catch (ParseException e) {
-						e.printStackTrace();
-					}
-				}
-			} catch (Exception e) {
-				log.error("PaymentUtils Exception occured during Payment authentication Token provision");
-			}
-		} else {
-			log.error("ASSEMBLY USER ID IS NULL");
-		}
-
-	}
-	
+//	public static void saveTokenAnswers(String qwandaServiceUrl, String userId, String tokenString, String assemblyId,
+//			String assemblyAuthToken) {
+//
+//		JSONParser parser = new JSONParser();
+//
+//		if (assemblyId != null) {
+//
+//			String tokenResponse = null;
+//			
+//			try {
+//				tokenResponse  = authenticatePaymentProvider(assemblyId, assemblyAuthToken);
+//
+//				if (!tokenResponse.contains("error")) {
+//					
+//					try {
+//						JSONObject tokenObj = (JSONObject) parser.parse(tokenResponse);
+//						System.out.println("token object ::" + tokenObj);
+//
+//						String providerToken = tokenObj.get("token").toString();
+//
+//						Answer cardTokenAnswer = new Answer(userId, userId, "PRI_ASSEMBLY_CARD_TOKEN", providerToken);
+//						saveAnswer(qwandaServiceUrl, cardTokenAnswer, tokenString);
+//
+//						Answer bankTokenAnswer = new Answer(userId, userId, "PRI_ASSEMBLY_BANK_TOKEN", providerToken);
+//						saveAnswer(qwandaServiceUrl, bankTokenAnswer, tokenString);
+//
+//					} catch (ParseException e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			} catch (Exception e) {
+//				log.error("PaymentUtils Exception occured during Payment authentication Token provision");
+//			}
+//		} else {
+//			log.error("ASSEMBLY USER ID IS NULL");
+//		}
+//
+//	}
+//	
 	
 	@SuppressWarnings("unchecked")
 	private static String authenticatePaymentProvider(String assemblyId, String assemblyAuthToken) throws PaymentException {
