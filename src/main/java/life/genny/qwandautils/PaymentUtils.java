@@ -118,7 +118,7 @@ public class PaymentUtils {
 		
 		System.out.println("response code ::"+responseCode);
 		System.out.println("response ::"+response.getStatusLine());
-		System.out.println("response body::"+response.getEntity().toString());
+		System.out.println("response body::"+retJson);
 		
 		if(responseCode != 200) {
 			throw new PaymentException("Payment exception, "+response.getEntity().getContent());
@@ -149,7 +149,7 @@ public class PaymentUtils {
 		System.out.println("response code ::"+responseCode);
 		System.out.println("response ::"+response.getStatusLine());
 		
-		System.out.println("response body::"+response.getEntity().toString());
+		System.out.println("response body::"+retJson);
 		
 		if(responseCode != 200) {
 			throw new PaymentException("Payment exception, "+response.getEntity().getContent());
@@ -186,7 +186,7 @@ public class PaymentUtils {
 		
 		System.out.println("response code ::"+responseCode);
 		System.out.println("response ::"+response.getStatusLine());
-		System.out.println("response body::"+response.getEntity().toString());
+		System.out.println("response body::"+retJson);
 		
 		if(responseCode != 200) {
 			throw new PaymentException("Payment exception,"+response.getEntity().getContent());
@@ -220,7 +220,7 @@ public class PaymentUtils {
 		
 		System.out.println("response code ::"+responseCode);
 		System.out.println("response ::"+response.getStatusLine());
-		System.out.println("response body::"+response.getEntity().toString());
+		System.out.println("response body::"+retJson);
 		
 		if(responseCode != 200) {
 			throw new PaymentException("Payment exception, "+response.getEntity().getContent());
@@ -688,6 +688,7 @@ public class PaymentUtils {
 			try {
 				throw new PaymentException("Payment Item creation will not succeed since Beg has no quoter link");
 			} catch (PaymentException e) {
+				log.error("BEG CONTEXT MAP HAS NO QUOTER LINK, SO SELLER OBJECT IS NULL");
 			}
 		}
 		
@@ -712,9 +713,8 @@ public class PaymentUtils {
 					return itemId;
 				}
 			} catch (PaymentException e) {
-				log.error("PAYMENT ITEM CREATION FAILED, ITEM/BUYER/SELLER OBJECT IS NULL");
+				log.error("PAYMENT ITEM CREATION FAILED, ITEM/BUYER/SELLER OBJECT IS NULL, exception is handled");
 				itemId = null;
-				e.printStackTrace();
 			}
 			
 		}
@@ -772,7 +772,6 @@ public class PaymentUtils {
 					}
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				log.error("PaymentUtils Exception occured during Payment authentication Token provision");
 			}
 		} else {
