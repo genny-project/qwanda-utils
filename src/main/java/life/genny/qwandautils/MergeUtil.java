@@ -41,10 +41,16 @@ public class MergeUtil {
 		while (match.find()) {
 			Object mergedtext = wordMerge(templateEntityMap, match.group(1));
 			log.info("merge text ::"+mergedtext);
-			mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, mergedtext.toString());			
+			System.out.println("merge text ::"+mergedtext);
+			if(mergedtext != null) {
+				mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, mergedtext.toString());
+			} else {
+				mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, "");
+			}
+						
 		}
 		return mergeStr;
-		
+	
 	}
 	
 	private static String wordMerge(Map<String, BaseEntity> entitymap, String mergeText){
