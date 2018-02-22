@@ -2,29 +2,13 @@ package life.genny.qwandautils;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Type;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.Logger;
-import org.javamoney.moneta.Money;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-
-import life.genny.qwanda.DateTimeDeserializer;
 import life.genny.qwanda.Link;
-import life.genny.qwanda.MoneyDeserializer;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 
@@ -37,33 +21,7 @@ public class MergeUtil {
     public static final String ANSI_BLUE = "\u001B[34m";
     public static final String ANSI_RED = "\u001B[31m";
 	
-    final static Gson gson = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer())
-	        .registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
-	          @Override
-	          public LocalDate deserialize(final JsonElement json, final Type type,
-	              final JsonDeserializationContext jsonDeserializationContext)
-	              throws JsonParseException {
-	            return LocalDate.parse(json.getAsJsonPrimitive().getAsString(), DateTimeFormatter.ISO_LOCAL_DATE);
-	          }
-
-	          public JsonElement serialize(final LocalDate date, final Type typeOfSrc,
-	              final JsonSerializationContext context) {
-	            return new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE)); 
-	          }
-	        }).registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
-		          @Override
-		          public LocalDateTime deserialize(final JsonElement json, final Type type,
-		              final JsonDeserializationContext jsonDeserializationContext)
-		              throws JsonParseException {
-		            return LocalDateTime.parse(json.getAsJsonPrimitive().getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-		          }
-
-		          public JsonElement serialize(final LocalDateTime date, final Type typeOfSrc,
-		              final JsonSerializationContext context) {
-		            return new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)); 
-		          }
-		        }).create();
-    
+   
     
 	public static final String REGEX_START = "[";
 	public static final String REGEX_END = "]";
@@ -83,10 +41,16 @@ public class MergeUtil {
 		while (match.find()) {
 			Object mergedtext = wordMerge(templateEntityMap, match.group(1));
 			log.info("merge text ::"+mergedtext);
-			mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, mergedtext.toString());			
+			System.out.println("merge text ::"+mergedtext);
+			if(mergedtext != null) {
+				mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, mergedtext.toString());
+			} else {
+				mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, "");
+			}
+						
 		}
 		return mergeStr;
-		
+	
 	}
 	
 	private static String wordMerge(Map<String, BaseEntity> entitymap, String mergeText){
@@ -103,9 +67,39 @@ public class MergeUtil {
 
 					BaseEntity be = entitymap.get(baseent);
 
-					//return be.findEntityAttribute(entityArr[1]).get().getValueString();
-					return getBaseEntityAttrValueAsString(be, entityArr[1]);
-				
+					// return
+					// be.findEntityAttribute(entityArr[1]).get().getValueString();
+					String attributeCode = entityArr[1];
+					
+					if (!(attributeCode.equals("PRI_PRICE")
+							|| attributeCode.equals("PRI_LOAD_PRICE") || attributeCode.equals("PRI_OFFER_PRICE")
+							|| attributeCode.equals("PRI_FEE") || attributeCode.equals("PRI_OWNER_PRICE")
+							|| attributeCode.equals("PRI_DRIVER_PRICE") || attributeCode.equals("PRI_OFFER_FEE")
+							|| attributeCode.equals("PRI_OFFER_OWNER_PRICE")
+							|| attributeCode.equals("PRI_OFFER_DRIVER_PRICE") || attributeCode.equals("PRI_FEE_INC_GST")
+							|| attributeCode.equals("PRI_FEE_EXC_GST") || attributeCode.equals("PRI_OFFER_FEE_INC_GST")
+							|| attributeCode.equals("PRI_OFFER_FEE_EXC_GST")
+							|| attributeCode.equals("PRI_OWNER_PRICE_INC_GST")
+							|| attributeCode.equals("PRI_OWNER_PRICE_EXC_GST")
+							|| attributeCode.equals("PRI_OFFER_OWNER_PRICE_INC_GST")
+							|| attributeCode.equals("PRI_OFFER_OWNER_PRICE_EXC_GST")
+							|| attributeCode.equals("PRI_DRIVER_PRICE_INC_GST")
+							|| attributeCode.equals("PRI_DRIVER_PRICE_EXC_GST")
+							|| attributeCode.equals("PRI_OFFER_DRIVER_PRICE_INC_GST")
+							|| attributeCode.equals("PRI_OFFER_DRIVER_PRICE_EXC_GST"))) {
+						
+						return getBaseEntityAttrValueAsString(be, attributeCode);
+						
+					} else {
+						System.out.println("price attributes");
+						String priceString = getBaseEntityAttrValueAsString(be, attributeCode);
+						
+						String amount = QwandaUtils.getAmountAsString(priceString);
+						String currency = QwandaUtils.getCurrencyAsString(priceString);
+
+						return amount + " " + currency;
+					}
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -127,13 +121,14 @@ public class MergeUtil {
 		
 		//String qwandaServiceUrl = "http://localhost:8280";
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
-		String attributeString;
+		String attributeString = null;
 		BaseEntity be = null;
 		try {
 			attributeString = QwandaUtils
 					.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode, token);
 		//	System.out.println(ANSI_BLUE + "Base entity attribute code::"+baseEntAttributeCode + ANSI_RESET);					
-			be = gson.fromJson(attributeString, BaseEntity.class);
+			be = JsonUtils.fromJson(attributeString, BaseEntity.class);
+			//be = JsonUtils.gson.fromJson(attributeString, BaseEntity.class);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -213,16 +208,12 @@ public class MergeUtil {
 		BaseEntity be = new BaseEntity(targetCode, name);
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 		
-		Gson gson1 = new Gson();
-		GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Money.class, new MoneyDeserializer());
-		gsonBuilder.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer());
-		gson1 = gsonBuilder.create();
-        
-        String jsonBE = gson1.toJson(be);
+	      
+        String jsonBE = JsonUtils.toJson(be);
         try {
             String output= QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/baseentitys", jsonBE, token);
             
-            QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/entityentitys", gson.toJson(new Link(sourceCode, targetCode, linkCode)),token);
+            QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/entityentitys", JsonUtils.toJson(new Link(sourceCode, targetCode, linkCode)),token);
             System.out.println("this is the output :: "+ output);
             
         }catch (Exception e) {

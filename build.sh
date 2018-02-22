@@ -4,3 +4,4 @@ export GOOGLE_CLIENT_SECRET="{\"installed\":{\"client_id\":\"260075856207-9d7a02
 export GOOGLE_SHEETID="1VSXJUn8_BHG1aW0DQrFDnvLjx_jxcNiD33QzqO5D-jc"
 
 mvn clean install
+mvn eclipse:eclipse

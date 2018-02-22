@@ -16,6 +16,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -31,6 +32,7 @@ import org.apache.http.message.BasicNameValuePair;
 // import org.keycloak.util.JsonSerialization;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.common.util.KeycloakUriBuilder;
 import org.keycloak.constants.ServiceUrlConstants;
@@ -189,6 +191,53 @@ public class KeycloakUtils {
 		}
 		return projectRealm;
 	}
+	
+	@SuppressWarnings("deprecation")
+	public static String resetUserPassword(String userId, String token, String realm) throws ClientProtocolException, IOException {
+			
+		HttpClient httpClient = new DefaultHttpClient();
+
+		try {
+			
+			String keycloakUrl = getKeycloakUrl();
+			HttpPut putRequest = new HttpPut(keycloakUrl+"/auth/admin/realms/"+realm+"/users/" + userId + "/reset-password");
+			System.out.println(keycloakUrl+"/auth/admin/realms/"+realm+"/users/" + userId + "/reset-password");
+			
+			putRequest.addHeader("Content-Type", "application/json");
+			putRequest.addHeader("Authorization", "Bearer "+token);
+				
+			HttpResponse response = httpClient.execute(putRequest);
+
+			int statusCode = response.getStatusLine().getStatusCode();
+			
+			HttpEntity entity = response.getEntity();
+			String content = null;
+			if (statusCode == 201) {
+				Header[] headers = response.getHeaders("Location");
+				String locationUrl = headers[0].getValue();
+				content = locationUrl.replaceFirst(".*/(\\w+)","$1");
+				return content;
+				} else if (statusCode == 204) {
+				Header[] headers = response.getHeaders("Location");
+				String locationUrl = headers[0].getValue();
+				content = locationUrl.replaceFirst(".*/(\\w+)","$1");
+				return content;
+			}
+				else if (statusCode == 409) {
+					throw new IOException("Already exists");
+				}
+			if (entity == null) {
+				throw new IOException("Null Entity");
+			} else {
+				content = getContent(entity);
+				throw new IOException(response+"");
+			}
+		} 
+		
+		finally {
+			httpClient.getConnectionManager().shutdown();
+		}
+	}
 
 	public static String createUser(String token, String keycloakUrl, String realm, 
 			String newUsername,
@@ -271,6 +320,14 @@ public class KeycloakUtils {
 		finally {
 			httpClient.getConnectionManager().shutdown();
 		}
+	}
+	
+	public static String getKeycloakUrl() {
+		
+		String keycloakProto = System.getenv("KEYCLOAK_PROTO") !=null ? System.getenv("KEYCLOAK_PROTO"): "http://";
+	    String keycloakPort = System.getenv("KEYCLOAK_PORT") != null ? System.getenv("KEYCLOAK_PORT"): "8180";
+	    String keycloakIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP"): "localhost";
+		return keycloakProto+keycloakIP+":"+keycloakPort;
 	}
 
 	public static int setPassword(String token, String keycloakUrl, String realm, String userId, String password) throws IOException 

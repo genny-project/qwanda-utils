@@ -66,6 +66,8 @@ public class MessageUtils {
 			type = QBaseMSGMessageType.SMS;
 		}else if(messageType.equals("EMAIL")) {
 			type = QBaseMSGMessageType.EMAIL;
+		}else if(messageType.equals("TOAST")) {
+			type = QBaseMSGMessageType.TOAST;
 		}
 		
 		QMessageGennyMSG msgMessage = new QMessageGennyMSG("MSG_MESSAGE", type, templateCode, contextMap, recipientArray);
