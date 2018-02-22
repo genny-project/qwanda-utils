@@ -74,7 +74,7 @@ public class MessageUtils {
 		JsonObject jsonMessage = JsonObject.mapFrom(msgMessage);
 
 		log.info("------------------------------------------------------------------------");
-		log.info("MESSAGE TO OWNER   ::   " + jsonMessage.toString());
+		log.info("MESSAGE ::   " + jsonMessage.toString());
 		log.info("------------------------------------------------------------------------");
 
 		jsonMessage.put("token", token);
