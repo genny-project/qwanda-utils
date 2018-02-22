@@ -107,41 +107,6 @@ public class QwandaUtils {
 	}
 
 
-	public static String apiGetBasicAuth(final String getUrl, final String username, final String password)
-		throws ClientProtocolException, IOException {
-		String retJson = "";
-		log.debug("BASICAUTH GET: " + getUrl);
-
-		final HttpClient client = HttpClientBuilder.create().build();
-		final HttpGet request = new HttpGet(getUrl);
-
-
-		String authToken = Base64.getEncoder().encodeToString((username+":"+password).getBytes());
-
-		if (authToken != null) {
-			request.addHeader("Authorization", "Basic " + authToken); // Authorization": `Bearer
-		}
-		final HttpResponse response = client.execute(request);
-		BufferedReader rd = null;
-
-		try {
-			rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-			String line = "";
-			while ((line = rd.readLine()) != null) {
-				retJson += line;
-				;
-			}
-			System.out.println("JENKINS CALL SUCEEDED");
-		} catch (NullPointerException e) {
-			System.out.println("JEKNINS CALL FAILED");
-			// TODO Auto-generated catch block
-			return null;
-		}
-
-		return retJson;
-
-	}
-
 	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken)
 			throws IOException {
 		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
