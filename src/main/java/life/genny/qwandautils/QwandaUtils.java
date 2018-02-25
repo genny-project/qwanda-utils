@@ -442,6 +442,33 @@ public class QwandaUtils {
 	
 	/**
 	 * 
+	 * @param baseEntAttributeCode
+	 * @param token
+	 * @return Deserialized BaseEntity model object with values for a BaseEntity code that is passed
+	 * @throws IOException 
+	 */
+	public static BaseEntity getBaseEntityByCodeWithAttributes(String baseEntAttributeCode, String token) throws  IOException {
+		
+		String attributeString = null;
+		BaseEntity be = null;
+		try {
+			attributeString = QwandaUtils
+					.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode+"/attributes", token);
+			be = JsonUtils.fromJson(attributeString, BaseEntity.class);
+			if (be == null) {
+				throw new IOException("Cannot find BE "+baseEntAttributeCode);
+			}
+			
+		} catch (IOException e)  {
+			throw new IOException("Cannot connect to QwandaURL "+qwandaServiceUrl);
+		}
+		
+		
+		return be;
+	}
+	
+	/**
+	 * 
 	 * @param username
 	 * @return baseEntity code for the userName passed
 	 */
