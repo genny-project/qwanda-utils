@@ -27,8 +27,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.entity.BaseEntity;
@@ -46,7 +44,7 @@ public class PaymentUtils {
 	public static final String DEFAULT_PAYMENT_TYPE = "escrow";
 	public static final String PROVIDER_TYPE_BANK = "bank"; 
 	
-	@SuppressWarnings("unchecked")
+	/*@SuppressWarnings("unchecked")
 	public static String getAssemblyAuthKey() {
 		
 		String paymentMarketPlace = System.getenv("PAYMENT_MARKETPLACE_NAME");
@@ -60,8 +58,8 @@ public class PaymentUtils {
 		
 		String encodedAuthString = base64Encoder(authObj.toJSONString());
 
-		return encodedAuthString;
-	}
+		return encodedAuthString; 
+	}*/
 
 	public static String base64Encoder(String plainString) {
 
@@ -238,16 +236,15 @@ public class PaymentUtils {
 	}
 	
 	
-	public static Boolean checkIfAssemblyUserExists(String assemblyUserId) {
+	public static Boolean checkIfAssemblyUserExists(String assemblyUserId, String assemblyAuthKey) {
 		
 		Boolean isExists = false;
 		
 		if(assemblyUserId != null) {
-			String authToken = getAssemblyAuthKey();
 			
 			String assemblyUserString = null;
 			try {
-				assemblyUserString = PaymentEndpoint.getAssemblyUserById(assemblyUserId, authToken);
+				assemblyUserString = PaymentEndpoint.getAssemblyUserById(assemblyUserId, assemblyAuthKey);
 				if(assemblyUserString != null && !assemblyUserString.contains("error")) {
 					System.out.println("assembly user string ::"+assemblyUserString);
 					isExists = true;
@@ -277,14 +274,14 @@ public class PaymentUtils {
 			
 			Object firstName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_FIRSTNAME");
 			Object lastName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_LASTNAME");
-			Object dobString = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_DOB");
+			//Object dobString = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_DOB");
 			Object email = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_EMAIL");
-			Object phoneNumber = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_MOBILE");
-			Object addressLine1 = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_ADDRESS1");
-			Object city = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_CITY");
-			Object state = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_STATE");
+			//Object phoneNumber = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_MOBILE");
+			//Object addressLine1 = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_ADDRESS1");
+			//Object city = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_CITY");
+			//Object state = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_STATE");
 			Object country = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_COUNTRY");
-			Object postCode = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_POSTCODE");
+			//Object postCode = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_POSTCODE");
 			
 			if(firstName != null) {
 				personalInfoObj.put("firstName", firstName.toString());
@@ -294,7 +291,7 @@ public class PaymentUtils {
 				personalInfoObj.put("lastName", lastName.toString());
 			} 
 			
-			if(dobString != null) {
+			/*if(dobString != null) {
 				System.out.println("dob string ::"+dobString);
 				//DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 				DateTimeFormatter assemblyDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -304,10 +301,6 @@ public class PaymentUtils {
 				System.out.println("another formatted dob ::"+formattedDOBString);
 				
 				personalInfoObj.put("dob", formattedDOBString.toString());
-			}
-			
-			if(email != null) {
-				contactInfoObj.put("email", email.toString());
 			}
 			
 			if(phoneNumber != null) {
@@ -324,7 +317,7 @@ public class PaymentUtils {
 			
 			if(state != null) {
 				locationObj.put("state", state.toString());
-			}
+			}*/
 			
 			if(country != null) {
 				locationObj.put("country", country.toString());
@@ -332,9 +325,13 @@ public class PaymentUtils {
 				locationObj.put("country", "AU");
 			}
 			
-			if(postCode != null) {
-				locationObj.put("postcode", postCode.toString());
+			if(email != null) {
+				contactInfoObj.put("email", email.toString());
 			}
+			
+			/*if(postCode != null) {
+				locationObj.put("postcode", postCode.toString());
+			}*/
 		}
 	
 		//personalInfoObj.put("governmentNumber", "123456789");
@@ -1360,7 +1357,7 @@ public class PaymentUtils {
 				} 
 				
 			} catch (PaymentException e) {
-				log.error("Payment user search has returned a null response");
+				log.error("Payment user search with email has returned a null response");
 				e.printStackTrace();
 			}
 			
