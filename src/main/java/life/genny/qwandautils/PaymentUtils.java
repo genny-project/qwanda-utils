@@ -44,7 +44,7 @@ public class PaymentUtils {
 	public static final String DEFAULT_PAYMENT_TYPE = "escrow";
 	public static final String PROVIDER_TYPE_BANK = "bank"; 
 	
-	@SuppressWarnings("unchecked")
+	/*@SuppressWarnings("unchecked")
 	public static String getAssemblyAuthKey() {
 		
 		String paymentMarketPlace = System.getenv("PAYMENT_MARKETPLACE_NAME");
@@ -58,8 +58,8 @@ public class PaymentUtils {
 		
 		String encodedAuthString = base64Encoder(authObj.toJSONString());
 
-		return encodedAuthString;
-	}
+		return encodedAuthString; 
+	}*/
 
 	public static String base64Encoder(String plainString) {
 
@@ -271,16 +271,15 @@ public class PaymentUtils {
 	}
 	
 	
-	public static Boolean checkIfAssemblyUserExists(String assemblyUserId) {
+	public static Boolean checkIfAssemblyUserExists(String assemblyUserId, String assemblyAuthKey) {
 		
 		Boolean isExists = false;
 		
 		if(assemblyUserId != null) {
-			String authToken = getAssemblyAuthKey();
 			
 			String assemblyUserString = null;
 			try {
-				assemblyUserString = PaymentEndpoint.getAssemblyUserById(assemblyUserId, authToken);
+				assemblyUserString = PaymentEndpoint.getAssemblyUserById(assemblyUserId, assemblyAuthKey);
 				if(assemblyUserString != null && !assemblyUserString.contains("error")) {
 					System.out.println("assembly user string ::"+assemblyUserString);
 					isExists = true;
@@ -310,9 +309,9 @@ public class PaymentUtils {
 			
 			Object firstName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_FIRSTNAME");
 			Object lastName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_LASTNAME");
-			Object dobString = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_DOB");
+			//Object dobString = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_DOB");
 			Object email = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_EMAIL");
-			//Object phoneNumber = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_MOBILE");
+
 			Object addressLine1 = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_ADDRESS1");
 			Object city = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_CITY");
 			Object state = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_STATE");
@@ -327,25 +326,6 @@ public class PaymentUtils {
 				personalInfoObj.put("lastName", lastName.toString());
 			} 
 			
-			if(dobString != null) {
-				System.out.println("dob string ::"+dobString);
-				//DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-				DateTimeFormatter assemblyDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-				
-				LocalDate dobDate = (LocalDate) dobString;
-				String formattedDOBString = assemblyDateFormatter.format(dobDate);
-				System.out.println("another formatted dob ::"+formattedDOBString);
-				
-				personalInfoObj.put("dob", formattedDOBString.toString());
-			}
-			
-			if(email != null) {
-				contactInfoObj.put("email", email.toString());
-			}
-			
-			/*if(phoneNumber != null) {
-				contactInfoObj.put("mobile", phoneNumber.toString());
-			}*/
 			
 			if(addressLine1 != null) {
 				locationObj.put("addressLine1", addressLine1.toString());
@@ -363,6 +343,10 @@ public class PaymentUtils {
 				locationObj.put("country", country.toString());
 			} else {
 				locationObj.put("country", "AU");
+			}
+			
+			if(email != null) {
+				contactInfoObj.put("email", email.toString());
 			}
 			
 			if(postCode != null) {
