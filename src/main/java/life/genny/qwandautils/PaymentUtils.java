@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.http.HttpResponse;
@@ -259,10 +260,8 @@ public class PaymentUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static String createAssemblyUser(String assemblyUserId, String authToken, String token) { 
+	public static String createAssemblyUser(String assemblyUserId, String authToken, BaseEntity userBe) { 
 		
-		String userCode = QwandaUtils.getUserCode(token);
-		BaseEntity be = MergeUtil.getBaseEntityForAttr(userCode, token);
 		String assemblyId = null;
 
 		JSONObject userobj = new JSONObject();
@@ -270,52 +269,65 @@ public class PaymentUtils {
 		JSONObject contactInfoObj = new JSONObject();
 		JSONObject locationObj = new JSONObject();
 		
-		if(be != null && assemblyUserId != null) {
+		if(userBe != null && assemblyUserId != null) {
 			
-			Object firstName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_FIRSTNAME");
-			Object lastName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_LASTNAME");
-			//Object dobString = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_DOB");
-			Object email = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_EMAIL");
+			Optional<String> firstName = userBe.getValue("PRI_FIRSTNAME");
+			Optional<String> lastName = userBe.getValue("PRI_LASTNAME");
+			Optional<Object> dobString = userBe.getValue("PRI_DOB");
+			Optional<String> email = userBe.getValue("PRI_EMAIL");
 
-			Object addressLine1 = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_ADDRESS1");
-			Object city = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_CITY");
-			Object state = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_STATE");
-			Object country = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_COUNTRY");
-			Object postCode = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_POSTCODE");
+			Optional<String> addressLine1 = userBe.getValue("PRI_ADDRESS_ADDRESS1");
+			Optional<String> city = userBe.getValue("PRI_ADDRESS_CITY");
+			Optional<String> state = userBe.getValue("PRI_ADDRESS_STATE");
+			Optional<String> country = userBe.getValue("PRI_ADDRESS_COUNTRY");
+			Optional<String> postCode = userBe.getValue("PRI_ADDRESS_POSTCODE");
 			
-			if(firstName != null) {
-				personalInfoObj.put("firstName", firstName.toString());
+			if(firstName.isPresent()) {
+				personalInfoObj.put("firstName", firstName.get());
 			}
 			
-			if(lastName != null) {
-				personalInfoObj.put("lastName", lastName.toString());
+			if(lastName.isPresent()) {
+				personalInfoObj.put("lastName", lastName.get());
 			} 
 			
-			
-			if(addressLine1 != null) {
-				locationObj.put("addressLine1", addressLine1.toString());
+			if(dobString.isPresent()) {
+				System.out.println("dob string ::"+dobString.get());
+				//DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+				DateTimeFormatter assemblyDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+				
+				LocalDate dobDate = (LocalDate) dobString.get();
+				String formattedDOBString = assemblyDateFormatter.format(dobDate);
+				System.out.println("another formatted dob ::"+formattedDOBString);
+				
+				personalInfoObj.put("dob", formattedDOBString.toString());
 			}
 			
-			if(city != null) {
-				locationObj.put("city", city.toString());
+			
+			if(addressLine1.isPresent()) {
+				locationObj.put("addressLine1", addressLine1.get());
 			}
 			
-			if(state != null) {
-				locationObj.put("state", state.toString());
+			if(city.isPresent()) {
+				locationObj.put("city", city.get());
 			}
 			
-			if(country != null) {
-				locationObj.put("country", country.toString());
+			if(state.isPresent()) {
+				locationObj.put("state", state.get());
+			}
+		
+			if(country.isPresent()) {
+				locationObj.put("country", country.get());
 			} else {
 				locationObj.put("country", "AU");
 			}
 			
-			if(email != null) {
-				contactInfoObj.put("email", email.toString());
+			if(email.isPresent()) {
+				contactInfoObj.put("email", email.get());
 			}
 			
-			if(postCode != null) {
-				locationObj.put("postcode", postCode.toString());
+			if(postCode.isPresent()) {
+				locationObj.put("postcode", postCode.get());
+
 			}
 		}
 	
