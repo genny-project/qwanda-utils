@@ -17,11 +17,13 @@ public class PaymentUtilsTest {
 	public void testEncoder() throws ParseException {
 		org.json.simple.JSONObject authObj = new org.json.simple.JSONObject();
 
-		authObj.put("tenant", "testing");
-		authObj.put("token", "hello");
-		authObj.put("secret", "testing");
+		authObj.put("tenant", "test");
+		authObj.put("token", "YzQ2MzY4NTQ3ZThiNDc5ZTg4MTg3OTQ0NWFmYTUxOTI=");
+		authObj.put("secret", "UdZ5fx63LyJUBpfKw0EEkHXF7FD60FxO");
 
 		String encodedAuthString = PaymentUtils.base64Encoder(authObj.toJSONString());
+		
+		System.out.println("encoded ::"+encodedAuthString);
 
 		org.json.simple.JSONObject decodedobj = PaymentUtils.base64Decoder(encodedAuthString);
 

@@ -46,7 +46,7 @@ public class GennySheets {
 	 * Stores logger object.
 	 */
 	protected static final Logger log = org.apache.logging.log4j.LogManager
-			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName()); 
 
 	/** Range of Columns to read or write */
 	private final String RANGE = "!A1:Z";
@@ -616,7 +616,7 @@ public class GennySheets {
 	public Map<String, Map> getMessageTemplates() {
 		List<Map> obj = new ArrayList<Map>();
 		try {
-			obj = row2DoubleTuples("Messages");
+			obj = row2DoubleTuples("Notifications");
 		} catch (final IOException e) {
 			return null;
 		}

@@ -173,18 +173,14 @@ public class GPSUtils {
 	 *            longitude2
 	 * @return the distance between passed coordinates in meters
 	 */
-	public static Double getDistance(String latitude1String, String longitude1String, String latitude2String,
-			String longitude2String) {
+	public static Double getDistance(Double latitude1, Double longitude1, Double latitude2,
+			Double longitude2) {
 		try {
 
-			if (latitude1String != null && longitude1String != null && latitude2String != null
-					&& longitude2String != null) {
+			if (latitude1 != null && longitude1 != null && latitude2 != null
+					&& longitude2 != null) {
 
-				Double latitude1 = Double.parseDouble(latitude1String);
-				Double longitude1 = Double.parseDouble(longitude1String);
-				Double latitude2 = Double.parseDouble(latitude2String);
-				Double longitude2 = Double.parseDouble(longitude2String);
-
+	
 				/* Call Google Maps API to know how far the driver is */
 				String response = QwandaUtils.apiGet("https://maps.googleapis.com/maps/api/distancematrix/json?origins="
 						+ latitude1 + "," + longitude1 + "&destinations=" + latitude2 + "," + longitude2
