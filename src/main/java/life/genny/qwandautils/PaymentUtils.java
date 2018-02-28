@@ -279,7 +279,7 @@ public class PaymentUtils {
 			Object lastName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_LASTNAME");
 			Object dobString = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_DOB");
 			Object email = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_EMAIL");
-			Object phoneNumber = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_MOBILE");
+			//Object phoneNumber = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_MOBILE");
 			Object addressLine1 = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_ADDRESS1");
 			Object city = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_CITY");
 			Object state = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_STATE");
@@ -310,9 +310,9 @@ public class PaymentUtils {
 				contactInfoObj.put("email", email.toString());
 			}
 			
-			if(phoneNumber != null) {
+			/*if(phoneNumber != null) {
 				contactInfoObj.put("mobile", phoneNumber.toString());
-			}
+			}*/
 			
 			if(addressLine1 != null) {
 				locationObj.put("addressLine1", addressLine1.toString());
