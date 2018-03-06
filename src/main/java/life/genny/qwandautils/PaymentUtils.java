@@ -121,8 +121,8 @@ public class PaymentUtils {
 		System.out.println("response body::"+retJson);
 		
 		if(responseCode != 200) {
-			throw new PaymentException("Payment exception, "+response.getEntity().getContent());
-		}
+			retJson = retJson;
+			throw new PaymentException("Payment exception, "+retJson);		}
 		return retJson;
 	}
 	
@@ -1068,7 +1068,6 @@ public class PaymentUtils {
 				
 				if(debitAuthorityResponse) {
 					log.debug("Make payment object ::" + paymentObj.toJSONString());
-					System.out.println("Make payment object ::" + paymentObj.toJSONString());
 					try {
 						paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), JsonUtils.toJson(paymentObj),
 								authToken);
@@ -1082,9 +1081,18 @@ public class PaymentUtils {
 						}
 
 					} catch (PaymentException e) {
-						isMakePaymentSuccess = false;
+						
 						log.error("Exception occured during making payment with " + paymentType);
-						e.printStackTrace();
+						String errorMessage = e.getMessage();		
+						log.error("error message ::"+errorMessage);
+						
+						/* When make payment API is getting accessed more than once for an item */
+						if(errorMessage.contains("payment is already made")) {
+							isMakePaymentSuccess = true;
+						} else {
+							isMakePaymentSuccess = false;
+						}
+						
 					}
 				} else {
 					isMakePaymentSuccess = false;
@@ -1107,9 +1115,19 @@ public class PaymentUtils {
 					}
 
 				} catch (PaymentException e) {
-					isMakePaymentSuccess = false;
-					log.error("Exception occured during making payment with " + paymentType);
-					e.printStackTrace();
+					
+					
+					log.error("Exception occured during making payment with " + paymentType);				
+					String errorMessage = e.getMessage();
+					log.error("error message ::"+errorMessage);
+					
+					/* When make payment API is getting accessed more than once for an item */
+					if(errorMessage.contains("payment is already made")) {
+						isMakePaymentSuccess = true;
+					} else {
+						isMakePaymentSuccess = false;
+					}
+						
 				}
 
 			}
