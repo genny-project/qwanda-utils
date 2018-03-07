@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.http.HttpResponse;
@@ -259,10 +260,8 @@ public class PaymentUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static String createAssemblyUser(String assemblyUserId, String authToken, String token) { 
+	public static String createAssemblyUser(String assemblyUserId, String authToken, BaseEntity userBe) { 
 		
-		String userCode = QwandaUtils.getUserCode(token);
-		BaseEntity be = MergeUtil.getBaseEntityForAttr(userCode, token);
 		String assemblyId = null;
 
 		JSONObject userobj = new JSONObject();
@@ -270,34 +269,33 @@ public class PaymentUtils {
 		JSONObject contactInfoObj = new JSONObject();
 		JSONObject locationObj = new JSONObject();
 		
-		if(be != null && assemblyUserId != null) {
+		if(userBe != null && assemblyUserId != null) {
 			
-			Object firstName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_FIRSTNAME");
-			Object lastName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_LASTNAME");
-			Object dobString = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_DOB");
-			Object email = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_EMAIL");
+			Optional<String> firstName = userBe.getValue("PRI_FIRSTNAME");
+			Optional<String> lastName = userBe.getValue("PRI_LASTNAME");
+			Optional<Object> dobString = userBe.getValue("PRI_DOB");
+			Optional<String> email = userBe.getValue("PRI_EMAIL");
 
-			Object addressLine1 = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_ADDRESS1");
-			Object city = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_CITY");
-			Object state = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_STATE");
-			//Object phoneNumber = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_MOBILE");
-			Object country = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_COUNTRY");
-			Object postCode = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_POSTCODE");
+			Optional<String> addressLine1 = userBe.getValue("PRI_ADDRESS_ADDRESS1");
+			Optional<String> city = userBe.getValue("PRI_ADDRESS_CITY");
+			Optional<String> state = userBe.getValue("PRI_ADDRESS_STATE");
+			Optional<String> country = userBe.getValue("PRI_ADDRESS_COUNTRY");
+			Optional<String> postCode = userBe.getValue("PRI_ADDRESS_POSTCODE");
 			
-			if(firstName != null) {
-				personalInfoObj.put("firstName", firstName.toString());
+			if(firstName.isPresent()) {
+				personalInfoObj.put("firstName", firstName.get());
 			}
 			
-			if(lastName != null) {
-				personalInfoObj.put("lastName", lastName.toString());
+			if(lastName.isPresent()) {
+				personalInfoObj.put("lastName", lastName.get());
 			} 
 			
-			if(dobString != null) {
-				System.out.println("dob string ::"+dobString);
+			if(dobString.isPresent()) {
+				System.out.println("dob string ::"+dobString.get());
 				//DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 				DateTimeFormatter assemblyDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 				
-				LocalDate dobDate = (LocalDate) dobString;
+				LocalDate dobDate = (LocalDate) dobString.get();
 				String formattedDOBString = assemblyDateFormatter.format(dobDate);
 				System.out.println("another formatted dob ::"+formattedDOBString);
 				
@@ -305,34 +303,34 @@ public class PaymentUtils {
 			}
 			
 			
-			if(addressLine1 != null) {
+			if(addressLine1.isPresent()) {
 				locationObj.put("addressLine1", addressLine1.toString());
 			}
 			
-			if(city != null) {
+			if(city.isPresent()) {
 				locationObj.put("city", city.toString());
 			}
 			
-			if(state != null) {
+			if(state.isPresent()) {
 				locationObj.put("state", state.toString());
 			}
 		
-			if(country != null) {
+			if(country.isPresent()) {
 				locationObj.put("country", country.toString());
 			} else {
 				locationObj.put("country", "AU");
 			}
 			
-			if(email != null) {
+			if(email.isPresent()) {
 				contactInfoObj.put("email", email.toString());
 			}
 			
-			if(postCode != null) {
+			if(postCode.isPresent()) {
 				locationObj.put("postcode", postCode.toString());
 
 			}
 			
-			if(postCode != null) {
+			if(postCode.isPresent()) {
 				locationObj.put("postcode", postCode.toString());
 			}
 		}
@@ -574,12 +572,10 @@ public class PaymentUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static String createPaymentItem(String offerCode, String BEGGroupCode, String assemblyauthToken, String token) {
+	public static String createPaymentItem(BaseEntity offerBe, BaseEntity begBe, String assemblyauthToken, String token) {
 		
 		String itemId = null;
-		Map<String, BaseEntity> itemContextMap = QwandaUtils.getBaseEntWithChildrenForAttributeCode(BEGGroupCode, token);
-		BaseEntity begBe = MergeUtil.getBaseEntityForAttr(BEGGroupCode, token);
-		BaseEntity offerBe = MergeUtil.getBaseEntityForAttr(offerCode, token);
+		Map<String, BaseEntity> itemContextMap = QwandaUtils.getBaseEntWithChildrenForAttributeCode(begBe.getCode(), token);
 		
 		JSONObject itemObj = new JSONObject();
 		JSONObject buyerObj = null;
@@ -593,15 +589,15 @@ public class PaymentUtils {
 			String feeId = getPaymentFeeId(offerBe, assemblyauthToken);
 			System.out.println("fee Id ::" + feeId);
 
-			String begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
-			String begDescription = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_DESCRIPTION");
+			Optional<String> begTitle = begBe.getValue("PRI_TITLE");
+			Optional<String> begDescription = begBe.getValue("PRI_DESCRIPTION");
 
-			if (begTitle != null) {
-				itemObj.put("name", begTitle);
+			if (begTitle.isPresent()) {
+				itemObj.put("name", begTitle.get());
 			}
 
-			if (begDescription != null) {
-				itemObj.put("description", begDescription);
+			if (begDescription.isPresent()) {
+				itemObj.put("description", begDescription.get());
 			}
 
 			if (feeId != null) {
@@ -613,15 +609,14 @@ public class PaymentUtils {
 			 * driverPriceIncGST = ownerPriceIncGST.subtract(feePriceIncGST),
 			 * Creating Payments Fee with feePriceIncGST
 			 */
-			String offerOwnerPriceString = MergeUtil.getBaseEntityAttrValueAsString(offerBe, "PRI_OFFER_DRIVER_PRICE_INC_GST");
-
-			System.out.println("begpriceString ::" + offerOwnerPriceString);
+			Optional<String> offerOwnerPriceString = offerBe.getValue("PRI_OFFER_DRIVER_PRICE_INC_GST");
 
 			String amount = null;
 			String currency = null;
-			if(offerOwnerPriceString != null) {
-				System.out.println("begPriceString is not null");
-				JSONObject moneyobj = JsonUtils.fromJson(offerOwnerPriceString, JSONObject.class);
+			
+			if(offerOwnerPriceString.isPresent()) {
+				System.out.println("begpriceString ::" + offerOwnerPriceString.get());
+				JSONObject moneyobj = JsonUtils.fromJson(offerOwnerPriceString.get(), JSONObject.class);
 				amount = moneyobj.get("amount").toString();
 				currency = moneyobj.get("currency").toString();
 				
@@ -663,13 +658,13 @@ public class PaymentUtils {
 			
 			if(ownerBe != null) {
 				buyerObj = new JSONObject();
-				buyerObj.put("id", MergeUtil.getBaseEntityAttrValueAsString(ownerBe, "PRI_ASSEMBLY_USER_ID"));
+				buyerObj.put("id", ownerBe.getValue("PRI_ASSEMBLY_USER_ID").get());
 			}
 		} else {
-			log.error("BEG CONTEXT MAP HAS NO OWNER LINK, SO BUYER OBJECT IS NULL");
 			try {
 				throw new PaymentException("Payment Item creation will not succeed since Beg has no owner link");
 			} catch (PaymentException e) {
+				log.error("BEG CONTEXT MAP HAS NO OWNER LINK, SO BUYER OBJECT IS NULL");
 			}
 		}
 		
@@ -681,10 +676,9 @@ public class PaymentUtils {
 			
 			if(driverBe != null) {
 				sellerObj = new JSONObject();
-				sellerObj.put("id", MergeUtil.getBaseEntityAttrValueAsString(driverBe, "PRI_ASSEMBLY_USER_ID"));
+				sellerObj.put("id", driverBe.getValue("PRI_ASSEMBLY_USER_ID").get());
 			}
 		} else {
-			log.error("BEG CONTEXT MAP HAS NO QUOTER LINK, SO SELLER OBJECT IS NULL");
 			try {
 				throw new PaymentException("Payment Item creation will not succeed since Beg has no quoter link");
 			} catch (PaymentException e) {
@@ -852,7 +846,7 @@ public class PaymentUtils {
 		String feeId = null;
 
 		// Object fee = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_FEE");
-		String begFeeString = MergeUtil.getBaseEntityAttrValueAsString(offerBe, "PRI_OFFER_FEE_INC_GST");
+		String begFeeString = offerBe.getValue("PRI_OFFER_FEE_INC_GST", null);
 
 		if (begFeeString != null) {
 			System.out.println("begpriceString ::" + begFeeString);
