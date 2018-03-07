@@ -23,6 +23,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.Logger;
+import org.javamoney.moneta.Money;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -496,10 +497,9 @@ public class PaymentUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static String createCompany(String authtoken, String tokenString) {
+	public static String createCompany(String authtoken, BaseEntity userBe) {
 
-		String userCode = QwandaUtils.getUserCode(tokenString);
-		BaseEntity be = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
+		String userCode = userBe.getCode();
 		String createCompanyResponse = null;
 		String companyCode = null;
 
@@ -508,12 +508,12 @@ public class PaymentUtils {
 		JSONObject contactObj = new JSONObject();
 		JSONObject locationObj = new JSONObject();
 
-		Object companyName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_NAME");
-		Object taxNumber = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ABN");
-		Object chargeTax = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_GST");
-		Object companyPhoneNumber = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_LANDLINE");
-		Object countryName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_COUNTRY");
-		Object assemblyUserId = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ASSEMBLY_USER_ID");
+		Object companyName = userBe.getValue("PRI_NAME", null);
+		Object taxNumber = userBe.getValue("PRI_ABN", null);
+		Object chargeTax = userBe.getValue("PRI_GST", null);
+		Object companyPhoneNumber = userBe.getValue("PRI_LANDLINE", null);
+		Object countryName = userBe.getValue("PRI_ADDRESS_COUNTRY", null);
+		Object assemblyUserId = userBe.getValue("PRI_ASSEMBLY_USER_ID", null);
 
 		if (companyName != null) {
 			companyObj.put("name", companyName.toString());
@@ -568,12 +568,10 @@ public class PaymentUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static String createPaymentItem(String offerCode, String BEGGroupCode, String assemblyauthToken, String token) {
+	public static String createPaymentItem(BaseEntity offerBe, BaseEntity begBe, String assemblyauthToken, String token) {
 		
 		String itemId = null;
-		Map<String, BaseEntity> itemContextMap = QwandaUtils.getBaseEntWithChildrenForAttributeCode(BEGGroupCode, token);
-		BaseEntity begBe = MergeUtil.getBaseEntityForAttr(BEGGroupCode, token);
-		BaseEntity offerBe = MergeUtil.getBaseEntityForAttr(offerCode, token);
+		Map<String, BaseEntity> itemContextMap = QwandaUtils.getBaseEntWithChildrenForAttributeCode(begBe.getCode(), token);
 		
 		JSONObject itemObj = new JSONObject();
 		JSONObject buyerObj = null;
@@ -587,15 +585,15 @@ public class PaymentUtils {
 			String feeId = getPaymentFeeId(offerBe, assemblyauthToken);
 			System.out.println("fee Id ::" + feeId);
 
-			String begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
-			String begDescription = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_DESCRIPTION");
+			Optional<String> begTitle = begBe.getValue("PRI_TITLE");
+			Optional<String> begDescription = begBe.getValue("PRI_DESCRIPTION");
 
-			if (begTitle != null) {
-				itemObj.put("name", begTitle);
+			if (begTitle.isPresent()) {
+				itemObj.put("name", begTitle.get());
 			}
 
-			if (begDescription != null) {
-				itemObj.put("description", begDescription);
+			if (begDescription.isPresent()) {
+				itemObj.put("description", begDescription.get());
 			}
 
 			if (feeId != null) {
@@ -607,20 +605,24 @@ public class PaymentUtils {
 			 * driverPriceIncGST = ownerPriceIncGST.subtract(feePriceIncGST),
 			 * Creating Payments Fee with feePriceIncGST
 			 */
-			String offerOwnerPriceString = MergeUtil.getBaseEntityAttrValueAsString(offerBe, "PRI_OFFER_DRIVER_PRICE_INC_GST");
-
-			System.out.println("begpriceString ::" + offerOwnerPriceString);
+			//Optional<String> offerOwnerPriceString = offerBe.getValue("PRI_OFFER_DRIVER_PRICE_INC_GST");
+			Money offerOwnerPriceString = offerBe.getLoopValue("PRI_OFFER_DRIVER_PRICE_INC_GST", null);
 
 			String amount = null;
 			String currency = null;
+			
 			if(offerOwnerPriceString != null) {
-				System.out.println("begPriceString is not null");
-				JSONObject moneyobj = JsonUtils.fromJson(offerOwnerPriceString, JSONObject.class);
+				
+				String moneyString = JsonUtils.toJson(offerOwnerPriceString);
+				
+				
+				System.out.println("begpriceString ::" + moneyString);
+				JSONObject moneyobj = JsonUtils.fromJson(moneyString, JSONObject.class);
 				amount = moneyobj.get("amount").toString();
 				currency = moneyobj.get("currency").toString();
 				
 				if(amount != null) {
-					System.out.println("amount is not null");
+					System.out.println("amount is not null ::"+amount);
 					BigDecimal begPrice = new BigDecimal(amount);
 
 					// 350 Dollars sent to Assembly as 3.50$, so multiplying with 100
@@ -657,13 +659,13 @@ public class PaymentUtils {
 			
 			if(ownerBe != null) {
 				buyerObj = new JSONObject();
-				buyerObj.put("id", MergeUtil.getBaseEntityAttrValueAsString(ownerBe, "PRI_ASSEMBLY_USER_ID"));
+				buyerObj.put("id", ownerBe.getValue("PRI_ASSEMBLY_USER_ID").get());
 			}
 		} else {
-			log.error("BEG CONTEXT MAP HAS NO OWNER LINK, SO BUYER OBJECT IS NULL");
 			try {
 				throw new PaymentException("Payment Item creation will not succeed since Beg has no owner link");
 			} catch (PaymentException e) {
+				log.error("BEG CONTEXT MAP HAS NO OWNER LINK, SO BUYER OBJECT IS NULL");
 			}
 		}
 		
@@ -675,10 +677,9 @@ public class PaymentUtils {
 			
 			if(driverBe != null) {
 				sellerObj = new JSONObject();
-				sellerObj.put("id", MergeUtil.getBaseEntityAttrValueAsString(driverBe, "PRI_ASSEMBLY_USER_ID"));
+				sellerObj.put("id", driverBe.getValue("PRI_ASSEMBLY_USER_ID").get());
 			}
 		} else {
-			log.error("BEG CONTEXT MAP HAS NO QUOTER LINK, SO SELLER OBJECT IS NULL");
 			try {
 				throw new PaymentException("Payment Item creation will not succeed since Beg has no quoter link");
 			} catch (PaymentException e) {
@@ -717,10 +718,10 @@ public class PaymentUtils {
 	}
 	
 	
-	public static String getBegCode(String offerCode, String tokenString) {
+	public static String getBegCode(BaseEntity offerCode) {
 		
 		String begCode = null;	
-		begCode = MergeUtil.getAttrValue(offerCode, "PRI_BEG_CODE", tokenString);
+		begCode = offerCode.getValue("PRI_BEG_CODE", null);
 		
 		return begCode;
 	}
@@ -846,12 +847,16 @@ public class PaymentUtils {
 		String feeId = null;
 
 		// Object fee = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_FEE");
-		String begFeeString = MergeUtil.getBaseEntityAttrValueAsString(offerBe, "PRI_OFFER_FEE_INC_GST");
+		/*String begFeeString = offerBe.getValue("PRI_OFFER_FEE_INC_GST", null); */
+		Money begFeeString = offerBe.getLoopValue("PRI_OFFER_FEE_INC_GST", null);
 
 		if (begFeeString != null) {
 			System.out.println("begpriceString ::" + begFeeString);
+			
+			String moneyString = JsonUtils.toJson(begFeeString);
+			
 
-			String amount = QwandaUtils.getAmountAsString(begFeeString);
+			String amount = QwandaUtils.getAmountAsString(moneyString);
 
 			BigDecimal begPrice = new BigDecimal(amount);
 
@@ -975,22 +980,18 @@ public class PaymentUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Boolean makePayment(String qwandaUrl, String offerCode, String begCode, String authToken, String tokenString) {
+	public static Boolean makePayment(String qwandaUrl, BaseEntity offerBe, BaseEntity begBe, BaseEntity userBe, String tokenString, String authToken) {
 		
 		System.out.println("inside make payment");
 
 		Boolean isMakePaymentSuccess = false;
-		String userCode = QwandaUtils.getUserCode(tokenString);
-		BaseEntity userBe = MergeUtil.getBaseEntityForAttr(userCode, tokenString);
-		BaseEntity begBe = MergeUtil.getBaseEntityForAttr(begCode, tokenString);
-		BaseEntity offerBe = MergeUtil.getBaseEntityForAttr(offerCode, tokenString);
 
 		String paymentResponse = null;
 
-		Object ipAddress = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_IP_ADDRESS");
-		Object deviceId = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_DEVICE_ID");
-		Object itemId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ITEM_ID");
-		Object accountId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ACCOUNT_ID");
+		String ipAddress = userBe.getValue("PRI_IP_ADDRESS", null);
+		String deviceId = userBe.getValue("PRI_DEVICE_ID", null);
+		String itemId = begBe.getValue("PRI_ITEM_ID", null);
+		String accountId = begBe.getValue("PRI_ACCOUNT_ID", null);
 
 		JSONObject paymentObj = new JSONObject();
 		JSONObject accountObj = null;
@@ -1070,7 +1071,7 @@ public class PaymentUtils {
 							isMakePaymentSuccess = true;
 							
 							/* Saving deposit reference as an answer to beg */
-							saveDepositReference(qwandaUrl, paymentResponse, userCode, begCode, tokenString);
+							saveDepositReference(qwandaUrl, paymentResponse, userBe, begBe, tokenString);
 							
 						}
 
@@ -1105,7 +1106,7 @@ public class PaymentUtils {
 						isMakePaymentSuccess = true;
 						
 						/* Save deposit reference as an answer to beg */
-						saveDepositReference(qwandaUrl, paymentResponse, userCode, begCode, tokenString);
+						saveDepositReference(qwandaUrl, paymentResponse, userBe, begBe, tokenString);
 					}
 
 				} catch (PaymentException e) {
@@ -1139,13 +1140,13 @@ public class PaymentUtils {
 		return isMakePaymentSuccess;
 	}
 	
-	private static void saveDepositReference(String qwandaServiceUrl, String paymentResponse, String userCode, String begCode,
+	private static void saveDepositReference(String qwandaServiceUrl, String paymentResponse, BaseEntity userBe, BaseEntity begBe,
 			String tokenString) {
 		
 		JSONObject depositReference = JsonUtils.fromJson(paymentResponse, JSONObject.class);
 		String depositReferenceId = depositReference.get("depositReference").toString();
 		
-		Answer answer = new Answer(userCode, begCode, "PRI_DEPOSIT_REFERENCE_ID", depositReferenceId);
+		Answer answer = new Answer(userBe.getCode(), begBe.getCode(), "PRI_DEPOSIT_REFERENCE_ID", depositReferenceId);
 		saveAnswer(qwandaServiceUrl, answer, tokenString);
 		
 	}
@@ -1154,7 +1155,7 @@ public class PaymentUtils {
 		
 		Boolean isDebitAuthority = false;
 		String getDebitAuthorityResponse = null;
-		String offerOwnerPriceString = MergeUtil.getBaseEntityAttrValueAsString(offerBe, "PRI_OFFER_DRIVER_PRICE_INC_GST");
+		String offerOwnerPriceString = offerBe.getValue("PRI_OFFER_DRIVER_PRICE_INC_GST", null);
 
 		System.out.println("begpriceString ::" + offerOwnerPriceString);
 
@@ -1215,7 +1216,7 @@ public class PaymentUtils {
 		
 		System.out.println("in getPaymentMethodType method");
 
-		Object paymentMethods = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_USER_PAYMENT_METHODS");
+		Object paymentMethods = userBe.getValue("PRI_USER_PAYMENT_METHODS", null);
 		JSONArray array = JsonUtils.fromJson(paymentMethods.toString(), JSONArray.class);
 		String paymentType = null;
 
@@ -1233,14 +1234,12 @@ public class PaymentUtils {
 
 	}
 	
-	public static Boolean releasePayment(String begCode, String authToken, String tokenString) {
+	public static Boolean releasePayment(BaseEntity begBe, String authToken, String tokenString) {
 		
 		Boolean isReleasePaymentSuccess = false;
-		System.out.println("BEG Code for release payment ::"+begCode);
-		BaseEntity begBe = MergeUtil.getBaseEntityForAttr(begCode, tokenString);
 		
 		String paymentResponse = null;
-		Object itemId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ITEM_ID");
+		Object itemId = begBe.getValue("PRI_ITEM_ID", null);
 		
 		if(itemId != null) {
 			try {
@@ -1268,12 +1267,12 @@ public class PaymentUtils {
 	}
 	
 	
-	public static String publishBaseEntityByCode(final String be, String token) {
+	/*public static String publishBaseEntityByCode(final String be, String token) {
 		
-		/*String[] recipientArray = new String[1];
+		String[] recipientArray = new String[1];
 		recipientArray[0] = be;
 		publishBaseEntityByCode(be, null,
-			     null, recipientArray);*/
+			     null, recipientArray);
 		
 		
 		String[] recipientArray = new String[1];
@@ -1290,7 +1289,7 @@ public class PaymentUtils {
 		String msgStr = JsonUtils.toJson(msg);
 		return msgStr;
 	
-	}
+	}*/
 	
 	@SuppressWarnings("unchecked")
 	public static String disburseAccount(String assembyUserId, String paymentMethodString, String authToken) {
@@ -1333,16 +1332,15 @@ public class PaymentUtils {
 		return disburseAccountResponse;
 	}
 	
-	public static String findExistingAssemblyUserAndSetAttribute(String userId, String tokenString, String authToken) {
+	public static String findExistingAssemblyUserAndSetAttribute(BaseEntity userBe, String tokenString, String authToken) {
 
-		BaseEntity userBe = MergeUtil.getBaseEntityForAttr(userId, tokenString);
-		Object email = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_EMAIL");
+		String email = userBe.getValue("PRI_EMAIL", null);
 
 		if (email != null) {
 			
 			String paymentUsersResponse;
 			try {
-				paymentUsersResponse = PaymentEndpoint.searchUser(email.toString(), authToken);
+				paymentUsersResponse = PaymentEndpoint.searchUser(email, authToken);
 				
 				if (!paymentUsersResponse.contains("error")) {
 					
