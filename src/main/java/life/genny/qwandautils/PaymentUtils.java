@@ -274,12 +274,13 @@ public class PaymentUtils {
 			
 			Object firstName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_FIRSTNAME");
 			Object lastName = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_LASTNAME");
-			//Object dobString = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_DOB");
+			Object dobString = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_DOB");
 			Object email = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_EMAIL");
 
 			Object addressLine1 = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_ADDRESS1");
 			Object city = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_CITY");
 			Object state = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_STATE");
+			//Object phoneNumber = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_MOBILE");
 			Object country = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_COUNTRY");
 			Object postCode = MergeUtil.getBaseEntityAttrObjectValue(be, "PRI_ADDRESS_POSTCODE");
 			
@@ -290,6 +291,18 @@ public class PaymentUtils {
 			if(lastName != null) {
 				personalInfoObj.put("lastName", lastName.toString());
 			} 
+			
+			if(dobString != null) {
+				System.out.println("dob string ::"+dobString);
+				//DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+				DateTimeFormatter assemblyDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+				
+				LocalDate dobDate = (LocalDate) dobString;
+				String formattedDOBString = assemblyDateFormatter.format(dobDate);
+				System.out.println("another formatted dob ::"+formattedDOBString);
+				
+				personalInfoObj.put("dob", formattedDOBString.toString());
+			}
 			
 			
 			if(addressLine1 != null) {
@@ -303,7 +316,7 @@ public class PaymentUtils {
 			if(state != null) {
 				locationObj.put("state", state.toString());
 			}
-			
+		
 			if(country != null) {
 				locationObj.put("country", country.toString());
 			} else {
@@ -312,6 +325,11 @@ public class PaymentUtils {
 			
 			if(email != null) {
 				contactInfoObj.put("email", email.toString());
+			}
+			
+			if(postCode != null) {
+				locationObj.put("postcode", postCode.toString());
+
 			}
 			
 			if(postCode != null) {
