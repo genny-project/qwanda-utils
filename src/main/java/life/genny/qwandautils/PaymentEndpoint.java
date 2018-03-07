@@ -307,7 +307,8 @@ public class PaymentEndpoint {
 		String deleteAccountResponse = null;
 		
 		try {
-			deleteAccountResponse = PaymentUtils.apiDeletePaymentEntity(paymentServiceUrl + "/" + paymentProvider + "/bank-accounts/" + bankAccountId, authToken);
+			String provider = getPaymentProvider(authToken);
+			deleteAccountResponse = PaymentUtils.apiDeletePaymentEntity(paymentServiceUrl + "/" + provider + "/bank-accounts/" + bankAccountId, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -321,7 +322,8 @@ public class PaymentEndpoint {
 		String deleteAccountResponse = null;
 		
 		try {
-			deleteAccountResponse = PaymentUtils.apiDeletePaymentEntity(paymentServiceUrl + "/" + paymentProvider + "/card-accounts/" + cardAccountId, authToken);
+			String provider = getPaymentProvider(authToken);
+			deleteAccountResponse = PaymentUtils.apiDeletePaymentEntity(paymentServiceUrl + "/" + provider + "/card-accounts/" + cardAccountId, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
