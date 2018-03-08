@@ -34,6 +34,7 @@ import life.genny.qwanda.Answer;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.exception.PaymentException;
 import life.genny.qwanda.message.QDataAnswerMessage;
+import life.genny.qwanda.message.QDataBaseEntityMessage;
 
 public class PaymentUtils {
 	
