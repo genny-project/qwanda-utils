@@ -27,8 +27,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.entity.BaseEntity;
@@ -369,20 +367,230 @@ public class PaymentUtils {
 		return responseString;
 	}
 	
-	
-	@SuppressWarnings("unchecked")
-	public static String updateUserPersonalInfo(String companyId, String assemblyUserId, String attributeCode, String value, String authToken) {
-
+	@SuppressWarnings({ "unchecked", "unused" })
+	public static String updateUserInfo(String assemblyUserId, String attributeCode, String value, String assemblyAuthToken) {
+		
 		System.out.println("attributeCode ::" + attributeCode + ", value ::" + value);
 		String responseString = null;
-
-		/* Personal Info Update Objects */
+		
+		 /* Personal Info Update Objects  */
 		JSONObject userobj = null;
 		JSONObject personalInfoObj = null;
 		JSONObject personalContactInfoObj = null;
 		JSONObject locationObj = null;
 		
+		switch (attributeCode) {
+
+		case "PRI_FIRSTNAME":
+			personalInfoObj = new JSONObject();
+			personalInfoObj.put("firstName", value);
+			break;
+			
+		case "PRI_LASTNAME":
+			personalInfoObj = new JSONObject();
+			personalInfoObj.put("lastName", value);
+			break;
+		
+		case "PRI_DOB":
+			personalInfoObj = new JSONObject();
+			DateTimeFormatter assemblyDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+			LocalDate date = LocalDate.parse(value.toString(), formatter);
+			String formattedDOBString = assemblyDateFormatter.format(date);
+			System.out.println("another formatted dob ::" + formattedDOBString);
+			personalInfoObj.put("dob", formattedDOBString.toString());
+			break;
+			
+		case "PRI_EMAIL":
+			personalContactInfoObj = new JSONObject();
+			personalContactInfoObj.put("email", value);
+			break;
+			
+		case "PRI_MOBILE":
+			personalContactInfoObj = new JSONObject();
+			personalContactInfoObj.put("phone", value);
+			break;
+			
+			
+		case "PRI_ADDRESS_FULL":
+			locationObj = new JSONObject();
+			locationObj.put("addressLine1", value);
+			break;
+			
+		case "PRI_ADDRESS_SUBURB":
+			locationObj = new JSONObject();
+			locationObj.put("addressLine2", value);
+			locationObj.put("city", value);
+			break;
+			
+		case "PRI_ADDRESS_STATE":
+			locationObj = new JSONObject();
+			locationObj.put("state", value);
+			break;
+		case "PRI_ADDRESS_COUNTRY":
+			locationObj = new JSONObject();
+			locationObj.put("country", value);	
+			break;
+		case "PRI_ADDRESS_POSTCODE":
+			locationObj = new JSONObject();
+			locationObj.put("postcode", value);
+			break;
+
+		}	
+		
+		 /* For Assembly Personal Information Update */
+			
+			if(personalInfoObj != null  && assemblyUserId != null) {
+				userobj = new JSONObject();
+				userobj.put("personalInfo", personalInfoObj);
+				userobj.put("id", assemblyUserId);
+			}
+
+			if (personalContactInfoObj != null && assemblyUserId != null) {
+				userobj = new JSONObject();
+				userobj.put("contactInfo", personalContactInfoObj);
+				userobj.put("id", assemblyUserId);	
+			}
+
+			if (locationObj != null && assemblyUserId != null) {
+				userobj = new JSONObject();
+				userobj.put("location", locationObj);
+				userobj.put("id", assemblyUserId);
+			
+			}
+			
+			if(userobj != null && assemblyUserId!= null) {
+				try {
+					responseString = PaymentEndpoint.updateAssemblyUser(assemblyUserId, JsonUtils.toJson(userobj), assemblyAuthToken);
+					System.out.println("response string from payments user updation ::"+responseString);
+				} catch (PaymentException e) {
+					log.error("Exception occured user updation");
+					e.printStackTrace();
+				}
+			}
+		
+			return responseString;
+	}
+	
+	
+	@SuppressWarnings({ "unused", "unchecked" })
+	public static String updateCompanyInfo(String userId, String companyId, String attributeCode, String value, String authToken) {
+		
+		System.out.println("attributeCode ::" + attributeCode + ", value ::" + value);
+
 		/* Company Info Update Objects */
+		String responseString = null;
+		JSONObject companyObj = new JSONObject();
+		companyObj.put("id", companyId);
+		
+		JSONObject userobj = null;
+		JSONObject companyContactInfoObj = null;
+		JSONObject locationObj = null;
+		
+		switch (attributeCode) {
+		
+		case "PRI_CPY_NAME":
+			companyObj.put("name", value);
+			companyObj.put("legalName", value);
+			break;
+			
+		case "PRI_ABN":
+			companyObj.put("taxNumber", value);
+			break;
+			
+		case "PRI_ACN":
+			companyObj.put("taxNumber", value);
+			break;
+			
+		case "PRI_GST":
+			companyObj.put("chargesTax", Boolean.valueOf(value));
+			break;
+			
+		case "PRI_LANDLINE":
+			companyContactInfoObj = new JSONObject();
+			companyContactInfoObj.put("phone", value);
+			break;		
+			
+		case "PRI_ADDRESS_FULL":
+			locationObj = new JSONObject();
+			locationObj.put("addressLine1", value);
+			break;
+			
+		case "PRI_ADDRESS_SUBURB":
+			locationObj = new JSONObject();
+			locationObj.put("addressLine2", value);
+			locationObj.put("city", value);
+			break;
+			
+		case "PRI_ADDRESS_STATE":
+			locationObj = new JSONObject();
+			locationObj.put("state", value);
+			break;
+		case "PRI_ADDRESS_COUNTRY":
+			locationObj = new JSONObject();
+			locationObj.put("country", value);	
+			break;
+		case "PRI_ADDRESS_POSTCODE":
+			locationObj = new JSONObject();
+			locationObj.put("postcode", value);
+			break;
+		}
+		
+		
+		 /* For Assembly User Company Information Update */
+			if(companyContactInfoObj != null && companyId != null) {
+				
+				companyObj.put("contactInfo", companyContactInfoObj);
+				
+				if(userId != null) {
+					userobj = new JSONObject();
+					userobj.put("id", userId);
+					companyObj.put("user", userobj);
+				}
+				
+			}
+			
+			if (locationObj != null) {
+				
+				companyObj.put("location", locationObj);
+				
+				if(userId != null) {
+					userobj = new JSONObject();
+					userobj.put("id", userId);
+					companyObj.put("user", userobj);
+				}
+			}
+			
+			
+			if(companyId != null && companyObj != null) {
+				System.out.println("updating company object in assembly ::"+companyObj);
+				try {
+					responseString = PaymentEndpoint.updateCompany(companyId, JsonUtils.toJson(companyObj), authToken);
+				} catch (PaymentException e) {
+					log.error("Exception occured company updation");
+					e.printStackTrace();
+				}
+			}
+			
+			return responseString;	
+		
+
+	}
+	
+	
+	/*@SuppressWarnings("unchecked")
+	public static String updateUserPersonalInfo(String companyId, String assemblyUserId, String attributeCode, String value, String authToken) {
+
+		System.out.println("attributeCode ::" + attributeCode + ", value ::" + value);
+		String responseString = null;
+
+		 Personal Info Update Objects 
+		JSONObject userobj = null;
+		JSONObject personalInfoObj = null;
+		JSONObject personalContactInfoObj = null;
+		JSONObject locationObj = null;
+		
+		 Company Info Update Objects 
 		JSONObject companyObj = null;
 		JSONObject companyContactInfoObj = null;
 
@@ -412,10 +620,19 @@ public class PaymentUtils {
 			personalContactInfoObj = new JSONObject();
 			personalContactInfoObj.put("mobile", value);
 			break;
-		case "PRI_ADDRESS_ADDRESS1":
+		case "PRI_ADDRESS_FULL":
 			personalContactInfoObj = new JSONObject();
 			personalContactInfoObj.put("addressLine1", value);
 			break;
+			
+		case "PRI_ADDRESS_SUBURB":
+			personalContactInfoObj = new JSONObject();
+			personalContactInfoObj.put("addressLine2", value);
+			
+			locationObj = new JSONObject();
+			locationObj.put("city", value);
+			break;
+			
 		case "PRI_ADDRESS_CITY":
 			locationObj = new JSONObject();
 			locationObj.put("city", value);
@@ -443,10 +660,21 @@ public class PaymentUtils {
 		case "PRI_LANDLINE":
 			companyContactInfoObj = new JSONObject();
 			companyContactInfoObj.put("phone", value);
+			break;		
+			
+		case "PRI_ACN":
+			companyObj = new JSONObject();
+			companyObj.put("taxNumber", value);
 			break;
+			
+		case "PRI_ABN":
+			companyObj = new JSONObject();
+			companyObj.put("taxNumber", value);
+			break;
+			
 		}
 		
-		/* For Assembly Personal Information Update */
+		 For Assembly Personal Information Update 
 		
 		if(personalInfoObj != null  && assemblyUserId != null) {
 			userobj = new JSONObject();
@@ -479,7 +707,7 @@ public class PaymentUtils {
 			}
 		}
 		
-		/* For Assembly User Company Information Update */
+		 For Assembly User Company Information Update 
 		if(companyContactInfoObj != null && companyId != null) {
 			companyObj = new JSONObject();
 			companyObj.put("contactInfo", companyContactInfoObj);
@@ -499,7 +727,7 @@ public class PaymentUtils {
 		
 		return responseString;
 
-	}
+	}*/
 	
 	@SuppressWarnings("unchecked")
 	public static String createCompany(String authtoken, String tokenString) {
@@ -1388,6 +1616,203 @@ public class PaymentUtils {
 		}
 
 		return null;
+	}
+	
+	public static String updateCompleteUserProfile(BaseEntity userBe, String assemblyUserId, String assemblyAuthKey) {
+		
+		String responseString = null;
+		
+		String firstName = userBe.getValue("PRI_FIRSTNAME", null);
+		String lastName = userBe.getValue("PRI_LASTNAME", null);
+		Object dob = userBe.getValue("PRI_DOB", null);
+		
+		String email = userBe.getValue("PRI_EMAIL", null);
+		
+		String addressLine1 = userBe.getValue("PRI_ADDRESS_FULL", null);
+		String addressLine2 = userBe.getValue("PRI_ADDRESS_ADDRESS1", null);
+		String city = userBe.getValue("PRI_ADDRESS_SUBURB", null);
+		String state = userBe.getValue("PRI_ADDRESS_STATE", null);
+		String country = userBe.getValue("PRI_ADDRESS_COUNTRY", null);
+		String postCode = userBe.getValue("PRI_ADDRESS_POSTCODE", null);
+		 
+		
+		JSONObject userObj = new JSONObject();
+		JSONObject personalInfoObj = new JSONObject();
+		JSONObject contactInfoObj = null;
+		JSONObject locationObj = null;
+		
+		userObj.put("id", assemblyUserId);
+		
+		if(firstName != null) {
+			personalInfoObj.put("firstName", firstName);
+		}
+		
+		if(lastName != null) {
+			personalInfoObj.put("lastName", lastName);
+		}
+		
+		if(dob != null) {
+			
+			DateTimeFormatter assemblyDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+			LocalDate date = LocalDate.parse(dob.toString(), formatter);
+			String formattedDOBString = assemblyDateFormatter.format(date);
+			System.out.println("formatted dob for updation ::" + formattedDOBString);
+			personalInfoObj.put("dob", formattedDOBString);
+		}
+		
+		if(email != null) {
+			contactInfoObj = new JSONObject();
+			contactInfoObj.put("email", email);
+			userObj.put("contactInfo", contactInfoObj);
+		}
+		
+		/*if(phoneNumber != null) {
+			contactInfoObj.put("mobile", phoneNumber);
+		}*/
+		
+		if(addressLine1 != null) {
+			
+			locationObj = new JSONObject();
+			locationObj.put("addressLine1", addressLine1);
+			
+			if(addressLine2 != null) {
+				locationObj.put("addressLine2", addressLine2);
+			}
+			
+			if(city != null) {
+				locationObj.put("city", city);
+			}
+			
+			if(state != null) {
+				locationObj.put("state", state);
+			}
+			
+			if(country != null) {
+				locationObj.put("country", country);
+			}
+			
+			if(postCode != null) {
+				locationObj.put("postCode", postCode);
+			}
+			
+			userObj.put("location", locationObj);
+		}
+		
+		userObj.put("personalInfo", personalInfoObj);
+		
+		
+		
+		
+		if(userObj != null && assemblyUserId != null) {
+			try {
+				responseString = PaymentEndpoint.updateAssemblyUser(assemblyUserId, JsonUtils.toJson(userObj), assemblyAuthKey);
+				System.out.println("response string from payments user updation ::"+responseString);
+			} catch (PaymentException e) {
+				log.error("Exception occured user updation");
+				e.printStackTrace();
+			}
+		}
+		
+		return responseString;
+		
+	}
+	
+	public static String updateCompleteCompanyProfile(BaseEntity userBe, BaseEntity companyBe, String assemblyUserId, String assemblyAuthKey) {
+		
+		String responseString = null;
+		JSONObject companyObj = new JSONObject();
+		JSONObject userObj = new JSONObject();
+		JSONObject contactInfoObj = null;
+		JSONObject locationObj = null;
+		
+		String companyId = userBe.getValue("PRI_ASSEMBLY_COMPANY_ID", null);
+		
+		String companyName = companyBe.getValue("PRI_CPY_NAME", null);
+		String abn = companyBe.getValue("PRI_ABN", null);
+		Object acn = companyBe.getValue("PRI_ACN", null);
+		Object gst = companyBe.getValue("PRI_GST", null);
+		
+		String companyPhone = companyBe.getValue("PRI_LANDLINE", null);
+	
+		
+		String addressLine1 = companyBe.getValue("PRI_ADDRESS_FULL", null);
+		String addressLine2 = companyBe.getValue("PRI_ADDRESS_ADDRESS1", null);
+		String city = companyBe.getValue("PRI_ADDRESS_SUBURB", null);
+		String state = companyBe.getValue("PRI_ADDRESS_STATE", null);
+		String country = companyBe.getValue("PRI_ADDRESS_COUNTRY", null);
+		String postCode = companyBe.getValue("PRI_ADDRESS_POSTCODE", null);
+		
+		if(assemblyUserId != null) {
+			userObj.put("id", assemblyUserId);
+			companyObj.put("user", userObj);
+		}
+		
+		
+		if(companyName != null) {
+			companyObj.put("name", companyName);
+			companyObj.put("legalName", companyName);
+		}
+		
+		if(abn != null) {
+			companyObj.put("taxNumber", abn);
+		} else if(acn != null){
+			companyObj.put("taxNumber", acn);
+		}
+		
+		if(gst != null) {
+			companyObj.put("chargesTax", gst);
+		}
+		
+		
+		if(companyPhone != null) {
+			
+			contactInfoObj = new JSONObject();
+			contactInfoObj.put("phone", companyPhone);
+			companyObj.put("contactInfo", contactInfoObj);
+		}
+		
+		if(addressLine1 != null) {
+			
+			locationObj = new JSONObject();
+			locationObj.put("addressLine1", addressLine1);
+			
+			if(addressLine2 != null) {
+				locationObj.put("addressLine2", addressLine2);
+			}
+			
+			if(city != null) {
+				locationObj.put("city", city);
+			}
+			
+			if(state != null) {
+				locationObj.put("state", state);
+			}
+			
+			if(country != null) {
+				locationObj.put("country", country);
+			}
+			
+			if(postCode != null) {
+				locationObj.put("postCode", postCode);
+			}
+			
+			companyObj.put("location", locationObj);
+		}
+		
+		
+		if(companyId != null && companyObj != null) {
+			System.out.println("updating company object in assembly ::"+companyObj);
+			try {
+				responseString = PaymentEndpoint.updateCompany(companyId, JsonUtils.toJson(companyObj), assemblyAuthKey);
+			} catch (PaymentException e) {
+				log.error("Exception occured company updation");
+				e.printStackTrace();
+			}
+		}
+		
+		return responseString;
+		
 	}
 	
 

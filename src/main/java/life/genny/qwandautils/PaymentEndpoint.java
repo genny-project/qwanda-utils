@@ -79,7 +79,7 @@ public class PaymentEndpoint {
 
 		try {
 			System.out.println("Request Entity ::"+companyEntityString);
-			updateCompanyResponse = PaymentUtils.apiPostPaymentEntity(
+			updateCompanyResponse = PaymentUtils.apiPutPaymentEntity(
 					paymentServiceUrl + "/" + paymentProvider + "/companies/" + companyId, companyEntityString, authToken);
 		} catch (IOException e) {
 			e.printStackTrace();
