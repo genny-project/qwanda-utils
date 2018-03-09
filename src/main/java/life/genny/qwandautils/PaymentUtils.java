@@ -1406,7 +1406,7 @@ public class PaymentUtils {
 		
 		if(assembyUserId != null && paymentMethodString != null) {
 			
-			System.out.println( "Payment account method string is not null ::"+paymentMethodString);
+			System.out.println( "Payment account method string is not null");
 			
 			JSONObject paymentMethodObj = JsonUtils.fromJson(paymentMethodString, JSONObject.class);
 			String paymentAccountId = paymentMethodObj.get("id").toString();
@@ -1968,20 +1968,6 @@ public class PaymentUtils {
 		}
 		
 		return debitAuthorityResponse;
-	}
-	
-	
-	public static Boolean isBankAccount(String bankPaymentString) {
-		
-		Boolean isBankAccount = false;
-		JSONObject paymentMethodObj = JsonUtils.fromJson(bankPaymentString, JSONObject.class);
-		
-		String paymentType = paymentMethodObj.get("type").toString();
-		if(paymentType.equals("BANK_ACCOUNT")) {
-			isBankAccount = true;
-		} 
-		
-		return isBankAccount;
 	}
 	
 
