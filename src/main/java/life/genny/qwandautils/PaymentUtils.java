@@ -1315,8 +1315,7 @@ public class PaymentUtils {
 				System.out.println("disburse payment response ::"+disburseAccountResponse);
 				
 			} catch (PaymentException e) {
-				log.error("Payment exception during payment disimbursement response");
-				log.error("disburse payment response ::"+disburseAccountResponse);
+				log.error("disburse payment response ::"+e.getMessage());
 				e.printStackTrace();
 			}		
 			
