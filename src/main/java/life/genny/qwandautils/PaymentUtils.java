@@ -1626,8 +1626,6 @@ public class PaymentUtils {
 		String lastName = userBe.getValue("PRI_LASTNAME", null);
 		Object dob = userBe.getValue("PRI_DOB", null);
 		
-		String email = userBe.getValue("PRI_EMAIL", null);
-		
 		String addressLine1 = userBe.getValue("PRI_ADDRESS_FULL", null);
 		String addressLine2 = userBe.getValue("PRI_ADDRESS_ADDRESS1", null);
 		String city = userBe.getValue("PRI_ADDRESS_SUBURB", null);
@@ -1661,15 +1659,6 @@ public class PaymentUtils {
 			personalInfoObj.put("dob", formattedDOBString);
 		}
 		
-		if(email != null) {
-			contactInfoObj = new JSONObject();
-			contactInfoObj.put("email", email);
-			userObj.put("contactInfo", contactInfoObj);
-		}
-		
-		/*if(phoneNumber != null) {
-			contactInfoObj.put("mobile", phoneNumber);
-		}*/
 		
 		if(addressLine1 != null) {
 			
