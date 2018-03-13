@@ -1654,5 +1654,18 @@ public class PaymentUtils {
 		
 	}
 	
+	public static Boolean isBankAccount(String bankPaymentString) {
+		
+		Boolean isBankAccount = false;
+		JSONObject paymentMethodObj = JsonUtils.fromJson(bankPaymentString, JSONObject.class);
+		
+		String paymentType = paymentMethodObj.get("type").toString();
+		if(paymentType.equals("BANK_ACCOUNT")) {
+			isBankAccount = true;
+		} 
+		
+		return isBankAccount;
+	}
+	
 
 }
