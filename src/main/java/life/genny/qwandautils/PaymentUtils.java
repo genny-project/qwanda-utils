@@ -119,7 +119,6 @@ public class PaymentUtils {
 		System.out.println("response body::"+retJson);
 		
 		if(responseCode != 200) {
-			retJson = retJson;
 			throw new PaymentException("Payment exception, "+retJson);		}
 		return retJson;
 	}
@@ -369,7 +368,7 @@ public class PaymentUtils {
 		return responseString;
 	}
 	
-	@SuppressWarnings({ "unchecked", "unused" })
+	@SuppressWarnings({ "unchecked"})
 	public static String updateUserInfo(String assemblyUserId, String attributeCode, String value, String assemblyAuthToken) {
 		
 		System.out.println("attributeCode ::" + attributeCode + ", value ::" + value);
@@ -475,7 +474,7 @@ public class PaymentUtils {
 	}
 	
 	
-	@SuppressWarnings({ "unused", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	public static String updateCompanyInfo(String userId, String companyId, String attributeCode, String value, String authToken) {
 		
 		System.out.println("attributeCode ::" + attributeCode + ", value ::" + value);
@@ -500,7 +499,7 @@ public class PaymentUtils {
 			companyObj.put("taxNumber", value);
 			break;
 			
-		case "PRI_ACN":
+		case "PRI_ACN":		
 			companyObj.put("taxNumber", value);
 			break;
 			
@@ -565,7 +564,6 @@ public class PaymentUtils {
 			
 			
 			if(companyId != null && companyObj != null) {
-				System.out.println("updating company object in assembly ::"+companyObj);
 				try {
 					responseString = PaymentEndpoint.updateCompany(companyId, JsonUtils.toJson(companyObj), authToken);
 				} catch (PaymentException e) {
@@ -579,157 +577,6 @@ public class PaymentUtils {
 
 	}
 	
-	
-	/*@SuppressWarnings("unchecked")
-	public static String updateUserPersonalInfo(String companyId, String assemblyUserId, String attributeCode, String value, String authToken) {
-
-		System.out.println("attributeCode ::" + attributeCode + ", value ::" + value);
-		String responseString = null;
-
-		 Personal Info Update Objects 
-		JSONObject userobj = null;
-		JSONObject personalInfoObj = null;
-		JSONObject personalContactInfoObj = null;
-		JSONObject locationObj = null;
-		
-		 Company Info Update Objects 
-		JSONObject companyObj = null;
-		JSONObject companyContactInfoObj = null;
-
-		switch (attributeCode) {
-		case "PRI_FIRSTNAME":
-			personalInfoObj = new JSONObject();
-			personalInfoObj.put("firstName", value);
-			break;
-		case "PRI_LASTNAME":
-			personalInfoObj = new JSONObject();
-			personalInfoObj.put("lastName", value);
-			break;
-		case "PRI_DOB":
-			personalInfoObj = new JSONObject();
-			DateTimeFormatter assemblyDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-			LocalDate date = LocalDate.parse(value.toString(), formatter);
-			String formattedDOBString = assemblyDateFormatter.format(date);
-			System.out.println("another formatted dob ::" + formattedDOBString);
-			personalInfoObj.put("dob", formattedDOBString.toString());
-			break;
-		case "PRI_EMAIL":
-			personalContactInfoObj = new JSONObject();
-			personalContactInfoObj.put("email", value);
-			break;
-		case "PRI_MOBILE":
-			personalContactInfoObj = new JSONObject();
-			personalContactInfoObj.put("mobile", value);
-			break;
-		case "PRI_ADDRESS_FULL":
-			personalContactInfoObj = new JSONObject();
-			personalContactInfoObj.put("addressLine1", value);
-			break;
-			
-		case "PRI_ADDRESS_SUBURB":
-			personalContactInfoObj = new JSONObject();
-			personalContactInfoObj.put("addressLine2", value);
-			
-			locationObj = new JSONObject();
-			locationObj.put("city", value);
-			break;
-			
-		case "PRI_ADDRESS_CITY":
-			locationObj = new JSONObject();
-			locationObj.put("city", value);
-			break;
-		case "PRI_ADDRESS_STATE":
-			locationObj = new JSONObject();
-			locationObj.put("state", value);
-			break;
-		case "PRI_ADDRESS_COUNTRY":
-			locationObj = new JSONObject();
-			locationObj.put("country", value);	
-			break;
-		case "PRI_ADDRESS_POSTCODE":
-			locationObj = new JSONObject();
-			locationObj.put("postcode", value);
-			break;
-		case "PRI_NAME":
-			companyObj = new JSONObject();
-			companyObj.put("name", value);
-			break;
-		case "PRI_GST":
-			companyObj = new JSONObject();
-			companyObj.put("chargesTax", Boolean.valueOf(value));
-			break;
-		case "PRI_LANDLINE":
-			companyContactInfoObj = new JSONObject();
-			companyContactInfoObj.put("phone", value);
-			break;		
-			
-		case "PRI_ACN":
-			companyObj = new JSONObject();
-			companyObj.put("taxNumber", value);
-			break;
-			
-		case "PRI_ABN":
-			companyObj = new JSONObject();
-			companyObj.put("taxNumber", value);
-			break;
-			
-		}
-		
-		 For Assembly Personal Information Update 
-		
-		if(personalInfoObj != null  && assemblyUserId != null) {
-			userobj = new JSONObject();
-			userobj.put("personalInfo", personalInfoObj);
-			userobj.put("id", assemblyUserId);
-		}
-
-		if (personalContactInfoObj != null && assemblyUserId != null) {
-			userobj = new JSONObject();
-			userobj.put("contactInfo", personalContactInfoObj);
-			userobj.put("id", assemblyUserId);	
-		}
-
-		if (locationObj != null && assemblyUserId != null) {
-			userobj = new JSONObject();
-			userobj.put("location", locationObj);
-			userobj.put("id", assemblyUserId);
-			
-			companyObj = new JSONObject();
-			companyObj.put("location", locationObj);
-		}
-		
-		if(userobj != null && assemblyUserId!= null) {
-			try {
-				responseString = PaymentEndpoint.updateAssemblyUser(assemblyUserId, JsonUtils.toJson(userobj), authToken);
-				System.out.println("response string from payments user updation ::"+responseString);
-			} catch (PaymentException e) {
-				log.error("Exception occured user updation");
-				e.printStackTrace();
-			}
-		}
-		
-		 For Assembly User Company Information Update 
-		if(companyContactInfoObj != null && companyId != null) {
-			companyObj = new JSONObject();
-			companyObj.put("contactInfo", companyContactInfoObj);
-			companyObj.put("id", companyId);
-		}
-		
-		
-		if(companyId != null && companyObj != null) {
-			System.out.println("updating company object in assembly ::"+companyObj);
-			try {
-				responseString = PaymentEndpoint.updateCompany(companyId, JsonUtils.toJson(companyObj), authToken);
-			} catch (PaymentException e) {
-				log.error("Exception occured company updation");
-				e.printStackTrace();
-			}
-		}
-		
-		return responseString;
-
-	}*/
 	
 	@SuppressWarnings("unchecked")
 	public static String createCompany(String authtoken, String tokenString) {
@@ -1538,7 +1385,7 @@ public class PaymentUtils {
 			System.out.println( "Payment account method string is not null");
 			
 			JSONObject paymentMethodObj = JsonUtils.fromJson(paymentMethodString, JSONObject.class);
-			String paymentAccountId = paymentMethodObj.get("accountNumber").toString();
+			String paymentAccountId = paymentMethodObj.get("id").toString();
 			
 			JSONObject disburseAccObj = new JSONObject();			
 			
@@ -1547,12 +1394,10 @@ public class PaymentUtils {
 			disburseAccObj.put("account", accObj);
 			
 			try {
-				System.out.println("disbursement account object ::"+disburseAccObj);
 				disburseAccountResponse = PaymentEndpoint.disburseAccount(assembyUserId, JsonUtils.toJson(disburseAccObj), authToken);
 				System.out.println("disburse payment response ::"+disburseAccountResponse);
 				
 			} catch (PaymentException e) {
-				log.error("Payment exception during payment disimbursement response");
 				log.error("disburse payment response ::"+disburseAccountResponse);
 				e.printStackTrace();
 			}		
@@ -1723,6 +1568,8 @@ public class PaymentUtils {
 		String abn = companyBe.getValue("PRI_ABN", null);
 		Object acn = companyBe.getValue("PRI_ACN", null);
 		Object gst = companyBe.getValue("PRI_GST", null);
+		
+		System.out.println("GST ::"+gst );
 		
 		String companyPhone = companyBe.getValue("PRI_LANDLINE", null);
 	
