@@ -150,7 +150,7 @@ public class PaymentUtils {
 		System.out.println("response body::"+retJson);
 		
 		if(responseCode != 200) {
-			throw new PaymentException("Payment exception, "+response.getEntity().getContent());
+			throw new PaymentException("Payment exception, "+retJson);
 		}
 		return retJson;
 	}
@@ -187,19 +187,21 @@ public class PaymentUtils {
 		System.out.println("response body::"+retJson);
 		
 		if(responseCode != 200) {
-			throw new PaymentException("Payment exception,"+response.getEntity().getContent());
+			throw new PaymentException("Payment exception,"+retJson);
 		}
 
 		return retJson;
 	}
 	
 	
-	public static String apiPutPaymentEntity(final String postUrl, final String entityString, final String authToken)
+	public static String apiPutPaymentEntity(final String putUrl, final String entityString, final String authToken)
 			throws IOException, PaymentException {
 		String retJson = "";
 		final HttpClient client = HttpClientBuilder.create().build();
+		
+		log.debug("GET:" + putUrl + ":");
 
-		final HttpPut put = new HttpPut(postUrl);
+		final HttpPut put = new HttpPut(putUrl);
 		put.addHeader("Authorization", authToken); 
 
 		final StringEntity input = new StringEntity(entityString);
@@ -221,7 +223,7 @@ public class PaymentUtils {
 		System.out.println("response body::"+retJson);
 		
 		if(responseCode != 200) {
-			throw new PaymentException("Payment exception, "+response.getEntity().getContent());
+			throw new PaymentException("Payment exception, "+retJson);
 		}
 		
 		return retJson;
@@ -408,7 +410,7 @@ public class PaymentUtils {
 			
 		case "PRI_MOBILE":
 			personalContactInfoObj = new JSONObject();
-			personalContactInfoObj.put("phone", value);
+			personalContactInfoObj.put("mobile", value);
 			break;
 			
 			
@@ -1682,7 +1684,7 @@ public class PaymentUtils {
 			}
 			
 			if(postCode != null) {
-				locationObj.put("postCode", postCode);
+				locationObj.put("postcode", postCode);
 			}
 			
 			userObj.put("location", locationObj);
@@ -1733,6 +1735,7 @@ public class PaymentUtils {
 		String postCode = companyBe.getValue("PRI_ADDRESS_POSTCODE", null);
 		
 		if(assemblyUserId != null) {
+			System.out.println("assembly user id is not null, user ::"+companyObj);
 			userObj.put("id", assemblyUserId);
 			companyObj.put("user", userObj);
 		}
@@ -1783,7 +1786,7 @@ public class PaymentUtils {
 			}
 			
 			if(postCode != null) {
-				locationObj.put("postCode", postCode);
+				locationObj.put("postcode", postCode);
 			}
 			
 			companyObj.put("location", locationObj);
