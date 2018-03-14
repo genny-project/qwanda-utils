@@ -207,5 +207,33 @@ public class PaymentEndpoint {
 		return searchUserResponse;
 		
 	}
+	
+	public static String deleteBankAccount(String bankAccountId, String authToken) throws PaymentException {
+		
+		String deleteAccountResponse = null;
+		
+		try {
+			deleteAccountResponse = PaymentUtils.apiDeletePaymentEntity(paymentServiceUrl + "/" + paymentProvider + "/bank-accounts/" + bankAccountId, authToken);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+				
+		return deleteAccountResponse;
+		
+	}
+	
+	public static String deleteCardAccount(String cardAccountId, String authToken) throws PaymentException {
+		
+		String deleteAccountResponse = null;
+		
+		try {
+			deleteAccountResponse = PaymentUtils.apiDeletePaymentEntity(paymentServiceUrl + "/" + paymentProvider + "/card-accounts/" + cardAccountId, authToken);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+				
+		return deleteAccountResponse;
+		
+	}
 
 }
