@@ -16,6 +16,7 @@ import java.util.UUID;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -197,23 +198,57 @@ public class PaymentUtils {
 			throws IOException, PaymentException {
 		String retJson = "";
 		final HttpClient client = HttpClientBuilder.create().build();
-		
-		log.debug("GET:" + putUrl + ":");
+
+		log.debug("PUT:" + putUrl + ":");
 
 		final HttpPut put = new HttpPut(putUrl);
-		put.addHeader("Authorization", authToken); 
+		put.addHeader("Authorization", authToken);
 
 		final StringEntity input = new StringEntity(entityString);
 		input.setContentType("application/json");
 		put.setEntity(input);
 		final HttpResponse response = client.execute(put);
-		
+
 		final BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 		String line = "";
 		while ((line = rd.readLine()) != null) {
 			retJson += line;
 			;
 		}
+
+		int responseCode = response.getStatusLine().getStatusCode();
+
+		System.out.println("response code ::" + responseCode);
+		System.out.println("response ::" + response.getStatusLine());
+		System.out.println("response body::" + retJson);
+
+		if (responseCode != 200) {
+			throw new PaymentException("Payment exception, " + response.getEntity().getContent());
+		}
+
+		return retJson;
+	}
+		
+		
+		
+		public static String apiDeletePaymentEntity(final String deleteUrl, final String authToken)
+				throws IOException, PaymentException {
+			String retJson = "";
+			final HttpClient client = HttpClientBuilder.create().build();
+			
+			log.debug("DELETE:" + deleteUrl + ":");
+
+			final HttpDelete delete = new HttpDelete(deleteUrl);
+			delete.addHeader("Authorization", authToken); 
+			
+			final HttpResponse response = client.execute(delete);
+			
+			final BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+			String line = "";
+			while ((line = rd.readLine()) != null) {
+				retJson += line;
+				;
+			}
 		
 		int responseCode = response.getStatusLine().getStatusCode();
 		
@@ -1665,6 +1700,26 @@ public class PaymentUtils {
 		} 
 		
 		return isBankAccount;
+	}
+	
+	public static void deleteBankAccount(String bankAccountId, String authKey) {
+				
+		try {
+			PaymentEndpoint.deleteBankAccount(bankAccountId, authKey);
+		} catch (PaymentException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	public static void deleteCard(String cardAccountId, String authKey) {
+				
+		try {
+			PaymentEndpoint.deleteCardAccount(cardAccountId, authKey);
+		} catch (PaymentException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 
