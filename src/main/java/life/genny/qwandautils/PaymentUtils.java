@@ -1453,6 +1453,7 @@ public class PaymentUtils {
 
 		BaseEntity userBe = MergeUtil.getBaseEntityForAttr(userId, tokenString);
 		Object email = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_EMAIL");
+		String assemblyUserId = null;
 
 		if (email != null) {
 			
@@ -1465,39 +1466,51 @@ public class PaymentUtils {
 					System.out.println("payment user search response ::" + paymentUsersResponse);
 					JSONObject userObj = JsonUtils.fromJson(paymentUsersResponse, JSONObject.class);
 					
-					ArrayList<Map> userList = (ArrayList<Map>) userObj.get("users");
+					Map<String, Object> metaInfo = (Map<String, Object>) userObj.get("meta");
+					Double total = (Double) metaInfo.get("total");
 					
-					if (userList.size() > 0) {
-						for (Map userDetails : userList) {
+					if(total > 0) {
+						ArrayList<Map> userList = (ArrayList<Map>) userObj.get("users");
+						
+						if (userList.size() > 0) {
+							for (Map userDetails : userList) {
 
-							Map<String, Object> contactInfoMap = (Map<String, Object>) userDetails.get("contactInfo");
-							Object contactEmail = contactInfoMap.get("email");
+								Map<String, Object> contactInfoMap = (Map<String, Object>) userDetails.get("contactInfo");
+								Object contactEmail = contactInfoMap.get("email");
 
-							if (contactEmail != null && contactEmail.equals(email)) {
+								if (contactEmail != null && contactEmail.equals(email)) {
 
-								String assemblyUserId = userDetails.get("id").toString();
-								return assemblyUserId;
+									assemblyUserId = userDetails.get("id").toString();
+									return assemblyUserId;
 
-							} else {
-								log.error("USER HAS NOT SET ASSEMBLY EMAIL ID");
+								} else {
+									log.error("USER HAS NOT SET ASSEMBLY EMAIL ID");
+									assemblyUserId = null;
+								}
 							}
+						} else {
+							log.error("No user found in assembly user");
+							assemblyUserId = null;
 						}
 					} else {
-						log.error("No user found in assembly user");
+						assemblyUserId = null;
 					}
+					
 				} 
 				
 			} catch (PaymentException e) {
-				log.error("Payment user search has returned a null response");
+				log.error("Payment user search has returned a null response and handling by returning null");
+				assemblyUserId = null;
 				e.printStackTrace();
 			}
 			
 
 		} else {
 			log.error("BASEENTITY HAS NULL EMAIL ATTRIBUTE");
+			assemblyUserId = null;
 		}
 
-		return null;
+		return assemblyUserId;
 	}
 	
 	public static String updateCompleteUserProfile(BaseEntity userBe, String assemblyUserId, String assemblyAuthKey) {
