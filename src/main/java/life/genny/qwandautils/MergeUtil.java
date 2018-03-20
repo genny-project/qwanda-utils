@@ -2,11 +2,16 @@ package life.genny.qwandautils;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.Logger;
+import org.javamoney.moneta.Money;
+import org.json.simple.JSONObject;
 
 import life.genny.qwanda.Link;
 import life.genny.qwanda.attribute.EntityAttribute;
@@ -88,16 +93,15 @@ public class MergeUtil {
 							|| attributeCode.equals("PRI_OFFER_DRIVER_PRICE_INC_GST")
 							|| attributeCode.equals("PRI_OFFER_DRIVER_PRICE_EXC_GST"))) {
 						
-						return getBaseEntityAttrValueAsString(be, attributeCode);
+						return be.getValue(attributeCode, null);
 						
 					} else {
 						System.out.println("price attributes");
-						String priceString = getBaseEntityAttrValueAsString(be, attributeCode);
 						
-						String amount = QwandaUtils.getAmountAsString(priceString);
-						String currency = QwandaUtils.getCurrencyAsString(priceString);
-
-						return amount + " " + currency;
+						Money money = be.getValue(attributeCode, null);
+						DecimalFormat df = new DecimalFormat("#.00"); 
+						
+						return df.format(money.getNumber()) + " " + money.getCurrency();
 					}
 
 				} catch (Exception e) {
