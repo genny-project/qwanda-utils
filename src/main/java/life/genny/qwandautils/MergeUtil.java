@@ -93,7 +93,7 @@ public class MergeUtil {
 							|| attributeCode.equals("PRI_OFFER_DRIVER_PRICE_INC_GST")
 							|| attributeCode.equals("PRI_OFFER_DRIVER_PRICE_EXC_GST"))) {
 						
-						return be.getValue(attributeCode, null);
+						return getBaseEntityAttrValueAsString(be, attributeCode);
 						
 					} else {
 						System.out.println("price attributes");
