@@ -2,16 +2,17 @@ package life.genny.qwandautils;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.Logger;
 import org.javamoney.moneta.Money;
-import org.json.simple.JSONObject;
 
 import life.genny.qwanda.Link;
 import life.genny.qwanda.attribute.EntityAttribute;
@@ -76,7 +77,7 @@ public class MergeUtil {
 					// be.findEntityAttribute(entityArr[1]).get().getValueString();
 					String attributeCode = entityArr[1];
 					
-					if (!(attributeCode.equals("PRI_PRICE")
+					if ((attributeCode.equals("PRI_PRICE")
 							|| attributeCode.equals("PRI_LOAD_PRICE") || attributeCode.equals("PRI_OFFER_PRICE")
 							|| attributeCode.equals("PRI_FEE") || attributeCode.equals("PRI_OWNER_PRICE")
 							|| attributeCode.equals("PRI_DRIVER_PRICE") || attributeCode.equals("PRI_OFFER_FEE")
@@ -93,15 +94,39 @@ public class MergeUtil {
 							|| attributeCode.equals("PRI_OFFER_DRIVER_PRICE_INC_GST")
 							|| attributeCode.equals("PRI_OFFER_DRIVER_PRICE_EXC_GST"))) {
 						
-						return getBaseEntityAttrValueAsString(be, attributeCode);
-						
-					} else {
 						System.out.println("price attributes");
 						
 						Money money = be.getValue(attributeCode, null);
 						DecimalFormat df = new DecimalFormat("#.00"); 
 						
 						return df.format(money.getNumber()) + " " + money.getCurrency();
+						
+					} else if(attributeCode.equals("PRI_DRIVER_CONFIRM_PICKUP_DATETIME")) {
+												
+						LocalDateTime dateTimeRawValue = be.getValue(attributeCode, null);
+						
+						/*To print in this format : 9am AEST, Monday, 22 January 2018*/
+						int ampmIntVal = dateTimeRawValue.get(ChronoField.AMPM_OF_DAY);
+						String ampm = null;
+						if(ampmIntVal == 0) {
+							ampm = "AM";
+						} else {
+							ampm = "PM";
+						}
+						
+					   DateTimeFormatter df =  
+					            new DateTimeFormatterBuilder().appendPattern("[HH][.mm]")
+					            .parseDefaulting(ChronoField.HOUR_OF_AMPM, 0)
+					            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+					            .toFormatter(); 
+					   String time = df.format(dateTimeRawValue);
+
+						
+						String editedDateTime = time + " " + ampm + ", " + dateTimeRawValue.getDayOfWeek().toString().toLowerCase() + ", " + dateTimeRawValue.getDayOfMonth() + " " + dateTimeRawValue.getMonth() + " " + dateTimeRawValue.getYear();
+						return editedDateTime.toLowerCase();
+						
+					} else {
+						return getBaseEntityAttrValueAsString(be, attributeCode);
 					}
 
 				} catch (Exception e) {
