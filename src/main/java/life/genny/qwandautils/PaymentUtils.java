@@ -33,7 +33,6 @@ import life.genny.qwanda.Answer;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.exception.PaymentException;
 import life.genny.qwanda.message.QDataAnswerMessage;
-import life.genny.qwanda.message.QDataBaseEntityMessage;
 
 public class PaymentUtils {
 	
@@ -705,15 +704,18 @@ public class PaymentUtils {
 			String feeId = getPaymentFeeId(offerBe, assemblyauthToken);
 			System.out.println("fee Id ::" + feeId);
 
-			String begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
-			String begDescription = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_DESCRIPTION");
+			/*String begTitle = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_TITLE");
+			String begDescription = MergeUtil.getBaseEntityAttrValueAsString(begBe, "PRI_DESCRIPTION");*/
+			String begTitle = begBe.getValue("PRI_TITLE", null);
+			String begDescription = begBe.getValue("PRI_DESCRIPTION", null);
+			String begJobId = begBe.getValue("PRI_JOB_ID", null);
 
 			if (begTitle != null) {
-				itemObj.put("name", begTitle);
+				itemObj.put("name", begTitle + ", Job #"+begJobId);
 			}
 
 			if (begDescription != null) {
-				itemObj.put("description", begDescription);
+				itemObj.put("description", begDescription + ", Job #" + begJobId);
 			}
 
 			if (feeId != null) {
@@ -775,7 +777,8 @@ public class PaymentUtils {
 			
 			if(ownerBe != null) {
 				buyerObj = new JSONObject();
-				buyerObj.put("id", MergeUtil.getBaseEntityAttrValueAsString(ownerBe, "PRI_ASSEMBLY_USER_ID"));
+				//buyerObj.put("id", MergeUtil.getBaseEntityAttrValueAsString(ownerBe, "PRI_ASSEMBLY_USER_ID"));
+				buyerObj.put("id", ownerBe.getValue("PRI_ASSEMBLY_USER_ID", null));
 			}
 		} else {
 			log.error("BEG CONTEXT MAP HAS NO OWNER LINK, SO BUYER OBJECT IS NULL");
@@ -793,7 +796,7 @@ public class PaymentUtils {
 			
 			if(driverBe != null) {
 				sellerObj = new JSONObject();
-				sellerObj.put("id", MergeUtil.getBaseEntityAttrValueAsString(driverBe, "PRI_ASSEMBLY_USER_ID"));
+				sellerObj.put("id", driverBe.getValue("PRI_ASSEMBLY_USER_ID",null));
 			}
 		} else {
 			log.error("BEG CONTEXT MAP HAS NO QUOTER LINK, SO SELLER OBJECT IS NULL");
@@ -1333,7 +1336,8 @@ public class PaymentUtils {
 		
 		System.out.println("in getPaymentMethodType method");
 
-		Object paymentMethods = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_USER_PAYMENT_METHODS");
+		/*Object paymentMethods = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_USER_PAYMENT_METHODS");*/
+		Object paymentMethods = userBe.getValue("PRI_USER_PAYMENT_METHODS", null);
 		JSONArray array = JsonUtils.fromJson(paymentMethods.toString(), JSONArray.class);
 		String paymentType = null;
 
@@ -1386,12 +1390,7 @@ public class PaymentUtils {
 	}
 	
 	
-	public static String publishBaseEntityByCode(final String be, String token) {
-		
-		/*String[] recipientArray = new String[1];
-		recipientArray[0] = be;
-		publishBaseEntityByCode(be, null,
-			     null, recipientArray);*/
+	/*public static String publishBaseEntityByCode(final String be, String token) {
 		
 		
 		String[] recipientArray = new String[1];
@@ -1408,7 +1407,7 @@ public class PaymentUtils {
 		String msgStr = JsonUtils.toJson(msg);
 		return msgStr;
 	
-	}
+	}*/
 	
 	@SuppressWarnings("unchecked")
 	public static String disburseAccount(String assembyUserId, String paymentMethodString, String authToken) {
