@@ -376,39 +376,47 @@ public class QwandaUtils {
 			for (Ask parentAsk : askMsgs.getItems()) {
 				for (Ask childAsk : parentAsk.getChildAsks()) {
 					// log.info("parent ask code ::"+parentAsk.getAttributeCode());
+			      if( childAsk.getChildAsks() != null) {
 					for (Ask basicChildAsk : childAsk.getChildAsks()) {
-
-						if (basicChildAsk.getMandatory()) {
-							/*
-							 * Optional<EntityAttribute> attributeVal =
-							 * be.findEntityAttribute(basicChildAsk.getAttributeCode()); if
-							 * (attributeVal.isPresent()) { if (attributeVal.get() == null) {
-							 * System.out.println("This attribute value of "+basicChildAsk.getAttributeCode(
-							 * ) +" is not filled and is null"); return false; } } else { return false; }
-							 */
-							// System.out.println("child ask attribute code
-							// ::"+basicChildAsk.getAttributeCode());
-							Object attributeVal = MergeUtil.getBaseEntityAttrObjectValue(be,
-									basicChildAsk.getAttributeCode());
-							if (attributeVal != null) {
-								// System.out.println("attribu6te value
-								// ::"+basicChildAsk.getAttributeCode()+"----"+attributeVal);
-							}
-
-							if (attributeVal == null) {
-								// System.out.println(basicChildAsk.getAttributeCode() + " is null");
-								return false;
-							}
-
+						if ( !isAsksMandatoryFilled(be,basicChildAsk ) ) {
+						     return false;
 						}
 
 					}
-				}
-			}
+			      }else {
+			    	        if ( !isAsksMandatoryFilled(be, childAsk) ) {
+						     return false;
+						}
+			    	      }
+			      }
 
-			// System.out.println("askMsgs ::" + askMsgs);
+			 }
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+		return true;
+	}
+	
+	public static Boolean isAsksMandatoryFilled(BaseEntity be, Ask asks) {
+		if (asks.getMandatory()) {
+			/*
+			 * Optional<EntityAttribute> attributeVal =
+			 * be.findEntityAttribute(basicChildAsk.getAttributeCode()); if
+			 * (attributeVal.isPresent()) { if (attributeVal.get() == null) {
+			 * System.out.println("This attribute value of "+basicChildAsk.getAttributeCode(
+			 * ) +" is not filled and is null"); return false; } } else { return false; }
+			 */
+			// System.out.println("child ask attribute code
+			// ::"+basicChildAsk.getAttributeCode());
+			Object attributeVal = MergeUtil.getBaseEntityAttrObjectValue(be,
+					asks.getAttributeCode());
+			if (attributeVal != null) {
+			}
+
+			if (attributeVal == null) {
+				// System.out.println(basicChildAsk.getAttributeCode() + " is null");
+				return false;
+			}
 		}
 		return true;
 	}
