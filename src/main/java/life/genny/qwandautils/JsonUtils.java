@@ -37,27 +37,7 @@ public class JsonUtils {
 	static public Gson gson = gsonBuilder.registerTypeAdapter(Money.class, new MoneyDeserializer())
 			.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer()).setPrettyPrinting()
 			.registerTypeAdapter(LocalDate.class, new LocalDateConverter())
-//			.registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
-//				@Override
-//				public LocalDate deserialize(final JsonElement json, final Type type,
-//						final JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-//					LocalDate ret = null;
-//					try {
-//						String str = json.getAsJsonPrimitive().getAsString();
-//					} catch (Exception e) {
-//						return null;
-//					}
-//					ret = LocalDate.parse(json.getAsJsonPrimitive().getAsString(), DateTimeFormatter.ISO_LOCAL_DATE);
-//					return ret;
-//				}
-//
-//				public JsonElement serialize(final LocalDate date, final Type typeOfSrc,
-//						final JsonSerializationContext context) {
-//					JsonPrimitive json = new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE));
-//					return json;
-//				}
-//			})
-			// .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+
 			.excludeFieldsWithoutExposeAnnotation().create();
 	
 	
@@ -74,6 +54,21 @@ public class JsonUtils {
 	                } catch (Exception e) {
 	                	     System.out.println("The JSON file received is  :::  "+json);;
 	                     log.error("Bad Deserialisation for "+clazz.getSimpleName());
+	                }
+	        }
+	        return item;
+	}
+	
+	public static <T> T fromJson(final String json, Type clazz)
+	{
+	        T item = null;
+	        if (json != null) {
+	                try {
+	                      item = (T)gson.fromJson(json, clazz);
+
+	                } catch (Exception e) {
+	                	     System.out.println("The JSON file received is  :::  "+json);;
+	                     log.error("Bad Deserialisation for "+clazz.getTypeName());
 	                }
 	        }
 	        return item;
