@@ -711,11 +711,21 @@ public class PaymentUtils {
 			String begJobId = begBe.getValue("PRI_JOB_ID", null);
 
 			if (begTitle != null) {
-				itemObj.put("name", begTitle + ", Job #"+begJobId);
+				if(begJobId != null) {
+					itemObj.put("name", begTitle + ", Job #"+begJobId);
+				} else {
+					itemObj.put("name", begTitle);
+				}
+				
 			}
 
 			if (begDescription != null) {
-				itemObj.put("description", begDescription + ", Job #" + begJobId);
+				if(begJobId != null) {
+					itemObj.put("description", begDescription + ", Job #" + begJobId);
+				} else {
+					itemObj.put("description", begDescription);
+				}
+				
 			}
 
 			if (feeId != null) {
