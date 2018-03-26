@@ -362,17 +362,18 @@ public class QwandaUtils {
 			String attributeString = null;
 			String key = sourceBaseEntityCode + ":" + questionCode + ":" + targetBaseEntityCode
 					+ userToken.substring(0, 8); // get first 8 chars
-			if (askMap.containsKey(key)) {
-				attributeString = askMap.get(key);
-			} else {
+		//	if (askMap.containsKey(key)) {
+		//		attributeString = askMap.get(key);
+		//	} else {
 				attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
 						+ "/asks3/" + questionCode + "/" + targetBaseEntityCode, userToken);
-				askMap.put(key, attributeString);
-			}
-			// log.debug("Attribute String="+attributeString);
+		//		askMap.put(key, attributeString);
+		//	}
+			log.debug("Attribute String="+attributeString);
 			QDataAskMessage askMsgs = JsonUtils.fromJson(attributeString, QDataAskMessage.class);
 			BaseEntity be = MergeUtil.getBaseEntityForAttr(targetBaseEntityCode, userToken);
 
+			if (askMsgs != null) {
 			for (Ask parentAsk : askMsgs.getItems()) {
 				for (Ask childAsk : parentAsk.getChildAsks()) {
 					// log.info("parent ask code ::"+parentAsk.getAttributeCode());
@@ -391,6 +392,10 @@ public class QwandaUtils {
 			      }
 
 			 }
+			} else {
+				log.error("AskMsg is NULL! "+qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
+						+ "/asks3/" + questionCode + "/" + targetBaseEntityCode);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
