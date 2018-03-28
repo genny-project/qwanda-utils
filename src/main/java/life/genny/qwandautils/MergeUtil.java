@@ -2,6 +2,7 @@ package life.genny.qwandautils;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -125,7 +126,20 @@ public class MergeUtil {
 						String editedDateTime = time + " " + ampm + ", " + dateTimeRawValue.getDayOfWeek().toString().toLowerCase() + ", " + dateTimeRawValue.getDayOfMonth() + " " + dateTimeRawValue.getMonth() + " " + dateTimeRawValue.getYear();
 						return editedDateTime.toLowerCase();
 						
-					} else {
+					} else if(attributeCode.equals("PRI_DROPOFF_DATETIME")) {
+						LocalDateTime dateTimeRawValue = be.getValue(attributeCode, null);
+						String formattedDate = "";
+						
+						if(dateTimeRawValue!= null) {
+							DateTimeFormatter df =  
+						            new DateTimeFormatterBuilder().appendPattern("dd/MM/yy HH:mm:ss").toFormatter();
+							formattedDate = df.format(dateTimeRawValue);
+						}
+						
+						
+						return formattedDate;
+						
+					}else {
 						return getBaseEntityAttrValueAsString(be, attributeCode);
 					}
 
