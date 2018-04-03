@@ -1118,13 +1118,19 @@ public class PaymentUtils {
 
 		String paymentResponse = null;
 
-		Object ipAddress = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_IP_ADDRESS");
+		/*Object ipAddress = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_IP_ADDRESS");
 		Object deviceId = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_DEVICE_ID");
 		Object itemId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ITEM_ID");
-		Object accountId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ACCOUNT_ID");
+		Object accountId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ACCOUNT_ID");*/
+		
+		String ipAddress = userBe.getValue("PRI_IP_ADDRESS", null);
+		String deviceId = userBe.getValue("PRI_DEVICE_ID", null);
+		String itemId = begBe.getValue("PRI_ITEM_ID", null);
+		String accountId = begBe.getValue("PRI_ACCOUNT_ID", null);
 
 		JSONObject paymentObj = new JSONObject();
 		JSONObject accountObj = null;
+		String paymentType = null;
 
 		if (itemId != null) {
 			paymentObj.put("id", itemId);
@@ -1141,6 +1147,9 @@ public class PaymentUtils {
 		if (accountId != null) {
 			accountObj = new JSONObject();
 			accountObj.put("id", accountId);
+			
+			paymentType = getPaymentMethodType(userBe, accountId);
+			
 			System.out.println("account id in make payment not null");
 		} else {
 			log.error("Make payment - accound Id is NULL");
@@ -1181,8 +1190,6 @@ public class PaymentUtils {
 
 		if (paymentObj.get("id") != null) {
 			System.out.println("payment obj not null");
-			
-			String paymentType = getPaymentMethodType(userBe, accountId);
 
 			if (paymentType != null && paymentType.equals("BANK_ACCOUNT")) {
 
