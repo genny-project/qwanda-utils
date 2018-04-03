@@ -1105,7 +1105,7 @@ public class PaymentUtils {
 		return begCode;
 	}
 	
-	@SuppressWarnings("unchecked")
+	/*@SuppressWarnings("unchecked")
 	public static Boolean makePayment(String qwandaUrl, String offerCode, String begCode, String authToken, String tokenString) {
 		
 		System.out.println("inside make payment");
@@ -1118,10 +1118,10 @@ public class PaymentUtils {
 
 		String paymentResponse = null;
 
-		/*Object ipAddress = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_IP_ADDRESS");
+		Object ipAddress = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_IP_ADDRESS");
 		Object deviceId = MergeUtil.getBaseEntityAttrObjectValue(userBe, "PRI_DEVICE_ID");
 		Object itemId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ITEM_ID");
-		Object accountId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ACCOUNT_ID");*/
+		Object accountId = MergeUtil.getBaseEntityAttrObjectValue(begBe, "PRI_ACCOUNT_ID");
 		
 		String ipAddress = userBe.getValue("PRI_IP_ADDRESS", null);
 		String deviceId = userBe.getValue("PRI_DEVICE_ID", null);
@@ -1195,7 +1195,7 @@ public class PaymentUtils {
 
 				System.out.println("Bank account..Need to be authorized to make payment");
 
-				/* Add Call to Matt's direct debit API */
+				 Add Call to Matt's direct debit API 
 				Boolean debitAuthorityResponse = getDebitAuthority(offerBe, begBe, accountId, authToken);
 				
 				if(debitAuthorityResponse) {
@@ -1207,7 +1207,7 @@ public class PaymentUtils {
 						if (!paymentResponse.contains("error")) {
 							isMakePaymentSuccess = true;
 							
-							/* Saving deposit reference as an answer to beg */
+							 Saving deposit reference as an answer to beg 
 							saveDepositReference(qwandaUrl, paymentResponse, userCode, begCode, tokenString);
 							
 						}
@@ -1218,7 +1218,7 @@ public class PaymentUtils {
 						String errorMessage = e.getMessage();		
 						log.error("error message ::"+errorMessage);
 						
-						/* When make payment API is getting accessed more than once for an item */
+						 When make payment API is getting accessed more than once for an item 
 						if(errorMessage.contains("payment is already made")) {
 							isMakePaymentSuccess = true;
 						} else {
@@ -1242,7 +1242,7 @@ public class PaymentUtils {
 					if (!paymentResponse.contains("error")) {
 						isMakePaymentSuccess = true;
 						
-						/* Save deposit reference as an answer to beg */
+						 Save deposit reference as an answer to beg 
 						saveDepositReference(qwandaUrl, paymentResponse, userCode, begCode, tokenString);
 					}
 
@@ -1253,7 +1253,7 @@ public class PaymentUtils {
 					String errorMessage = e.getMessage();
 					log.error("error message ::"+errorMessage);
 					
-					/* When make payment API is getting accessed more than once for an item */
+					 When make payment API is getting accessed more than once for an item 
 					if(errorMessage.contains("payment is already made")) {
 						isMakePaymentSuccess = true;
 					} else {
@@ -1312,12 +1312,12 @@ public class PaymentUtils {
 				JSONObject debitAuthorityObj = new JSONObject();
 				JSONObject accountObj = new JSONObject();
 				
-				/*{
+				{
 					  "account": {
 					    "id": "dkjgsxdkfesw345fidsfdsf"
 					  },
 					  "amount": 1000
-					}*/
+					}
 				
 				accountObj.put("id", accountId);
 				debitAuthorityObj.put("amount", finalPrice.toString());
@@ -1347,7 +1347,7 @@ public class PaymentUtils {
 		}
 		
 		return isDebitAuthority;
-	}
+	}*/
 
 	private static String getPaymentMethodType(BaseEntity userBe, Object accountId) {
 		
@@ -1749,6 +1749,252 @@ public class PaymentUtils {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static JSONObject makePaymentWithResponse(BaseEntity userBe, BaseEntity offerBe, BaseEntity begBe, String authToken) {
+		
+		System.out.println("inside make payment");
+
+		Boolean isMakePaymentSuccess = false;
+		String userCode = userBe.getCode();
+		
+		Object ipAddress = userBe.getValue("PRI_IP_ADDRESS", null);
+		Object deviceId = userBe.getValue("PRI_DEVICE_ID", null);
+		Object itemId = begBe.getValue("PRI_ITEM_ID", null);
+		Object accountId = begBe.getValue("PRI_ACCOUNT_ID", null);
+	
+		JSONObject makepaymentResponse = new JSONObject();
+		String paymentResponse = null;
+
+		JSONObject paymentObj = new JSONObject();
+		JSONObject accountObj = null;
+		String paymentType = null;
+
+		if (itemId != null) {
+			
+			paymentObj.put("id", itemId);
+			
+			if(deviceId != null) {
+				paymentObj.put("deviceID", deviceId);
+			} else {
+				System.out.println("device ID is null");
+			}
+			
+			if(ipAddress != null) {
+				paymentObj.put("ipAddress", ipAddress);
+			} else {
+				System.out.println("IP address is null");
+			}
+			
+			if(accountId != null) {
+				accountObj = new JSONObject();
+				accountObj.put("id", accountId);
+				paymentObj.put("account", accountObj);
+				
+				paymentType = getPaymentMethodType(userBe, accountId);
+				System.out.println("payment type ::" +paymentType);
+				
+			} else {
+				System.out.println("account Id is null");
+			}
+			
+
+			if (paymentType != null && paymentType.equals("BANK_ACCOUNT")) {
+
+				System.out.println("Bank account..Need to be authorized to make payment");
+
+				/* Call to Matt's direct debit API */
+				JSONObject debitAuthorityResponse = getDebitAuthorityWithResponse(offerBe, begBe, accountId, authToken);
+				
+				if((boolean) debitAuthorityResponse.get("isSuccess")) {
+					log.debug("Make payment object ::" + paymentObj.toJSONString());
+					try {
+						paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), JsonUtils.toJson(paymentObj),
+								authToken);
+						log.debug("Make payment response ::" + paymentResponse);
+						if (!paymentResponse.contains("error")) {
+							isMakePaymentSuccess = true;
+							
+							/* getting deposit reference to add as an attribute of beg */
+							String referenceId = getDepositReference(paymentResponse, userCode, begBe.getCode());
+							
+							makepaymentResponse.put("isSuccess", isMakePaymentSuccess);
+							makepaymentResponse.put("message", "success");
+							makepaymentResponse.put("depositReferenceId", referenceId);
+											
+						}
+
+					} catch (PaymentException e) {
+						
+						log.error("Exception occured during making payment with " + paymentType);
+						String errorMessage = e.getMessage();		
+						log.error("error message ::"+errorMessage);
+						
+						/* When make payment API is getting accessed more than once for an item */
+						if(errorMessage.contains("payment is already made")) {
+							
+							isMakePaymentSuccess = true;
+							makepaymentResponse.put("isSuccess", isMakePaymentSuccess);
+							makepaymentResponse.put("message", e.getMessage());
+							makepaymentResponse.put("depositReferenceId", begBe.getValue("PRI_DEPOSIT_REFERENCE_ID", null));
+							
+							
+						} else {
+							isMakePaymentSuccess = false;
+							makepaymentResponse.put("isSuccess", isMakePaymentSuccess);
+							makepaymentResponse.put("message", e.getMessage());
+							makepaymentResponse.put("depositReferenceId", null);
+						}
+						
+					}
+				} else {
+					isMakePaymentSuccess = false;
+					makepaymentResponse.put("isSuccess", isMakePaymentSuccess);
+					makepaymentResponse.put("message", debitAuthorityResponse.get("message"));
+					makepaymentResponse.put("depositReferenceId", null);
+					
+				}
+				
+
+			} else if (paymentType != null && paymentType.equals("CARD")) {
+
+				System.out.println("Credit card payment");
+
+				try {
+					paymentResponse = PaymentEndpoint.makePayment(itemId.toString(), JsonUtils.toJson(paymentObj),
+							authToken);
+					log.debug("Make payment response ::" + paymentResponse);
+					if (!paymentResponse.contains("error")) {
+						isMakePaymentSuccess = true;
+						
+						/* Save deposit reference as an answer to beg */
+						String referenceId = getDepositReference(paymentResponse, userCode, begBe.getCode());
+						
+						makepaymentResponse.put("isSuccess", isMakePaymentSuccess);
+						makepaymentResponse.put("message", "success");
+						makepaymentResponse.put("depositReferenceId", referenceId);
+					}
+
+				} catch (PaymentException e) {
+					
+					log.error("Exception occured during making payment with " + paymentType);				
+					String errorMessage = e.getMessage();
+					log.error("error message ::"+errorMessage);
+					
+					/* When make payment API is getting accessed more than once for an item */
+					if(errorMessage.contains("payment is already made")) {
+						isMakePaymentSuccess = true;
+						
+						makepaymentResponse.put("isSuccess", isMakePaymentSuccess);
+						makepaymentResponse.put("message", e.getMessage());
+						makepaymentResponse.put("depositReferenceId", begBe.getValue("PRI_DEPOSIT_REFERENCE_ID", null));
+						
+					} else {
+						isMakePaymentSuccess = false;
+						
+						makepaymentResponse.put("isSuccess", isMakePaymentSuccess);
+						makepaymentResponse.put("message", e.getMessage());
+						makepaymentResponse.put("depositReferenceId", null);
+					}
+						
+				}
+
+			} else {
+				makepaymentResponse.put("isSuccess", false);
+				makepaymentResponse.put("message", "Unknown payment method type.");
+				makepaymentResponse.put("depositReferenceId", null);
+			}
+
+			return makepaymentResponse;
+
+		} else {
+			try {
+				throw new PaymentException("Item ID is null, so Make Payment will not succeed");
+			} catch (PaymentException e) {
+				
+				isMakePaymentSuccess = false;
+				makepaymentResponse.put("isSuccess", isMakePaymentSuccess);
+				makepaymentResponse.put("message", "Item was not created for transaction to take place");
+				makepaymentResponse.put("depositReferenceId", null);
+			}
+		}
+
+		return makepaymentResponse;
+	}
+	
+	private static String getDepositReference(String paymentResponse, String userCode, String begCode) {
+		
+		JSONObject depositReference = JsonUtils.fromJson(paymentResponse, JSONObject.class);
+		String depositReferenceId = depositReference.get("depositReference").toString();
+		
+		/*Answer answer = new Answer(userCode, begCode, "PRI_DEPOSIT_REFERENCE_ID", depositReferenceId);
+		saveAnswer(qwandaServiceUrl, answer, tokenString);*/
+		
+		return depositReferenceId;
+		
+	}
+	
+	private static JSONObject getDebitAuthorityWithResponse(BaseEntity offerBe, BaseEntity begBe, Object accountId, String authToken) {
+		
+		Boolean isDebitAuthority = false;
+		String getDebitAuthorityResponse = null;
+		String offerOwnerPriceString = MergeUtil.getBaseEntityAttrValueAsString(offerBe, "PRI_OFFER_DRIVER_PRICE_INC_GST");
+		JSONObject debitAuthorityResponse = new JSONObject();
+
+		System.out.println("begpriceString ::" + offerOwnerPriceString);
+
+		String amount = null;
+		if(offerOwnerPriceString != null) {
+			JSONObject moneyobj = JsonUtils.fromJson(offerOwnerPriceString, JSONObject.class);
+			amount = moneyobj.get("amount").toString();
+			
+			if(amount != null) {
+				BigDecimal begPrice = new BigDecimal(amount);
+
+				// 350 Dollars sent to Assembly as 3.50$, so multiplying with 100
+				BigDecimal finalPrice = begPrice.multiply(new BigDecimal(100));
+				
+				JSONObject debitAuthorityObj = new JSONObject();
+				JSONObject accountObj = new JSONObject();
+	
+				accountObj.put("id", accountId);
+				debitAuthorityObj.put("amount", finalPrice.toString());
+				debitAuthorityObj.put("account", accountObj);
+				
+				try {
+					getDebitAuthorityResponse = PaymentEndpoint.getdebitAuthorization(JsonUtils.toJson(debitAuthorityObj), authToken); 
+					if(!getDebitAuthorityResponse.contains("error")) {
+						isDebitAuthority = true;
+						
+						debitAuthorityResponse.put("isSuccess", isDebitAuthority);
+						debitAuthorityResponse.put("message", "success");
+						
+					}
+				} catch (PaymentException e) {
+					isDebitAuthority = false;
+					log.error("Exception occured during debit authorization, Make Payment will not succeed");
+					
+					debitAuthorityResponse.put("isSuccess", isDebitAuthority);
+					debitAuthorityResponse.put("message", e.getMessage());				}
+				
+				
+			} else {
+				isDebitAuthority = false;
+				log.error("AMOUNT IS NULL");
+				debitAuthorityResponse.put("isSuccess", isDebitAuthority);
+				debitAuthorityResponse.put("message", "Amount for transaction not specified");
+			}
+			
+			
+		} else {
+			isDebitAuthority = false;
+			log.error("PRI_DRIVER_PRICE_INC_GST IS NULL");
+			debitAuthorityResponse.put("isSuccess", isDebitAuthority);
+			debitAuthorityResponse.put("message", "Amount for transaction not specified");
+		}
+		
+		return debitAuthorityResponse;
 	}
 	
 
