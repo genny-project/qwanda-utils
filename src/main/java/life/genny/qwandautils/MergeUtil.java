@@ -2,14 +2,12 @@ package life.genny.qwandautils;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,8 +38,8 @@ public class MergeUtil {
     public static final Pattern PATTEN_MATCHER = Pattern.compile(PATTERN_BASEENTITY);
     
     /* ${VARIABLE} pattern */
-    public static final String VARIABLE_REGEX_START = "${";
-    public static final String VARIABLE_REGEX_END = "}";
+    public static final String VARIABLE_REGEX_START = "{{";
+    public static final String VARIABLE_REGEX_END = "}}";
     public static final Pattern PATTERN_VARIABLE = Pattern.compile(Pattern.quote(VARIABLE_REGEX_START) + "(.*)" + Pattern.quote(VARIABLE_REGEX_END));    
     
 	public static String merge(String mergeStr, Map<String, Object> templateEntityMap) {
@@ -65,11 +63,13 @@ public class MergeUtil {
 		/* duplicating this for now. ideally wordMerge should be a bit more flexible and allows all kind of data to be passed */
 		while(matchVariables.find()) {
 			
-			Object mergedtext = wordMerge(templateEntityMap, matchVariables.group(1));
-			log.info("merge text ::"+mergedtext);
-			System.out.println("merge text ::"+mergedtext);
-			if(mergedtext != null) {
-				mergeStr = mergeStr.replace(VARIABLE_REGEX_START + matchVariables.group(1) + VARIABLE_REGEX_END, mergedtext.toString());
+			//Object mergedtext = wordMerge(templateEntityMap, matchVariables.group(1));
+			System.out.println("match variable ::"+matchVariables.group(1));
+			Object mergedText = templateEntityMap.get(matchVariables.group(1));
+			log.info("merge text ::"+mergedText);
+			System.out.println("merge text ::"+mergedText);
+			if(mergedText != null) {
+				mergeStr = mergeStr.replace(VARIABLE_REGEX_START + matchVariables.group(1) + VARIABLE_REGEX_END, mergedText.toString());
 			} else {
 				mergeStr = mergeStr.replace(VARIABLE_REGEX_START + matchVariables.group(1) + VARIABLE_REGEX_END, "");
 			}	
