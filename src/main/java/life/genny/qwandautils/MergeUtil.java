@@ -125,7 +125,12 @@ public class MergeUtil {
 							Money money = be.getValue(attributeCode, null);
 							DecimalFormat df = new DecimalFormat("#.00"); 
 							
-							return df.format(money.getNumber()) + " " + money.getCurrency();
+							if(money != null) {
+								return df.format(money.getNumber()) + " " + money.getCurrency();
+							} else {
+								return DEFAULT;
+							}
+							
 							
 						} else if(attributeCode.equals("PRI_DRIVER_CONFIRM_PICKUP_DATETIME")) {
 													
