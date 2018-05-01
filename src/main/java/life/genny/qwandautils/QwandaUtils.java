@@ -6,6 +6,9 @@ import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1165,5 +1168,17 @@ public class QwandaUtils {
 		}
 
 		return currency;
+	}
+	
+	public static String getZonedCurrentLocalDateTime() {
+
+		LocalDateTime ldt = LocalDateTime.now();
+		ZonedDateTime zdt = ldt.atZone(ZoneOffset.systemDefault());
+		String iso8601DateString = ldt.toString(); // zdt.toString(); MUST USE UMT!!!!
+
+		System.out.println("datetime ::" + iso8601DateString);
+
+		return iso8601DateString;
+
 	}
 }
