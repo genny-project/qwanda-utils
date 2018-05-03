@@ -1173,8 +1173,8 @@ public class QwandaUtils {
 	public static String getZonedCurrentLocalDateTime() {
 
 		LocalDateTime ldt = LocalDateTime.now();
-		ZonedDateTime zdt = ldt.atZone(ZoneOffset.systemDefault());
-		String iso8601DateString = ldt.toString(); // zdt.toString(); MUST USE UMT!!!!
+		ZonedDateTime zdt = ldt.atZone(ZoneOffset.UTC);  //Using UTC Time
+		String iso8601DateString = zdt.toString(); // zdt.toString(); MUST USE UMT!!!!
 
 		System.out.println("datetime ::" + iso8601DateString);
 
