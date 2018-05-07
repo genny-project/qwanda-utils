@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Type;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
@@ -41,6 +42,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.Ask;
@@ -50,6 +52,7 @@ import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.EntityEntity;
 import life.genny.qwanda.entity.Person;
+import life.genny.qwanda.entity.SearchEntity;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QDataAnswerMessage;
 import life.genny.qwanda.message.QDataAskMessage;
@@ -1181,4 +1184,17 @@ public class QwandaUtils {
 		return iso8601DateString;
 
 	}
+	
+	public static List<BaseEntity> fetchResults(final SearchEntity searchBE, final String token) throws IOException
+	{
+		String jsonSearchBE = JsonUtils.toJson(searchBE);
+		String result = QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/baseentitys/search", jsonSearchBE,
+				token);
+		Type type = new TypeToken<List<BaseEntity>>() {
+		}.getType();
+		List<BaseEntity> results = JsonUtils.fromJson(result, type);
+		return results;
+
+	}
+	
 }
