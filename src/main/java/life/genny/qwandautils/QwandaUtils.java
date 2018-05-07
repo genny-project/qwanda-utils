@@ -1185,7 +1185,7 @@ public class QwandaUtils {
 
 	}
 	
-	public static List<BaseEntity> fetchResults(final SearchEntity searchBE, final String token) throws IOException
+	public static List<BaseEntity> fetchResults(final BaseEntity searchBE, final String token) throws IOException
 	{
 		String jsonSearchBE = JsonUtils.toJson(searchBE);
 		String result = QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/baseentitys/search", jsonSearchBE,
