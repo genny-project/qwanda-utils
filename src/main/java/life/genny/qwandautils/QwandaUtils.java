@@ -1185,14 +1185,13 @@ public class QwandaUtils {
 
 	}
 	
-	public static List<BaseEntity> fetchResults(final BaseEntity searchBE, final String token) throws IOException
+	public static QDataBaseEntityMessage fetchResults(final BaseEntity searchBE, final String token) throws IOException
 	{
 		String jsonSearchBE = JsonUtils.toJson(searchBE);
 		String result = QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/baseentitys/search", jsonSearchBE,
 				token);
-		Type type = new TypeToken<List<BaseEntity>>() {
-		}.getType();
-		List<BaseEntity> results = JsonUtils.fromJson(result, type);
+
+		QDataBaseEntityMessage results = JsonUtils.fromJson(result, QDataBaseEntityMessage.class);
 		return results;
 
 	}
