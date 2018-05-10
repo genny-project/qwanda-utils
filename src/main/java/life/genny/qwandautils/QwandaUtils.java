@@ -93,7 +93,9 @@ public class QwandaUtils {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 		}
 	
-		CloseableHttpResponse response = httpclient.execute(request);
+		CloseableHttpResponse response =null;
+		try {
+		response = httpclient.execute(request);
 		// The underlying HTTP connection is still held by the response object
 		// to allow the response content to be streamed directly from the network
 		// socket.
@@ -102,7 +104,7 @@ public class QwandaUtils {
 		// Please note that if response content is not fully consumed the underlying
 		// connection cannot be safely re-used and will be shut down and discarded
 		// by the connection manager.
-		try {
+		
 			HttpEntity entity1 = response.getEntity();
 			String responseString = EntityUtils.toString(entity1);
 
