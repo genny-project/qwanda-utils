@@ -82,12 +82,17 @@ public class QwandaUtils {
 
 	public static String apiGet(String getUrl, final String authToken) throws ClientProtocolException, IOException {
 		log.debug("GET:" + getUrl + ":");
-		CloseableHttpClient httpclient = HttpClients.createDefault();
+		int timeout = 10;
+		RequestConfig config = RequestConfig.custom()
+		  .setConnectTimeout(timeout * 1000)
+		  .setConnectionRequestTimeout(timeout * 1000)
+		  .setSocketTimeout(timeout * 1000).build();
+		CloseableHttpClient httpclient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
 		HttpGet request = new HttpGet(getUrl);
 		if (authToken != null) {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 		}
-
+	
 		CloseableHttpResponse response = httpclient.execute(request);
 		// The underlying HTTP connection is still held by the response object
 		// to allow the response content to be streamed directly from the network
@@ -104,7 +109,13 @@ public class QwandaUtils {
 			EntityUtils.consume(entity1);
 
 			return responseString;
-		} finally {
+		} 
+		catch (java.net.SocketTimeoutException e) {
+			log.error("API Get call timeout - "+timeout+" secs to "+getUrl);
+			return null;
+		}
+		
+		finally {
 			IOUtils.closeQuietly(response);
 			IOUtils.closeQuietly(httpclient);
 		}
