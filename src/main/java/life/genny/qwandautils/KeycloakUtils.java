@@ -55,6 +55,15 @@ public class KeycloakUtils {
 	// getAccessToken(keycloakUrl,realm,clientId,secret,username,password).getToken();
 	// }
 
+	public static String getToken(String keycloakUrl, String realm, String clientId, String secret, String username,
+			String password) throws IOException {
+		AccessTokenResponse accessToken = KeycloakUtils.getAccessToken(keycloakUrl, realm, clientId, secret, username,
+				password);
+		String token = accessToken.getToken();
+		return token;
+
+	}
+
 	public static AccessTokenResponse getAccessToken(String keycloakUrl, String realm, String clientId, String secret,
 			String username, String password) throws IOException {
 
@@ -63,10 +72,11 @@ public class KeycloakUtils {
 		try {
 			HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl + "/auth")
 					.path(ServiceUrlConstants.TOKEN_PATH).build(realm));
-//			System.out.println("url token post=" + keycloakUrl + "/auth" + ",tokenpath="
-//					+ ServiceUrlConstants.TOKEN_PATH + ":realm=" + realm + ":clientid=" + clientId + ":secret" + secret
-//					+ ":un:" + username + "pw:" + password);
-//			;
+			// System.out.println("url token post=" + keycloakUrl + "/auth" + ",tokenpath="
+			// + ServiceUrlConstants.TOKEN_PATH + ":realm=" + realm + ":clientid=" +
+			// clientId + ":secret" + secret
+			// + ":un:" + username + "pw:" + password);
+			// ;
 			post.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
 			List<NameValuePair> formParams = new ArrayList<NameValuePair>();
@@ -191,186 +201,160 @@ public class KeycloakUtils {
 		}
 		return projectRealm;
 	}
-	
+
 	@SuppressWarnings("deprecation")
-	public static String resetUserPassword(String userId, String token, String realm) throws ClientProtocolException, IOException {
-			
+	public static String resetUserPassword(String userId, String token, String realm)
+			throws ClientProtocolException, IOException {
+
 		HttpClient httpClient = new DefaultHttpClient();
 
 		try {
-			
+
 			String keycloakUrl = getKeycloakUrl();
-			HttpPut putRequest = new HttpPut(keycloakUrl+"/auth/admin/realms/"+realm+"/users/" + userId + "/reset-password");
-			System.out.println(keycloakUrl+"/auth/admin/realms/"+realm+"/users/" + userId + "/reset-password");
-			
+			HttpPut putRequest = new HttpPut(
+					keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password");
+			System.out.println(keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password");
+
 			putRequest.addHeader("Content-Type", "application/json");
-			putRequest.addHeader("Authorization", "Bearer "+token);
-				
+			putRequest.addHeader("Authorization", "Bearer " + token);
+
 			HttpResponse response = httpClient.execute(putRequest);
 
 			int statusCode = response.getStatusLine().getStatusCode();
-			
+
 			HttpEntity entity = response.getEntity();
 			String content = null;
 			if (statusCode == 201) {
 				Header[] headers = response.getHeaders("Location");
 				String locationUrl = headers[0].getValue();
-				content = locationUrl.replaceFirst(".*/(\\w+)","$1");
+				content = locationUrl.replaceFirst(".*/(\\w+)", "$1");
 				return content;
-				} else if (statusCode == 204) {
+			} else if (statusCode == 204) {
 				Header[] headers = response.getHeaders("Location");
 				String locationUrl = headers[0].getValue();
-				content = locationUrl.replaceFirst(".*/(\\w+)","$1");
+				content = locationUrl.replaceFirst(".*/(\\w+)", "$1");
 				return content;
+			} else if (statusCode == 409) {
+				throw new IOException("Already exists");
 			}
-				else if (statusCode == 409) {
-					throw new IOException("Already exists");
-				}
 			if (entity == null) {
 				throw new IOException("Null Entity");
 			} else {
 				content = getContent(entity);
-				throw new IOException(response+"");
+				throw new IOException(response + "");
 			}
-		} 
-		
+		}
+
 		finally {
 			httpClient.getConnectionManager().shutdown();
 		}
 	}
 
-	public static String createUser(String token, String keycloakUrl, String realm, 
-			String newUsername,
-			String newFirstname,
-			String newLastname,
-			String newEmail
-			) throws IOException {
-			return createUser(token,keycloakUrl,realm,newUsername,newFirstname,newLastname,newEmail);
+	public static String createUser(String token, String keycloakUrl, String realm, String newUsername,
+			String newFirstname, String newLastname, String newEmail) throws IOException {
+		return createUser(token, keycloakUrl, realm, newUsername, newFirstname, newLastname, newEmail);
 	}
-	
-	public static String createUser(String token, String keycloakUrl, String realm, 
-			String newUsername,
-			String newFirstname,
-			String newLastname,
-			String newEmail,
-			String newRealmRoles,
-			String newGroupRoles
-			) throws IOException {
-		
-		String json = "{ " 
-				+ "\"username\" : \""+newUsername+"\"," 
-				+ "\"email\" : \""+newEmail+"\" , " 
-				+ "\"enabled\" : true, " 
-				+ "\"emailVerified\" : true, " 
-				+ "\"firstName\" : \""+newFirstname+"\", " 
-				+ "\"lastName\" : \""+newLastname+"\", " 
-				+ "\"groups\" : ["  
-				+  " \""+newGroupRoles+"\" "  
-				+ "],"  
-				+ "\"realmRoles\" : [" 
-				+   "\""+newRealmRoles+"\" " 
-				+ "]" 
-				+"}";
 
+	public static String createUser(String token, String keycloakUrl, String realm, String newUsername,
+			String newFirstname, String newLastname, String newEmail, String newRealmRoles, String newGroupRoles)
+			throws IOException {
 
-		
+		String json = "{ " + "\"username\" : \"" + newUsername + "\"," + "\"email\" : \"" + newEmail + "\" , "
+				+ "\"enabled\" : true, " + "\"emailVerified\" : true, " + "\"firstName\" : \"" + newFirstname + "\", "
+				+ "\"lastName\" : \"" + newLastname + "\", " + "\"groups\" : [" + " \"" + newGroupRoles + "\" " + "],"
+				+ "\"realmRoles\" : [" + "\"" + newRealmRoles + "\" " + "]" + "}";
+
 		HttpClient httpClient = new DefaultHttpClient();
 
 		try {
-			HttpPost post = new HttpPost(keycloakUrl+"/auth/admin/realms/"+realm+"/users");
-	//		HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl + "/auth/admin/realms/"+realm+"/users"));
+			HttpPost post = new HttpPost(keycloakUrl + "/auth/admin/realms/" + realm + "/users");
+			// HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl +
+			// "/auth/admin/realms/"+realm+"/users"));
 
 			post.addHeader("Content-Type", "application/json");
-			post.addHeader("Authorization", "Bearer "+token);
-			
+			post.addHeader("Authorization", "Bearer " + token);
+
 			StringEntity postingString = new StringEntity(json);
 			post.setEntity(postingString);
 
-	
 			HttpResponse response = httpClient.execute(post);
 
 			int statusCode = response.getStatusLine().getStatusCode();
-			
+
 			HttpEntity entity = response.getEntity();
 			String content = null;
 			if (statusCode == 201) {
 				Header[] headers = response.getHeaders("Location");
 				String locationUrl = headers[0].getValue();
-				content = locationUrl.replaceFirst(".*/(\\w+)","$1");
+				content = locationUrl.replaceFirst(".*/(\\w+)", "$1");
 				return content;
-				} else if (statusCode == 204) {
+			} else if (statusCode == 204) {
 				Header[] headers = response.getHeaders("Location");
 				String locationUrl = headers[0].getValue();
-				content = locationUrl.replaceFirst(".*/(\\w+)","$1");
+				content = locationUrl.replaceFirst(".*/(\\w+)", "$1");
 				return content;
+			} else if (statusCode == 409) {
+				throw new IOException("Already exists");
 			}
-				else if (statusCode == 409) {
-					throw new IOException("Already exists");
-				}
 			if (entity == null) {
 				throw new IOException("Null Entity");
 			} else {
 				content = getContent(entity);
-				throw new IOException(response+"");
+				throw new IOException(response + "");
 
 			}
-		
-		} 
-		
+
+		}
+
 		finally {
 			httpClient.getConnectionManager().shutdown();
 		}
 	}
-	
+
 	public static String getKeycloakUrl() {
-		
-		String keycloakProto = System.getenv("KEYCLOAK_PROTO") !=null ? System.getenv("KEYCLOAK_PROTO"): "http://";
-	    String keycloakPort = System.getenv("KEYCLOAK_PORT") != null ? System.getenv("KEYCLOAK_PORT"): "8180";
-	    String keycloakIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP"): "localhost";
-		return keycloakProto+keycloakIP+":"+keycloakPort;
+
+		String keycloakProto = System.getenv("KEYCLOAK_PROTO") != null ? System.getenv("KEYCLOAK_PROTO") : "http://";
+		String keycloakPort = System.getenv("KEYCLOAK_PORT") != null ? System.getenv("KEYCLOAK_PORT") : "8180";
+		String keycloakIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : "localhost";
+		return keycloakProto + keycloakIP + ":" + keycloakPort;
 	}
 
-	public static int setPassword(String token, String keycloakUrl, String realm, String userId, String password) throws IOException 
-	{
-	String json = "{\"type\": \"password\", " +
-		 "\"temporary\": false," + 
-		 "\"value\": \""+password+"\"" +
-		"}";
-	
-	HttpClient httpClient = new DefaultHttpClient();
+	public static int setPassword(String token, String keycloakUrl, String realm, String userId, String password)
+			throws IOException {
+		String json = "{\"type\": \"password\", " + "\"temporary\": false," + "\"value\": \"" + password + "\"" + "}";
 
-	try {
-		HttpPut put = new HttpPut(keycloakUrl+"/auth/admin/realms/"+realm+"/users/"+userId+"/reset-password");
+		HttpClient httpClient = new DefaultHttpClient();
 
-		put.addHeader("Content-Type", "application/json");
-		put.addHeader("Authorization", "Bearer "+token);
-		
-		StringEntity postingString = new StringEntity(json);
-		put.setEntity(postingString);
+		try {
+			HttpPut put = new HttpPut(
+					keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password");
 
+			put.addHeader("Content-Type", "application/json");
+			put.addHeader("Authorization", "Bearer " + token);
 
-		HttpResponse response = httpClient.execute(put);
+			StringEntity postingString = new StringEntity(json);
+			put.setEntity(postingString);
 
-		int statusCode = response.getStatusLine().getStatusCode();
-		
-		HttpEntity entity = response.getEntity();
-		String content = null;
-		if (statusCode != 204) {
-			content = getContent(entity);
-			throw new IOException("" + statusCode);
+			HttpResponse response = httpClient.execute(put);
+
+			int statusCode = response.getStatusLine().getStatusCode();
+
+			HttpEntity entity = response.getEntity();
+			String content = null;
+			if (statusCode != 204) {
+				content = getContent(entity);
+				throw new IOException("" + statusCode);
+			}
+			if (statusCode == 403) {
+				throw new IOException("403 Forbidden");
+			}
+
+			return statusCode;
 		}
-		if (statusCode == 403) {
-			throw new IOException("403 Forbidden");
+
+		finally {
+			httpClient.getConnectionManager().shutdown();
 		}
-
-		return statusCode;
-	} 
-	
-	finally {
-		httpClient.getConnectionManager().shutdown();
 	}
-	}
-	
 
-	
 }
