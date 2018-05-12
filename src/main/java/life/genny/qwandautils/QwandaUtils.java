@@ -82,6 +82,9 @@ public class QwandaUtils {
 
 	public static String apiGet(String getUrl, final String authToken) throws ClientProtocolException, IOException {
 		log.debug("GET:" + getUrl + ":");
+		if ("http://qwanda-service.genny.life/qwanda/baseentitys/PER_SHARONCROW66_AT_GMAILCOM/attributes".equalsIgnoreCase(getUrl)) {
+			log.debug("match");
+		}
 		int timeout = 10;
 		RequestConfig config = RequestConfig.custom()
 		  .setConnectTimeout(timeout * 1000)
