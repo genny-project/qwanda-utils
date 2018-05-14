@@ -85,7 +85,7 @@ public class QwandaUtils {
 		if ("http://qwanda-service.genny.life/qwanda/baseentitys/PER_SHARONCROW66_AT_GMAILCOM/attributes".equalsIgnoreCase(getUrl)) {
 			log.debug("match");
 		}
-		int timeout = 10;
+		int timeout = 20;
 		RequestConfig config = RequestConfig.custom()
 		  .setConnectTimeout(timeout * 1000)
 		  .setConnectionRequestTimeout(timeout * 1000)
