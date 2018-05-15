@@ -81,10 +81,12 @@ public class QwandaUtils {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	public static String apiGet(String getUrl, final String authToken) throws ClientProtocolException, IOException {
-		log.debug("GET:" + getUrl + ":");
+
+    log.debug("GET:" + getUrl + ":");
 		if ("http://qwanda-service.genny.life/qwanda/baseentitys/PER_SHARONCROW66_AT_GMAILCOM/attributes".equalsIgnoreCase(getUrl)) {
 			log.debug("match");
 		}
+
 		int timeout = 20;
 		RequestConfig config = RequestConfig.custom()
 		  .setConnectTimeout(timeout * 1000)
@@ -119,6 +121,10 @@ public class QwandaUtils {
 			log.error("API Get call timeout - "+timeout+" secs to "+getUrl);
 			return null;
 		}
+    catch (Exception e) {
+      log.error("API Get call timeout - "+timeout+" secs to "+getUrl);
+			return null;
+    }
 
 		finally {
 			IOUtils.closeQuietly(response);
