@@ -63,7 +63,7 @@ public class QwandaUtils {
 	private static int apiPort = System.getenv("API_PORT") != null ? (Integer.parseInt(System.getenv("API_PORT")))
 			: 8088;
 	private static String hostIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : "127.0.0.1";
-	
+
 	private static String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 
 
@@ -95,7 +95,7 @@ public class QwandaUtils {
 		if (authToken != null) {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 		}
-	
+
 		CloseableHttpResponse response =null;
 		try {
 		response = httpclient.execute(request);
@@ -107,19 +107,19 @@ public class QwandaUtils {
 		// Please note that if response content is not fully consumed the underlying
 		// connection cannot be safely re-used and will be shut down and discarded
 		// by the connection manager.
-		
+
 			HttpEntity entity1 = response.getEntity();
 			String responseString = EntityUtils.toString(entity1);
 
 			EntityUtils.consume(entity1);
 
 			return responseString;
-		} 
+		}
 		catch (java.net.SocketTimeoutException e) {
 			log.error("API Get call timeout - "+timeout+" secs to "+getUrl);
 			return null;
 		}
-		
+
 		finally {
 			IOUtils.closeQuietly(response);
 			IOUtils.closeQuietly(httpclient);
@@ -163,7 +163,7 @@ public class QwandaUtils {
 
 	public static String apiDelete(final String deleteUrl, final String entityString, final String authToken)
 			throws IOException {
-		
+
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpDeleteWithBody request = new HttpDeleteWithBody(deleteUrl);
 		if (authToken != null) {
@@ -346,7 +346,7 @@ public class QwandaUtils {
 		/*
 		 * else { String attributeVal = MergeUtil.getAttrValue(code,
 		 * "PRI_KEYCLOAK_UUID", userToken);
-		 * 
+		 *
 		 * System.out.println("pri_keycloak_UUID for the code::"+attributeVal);
 		 * if(attributeVal == null){ tokenExists = false;
 		 * System.out.println("baseentity found and UUID is null"); }else
@@ -361,7 +361,7 @@ public class QwandaUtils {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param sourceBaseEntityCode
 	 * @param targetBaseEntityCode
 	 * @param questionCode
@@ -423,7 +423,7 @@ public class QwandaUtils {
 		}
 		return true;
 	}
-	
+
 	public static Boolean isAsksMandatoryFilled(BaseEntity be, Ask asks) {
 		if (asks.getMandatory()) {
 			/*
@@ -449,14 +449,14 @@ public class QwandaUtils {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param baseEntAttributeCode
 	 * @param token
 	 * @return Deserialized BaseEntity model object with values for a BaseEntity code that is passed
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static BaseEntity getBaseEntityByCode(String baseEntAttributeCode, String token) throws  IOException {
-		
+
 		String attributeString = null;
 		BaseEntity be = null;
 		try {
@@ -466,44 +466,46 @@ public class QwandaUtils {
 			if (be == null) {
 				throw new IOException("Cannot find BE "+baseEntAttributeCode);
 			}
-			
+
 		} catch (IOException e)  {
 			throw new IOException("Cannot connect to QwandaURL "+qwandaServiceUrl);
 		}
-		
-		
+
+
 		return be;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param baseEntAttributeCode
 	 * @param token
 	 * @return Deserialized BaseEntity model object with values for a BaseEntity code that is passed
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static BaseEntity getBaseEntityByCodeWithAttributes(String baseEntAttributeCode, String token) throws  IOException {
-		
+
 		String attributeString = null;
 		BaseEntity be = null;
 		try {
-			attributeString = QwandaUtils
-					.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode+"/attributes", token);
-			be = JsonUtils.fromJson(attributeString, BaseEntity.class);
-			if (be == null) {
-				throw new IOException("Cannot find BE "+baseEntAttributeCode);
-			}
-			
+
+      attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode+"/attributes", token);
+      if(attributeString != null) {
+        be = JsonUtils.fromJson(attributeString, BaseEntity.class);
+      }
+      else {
+        throw new IOException("Cannot find BE "+baseEntAttributeCode);
+      }
+
 		} catch (IOException e)  {
 			throw new IOException("Cannot connect to QwandaURL "+qwandaServiceUrl);
 		}
-		
-		
+
+
 		return be;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param username
 	 * @return baseEntity code for the userName passed
 	 */
@@ -535,7 +537,7 @@ public class QwandaUtils {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param templateCode
 	 * @param token
 	 * @return template
@@ -558,7 +560,7 @@ public class QwandaUtils {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param groupCode
 	 * @param token
 	 * @return all the children links for a given groupCode
@@ -585,7 +587,7 @@ public class QwandaUtils {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param attributeCode
 	 * @param token
 	 * @return BaseEntity with children (alias code, code of the attributes for the
@@ -739,7 +741,7 @@ public class QwandaUtils {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param parentCode
 	 * @param parentLinkCode
 	 * @param childLinkCode
@@ -778,7 +780,7 @@ public class QwandaUtils {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param groupCode
 	 * @param attributeCode
 	 * @param sourceOrTarget
@@ -799,12 +801,12 @@ public class QwandaUtils {
 		if (dataBEMessage != null) {
 
 			for (BaseEntity be : dataBEMessage.getItems()) {
-				
+
 				Set<EntityEntity> eeSet = be.getLinks();
-				
+
 				for(EntityEntity ee : eeSet) {
 					Link finalLink = ee.getLink();
-					
+
 					if (isSource) {
 						if (finalLink != null && finalLink.getAttributeCode() != null && finalLink.getTargetCode() != null
 								&& finalLink.getLinkValue() != null) {
@@ -832,12 +834,12 @@ public class QwandaUtils {
 							}
 						}
 					}
-					
+
 				}
-				
+
 				/*for (EntityEntity entityEntity : be.getLinks()) {
-					
-					
+
+
 
 					Link link = entityEntity.getLink();
 
@@ -879,7 +881,7 @@ public class QwandaUtils {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param groupCode
 	 * @param linkCode
 	 *            (which is the attributeCode in the Link model)
@@ -949,7 +951,7 @@ public class QwandaUtils {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param groupCode
 	 * @param targetCode
 	 * @param linkCode
@@ -1126,7 +1128,7 @@ public class QwandaUtils {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param inputMoney
 	 * @return stringified Money JSONObject
 	 */
@@ -1142,7 +1144,7 @@ public class QwandaUtils {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param stringifiedMoneyJson
 	 * @return Amount as a string
 	 */
@@ -1171,7 +1173,7 @@ public class QwandaUtils {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param stringifiedMoneyJson
 	 * @return Currency as a string
 	 */
@@ -1188,7 +1190,7 @@ public class QwandaUtils {
 
 		return currency;
 	}
-	
+
 	public static String getZonedCurrentLocalDateTime() {
 
 		LocalDateTime ldt = LocalDateTime.now();
@@ -1200,7 +1202,7 @@ public class QwandaUtils {
 		return iso8601DateString;
 
 	}
-	
+
 	public static QDataBaseEntityMessage fetchResults(final BaseEntity searchBE, final String token) throws IOException
 	{
 		String jsonSearchBE = JsonUtils.toJson(searchBE);
@@ -1211,5 +1213,5 @@ public class QwandaUtils {
 		return results;
 
 	}
-	
+
 }
