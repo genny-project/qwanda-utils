@@ -1208,6 +1208,15 @@ public class QwandaUtils {
 		return iso8601DateString;
 
 	}
+	
+	public static String getCurrentUTCDateTime() {
+		
+		ZonedDateTime now = ZonedDateTime.now( ZoneOffset.UTC );
+		String dateTimeString = now.toString();
+		System.out.println("UTC datetime is ::" + dateTimeString);
+
+		return dateTimeString;
+	}
 
 	public static QDataBaseEntityMessage fetchResults(final BaseEntity searchBE, final String token) throws IOException
 	{
