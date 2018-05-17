@@ -1221,16 +1221,18 @@ public class QwandaUtils {
 	public static QDataBaseEntityMessage fetchResults(final BaseEntity searchBE, final String token) throws IOException
 	{
 		QDataBaseEntityMessage results = null;
-		if (searchBE.getCode().startsWith("SBE_")) {
+		SearchEntity se = new SearchEntity(searchBE);
+		System.out.println("se="+se.getCode());
+//	if (searchBE.getCode().startsWith("SBE_")) {
 		
 		String jsonSearchBE = JsonUtils.toJson(searchBE);
 		String result = QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/baseentitys/search", jsonSearchBE,
 				token);
 
 		results = JsonUtils.fromJson(result, QDataBaseEntityMessage.class);
-		} else {
-			throw new IllegalArgumentException("Must only send SearchBaseEntities - "+searchBE.getCode());
-		}
+//		} else {
+//			throw new IllegalArgumentException("Must only send SearchBaseEntities - "+searchBE.getCode());
+//		}
 		return results;
 
 	}
