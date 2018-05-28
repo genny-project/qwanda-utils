@@ -60,15 +60,16 @@ public class KeycloakUtils {
 
 	public static String getToken(String keycloakUrl, String realm, String clientId, String secret, String username,
 			String password) throws IOException {
-		
-		AccessTokenResponse accessToken = KeycloakUtils.getAccessToken(keycloakUrl, realm, clientId, secret, username, password);
-		if(accessToken != null) {
-			return accessToken.getToken();
-		}
-		
+
+    try {
+      return KeycloakUtils.getAccessToken(keycloakUrl, realm, clientId, secret, username, password).getToken(;
+    }
+		catch (Exception e ) {
+      
+    }
 		return null;
 	}
-	
+
 	public static AccessTokenResponse getAccessToken(String keycloakUrl, String realm, String clientId, String secret,
 			String username, String password) throws IOException {
 
@@ -112,7 +113,7 @@ public class KeycloakUtils {
 			}
 			return JsonSerialization.readValue(content, AccessTokenResponse.class);
 		} catch (URISyntaxException e) {
-			
+
 			httpClient.getConnectionManager().shutdown();
 			return null;
 		} finally {
