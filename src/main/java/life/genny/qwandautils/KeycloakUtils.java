@@ -47,6 +47,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.vertx.core.json.JsonObject;
+
 
 public class KeycloakUtils {
 
@@ -62,7 +64,13 @@ public class KeycloakUtils {
 			String password) throws IOException {
 
     try {
-      return KeycloakUtils.getAccessToken(keycloakUrl, realm, clientId, secret, username, password).getToken();
+    	
+    		JsonObject content = KeycloakUtils.getAccessToken(keycloakUrl, realm, clientId, secret, username, password);
+    		if(content != null) {
+    			return content.getString("token");
+    		}
+    		
+    		return null;
     }
 		catch (Exception e ) {
       
@@ -70,7 +78,7 @@ public class KeycloakUtils {
 		return null;
 	}
 
-	public static AccessTokenResponse getAccessToken(String keycloakUrl, String realm, String clientId, String secret,
+	public static JsonObject getAccessToken(String keycloakUrl, String realm, String clientId, String secret,
 			String username, String password) throws IOException {
 
 		HttpClient httpClient = new DefaultHttpClient();
@@ -111,7 +119,16 @@ public class KeycloakUtils {
 			} else {
 				content = getContent(entity);
 			}
-			return JsonSerialization.readValue(content, AccessTokenResponse.class);
+			
+			try {
+				
+				JsonObject obj = JsonUtils.fromJson(content, JsonObject.class);
+				return obj;
+			}
+			catch(Exception e) {
+				
+			}
+			
 		} catch (URISyntaxException e) {
 
 			httpClient.getConnectionManager().shutdown();
@@ -119,6 +136,8 @@ public class KeycloakUtils {
 		} finally {
 			httpClient.getConnectionManager().shutdown();
 		}
+		
+		return null;
 	}
 
 	public static String getContent(final HttpEntity httpEntity) throws IOException {
