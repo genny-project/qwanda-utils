@@ -60,55 +60,14 @@ public class KeycloakUtils {
 
 	public static String getToken(String keycloakUrl, String realm, String clientId, String secret, String username,
 			String password) throws IOException {
-		HttpClient httpClient = new DefaultHttpClient();
-String token = null;
-		try {
-			URI uri = new URI(keycloakUrl+"/auth/realms/"+realm+"/protocol/openid-connect/token");
-			HttpPost post = new HttpPost(uri);
-//			HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl + "/auth")
-//					.path(ServiceUrlConstants.TOKEN_PATH).build(realm));
-			// System.out.println("url token post=" + keycloakUrl + "/auth" + ",tokenpath="
-			// + ServiceUrlConstants.TOKEN_PATH + ":realm=" + realm + ":clientid=" +
-			// clientId + ":secret" + secret
-			// + ":un:" + username + "pw:" + password);
-			// ;
-			post.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-			List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-			formParams.add(new BasicNameValuePair("username", username));
-			formParams.add(new BasicNameValuePair("password", password));
-			formParams.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, "password"));
-			formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_ID, clientId));
-			formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_SECRET, secret));
-			UrlEncodedFormEntity form = new UrlEncodedFormEntity(formParams, "UTF-8");
-
-			post.setEntity(form);
-
-			HttpResponse response = httpClient.execute(post);
-
-			int statusCode = response.getStatusLine().getStatusCode();
-			HttpEntity entity = response.getEntity();
-			String content = null;
-			if (statusCode != 200) {
-				content = getContent(entity);
-				throw new IOException("" + statusCode);
-			}
-			if (entity == null) {
-				throw new IOException("Null Entity");
-			} else {
-				content = getContent(entity);
-			}
-			JSONObject json = new JSONObject(content);
-			token = json.getString("access_token");
-		} catch (URISyntaxException e) {
-			
-			httpClient.getConnectionManager().shutdown();
-
-		} finally {
-			httpClient.getConnectionManager().shutdown();
-		}
-		return token;
-
+    try {
+      return KeycloakUtils.getAccessToken(keycloakUrl, realm, clientId, secret, username, password).getToken();
+    }
+		catch (Exception e ) {
+      
+    }
+		return null;
 	}
 
 	public static AccessTokenResponse getAccessToken(String keycloakUrl, String realm, String clientId, String secret,
@@ -154,7 +113,7 @@ String token = null;
 			}
 			return JsonSerialization.readValue(content, AccessTokenResponse.class);
 		} catch (URISyntaxException e) {
-			
+
 			httpClient.getConnectionManager().shutdown();
 			return null;
 		} finally {
