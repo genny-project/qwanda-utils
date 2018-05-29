@@ -62,7 +62,7 @@ public class KeycloakUtils {
 			String password) throws IOException {
 
     try {
-      return KeycloakUtils.getAccessToken(keycloakUrl, realm, clientId, secret, username, password).getIdToken();
+      return KeycloakUtils.getAccessToken(keycloakUrl, realm, clientId, secret, username, password).getToken();
     }
 		catch (Exception e ) {
       
