@@ -133,7 +133,7 @@ public class KeycloakUtils {
 			
 			try {
 				
-				JsonObject obj = JsonUtils.fromJson(content, JsonObject.class);
+				JsonObject obj = new JsonObject(content);
 				return obj;
 			}
 			catch(Exception e) {
