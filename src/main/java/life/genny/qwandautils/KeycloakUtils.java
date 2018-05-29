@@ -77,6 +77,17 @@ public class KeycloakUtils {
     }
 		return null;
 	}
+	
+	public static AccessTokenResponse getAccessTokenResponse(String keycloakUrl, String realm, String clientId, String secret,
+			String username, String password) throws IOException {
+
+		JsonObject content = KeycloakUtils.getAccessToken(keycloakUrl, realm, clientId, secret, username, password);
+		if(content != null) {
+			return JsonUtils.fromJson(content.toString(), AccessTokenResponse.class);
+		}
+		
+		return null;
+	}
 
 	public static JsonObject getAccessToken(String keycloakUrl, String realm, String clientId, String secret,
 			String username, String password) throws IOException {
