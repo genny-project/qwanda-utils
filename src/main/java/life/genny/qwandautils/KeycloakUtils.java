@@ -67,7 +67,7 @@ public class KeycloakUtils {
     	
     		JsonObject content = KeycloakUtils.getAccessToken(keycloakUrl, realm, clientId, secret, username, password);
     		if(content != null) {
-    			return content.getString("token");
+    			return content.getString("access_token");
     		}
     		
     		return null;
