@@ -8,10 +8,10 @@ public class SecurityUtilsTest {
 	@Test
 	public void versionTest()
 	{
-		        String key        = "HelloImA121Key@!"; // 128 bit key
-		        String initVector = "PRJ_GENNY*******"; // 16 bytes IV
+		        String key        = "ImAKeythatweuse!"; // 128 bit key
+		        String initVector = "PRJ_INTERNMATCH*"; // 16 bytes IV
 
-		        String encrypted = SecurityUtils.encrypt(key, initVector, "I am some encrypted text!");
+		        String encrypted = SecurityUtils.encrypt(key, initVector, "Yo!Dude!IamapublicPassword");
 		        System.out.println("["+encrypted+"]");;
 		        System.out.println(SecurityUtils.decrypt(key, initVector, encrypted
 		                ));
