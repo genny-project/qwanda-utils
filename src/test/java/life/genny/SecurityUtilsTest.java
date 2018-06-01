@@ -9,7 +9,7 @@ public class SecurityUtilsTest {
 	public void versionTest()
 	{
 		        String key        = "ImAKeythatweuse!"; // 128 bit key
-		        String initVector = "PRJ_INTERNMATCH*"; // 16 bytes IV
+		        String initVector = "PRJ_GENNY*******"; // 16 bytes IV
 
 		        String encrypted = SecurityUtils.encrypt(key, initVector, "Yo!Dude!IamapublicPassword");
 		        System.out.println("["+encrypted+"]");;
