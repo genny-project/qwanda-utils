@@ -167,7 +167,7 @@ public class QwandaUtils {
 
 	}
 
-	public static String apiDelete(final String deleteUrl, final String entityString, final String authToken)
+	public static String apiDelete(final String deleteUrl, final String authToken)
 			throws IOException {
 
 		CloseableHttpClient httpclient = HttpClients.createDefault();
