@@ -208,6 +208,36 @@ public class QwandaUtils {
 		}
 	}
 
+	public static String apiDelete(final String deleteUrl, final String entityString, final String authToken)
+			throws IOException {
+
+		CloseableHttpClient httpclient = HttpClients.createDefault();
+		HttpDeleteWithBody request = new HttpDeleteWithBody(deleteUrl);
+		if (authToken != null) {
+			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+		}
+
+		CloseableHttpResponse response = httpclient.execute(request);
+		// The underlying HTTP connection is still held by the response object
+		// to allow the response content to be streamed directly from the network
+		// socket.
+		// In order to ensure correct deallocation of system resources
+		// the user MUST call CloseableHttpResponse#close() from a finally clause.
+		// Please note that if response content is not fully consumed the underlying
+		// connection cannot be safely re-used and will be shut down and discarded
+		// by the connection manager.
+		try {
+			HttpEntity entity1 = response.getEntity();
+			String responseString = EntityUtils.toString(entity1);
+
+			EntityUtils.consume(entity1);
+
+			return responseString;
+		} finally {
+			IOUtils.closeQuietly(response);
+			IOUtils.closeQuietly(httpclient);
+		}
+}
 	public static String apiPutEntity(final String postUrl, final String entityString, final String authToken)
 			throws IOException {
 		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
