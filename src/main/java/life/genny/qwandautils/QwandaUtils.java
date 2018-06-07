@@ -1,6 +1,7 @@
 package life.genny.qwandautils;
 
 import java.io.BufferedReader;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -48,15 +50,23 @@ import life.genny.qwanda.Answer;
 import life.genny.qwanda.Ask;
 import life.genny.qwanda.CodedEntity;
 import life.genny.qwanda.Link;
+import life.genny.qwanda.attribute.Attribute;
 import life.genny.qwanda.attribute.EntityAttribute;
+import life.genny.qwanda.datatype.DataType;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.EntityEntity;
 import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.entity.SearchEntity;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
+import life.genny.qwanda.message.QBulkMessage;
+import life.genny.qwanda.message.QCmdViewFormMessage;
+import life.genny.qwanda.message.QCmdViewMessage;
 import life.genny.qwanda.message.QDataAnswerMessage;
 import life.genny.qwanda.message.QDataAskMessage;
+import life.genny.qwanda.message.QDataAttributeMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
+import life.genny.qwanda.message.QDataMessage;
+import life.genny.qwanda.validation.Validation;
 
 public class QwandaUtils {
 
@@ -1236,5 +1246,244 @@ public class QwandaUtils {
 		return results;
 
 	}
+	
+	public static List<BaseEntity> getBaseEntityWithChildren(String beCode, Integer level, String token) {
 
+		if (level == 0) {
+			return null; // exit point;
+		}
+
+		level--;
+		BaseEntity be;
+		try {
+			
+			be = QwandaUtils.getBaseEntityByCode(beCode, token);
+			
+			if (be != null) {
+
+				List<BaseEntity> beList = new ArrayList<BaseEntity>();
+
+				Set<EntityEntity> entityEntities = be.getLinks();
+
+				// we interate through the links
+				for (EntityEntity entityEntity : entityEntities) {
+
+					Link link = entityEntity.getLink();
+					if (link != null) {
+
+						// we get the target BE
+						String targetCode = link.getTargetCode();
+						if (targetCode != null) {
+							
+							BaseEntity targetBe = QwandaUtils.getBaseEntityByCode(targetCode, token);;
+							if(targetBe != null) {
+								beList.add(targetBe);
+							}
+							
+							// recursion
+							beList.addAll(QwandaUtils.getBaseEntityWithChildren(targetCode, level, token));
+						}
+					}
+				}
+
+				return beList;
+			}
+			
+		} catch (IOException e) {
+			
+		}
+
+		return null;
+	}
+	
+	public static Boolean doesQuestionGroupExist(String sourceCode, String targetCode, final String questionCode, String token) {
+
+		/* we grab the question group using the questionCode */
+		QDataAskMessage questions = QwandaUtils.getAsks(sourceCode, targetCode, questionCode, token);
+
+		/* we check if the question payload is not empty */
+		if (questions != null) {
+
+			/* we check if the question group contains at least one question */
+			if (questions.getItems() != null && questions.getItems().length > 0) {
+
+				Ask firstQuestion = questions.getItems()[0];
+
+				/* we check if the question is a question group */
+				if (firstQuestion.getAttributeCode().contains("QQQ_QUESTION_GROUP_BUTTON_SUBMIT")) {
+
+					/* we see if this group contains at least one question */
+					return firstQuestion.getChildAsks().length > 0;
+				} else {
+
+					/* if it is an ask we return true */
+					return true;
+				}
+			}
+		}
+
+		/* we return false otherwise */
+		return false;
+	}
+
+	private static QDataAskMessage getAsks(String sourceCode, String targetCode, String questionCode, String token) {
+
+		String json;
+		try {
+			
+			json = QwandaUtils.apiGet(QwandaUtils.qwandaServiceUrl + "/qwanda/baseentitys/" + sourceCode + "/asks2/"
+					+ questionCode + "/" + targetCode, token);
+			QDataAskMessage msg = JsonUtils.fromJson(json, QDataAskMessage.class);
+			return msg;
+
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	public static QwandaMessage getQuestions(String sourceCode, String targetCode, String questionCode, String token) throws ClientProtocolException, IOException {
+		return QwandaUtils.getQuestions(sourceCode, targetCode, questionCode, token, null);
+	}
+	
+	public static QwandaMessage getQuestions(String sourceCode, String targetCode, String questionCode, String token, String stakeholderCode) throws ClientProtocolException, IOException {
+		
+		QBulkMessage bulk = new QBulkMessage();
+		QwandaMessage qwandaMessage = new QwandaMessage();
+		
+		QDataAskMessage questions = QwandaUtils.getAsks(sourceCode, targetCode, questionCode, token);
+		if (questions != null) {
+
+			/*
+			 * if we have the questions, we loop through the asks and send the required data
+			 * to front end
+			 */
+
+			Ask[] asks = questions.getItems();
+			if (asks != null) {
+				QBulkMessage askData = QwandaUtils.sendAsksRequiredData(asks, token, stakeholderCode);
+				for(QDataBaseEntityMessage message: askData.getMessages()) {
+					bulk.add(message);
+				}
+			}
+			
+			qwandaMessage.askData = bulk;
+			qwandaMessage.asks = questions;
+			
+			return qwandaMessage;
+
+		} else {
+			log.error("Questions Msg is null " + sourceCode + "/asks2/" + questionCode + "/" + targetCode);
+		}
+		
+		return null;
+	}
+	
+	private static Attribute getAttribute(String attributeCode, String token) {
+
+		try {
+
+			String response = QwandaUtils.apiGet(QwandaUtils.qwandaServiceUrl + "/qwanda/attributes/", token);
+			QDataAttributeMessage attributeMessage = JsonUtils.fromJson(response, QDataAttributeMessage.class);
+			for(Attribute attribute: attributeMessage.getItems()) {
+				if(attribute.getCode().equals(attributeCode)) {
+					return attribute;
+				}
+			}
+		}
+		catch(Exception e) {
+			
+		}
+
+		return null;
+	}
+	
+	private static QBulkMessage sendAsksRequiredData(Ask[] asks, String token, String stakeholderCode) {
+		
+		QBulkMessage bulk = new QBulkMessage();
+
+		/* we loop through the asks and send the required data if necessary */
+		for (Ask ask : asks) {
+
+			/*
+			 * we get the attribute code. if it starts with "LNK_" it means it is a dropdown
+			 * selection.
+			 */
+
+			String attributeCode = ask.getAttributeCode();
+			if (attributeCode != null && attributeCode.startsWith("LNK_")) {
+
+				/* we get the attribute validation to get the group code */
+				Attribute attribute = QwandaUtils.getAttribute(attributeCode, token);
+				if(attribute != null) {
+
+					/* grab the group in the validation */
+					DataType attributeDataType = attribute.getDataType();
+					if(attributeDataType != null) {
+
+						List<Validation> validations = attributeDataType.getValidationList();
+
+						/* we loop through the validations */
+						for(Validation validation: validations) {
+
+							List<String> validationStrings = validation.getSelectionBaseEntityGroupList();
+							for(String validationString: validationStrings) {
+
+								if(validationString.startsWith("GRP_")) {
+
+									/* we have a GRP. we push it to FE */
+									List<BaseEntity> bes = QwandaUtils.getBaseEntityWithChildren(validationString, 2, token);									
+									if(bes != null) {
+										
+										/* hard coding this for now. sorry */
+										if(attributeCode.equals("LNK_LOAD_LISTS") && stakeholderCode != null) {
+											
+											/* we filter load you only are a stakeholder of */
+											bes = bes.stream().filter(baseEntity -> baseEntity.getValue("PRI_AUTHOR", "").equals(stakeholderCode)).collect(Collectors.toList());
+										}
+										
+										QDataBaseEntityMessage beMessage = new QDataBaseEntityMessage(bes);
+										beMessage.setParentCode(validationString);
+										beMessage.setLinkCode("LNK_CORE");
+										bulk.add(beMessage);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			/* recursive call */
+			Ask[] childAsks = ask.getChildAsks();
+			if (childAsks != null && childAsks.length > 0) {
+				
+				QBulkMessage newBulk = QwandaUtils.sendAsksRequiredData(childAsks, token, stakeholderCode);
+				for(QDataBaseEntityMessage msg: newBulk.getMessages()) {
+					bulk.add(msg);
+				}
+			}
+		}
+		
+		return bulk;
+	}
+	
+	public static void askQuestions(final String sourceCode, final String targetCode, final String questionGroupCode, String token) {
+		QwandaUtils.askQuestions(sourceCode, targetCode, questionGroupCode, token, null);
+	}
+	
+	public static QwandaMessage askQuestions(final String sourceCode, final String targetCode, final String questionGroupCode, final String token, final String stakeholderCode) {
+
+		try {
+
+			/* if sending the questions worked, we ask user */
+			return QwandaUtils.getQuestions(sourceCode, targetCode, questionGroupCode, token, stakeholderCode);
+
+		} catch (Exception e) {
+			return null;
+		}
+	}
 }
