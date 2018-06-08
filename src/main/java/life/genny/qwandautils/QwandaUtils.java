@@ -1390,9 +1390,6 @@ public class QwandaUtils {
 		QwandaMessage qwandaMessage = new QwandaMessage();
 
 		QDataAskMessage questions = QwandaUtils.getAsks(sourceCode, targetCode, questionCode, token);
-    System.out.println("DID WE GET ANY QUESTIONS?");
-    System.out.println(questions);
-
 		if (questions != null) {
 
 			/*
@@ -1455,32 +1452,50 @@ public class QwandaUtils {
 			if (attributeCode != null && attributeCode.startsWith("LNK_")) {
 
 				/* we get the attribute validation to get the group code */
+        System.out.println("getting attribute" +  attributeCode);
 				Attribute attribute = QwandaUtils.getAttribute(attributeCode, token);
 				if(attribute != null) {
 
 					/* grab the group in the validation */
 					DataType attributeDataType = attribute.getDataType();
+          System.out.println("getting " + attributeDataType);
+
 					if(attributeDataType != null) {
 
 						List<Validation> validations = attributeDataType.getValidationList();
+
+            System.out.println("got validations");
 
 						/* we loop through the validations */
 						for(Validation validation: validations) {
 
 							List<String> validationStrings = validation.getSelectionBaseEntityGroupList();
+              System.out.println("got validations strings");
+
 							for(String validationString: validationStrings) {
+
+                System.out.println(validationString);
 
 								if(validationString.startsWith("GRP_")) {
 
 									/* we have a GRP. we push it to FE */
 									List<BaseEntity> bes = QwandaUtils.getBaseEntityWithChildren(validationString, 2, token);
+                  System.out.println("bes check");
+                  System.out.println(bes == null);
+
 									if(bes != null) {
 
 										/* hard coding this for now. sorry */
 										if(attributeCode.equals("LNK_LOAD_LISTS") && stakeholderCode != null) {
 
+                      System.out.println("selection before stakeholder: ");
+                      System.out.println(bes);
+
 											/* we filter load you only are a stakeholder of */
 											bes = bes.stream().filter(baseEntity -> baseEntity.getValue("PRI_AUTHOR", "").equals(stakeholderCode)).collect(Collectors.toList());
+
+                      System.out.println("selection after stakeholder: ");
+                      System.out.println(bes);
 										}
 
 										QDataBaseEntityMessage beMessage = new QDataBaseEntityMessage(bes);
