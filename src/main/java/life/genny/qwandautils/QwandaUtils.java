@@ -1248,9 +1248,9 @@ public class QwandaUtils {
 		return iso8601DateString;
 
 	}
-	
+
 	public static String getCurrentUTCDateTime() {
-		
+
 		ZonedDateTime now = ZonedDateTime.now( ZoneOffset.UTC );
 		String dateTimeString = now.toString();
 		System.out.println("UTC datetime is ::" + dateTimeString);
@@ -1264,7 +1264,7 @@ public class QwandaUtils {
 		SearchEntity se = new SearchEntity(searchBE);
 		System.out.println("se="+se.getCode());
 //	if (searchBE.getCode().startsWith("SBE_")) {
-		
+
 		String jsonSearchBE = JsonUtils.toJson(searchBE);
 		String result = QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/baseentitys/search", jsonSearchBE,
 				token);
@@ -1276,7 +1276,7 @@ public class QwandaUtils {
 		return results;
 
 	}
-	
+
 	public static List<BaseEntity> getBaseEntityWithChildren(String beCode, Integer level, String token) {
 
 		if (level == 0) {
@@ -1286,9 +1286,9 @@ public class QwandaUtils {
 		level--;
 		BaseEntity be;
 		try {
-			
+
 			be = QwandaUtils.getBaseEntityByCode(beCode, token);
-			
+
 			if (be != null) {
 
 				List<BaseEntity> beList = new ArrayList<BaseEntity>();
@@ -1304,28 +1304,31 @@ public class QwandaUtils {
 						// we get the target BE
 						String targetCode = link.getTargetCode();
 						if (targetCode != null) {
-							
+
 							BaseEntity targetBe = QwandaUtils.getBaseEntityByCode(targetCode, token);;
 							if(targetBe != null) {
 								beList.add(targetBe);
 							}
-							
+
 							// recursion
-							beList.addAll(QwandaUtils.getBaseEntityWithChildren(targetCode, level, token));
+              List<BaseEntity> kids = QwandaUtils.getBaseEntityWithChildren(targetCode, level, token);
+  						if(kids != null) {
+                	beList.addAll(kids);
+              }
 						}
 					}
 				}
 
 				return beList;
 			}
-			
+
 		} catch (IOException e) {
-			
+
 		}
 
 		return null;
 	}
-	
+
 	public static Boolean doesQuestionGroupExist(String sourceCode, String targetCode, final String questionCode, String token) {
 
 		/* we grab the question group using the questionCode */
@@ -1360,9 +1363,11 @@ public class QwandaUtils {
 
 		String json;
 		try {
-			
+
 			json = QwandaUtils.apiGet(QwandaUtils.qwandaServiceUrl + "/qwanda/baseentitys/" + sourceCode + "/asks2/"
 					+ questionCode + "/" + targetCode, token);
+      System.out.println("GOT QUESTIONS");
+      System.out.println(json);
 			QDataAskMessage msg = JsonUtils.fromJson(json, QDataAskMessage.class);
 			return msg;
 
@@ -1374,17 +1379,20 @@ public class QwandaUtils {
 
 		return null;
 	}
-	
+
 	public static QwandaMessage getQuestions(String sourceCode, String targetCode, String questionCode, String token) throws ClientProtocolException, IOException {
 		return QwandaUtils.getQuestions(sourceCode, targetCode, questionCode, token, null);
 	}
-	
+
 	public static QwandaMessage getQuestions(String sourceCode, String targetCode, String questionCode, String token, String stakeholderCode) throws ClientProtocolException, IOException {
-		
+
 		QBulkMessage bulk = new QBulkMessage();
 		QwandaMessage qwandaMessage = new QwandaMessage();
-		
+
 		QDataAskMessage questions = QwandaUtils.getAsks(sourceCode, targetCode, questionCode, token);
+    System.out.println("DID WE GET ANY QUESTIONS?");
+    System.out.println(questions);
+
 		if (questions != null) {
 
 			/*
@@ -1399,19 +1407,19 @@ public class QwandaUtils {
 					bulk.add(message);
 				}
 			}
-			
+
 			qwandaMessage.askData = bulk;
 			qwandaMessage.asks = questions;
-			
+
 			return qwandaMessage;
 
 		} else {
 			log.error("Questions Msg is null " + sourceCode + "/asks2/" + questionCode + "/" + targetCode);
 		}
-		
+
 		return null;
 	}
-	
+
 	private static Attribute getAttribute(String attributeCode, String token) {
 
 		try {
@@ -1425,14 +1433,14 @@ public class QwandaUtils {
 			}
 		}
 		catch(Exception e) {
-			
+
 		}
 
 		return null;
 	}
-	
+
 	private static QBulkMessage sendAsksRequiredData(Ask[] asks, String token, String stakeholderCode) {
-		
+
 		QBulkMessage bulk = new QBulkMessage();
 
 		/* we loop through the asks and send the required data if necessary */
@@ -1465,16 +1473,16 @@ public class QwandaUtils {
 								if(validationString.startsWith("GRP_")) {
 
 									/* we have a GRP. we push it to FE */
-									List<BaseEntity> bes = QwandaUtils.getBaseEntityWithChildren(validationString, 2, token);									
+									List<BaseEntity> bes = QwandaUtils.getBaseEntityWithChildren(validationString, 2, token);
 									if(bes != null) {
-										
+
 										/* hard coding this for now. sorry */
 										if(attributeCode.equals("LNK_LOAD_LISTS") && stakeholderCode != null) {
-											
+
 											/* we filter load you only are a stakeholder of */
 											bes = bes.stream().filter(baseEntity -> baseEntity.getValue("PRI_AUTHOR", "").equals(stakeholderCode)).collect(Collectors.toList());
 										}
-										
+
 										QDataBaseEntityMessage beMessage = new QDataBaseEntityMessage(bes);
 										beMessage.setParentCode(validationString);
 										beMessage.setLinkCode("LNK_CORE");
@@ -1490,21 +1498,21 @@ public class QwandaUtils {
 			/* recursive call */
 			Ask[] childAsks = ask.getChildAsks();
 			if (childAsks != null && childAsks.length > 0) {
-				
+
 				QBulkMessage newBulk = QwandaUtils.sendAsksRequiredData(childAsks, token, stakeholderCode);
 				for(QDataBaseEntityMessage msg: newBulk.getMessages()) {
 					bulk.add(msg);
 				}
 			}
 		}
-		
+
 		return bulk;
 	}
-	
+
 	public static void askQuestions(final String sourceCode, final String targetCode, final String questionGroupCode, String token) {
 		QwandaUtils.askQuestions(sourceCode, targetCode, questionGroupCode, token, null);
 	}
-	
+
 	public static QwandaMessage askQuestions(final String sourceCode, final String targetCode, final String questionGroupCode, final String token, final String stakeholderCode) {
 
 		try {
@@ -1513,6 +1521,8 @@ public class QwandaUtils {
 			return QwandaUtils.getQuestions(sourceCode, targetCode, questionGroupCode, token, stakeholderCode);
 
 		} catch (Exception e) {
+      System.out.println("Ask questions exception: ");
+      e.printStackTrace();
 			return null;
 		}
 	}
