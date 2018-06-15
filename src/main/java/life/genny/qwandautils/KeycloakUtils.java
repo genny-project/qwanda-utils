@@ -62,7 +62,7 @@ public class KeycloakUtils {
 
 	public static String getToken(String keycloakUrl, String realm, String clientId, String secret, String username,
 			String password) throws IOException {
-
+		
     try {
     	
     		JsonObject content = KeycloakUtils.getAccessToken(keycloakUrl, realm, clientId, secret, username, password);
@@ -292,12 +292,16 @@ public class KeycloakUtils {
 		}
 	}
 
-	public static String createUser(String token, String keycloakUrl, String realm, String newUsername,
+	public static String createUser(String token, String realm, String newUsername,
 			String newFirstname, String newLastname, String newEmail) throws IOException {
-		return createUser(token, keycloakUrl, realm, newUsername, newFirstname, newLastname, newEmail);
+		
+		String newRealmRoles = "user,offline_access,uma_authorization";
+		String newGroupRoles = "/users";
+		
+		return createUser(token, realm, newUsername, newFirstname, newLastname, newEmail, newRealmRoles, newGroupRoles);
 	}
 
-	public static String createUser(String token, String keycloakUrl, String realm, String newUsername,
+	public static String createUser(String token, String realm, String newUsername,
 			String newFirstname, String newLastname, String newEmail, String newRealmRoles, String newGroupRoles)
 			throws IOException {
 
@@ -307,7 +311,8 @@ public class KeycloakUtils {
 				+ "\"realmRoles\" : [" + "\"" + newRealmRoles + "\" " + "]" + "}";
 
 		HttpClient httpClient = new DefaultHttpClient();
-
+		String keycloakUrl = getKeycloakUrl();
+		
 		try {
 			HttpPost post = new HttpPost(keycloakUrl + "/auth/admin/realms/" + realm + "/users");
 			// HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl +
@@ -329,6 +334,10 @@ public class KeycloakUtils {
 				Header[] headers = response.getHeaders("Location");
 				String locationUrl = headers[0].getValue();
 				content = locationUrl.replaceFirst(".*/(\\w+)", "$1");
+				if(content.length() > 0) {
+					KeycloakUtils.setPassword(token, keycloakUrl, realm, content, "password1");
+				}
+				
 				return content;
 			} else if (statusCode == 204) {
 				Header[] headers = response.getHeaders("Location");
@@ -336,16 +345,14 @@ public class KeycloakUtils {
 				content = locationUrl.replaceFirst(".*/(\\w+)", "$1");
 				return content;
 			} else if (statusCode == 409) {
-				throw new IOException("Already exists");
+				throw new IOException("Email is already taken. Please use a different email address.");
 			}
 			if (entity == null) {
-				throw new IOException("Null Entity");
+				throw new IOException("We could not create the new user. Please try again.");
 			} else {
 				content = getContent(entity);
 				throw new IOException(response + "");
-
 			}
-
 		}
 
 		finally {
@@ -363,7 +370,7 @@ public class KeycloakUtils {
 
 	public static int setPassword(String token, String keycloakUrl, String realm, String userId, String password)
 			throws IOException {
-		String json = "{\"type\": \"password\", " + "\"temporary\": false," + "\"value\": \"" + password + "\"" + "}";
+		String json = "{\"type\": \"password\", " + "\"temporary\": true," + "\"value\": \"" + password + "\"" + "}";
 
 		HttpClient httpClient = new DefaultHttpClient();
 

@@ -5,7 +5,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Type;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
@@ -14,11 +13,13 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -44,7 +45,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.Ask;
@@ -59,13 +59,10 @@ import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.entity.SearchEntity;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QBulkMessage;
-import life.genny.qwanda.message.QCmdViewFormMessage;
-import life.genny.qwanda.message.QCmdViewMessage;
 import life.genny.qwanda.message.QDataAnswerMessage;
 import life.genny.qwanda.message.QDataAskMessage;
 import life.genny.qwanda.message.QDataAttributeMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
-import life.genny.qwanda.message.QDataMessage;
 import life.genny.qwanda.validation.Validation;
 
 public class QwandaUtils {
@@ -74,8 +71,8 @@ public class QwandaUtils {
 			: 8088;
 	private static String hostIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : "127.0.0.1";
 
-	private static String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 
+	private static String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 
 	public static final String ANSI_RESET = "\u001B[0m";
 	public static final String ANSI_BLUE = "\u001B[34m";
@@ -89,19 +86,19 @@ public class QwandaUtils {
 
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
-
+	
 	public static String apiGet(String getUrl, final String authToken) throws ClientProtocolException, IOException {
 
-    log.debug("GET:" + getUrl + ":");
+		log.debug("GET:" + getUrl + ":");
 		if ("http://qwanda-service.genny.life/qwanda/baseentitys/PER_SHARONCROW66_AT_GMAILCOM/attributes".equalsIgnoreCase(getUrl)) {
 			log.debug("match");
 		}
 
 		int timeout = 20;
 		RequestConfig config = RequestConfig.custom()
-		  .setConnectTimeout(timeout * 1000)
-		  .setConnectionRequestTimeout(timeout * 1000)
-		  .setSocketTimeout(timeout * 1000).build();
+				.setConnectTimeout(timeout * 1000)
+				.setConnectionRequestTimeout(timeout * 1000)
+				.setSocketTimeout(timeout * 1000).build();
 		CloseableHttpClient httpclient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
 		HttpGet request = new HttpGet(getUrl);
 		if (authToken != null) {
@@ -110,15 +107,15 @@ public class QwandaUtils {
 
 		CloseableHttpResponse response =null;
 		try {
-		response = httpclient.execute(request);
-		// The underlying HTTP connection is still held by the response object
-		// to allow the response content to be streamed directly from the network
-		// socket.
-		// In order to ensure correct deallocation of system resources
-		// the user MUST call CloseableHttpResponse#close() from a finally clause.
-		// Please note that if response content is not fully consumed the underlying
-		// connection cannot be safely re-used and will be shut down and discarded
-		// by the connection manager.
+			response = httpclient.execute(request);
+			// The underlying HTTP connection is still held by the response object
+			// to allow the response content to be streamed directly from the network
+			// socket.
+			// In order to ensure correct deallocation of system resources
+			// the user MUST call CloseableHttpResponse#close() from a finally clause.
+			// Please note that if response content is not fully consumed the underlying
+			// connection cannot be safely re-used and will be shut down and discarded
+			// by the connection manager.
 
 			HttpEntity entity1 = response.getEntity();
 			String responseString = EntityUtils.toString(entity1);
@@ -131,10 +128,10 @@ public class QwandaUtils {
 			log.error("API Get call timeout - "+timeout+" secs to "+getUrl);
 			return null;
 		}
-    catch (Exception e) {
-      log.error("API Get call timeout - "+timeout+" secs to "+getUrl);
+		catch (Exception e) {
+			log.error("API Get call timeout - "+timeout+" secs to "+getUrl);
 			return null;
-    }
+		}
 
 		finally {
 			IOUtils.closeQuietly(response);
@@ -143,8 +140,9 @@ public class QwandaUtils {
 
 	}
 
-	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken)
+	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken, final Consumer<String> callback)
 			throws IOException {
+
 		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
 		CloseableHttpResponse response = null;
 		try {
@@ -162,19 +160,24 @@ public class QwandaUtils {
 			response = httpclient.execute(post);
 			HttpEntity entity = response.getEntity();
 			String responseString = EntityUtils.toString(entity);
+			if(callback != null) {
+				callback.accept(responseString);
+			}
 			return responseString;
-		} finally {
+		} 
+		finally {
 			IOUtils.closeQuietly(response);
 			IOUtils.closeQuietly(httpclient);
 		}
 
 	}
 
-	public static String apiPost(final String postUrl, final ArrayList<BasicNameValuePair> nameValuePairs,
-			final String authToken) throws IOException {
+	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken) throws IOException {
+		return apiPostEntity(postUrl, entityString, authToken, null);
+	}
 
-		return apiPostEntity(postUrl, (new UrlEncodedFormEntity(nameValuePairs)).toString(), authToken);
-
+	public static String apiPost(final String postUrl, final ArrayList<BasicNameValuePair> nameValuePairs, final String authToken) throws IOException {
+		return apiPostEntity(postUrl, (new UrlEncodedFormEntity(nameValuePairs)).toString(), authToken, null);
 	}
 
 	public static String apiDelete(final String deleteUrl, final String authToken)
@@ -237,7 +240,7 @@ public class QwandaUtils {
 			IOUtils.closeQuietly(response);
 			IOUtils.closeQuietly(httpclient);
 		}
-}
+	}
 	public static String apiPutEntity(final String postUrl, final String entityString, final String authToken)
 			throws IOException {
 		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
@@ -430,36 +433,36 @@ public class QwandaUtils {
 			String attributeString = null;
 			String key = sourceBaseEntityCode + ":" + questionCode + ":" + targetBaseEntityCode
 					+ userToken.substring(0, 8); // get first 8 chars
-		//	if (askMap.containsKey(key)) {
-		//		attributeString = askMap.get(key);
-		//	} else {
-				attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
-						+ "/asks3/" + questionCode + "/" + targetBaseEntityCode, userToken);
-		//		askMap.put(key, attributeString);
-		//	}
+			//	if (askMap.containsKey(key)) {
+			//		attributeString = askMap.get(key);
+			//	} else {
+			attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
+					+ "/asks3/" + questionCode + "/" + targetBaseEntityCode, userToken);
+			//		askMap.put(key, attributeString);
+			//	}
 			log.debug("Attribute String="+attributeString);
 			QDataAskMessage askMsgs = JsonUtils.fromJson(attributeString, QDataAskMessage.class);
 			BaseEntity be = MergeUtil.getBaseEntityForAttr(targetBaseEntityCode, userToken);
 
 			if (askMsgs != null) {
-			for (Ask parentAsk : askMsgs.getItems()) {
-				for (Ask childAsk : parentAsk.getChildAsks()) {
-					// log.info("parent ask code ::"+parentAsk.getAttributeCode());
-			      if( childAsk.getChildAsks() != null) {
-					for (Ask basicChildAsk : childAsk.getChildAsks()) {
-						if ( !isAsksMandatoryFilled(be,basicChildAsk ) ) {
-						     return false;
-						}
+				for (Ask parentAsk : askMsgs.getItems()) {
+					for (Ask childAsk : parentAsk.getChildAsks()) {
+						// log.info("parent ask code ::"+parentAsk.getAttributeCode());
+						if( childAsk.getChildAsks() != null) {
+							for (Ask basicChildAsk : childAsk.getChildAsks()) {
+								if ( !isAsksMandatoryFilled(be,basicChildAsk ) ) {
+									return false;
+								}
 
+							}
+						}else {
+							if ( !isAsksMandatoryFilled(be, childAsk) ) {
+								return false;
+							}
+						}
 					}
-			      }else {
-			    	        if ( !isAsksMandatoryFilled(be, childAsk) ) {
-						     return false;
-						}
-			    	      }
-			      }
 
-			 }
+				}
 			} else {
 				log.error("AskMsg is NULL! "+qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
 						+ "/asks3/" + questionCode + "/" + targetBaseEntityCode);
@@ -534,13 +537,13 @@ public class QwandaUtils {
 		BaseEntity be = null;
 		try {
 
-      attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode+"/attributes", token);
-      if(attributeString != null) {
-        be = JsonUtils.fromJson(attributeString, BaseEntity.class);
-      }
-      else {
-        throw new IOException("Cannot find BE "+baseEntAttributeCode);
-      }
+			attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode+"/attributes", token);
+			if(attributeString != null) {
+				be = JsonUtils.fromJson(attributeString, BaseEntity.class);
+			}
+			else {
+				throw new IOException("Cannot find BE "+baseEntAttributeCode);
+			}
 
 		} catch (IOException e)  {
 			throw new IOException("Cannot connect to QwandaURL "+qwandaServiceUrl);
@@ -700,7 +703,7 @@ public class QwandaUtils {
 	public static QDataBaseEntityMessage getDataBEMessage(String groupCode, String linkCode, String token) {
 
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
-		 //String qwandaServiceUrl = "http://localhost:8280";
+		//String qwandaServiceUrl = "http://localhost:8280";
 		QDataBaseEntityMessage dataBEMessage = null;
 
 		try {
@@ -1164,7 +1167,7 @@ public class QwandaUtils {
 	public static String getUserCode(String token) {
 
 		org.json.JSONObject decodedToken = KeycloakUtils.getDecodedToken(token);
-	//	System.out.println("decoded token object ::" + decodedToken);
+		//	System.out.println("decoded token object ::" + decodedToken);
 
 		String username = decodedToken.getString("preferred_username");
 		String uname = QwandaUtils.getNormalisedUsername(username);
@@ -1263,16 +1266,16 @@ public class QwandaUtils {
 		QDataBaseEntityMessage results = null;
 		SearchEntity se = new SearchEntity(searchBE);
 		System.out.println("se="+se.getCode());
-//	if (searchBE.getCode().startsWith("SBE_")) {
+		//	if (searchBE.getCode().startsWith("SBE_")) {
 
 		String jsonSearchBE = JsonUtils.toJson(searchBE);
 		String result = QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/baseentitys/search", jsonSearchBE,
 				token);
 
 		results = JsonUtils.fromJson(result, QDataBaseEntityMessage.class);
-//		} else {
-//			throw new IllegalArgumentException("Must only send SearchBaseEntities - "+searchBE.getCode());
-//		}
+		//		} else {
+		//			throw new IllegalArgumentException("Must only send SearchBaseEntities - "+searchBE.getCode());
+		//		}
 		return results;
 
 	}
@@ -1305,16 +1308,16 @@ public class QwandaUtils {
 						String targetCode = link.getTargetCode();
 						if (targetCode != null) {
 
-							BaseEntity targetBe = QwandaUtils.getBaseEntityByCode(targetCode, token);;
+							BaseEntity targetBe = QwandaUtils.getBaseEntityByCodeWithAttributes(targetCode, token);;
 							if(targetBe != null) {
 								beList.add(targetBe);
 							}
 
 							// recursion
-              List<BaseEntity> kids = QwandaUtils.getBaseEntityWithChildren(targetCode, level, token);
-  						if(kids != null) {
-                	beList.addAll(kids);
-              }
+							List<BaseEntity> kids = QwandaUtils.getBaseEntityWithChildren(targetCode, level, token);
+							if(kids != null) {
+								beList.addAll(kids);
+							}
 						}
 					}
 				}
@@ -1366,8 +1369,6 @@ public class QwandaUtils {
 
 			json = QwandaUtils.apiGet(QwandaUtils.qwandaServiceUrl + "/qwanda/baseentitys/" + sourceCode + "/asks2/"
 					+ questionCode + "/" + targetCode, token);
-      System.out.println("GOT QUESTIONS");
-      System.out.println(json);
 			QDataAskMessage msg = JsonUtils.fromJson(json, QDataAskMessage.class);
 			return msg;
 
@@ -1452,55 +1453,45 @@ public class QwandaUtils {
 			if (attributeCode != null && attributeCode.startsWith("LNK_")) {
 
 				/* we get the attribute validation to get the group code */
-        System.out.println("getting attribute" +  attributeCode);
 				Attribute attribute = QwandaUtils.getAttribute(attributeCode, token);
 				if(attribute != null) {
 
 					/* grab the group in the validation */
 					DataType attributeDataType = attribute.getDataType();
-          System.out.println("getting " + attributeDataType);
-
 					if(attributeDataType != null) {
 
 						List<Validation> validations = attributeDataType.getValidationList();
-
-            System.out.println("got validations");
 
 						/* we loop through the validations */
 						for(Validation validation: validations) {
 
 							List<String> validationStrings = validation.getSelectionBaseEntityGroupList();
-              System.out.println("got validations strings");
 
 							for(String validationString: validationStrings) {
-
-                System.out.println(validationString);
 
 								if(validationString.startsWith("GRP_")) {
 
 									/* we have a GRP. we push it to FE */
 									List<BaseEntity> bes = QwandaUtils.getBaseEntityWithChildren(validationString, 2, token);
-                  System.out.println("bes check");
-                  System.out.println(bes == null);
+									List<BaseEntity> filteredBes = null;
 
 									if(bes != null) {
 
 										/* hard coding this for now. sorry */
 										if(attributeCode.equals("LNK_LOAD_LISTS") && stakeholderCode != null) {
 
-                      System.out.println("selection before stakeholder: ");
-                      System.out.println(bes);
-
 											/* we filter load you only are a stakeholder of */
-											bes = bes.stream().filter(baseEntity -> baseEntity.getValue("PRI_AUTHOR", "").equals(stakeholderCode)).collect(Collectors.toList());
-
-                      System.out.println("selection after stakeholder: ");
-                      System.out.println(bes);
+											filteredBes = bes.stream().filter(baseEntity -> {
+												return baseEntity.getValue("PRI_AUTHOR", "").equals(stakeholderCode);
+											}).collect(Collectors.toList());
+										}
+										else {
+											filteredBes = bes;
 										}
 
-										QDataBaseEntityMessage beMessage = new QDataBaseEntityMessage(bes);
-										beMessage.setParentCode(validationString);
+										QDataBaseEntityMessage beMessage = new QDataBaseEntityMessage(filteredBes);
 										beMessage.setLinkCode("LNK_CORE");
+										beMessage.setParentCode(validationString);
 										bulk.add(beMessage);
 									}
 								}
@@ -1536,8 +1527,8 @@ public class QwandaUtils {
 			return QwandaUtils.getQuestions(sourceCode, targetCode, questionGroupCode, token, stakeholderCode);
 
 		} catch (Exception e) {
-      System.out.println("Ask questions exception: ");
-      e.printStackTrace();
+			System.out.println("Ask questions exception: ");
+			e.printStackTrace();
 			return null;
 		}
 	}
