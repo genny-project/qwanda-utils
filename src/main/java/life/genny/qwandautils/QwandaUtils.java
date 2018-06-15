@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
@@ -1280,58 +1281,28 @@ public class QwandaUtils {
 
 	}
 
-	public static List<BaseEntity> getBaseEntityWithChildren(String beCode, Integer level, String token) {
-
-		if (level == 0) {
-			return null; // exit point;
-		}
-
-		level--;
-		BaseEntity be;
+	public static List<BaseEntity> searchBaseEntities(String parentCode, String stakeholderCode, String token) {
+		
+		
+		SearchEntity search = new SearchEntity(parentCode, parentCode);
+		search.setSourceCode(parentCode);
+		search.setStakeholder(stakeholderCode);
+	
 		try {
-
-			be = QwandaUtils.getBaseEntityByCode(beCode, token);
-
-			if (be != null) {
-
-				List<BaseEntity> beList = new ArrayList<BaseEntity>();
-
-				Set<EntityEntity> entityEntities = be.getLinks();
-
-				// we interate through the links
-				for (EntityEntity entityEntity : entityEntities) {
-
-					Link link = entityEntity.getLink();
-					if (link != null) {
-
-						// we get the target BE
-						String targetCode = link.getTargetCode();
-						if (targetCode != null) {
-
-							BaseEntity targetBe = QwandaUtils.getBaseEntityByCodeWithAttributes(targetCode, token);;
-							if(targetBe != null) {
-								beList.add(targetBe);
-							}
-
-							// recursion
-							List<BaseEntity> kids = QwandaUtils.getBaseEntityWithChildren(targetCode, level, token);
-							if(kids != null) {
-								beList.addAll(kids);
-							}
-						}
-					}
-				}
-
-				return beList;
+			
+			String jsonSearchBE = JsonUtils.toJson(search);
+			String resultJson = QwandaUtils.apiPostEntity(QwandaUtils.qwandaServiceUrl + "/qwanda/baseentitys/search", jsonSearchBE, token);
+			QDataBaseEntityMessage msg = JsonUtils.fromJson(resultJson, QDataBaseEntityMessage.class);
+			if(msg != null && msg.getItems() != null && msg.getItems().length > 0) {
+				return Arrays.asList(msg.getItems());
 			}
-
-		} catch (IOException e) {
-
-		}
-
+		} 
+		catch (IOException e) {}
+	
+		
 		return null;
 	}
-
+	
 	public static Boolean doesQuestionGroupExist(String sourceCode, String targetCode, final String questionCode, String token) {
 
 		/* we grab the question group using the questionCode */
@@ -1472,11 +1443,11 @@ public class QwandaUtils {
 								if(validationString.startsWith("GRP_")) {
 
 									/* we have a GRP. we push it to FE */
-									List<BaseEntity> bes = QwandaUtils.getBaseEntityWithChildren(validationString, 2, token);
+									List<BaseEntity> bes = QwandaUtils.searchBaseEntities(validationString, stakeholderCode, token);
 									List<BaseEntity> filteredBes = null;
 
 									if(bes != null) {
-
+										
 										/* hard coding this for now. sorry */
 										if(attributeCode.equals("LNK_LOAD_LISTS") && stakeholderCode != null) {
 
