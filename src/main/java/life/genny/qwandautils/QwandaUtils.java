@@ -1515,16 +1515,20 @@ public class QwandaUtils {
 		return bulk;
 	}
 
-	public static void askQuestions(final String sourceCode, final String targetCode, final String questionGroupCode, String token) {
-		QwandaUtils.askQuestions(sourceCode, targetCode, questionGroupCode, token, null, true);
+	public static QwandaMessage askQuestions(final String sourceCode, final String targetCode, final String questionGroupCode, String token) {
+		return QwandaUtils.askQuestions(sourceCode, targetCode, questionGroupCode, token, null, true);
 	}
 	
-	public static void askQuestions(final String sourceCode, final String targetCode, final String questionGroupCode, Boolean pushSelection) {
-		QwandaUtils.askQuestions(sourceCode, targetCode, questionGroupCode, null, null, pushSelection);
+	public static QwandaMessage askQuestions(final String sourceCode, final String targetCode, final String questionGroupCode, String token, String stakeholderCode) {
+		return QwandaUtils.askQuestions(sourceCode, targetCode, questionGroupCode, token, stakeholderCode, true);
 	}
 	
-	public static void askQuestions(final String sourceCode, final String targetCode, final String questionGroupCode, String token, Boolean pushSelection) {
-		QwandaUtils.askQuestions(sourceCode, targetCode, questionGroupCode, token, null, pushSelection);
+	public static QwandaMessage askQuestions(final String sourceCode, final String targetCode, final String questionGroupCode, Boolean pushSelection) {
+		return QwandaUtils.askQuestions(sourceCode, targetCode, questionGroupCode, null, null, pushSelection);
+	}
+	
+	public static QwandaMessage askQuestions(final String sourceCode, final String targetCode, final String questionGroupCode, String token, Boolean pushSelection) {
+		return QwandaUtils.askQuestions(sourceCode, targetCode, questionGroupCode, token, null, pushSelection);
 	}
 
 	public static QwandaMessage askQuestions(final String sourceCode, final String targetCode, final String questionGroupCode, final String token, final String stakeholderCode, final Boolean pushSelection) {
