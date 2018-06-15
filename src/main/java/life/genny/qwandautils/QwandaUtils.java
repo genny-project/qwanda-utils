@@ -1532,4 +1532,26 @@ public class QwandaUtils {
 			return null;
 		}
 	}
+	
+	public static QwandaMessage setCustomQuestion(QwandaMessage questions, String questionAttributeCode, String customTemporaryQuestion) {
+		if(questions != null && questionAttributeCode != null) {
+			Ask[] askArr = questions.asks.getItems();
+			if(askArr != null && askArr.length > 0) {
+				for(Ask ask : askArr) {
+					Ask[] childAskArr = ask.getChildAsks();
+					if(childAskArr != null && childAskArr.length > 0) {
+						for(Ask childAsk : childAskArr) {
+							System.out.println("child ask code :: "+childAsk.getAttributeCode() + ", child ask name :: "+childAsk.getName());
+							if(childAsk.getAttributeCode().equals(questionAttributeCode)) {
+								if(customTemporaryQuestion != null) {
+									childAsk.getQuestion().setName(customTemporaryQuestion);
+								}								
+							}
+						}
+					}
+				}
+			}	
+		}
+		return questions;
+	}
 }
