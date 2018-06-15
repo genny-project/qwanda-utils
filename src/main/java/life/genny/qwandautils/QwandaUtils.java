@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
@@ -1281,28 +1280,58 @@ public class QwandaUtils {
 
 	}
 
-	public static List<BaseEntity> searchBaseEntities(String parentCode, String stakeholderCode, String token) {
-		
-		
-		SearchEntity search = new SearchEntity(parentCode, parentCode);
-		search.setSourceCode(parentCode);
-		search.setStakeholder(stakeholderCode);
-	
+	public static List<BaseEntity> getBaseEntityWithChildren(String beCode, Integer level, String token) {
+
+		if (level == 0) {
+			return null; // exit point;
+		}
+
+		level--;
+		BaseEntity be;
 		try {
-			
-			String jsonSearchBE = JsonUtils.toJson(search);
-			String resultJson = QwandaUtils.apiPostEntity(QwandaUtils.qwandaServiceUrl + "/qwanda/baseentitys/search", jsonSearchBE, token);
-			QDataBaseEntityMessage msg = JsonUtils.fromJson(resultJson, QDataBaseEntityMessage.class);
-			if(msg != null && msg.getItems() != null && msg.getItems().length > 0) {
-				return Arrays.asList(msg.getItems());
+
+			be = QwandaUtils.getBaseEntityByCode(beCode, token);
+
+			if (be != null) {
+
+				List<BaseEntity> beList = new ArrayList<BaseEntity>();
+
+				Set<EntityEntity> entityEntities = be.getLinks();
+
+				// we interate through the links
+				for (EntityEntity entityEntity : entityEntities) {
+
+					Link link = entityEntity.getLink();
+					if (link != null) {
+
+						// we get the target BE
+						String targetCode = link.getTargetCode();
+						if (targetCode != null) {
+
+							BaseEntity targetBe = QwandaUtils.getBaseEntityByCodeWithAttributes(targetCode, token);;
+							if(targetBe != null) {
+								beList.add(targetBe);
+							}
+
+							// recursion
+							List<BaseEntity> kids = QwandaUtils.getBaseEntityWithChildren(targetCode, level, token);
+							if(kids != null) {
+								beList.addAll(kids);
+							}
+						}
+					}
+				}
+
+				return beList;
 			}
-		} 
-		catch (IOException e) {}
-	
-		
+
+		} catch (IOException e) {
+
+		}
+
 		return null;
 	}
-	
+
 	public static Boolean doesQuestionGroupExist(String sourceCode, String targetCode, final String questionCode, String token) {
 
 		/* we grab the question group using the questionCode */
@@ -1353,10 +1382,10 @@ public class QwandaUtils {
 	}
 
 	public static QwandaMessage getQuestions(String sourceCode, String targetCode, String questionCode, String token) throws ClientProtocolException, IOException {
-		return QwandaUtils.getQuestions(sourceCode, targetCode, questionCode, token, null);
+		return QwandaUtils.getQuestions(sourceCode, targetCode, questionCode, token, null, true);
 	}
 
-	public static QwandaMessage getQuestions(String sourceCode, String targetCode, String questionCode, String token, String stakeholderCode) throws ClientProtocolException, IOException {
+	public static QwandaMessage getQuestions(String sourceCode, String targetCode, String questionCode, String token, String stakeholderCode, Boolean pushSelection) throws ClientProtocolException, IOException {
 
 		QBulkMessage bulk = new QBulkMessage();
 		QwandaMessage qwandaMessage = new QwandaMessage();
@@ -1370,7 +1399,7 @@ public class QwandaUtils {
 			 */
 
 			Ask[] asks = questions.getItems();
-			if (asks != null) {
+			if (asks != null && pushSelection == true) {
 				QBulkMessage askData = QwandaUtils.sendAsksRequiredData(asks, token, stakeholderCode);
 				for(QDataBaseEntityMessage message: askData.getMessages()) {
 					bulk.add(message);
@@ -1443,7 +1472,7 @@ public class QwandaUtils {
 								if(validationString.startsWith("GRP_")) {
 
 									/* we have a GRP. we push it to FE */
-									List<BaseEntity> bes = QwandaUtils.searchBaseEntities(validationString, stakeholderCode, token);
+									List<BaseEntity> bes = QwandaUtils.getBaseEntityWithChildren(validationString, 2, token);
 									List<BaseEntity> filteredBes = null;
 
 									if(bes != null) {
@@ -1487,15 +1516,15 @@ public class QwandaUtils {
 	}
 
 	public static void askQuestions(final String sourceCode, final String targetCode, final String questionGroupCode, String token) {
-		QwandaUtils.askQuestions(sourceCode, targetCode, questionGroupCode, token, null);
+		QwandaUtils.askQuestions(sourceCode, targetCode, questionGroupCode, token, null, true);
 	}
 
-	public static QwandaMessage askQuestions(final String sourceCode, final String targetCode, final String questionGroupCode, final String token, final String stakeholderCode) {
+	public static QwandaMessage askQuestions(final String sourceCode, final String targetCode, final String questionGroupCode, final String token, final String stakeholderCode, final Boolean pushSelection) {
 
 		try {
 
 			/* if sending the questions worked, we ask user */
-			return QwandaUtils.getQuestions(sourceCode, targetCode, questionGroupCode, token, stakeholderCode);
+			return QwandaUtils.getQuestions(sourceCode, targetCode, questionGroupCode, token, stakeholderCode, pushSelection);
 
 		} catch (Exception e) {
 			System.out.println("Ask questions exception: ");
