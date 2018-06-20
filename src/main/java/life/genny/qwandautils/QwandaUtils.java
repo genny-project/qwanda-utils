@@ -679,13 +679,18 @@ public class QwandaUtils {
 
 		String uniqueID = UUID.randomUUID().toString().replaceAll("-", "");
 
-		BaseEntity be = MergeUtil.getBaseEntityForAttr(baseEntityCode, token);
-		String nameInitials = getInitials(be.getName().split("\\s+"));
-
-		// working on it
-		// String companyCode = getCompanyCode(baseEntityCode, token);
-
-		return prefix + "_" + nameInitials + uniqueID;
+		//BaseEntity be = MergeUtil.getBaseEntityForAttr(baseEntityCode, token);
+		BaseEntity be;
+		try {
+			
+			be = QwandaUtils.getBaseEntityByCode(baseEntityCode, token);
+			String nameInitials = getInitials(be.getName().split("\\s+"));
+			return prefix + "_" + nameInitials + uniqueID;
+			
+		} catch (IOException e) {
+		}
+		
+		return null;
 	}
 
 	public static String getInitials(String[] strarr) {
