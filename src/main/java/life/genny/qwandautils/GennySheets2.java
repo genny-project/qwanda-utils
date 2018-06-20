@@ -457,12 +457,9 @@ public class GennySheets2 {
       final String code = (String) object.get("code");
       final String name = (String) object.get("name");
       final String attrCode = (String) object.get("attribute_code");
-      final String oneshotStr = (String) object.get("oneshot");
-      final Boolean oneshot = "TRUE".equalsIgnoreCase(oneshotStr);
       Attribute attr;
       attr = findAttributeByCode.get(attrCode);
-      Question q = new Question(code, name, attr);
-      q.setOneshot(oneshot);
+      final Question q = new Question(code, name, attr);
       map.put(code, q);
       return map;
     }).reduce((ac, acc) -> {
