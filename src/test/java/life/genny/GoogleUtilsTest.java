@@ -1,10 +1,12 @@
 package life.genny;
 
 import static java.lang.System.out;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
 import life.genny.qwanda.attribute.Attribute;
 import life.genny.qwanda.attribute.AttributeLink;
 import life.genny.qwanda.attribute.EntityAttribute;
@@ -12,7 +14,7 @@ import life.genny.qwanda.datatype.DataType;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.EntityEntity;
 import life.genny.qwanda.validation.Validation;
-import life.genny.qwandautils.GennySheets;
+
 import life.genny.qwandautils.GennySheets2;
 
 public class GoogleUtilsTest {
@@ -120,7 +122,7 @@ public class GoogleUtilsTest {
 
   }
  
-  GennySheets sheets;
+  GennySheets2 sheets;
 
     // @Test
     public void getData() {
@@ -129,7 +131,7 @@ public class GoogleUtilsTest {
       // "1VSXJUn8_BHG1aW0DQrFDnvLjx_jxcNiD33QzqO5D-jc", new File(System.getProperty("user.home"),
       // ".credentials/sheets.googleapis.com-java-quickstart"));
 
-      sheets = new GennySheets(
+      sheets = new GennySheets2(
           "{\"installed\":{\"client_id\":\"260075856207-9d7a02ekmujr2bh7i53dro28n132iqhe.apps.googleusercontent.com\",\"project_id\":\"genny-sheets-181905\",\"auth_uri\":\"https://accounts.google.com/o/oauth2/auth\",\"token_uri\":\"https://accounts.google.com/o/oauth2/token\",\"auth_provider_x509_cert_url\":\"https://www.googleapis.com/oauth2/v1/certs\",\"client_secret\":\"vgXEFRgQvh3_t_e5Hj-eb6IX\",\"redirect_uris\":[\"urn:ietf:wg:oauth:2.0:oob\",\"http://localhost\"]}}",
           "1-h7cmgJyUf2Xg7fd9icCJAdLjj6oXtYFPXGqd8En7sM", new File(System.getProperty("user.home"),
               ".credentials/sheets.googleapis.com-java-quickstart"));
