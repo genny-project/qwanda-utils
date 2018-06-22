@@ -1497,6 +1497,7 @@ public class QwandaUtils {
 										QDataBaseEntityMessage beMessage = new QDataBaseEntityMessage(filteredBes);
 										beMessage.setLinkCode("LNK_CORE");
 										beMessage.setParentCode(validationString);
+										beMessage.setReplace(true);
 										bulk.add(beMessage);
 									}
 								}
