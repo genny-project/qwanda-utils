@@ -328,12 +328,26 @@ public class QwandaUtils {
 			final String firstname, final String lastname, final String email) throws IOException {
 
 		return createUser(qwandaUrl, token, username, firstname, lastname, email, "genny", firstname + " " + lastname,
-				null);
+				null, null);
+	}
+	
+	public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
+			final String firstname, final String lastname, final String email, String keycloakId) throws IOException {
+
+		return createUser(qwandaUrl, token, username, firstname, lastname, email, "genny", firstname + " " + lastname,
+				null, null);
+	}
+	
+	public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
+			final String firstname, final String lastname, final String email, final String realm, final String name,
+			final String keycloakId) throws IOException {
+		
+		return QwandaUtils.createUser(qwandaUrl, token, username, firstname, lastname, email, realm, name, keycloakId, null);
 	}
 
 	public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
 			final String firstname, final String lastname, final String email, final String realm, final String name,
-			final String keycloakId) throws IOException {
+			final String keycloakId, HashMap<String, String> attributes) throws IOException {
 
 		String uname = getNormalisedUsername(username);
 		String code = "PER_" + uname.toUpperCase();
@@ -351,6 +365,18 @@ public class QwandaUtils {
 		answers.add((new Answer(code, code, "PRI_REALM", realm)));
 		answers.add((new Answer(code, code, "PRI_NAME", name)));
 		answers.add((new Answer(code, code, "PRI_KEYCLOAK_ID", keycloakId)));
+		
+		if(attributes != null) {
+			
+			/* we loop through the attributes */
+			for(String attributeCode: attributes.keySet()) {
+				
+				String value = attributes.get(attributeCode);
+				
+				/* we create an answer */
+				answers.add(new Answer(code, code, attributeCode, value));
+			}
+		}
 
 		Answer items[] = new Answer[answers.size()];
 		items = answers.toArray(items);
@@ -674,23 +700,21 @@ public class QwandaUtils {
 		return entityTemplateContextMap;
 
 	}
-
-	public static String getUniqueId(String baseEntityCode, String questionId, String prefix, String token) {
-
+	
+	public static String getUniqueId(String prefix) {
+		return QwandaUtils.getUniqueId(prefix, null);
+	}
+	
+	public static String getUniqueId(String prefix, String author) {
+		
 		String uniqueID = UUID.randomUUID().toString().replaceAll("-", "");
 
-		//BaseEntity be = MergeUtil.getBaseEntityForAttr(baseEntityCode, token);
-		BaseEntity be;
-		try {
-			
-			be = QwandaUtils.getBaseEntityByCode(baseEntityCode, token);
-			String nameInitials = getInitials(be.getName().split("\\s+"));
-			return prefix + "_" + nameInitials + uniqueID;
-			
-		} catch (IOException e) {
+		String nameInitials = "";
+		if(author != null) {
+			nameInitials = getInitials(author.split("\\s+"));
 		}
-		
-		return null;
+
+		return prefix + "_" + nameInitials + uniqueID;
 	}
 
 	public static String getInitials(String[] strarr) {
@@ -1552,6 +1576,7 @@ public class QwandaUtils {
 	}
 	
 	public static QwandaMessage setCustomQuestion(QwandaMessage questions, String questionAttributeCode, String customTemporaryQuestion) {
+		
 		if(questions != null && questionAttributeCode != null) {
 			Ask[] askArr = questions.asks.getItems();
 			if(askArr != null && askArr.length > 0) {
@@ -1563,6 +1588,7 @@ public class QwandaUtils {
 							if(childAsk.getAttributeCode().equals(questionAttributeCode)) {
 								if(customTemporaryQuestion != null) {
 									childAsk.getQuestion().setName(customTemporaryQuestion);
+									return questions;
 								}								
 							}
 						}
