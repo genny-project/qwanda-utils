@@ -361,11 +361,15 @@ public class KeycloakUtils {
 	}
 
 	public static String getKeycloakUrl() {
+		String keycloakProto =
+				System.getenv("KEYCLOAK_PROTO") != null ? System.getenv("KEYCLOAK_PROTO") : "http://";
+				String keycloakPort =
+						System.getenv("KEYCLOAK_PORT") != null ? System.getenv("KEYCLOAK_PORT") : "8180";
+						String keycloakIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : "localhost";
 
-		String keycloakProto = System.getenv("KEYCLOAK_PROTO") != null ? System.getenv("KEYCLOAK_PROTO") : "http://";
-		String keycloakPort = System.getenv("KEYCLOAK_PORT") != null ? System.getenv("KEYCLOAK_PORT") : "8180";
-		String keycloakIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : "localhost";
-		return keycloakProto + keycloakIP + ":" + keycloakPort;
+						String keycloakURL = System.getenv("KEYCLOAKURL") != null ? System.getenv("KEYCLOAKURL")
+								: keycloakProto + keycloakIP + ":" + keycloakPort;
+						return keycloakURL;
 	}
 
 	public static int setPassword(String token, String keycloakUrl, String realm, String userId, String password)
