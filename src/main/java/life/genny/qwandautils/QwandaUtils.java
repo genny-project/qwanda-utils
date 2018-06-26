@@ -344,10 +344,17 @@ public class QwandaUtils {
 		
 		return QwandaUtils.createUser(qwandaUrl, token, username, firstname, lastname, email, realm, name, keycloakId, null);
 	}
-
+	
 	public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
 			final String firstname, final String lastname, final String email, final String realm, final String name,
 			final String keycloakId, HashMap<String, String> attributes) throws IOException {
+		
+		return QwandaUtils.createUser(qwandaUrl, token, username, firstname, lastname, email, realm, name, keycloakId, attributes, null);
+	}
+
+	public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
+			final String firstname, final String lastname, final String email, final String realm, final String name,
+			final String keycloakId, HashMap<String, String> attributes, Link[] links) throws IOException {
 
 		String uname = getNormalisedUsername(username);
 		String code = "PER_" + uname.toUpperCase();
@@ -387,6 +394,21 @@ public class QwandaUtils {
 
 		postLink(qwandaUrl, token, new Link("GRP_USERS", code, "LNK_CORE"));
 		postLink(qwandaUrl, token, new Link("GRP_PEOPLE", code, "LNK_CORE"));
+		
+		if(links != null) {
+			for(Link link: links) {
+				
+				if(link.getSourceCode() == null) {
+					link.setSourceCode(code);
+				}
+				
+				if(link.getTargetCode() == null) {
+					link.setTargetCode(code);
+				}
+				
+				postLink(qwandaUrl, token, link);
+			}
+		}
 
 		return person;
 	}
