@@ -1,24 +1,19 @@
 package life.genny.qwandautils;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.HashMap;
 
 import org.json.simple.JSONObject;
 
 import com.google.gson.Gson;
-
-import life.genny.qwandautils.JsonUtils;
-import life.genny.qwandautils.MergeUtil;
-import life.genny.qwandautils.QwandaUtils;
 
 public class PDFHelper {
 	
 	final public static String PDF_GEN_SERVICE_API_URL = System.getenv("PDF_GEN_SERVICE_API_URL") == null ? "http://localhost:7331"
 			: System.getenv("PDF_GEN_SERVICE_API_URL");
 	
-	public static String getDownloadablePdfLinkForHtml(String htmlUrl, Map<String, Object> contextMap){
+	public static String getDownloadablePdfLinkForHtml(String htmlUrl, HashMap<String, Object> contextMap){
 		
-		htmlUrl = "https://raw.githubusercontent.com/genny-project/layouts/dev/internmatch/document_templates/agreement.html";
 		String content = null;
 		String downloadablePdfUrl = null;
 		
