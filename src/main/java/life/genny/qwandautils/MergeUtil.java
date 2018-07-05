@@ -42,39 +42,43 @@ public class MergeUtil {
     public static final String VARIABLE_REGEX_END = "}}";
     public static final Pattern PATTERN_VARIABLE = Pattern.compile(Pattern.quote(VARIABLE_REGEX_START) + "(.*)" + Pattern.quote(VARIABLE_REGEX_END));    
     
-	public static String merge(String mergeStr, Map<String, Object> templateEntityMap) {
+	public static String merge(String mergeStr, Map<String, Object> templateEntityMap) { 
 		
 		/* matching [OBJECT.ATTRIBUTE] patterns */
 		Matcher match = PATTEN_MATCHER.matcher(mergeStr);
 		Matcher matchVariables = PATTERN_VARIABLE.matcher(mergeStr);
 		
-		while (match.find()) {	
+		if(templateEntityMap != null && templateEntityMap.size() > 0) {
 			
-			Object mergedtext = wordMerge(templateEntityMap, match.group(1));
-			log.info("merge text ::"+mergedtext);
-			System.out.println("merge text ::"+mergedtext);
-			if(mergedtext != null) {
-				mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, mergedtext.toString());
-			} else {
-				mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, "");
-			}			
-		}
-		
-		/* duplicating this for now. ideally wordMerge should be a bit more flexible and allows all kind of data to be passed */
-		while(matchVariables.find()) {
+			while (match.find()) {	
+				
+				Object mergedtext = wordMerge(templateEntityMap, match.group(1));
+				log.info("merge text ::"+mergedtext);
+				System.out.println("merge text ::"+mergedtext);
+				if(mergedtext != null) {
+					mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, mergedtext.toString());
+				} else {
+					mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, "");
+				}			
+			}
 			
-			//Object mergedtext = wordMerge(templateEntityMap, matchVariables.group(1));
-			System.out.println("match variable ::"+matchVariables.group(1));
-			Object mergedText = templateEntityMap.get(matchVariables.group(1));
-			log.info("merge text ::"+mergedText);
-			System.out.println("merge text ::"+mergedText);
-			if(mergedText != null) {
-				mergeStr = mergeStr.replace(VARIABLE_REGEX_START + matchVariables.group(1) + VARIABLE_REGEX_END, mergedText.toString());
-			} else {
-				mergeStr = mergeStr.replace(VARIABLE_REGEX_START + matchVariables.group(1) + VARIABLE_REGEX_END, "");
-			}	
+			/* duplicating this for now. ideally wordMerge should be a bit more flexible and allows all kind of data to be passed */
+			while(matchVariables.find()) {
+				
+				//Object mergedtext = wordMerge(templateEntityMap, matchVariables.group(1));
+				System.out.println("match variable ::"+matchVariables.group(1));
+				Object mergedText = templateEntityMap.get(matchVariables.group(1));
+				log.info("merge text ::"+mergedText);
+				System.out.println("merge text ::"+mergedText);
+				if(mergedText != null) {
+					mergeStr = mergeStr.replace(VARIABLE_REGEX_START + matchVariables.group(1) + VARIABLE_REGEX_END, mergedText.toString());
+				} else {
+					mergeStr = mergeStr.replace(VARIABLE_REGEX_START + matchVariables.group(1) + VARIABLE_REGEX_END, "");
+				}	
+			}
+			
 		}
-		
+	
 		return mergeStr;
 	}
 	

@@ -54,7 +54,7 @@
 		<keycloak-adapter-core.version>3.4.0.Final</keycloak-adapter-core.version>
 		<version.resteasy>3.0.10.Final</version.resteasy>
 		<vertx.version>3.4.2</vertx.version>
-
+		<aws.version>1.11.327</aws.version>
 	</properties>
 
 	<scm>
@@ -79,18 +79,19 @@
 			<id>Sonatype repository</id>
 			<url>https://oss.sonatype.org/content/repositories/releases/</url>
 		</repository>
-		<repository> 
-                        <id>life.genny</id> <url>https://nexus.outcome-hub.com/nexus/content/repositories/life.genny</url> 
-		</repository> 
+		<repository>
+			<id>life.genny</id>
+			<url>https://nexus.outcome-hub.com/nexus/content/repositories/life.genny</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
-			<dependency>
+		<dependency>
 			<groupId>org.javamoney</groupId>
 			<artifactId>moneta</artifactId>
 			<version>1.1</version>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
@@ -242,12 +243,20 @@
 			<artifactId>google-api-services-drive</artifactId>
 			<version>v3-rev90-1.23.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-core</artifactId>
 			<version>${vertx.version}</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk -->
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk</artifactId>
+			<version>${aws.version}</version>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
