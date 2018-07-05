@@ -140,9 +140,7 @@ public class QwandaUtils {
 
 	}
 	
-	public static String getQwandaServiceUrl() {
-		return QwandaUtils.qwandaServiceUrl;
-	}
+
 
 	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken, final Consumer<String> callback)
 			throws IOException {
