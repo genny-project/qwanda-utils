@@ -19,9 +19,7 @@ public class PDFHelper {
 		
 		try {
 			/* Get content from link in String format */
-			content = QwandaUtils.apiGet(htmlUrl, null);
-			System.out.println("link string ::"+content);
-			
+			content = QwandaUtils.apiGet(htmlUrl, null);			
 			/* If merge is required, use MergeUtils for merge with context map */
 			content = MergeUtil.merge(content, contextMap);
 
