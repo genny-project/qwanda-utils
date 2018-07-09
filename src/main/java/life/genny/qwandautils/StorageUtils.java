@@ -41,7 +41,7 @@ public class StorageUtils {
 	}
 	
 
-	public static FileUploadDetails uploadToAWSS3(String downloadableUrl, FileUploadDetails fileUploadDetails, BaseEntity projectBe) {	
+	public static FileUploadDetails uploadToAWSS3(String downloadableUrl, FileUploadDetails fileUploadDetails, BaseEntity projectBe, String mimeType) {	
 		
 		AmazonS3 s3Client = getAmazonClientObj(projectBe);
 	
@@ -84,15 +84,13 @@ public class StorageUtils {
 				}		
 				
 				/* Finally uploads to S3 bucket */
-	            //metadata.setContentType(contentType);
+	            metadata.setContentType(mimeType);
 				metadata.addUserMetadata(fileUploadDetails.getUserMetaDataObjKey(), fileUploadDetails.getUserMetaDataObjValue());
 	            request.setMetadata(metadata);
 	            request.withCannedAcl(CannedAccessControlList.PublicRead);
 	            PutObjectResult result = s3Client.putObject(request);
 	            
-	            String uploadedUrl = String.valueOf(s3Client.getUrl(
-	                   bucketName, 
-	                    file.getName()));
+	            String uploadedUrl = String.valueOf(s3Client.getUrl(bucketName, file.getName()));
 	                        
 	            System.out.println("uploaded url ::"+uploadedUrl);
 	            fileUploadDetails.setUploadedFilePath(uploadedUrl);
