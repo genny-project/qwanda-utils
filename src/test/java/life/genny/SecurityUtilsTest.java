@@ -15,5 +15,7 @@ public class SecurityUtilsTest {
 		        System.out.println("["+encrypted+"]");;
 		        System.out.println(SecurityUtils.decrypt(key, initVector, encrypted
 		                ));
+		        
+
 	}
 }
