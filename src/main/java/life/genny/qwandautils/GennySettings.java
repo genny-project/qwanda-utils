@@ -6,6 +6,8 @@ public class GennySettings {
 	public static final String projectUrl = System.getenv("PROJECT_URL");
 	public final static String mainrealm = System.getenv("PROJECT_REALM"); // UGLY
 	public final static Boolean isRulesManager = "TRUE".equalsIgnoreCase(System.getenv("RULESMANAGER"));
+	public final static Boolean isDdtHost = "TRUE".equalsIgnoreCase(System.getenv("DDTHOST"));
+
 	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + System.getenv("HOSTIP") + ":8089")
 			: System.getenv("DDT_URL");
 
