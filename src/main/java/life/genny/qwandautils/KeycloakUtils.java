@@ -3,17 +3,18 @@ package life.genny.qwandautils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -21,12 +22,12 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.logging.log4j.Logger;
 // import org.keycloak.OAuth2Constants;
 // import org.keycloak.common.util.KeycloakUriBuilder;
 // import org.keycloak.constants.ServiceUrlConstants;
@@ -34,13 +35,8 @@ import org.apache.http.message.BasicNameValuePair;
 // import org.keycloak.util.JsonSerialization;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.OAuth2Constants;
-import org.keycloak.common.util.KeycloakUriBuilder;
-import org.keycloak.constants.ServiceUrlConstants;
 import org.keycloak.representations.AccessTokenResponse;
-import org.keycloak.representations.idm.UserRepresentation;
-import org.keycloak.util.JsonSerialization;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -51,6 +47,10 @@ import io.vertx.core.json.JsonObject;
 
 
 public class KeycloakUtils {
+	
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
 
 	// static public String getToken(String keycloakUrl, String realm, String
 	// clientId, String secret,
@@ -410,4 +410,52 @@ public class KeycloakUtils {
 		}
 	}
 
+	public static String generateServiceToken(String realm, String keycloakUrl, String secret) {
+
+		if (GennySettings.devMode) {
+			realm = "genny";
+		}
+
+		String jsonFile = realm + ".json";
+
+
+		// fetch token from keycloak
+		String key = null;
+		String initVector = "PRJ_" + realm.toUpperCase();
+		initVector = StringUtils.rightPad(initVector, 16, '*');
+		String encryptedPassword = null;
+		if (GennySettings.devMode) {
+			initVector = "PRJ_GENNY*******";
+		}
+
+		try {
+			key = System.getenv("ENV_SECURITY_KEY"); // TODO , Add each realm as a prefix
+		} catch (Exception e) {
+			log.info("PRJ_" + realm.toUpperCase() + " ENV ENV_SECURITY_KEY  is missing!");
+		}
+
+		try {
+			encryptedPassword = System.getenv("ENV_SERVICE_PASSWORD");
+		} catch (Exception e) {
+			log.info("PRJ_" + realm.toUpperCase() + " attribute ENV_SECURITY_KEY  is missing!");
+		}
+
+		String password = SecurityUtils.decrypt(key, initVector, encryptedPassword);
+
+
+		try {
+//			println("realm() : " + realm + "\n" + "realm : " + realm + "\n" + "secret : " + secret + "\n"
+//					+ "keycloakurl: " + keycloakurl + "\n" + "key : " + key + "\n" + "initVector : " + initVector + "\n"
+//					+ "enc pw : " + encryptedPassword + "\n" + "password : " + password + "\n");
+
+			String token = KeycloakUtils.getToken(keycloakUrl, realm, realm, secret, "service", password);
+//			println("token = " + token);
+			return token;
+
+		} catch (Exception e) {
+			log.error(e);
+		}
+
+		return null;
+	}
 }
