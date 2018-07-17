@@ -11,5 +11,5 @@ public class GennySettings {
 	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + System.getenv("HOSTIP") + ":8089")
 			: System.getenv("DDT_URL");
 
-
+	public static final String username = (System.getenv("USER") == null ? "GENNY" : System.getenv("USER"));
 }
