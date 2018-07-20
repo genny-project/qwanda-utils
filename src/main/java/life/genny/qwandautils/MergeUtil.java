@@ -82,6 +82,7 @@ public class MergeUtil {
 		return mergeStr;
 	}
 	
+	@SuppressWarnings("unused")
 	private static String wordMerge(Map<String, Object> entitymap, String mergeText) {
 		
 		if(mergeText != null && !mergeText.isEmpty()) {
@@ -106,37 +107,28 @@ public class MergeUtil {
 						
 						/* TODO: to be removed. a good way to do that is to use getLoopValue(.., Class) of BaseEntity class and check if the value returned is null.
 								 if it is it means the cast did not work and therefore the attribute is not a Money class and you can proceed to the second test */
+						Object attributeValue = be.getValue(attributeCode, null);
 						
-						if ((attributeCode.equals("PRI_PRICE")
-								|| attributeCode.equals("PRI_LOAD_PRICE") || attributeCode.equals("PRI_OFFER_PRICE")
-								|| attributeCode.equals("PRI_FEE") || attributeCode.equals("PRI_OWNER_PRICE")
-								|| attributeCode.equals("PRI_DRIVER_PRICE") || attributeCode.equals("PRI_OFFER_FEE")
-								|| attributeCode.equals("PRI_OFFER_OWNER_PRICE")
-								|| attributeCode.equals("PRI_OFFER_DRIVER_PRICE") || attributeCode.equals("PRI_FEE_INC_GST")
-								|| attributeCode.equals("PRI_FEE_EXC_GST") || attributeCode.equals("PRI_OFFER_FEE_INC_GST")
-								|| attributeCode.equals("PRI_OFFER_FEE_EXC_GST")
-								|| attributeCode.equals("PRI_OWNER_PRICE_INC_GST")
-								|| attributeCode.equals("PRI_OWNER_PRICE_EXC_GST")
-								|| attributeCode.equals("PRI_OFFER_OWNER_PRICE_INC_GST")
-								|| attributeCode.equals("PRI_OFFER_OWNER_PRICE_EXC_GST")
-								|| attributeCode.equals("PRI_DRIVER_PRICE_INC_GST")
-								|| attributeCode.equals("PRI_DRIVER_PRICE_EXC_GST")
-								|| attributeCode.equals("PRI_OFFER_DRIVER_PRICE_INC_GST")
-								|| attributeCode.equals("PRI_OFFER_DRIVER_PRICE_EXC_GST"))) {
-							
-							System.out.println("price attributes");
-							
-							Money money = be.getValue(attributeCode, null);
+						if(attributeValue instanceof org.javamoney.moneta.Money) {
+							System.out.println("price attributes 1");
 							DecimalFormat df = new DecimalFormat("#.00"); 
+							Money money = (Money) attributeValue; 
 							
-							if(money != null) {
+							if(attributeValue != null) {
 								return df.format(money.getNumber()) + " " + money.getCurrency();
 							} else {
 								return DEFAULT;
 							}
-							
-							
-						} else if(attributeCode.equals("PRI_DRIVER_CONFIRM_PICKUP_DATETIME")) {
+						}
+						
+						/*if(attributeValue instanceof java.time.LocalDateTime) {
+							 we split the date-time related merge text to merge into 3 components: BE.PRI.TimeDateformat... becomes [BE, PRI...] 
+							if(entityArr != null && entityArr.length > 2) {
+								
+							}
+						}*/
+						
+						if(attributeCode.equals("PRI_DRIVER_CONFIRM_PICKUP_DATETIME")) {
 													
 							LocalDateTime dateTimeRawValue = be.getValue(attributeCode, null);
 							
