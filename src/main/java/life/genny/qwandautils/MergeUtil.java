@@ -149,7 +149,7 @@ public class MergeUtil {
 						   String time = df.format(dateTimeRawValue);
 
 							
-							String editedDateTime = time + " " + ampm + ", " + dateTimeRawValue.getDayOfWeek().toString().toLowerCase() + ", " + dateTimeRawValue.getDayOfMonth() + " " + dateTimeRawValue.getMonth() + " " + dateTimeRawValue.getYear();
+							String editedDateTime = time + " " + ampm + ", " + dateTimeRawValue.getDayOfWeek().toString().toLowerCase() + ", " + dateTimeRawValue.getDayOfMonth() + " " + dateTimeRawValue + " " + dateTimeRawValue.getYear();
 							return editedDateTime.toLowerCase();
 							
 						} else if(attributeCode.equals("PRI_DROPOFF_DATETIME")) {
@@ -309,5 +309,96 @@ public class MergeUtil {
 		return attributeVal;
 
 	}
+	
+	
+	public static String mergeDateTimeAttributeValue(String attributeCode, Object attributeValue, String dateTimeFormatValue) {
+		
+		LocalDateTime dateTimeRawValue = (LocalDateTime) attributeValue;
+		String[] mergeValue = dateTimeFormatValue.split("\\.");
+		String mergedFormattedDateTimeValue = "";
+		for(String format : mergeValue) {
+			mergedFormattedDateTimeValue = mergedFormattedDateTimeValue + getMergedDateTimeValue(dateTimeRawValue, format.toLowerCase());
+		}
+		return mergedFormattedDateTimeValue;
+	}
+
+	private static Object getMergedDateTimeValue(LocalDateTime dateTimeRawValue, String formatToBeMerged) {
+		
+		Object mergedDateTimeValue = null;
+		if(formatToBeMerged != null) {
+			switch (formatToBeMerged) {
+			
+			/* for date 1,2*/
+			case "dd":
+				mergedDateTimeValue = dateTimeRawValue.getDayOfMonth();
+				break;
+			/* for year - 2018 */
+			case "yy":
+				mergedDateTimeValue = dateTimeRawValue.getYear();
+				break;
+			/* for month - 1 to 12 */
+			case "mm":
+				mergedDateTimeValue = dateTimeRawValue.getMonthValue();
+				break;
+			/* for space between formatting */
+			case "space":
+				mergedDateTimeValue = " ";
+				break;
+			/* for getting if the time is AM or PM */
+			case "ampm":
+				int ampmIntVal = dateTimeRawValue.get(ChronoField.AMPM_OF_DAY);
+				String ampm = null;
+				if(ampmIntVal == 0) {
+					ampm = "AM";
+				} else {
+					ampm = "PM";
+				}
+				mergedDateTimeValue = ampm;
+				break;
+			/* for having commas between formatting */
+			case "comma":
+				mergedDateTimeValue = ",";
+				break;
+			/* for getting weekday - Monday, Tuesday */
+			case "dayofweekstring":
+				mergedDateTimeValue = dateTimeRawValue.getDayOfWeek().toString().toLowerCase();
+				break;
+			/* for getting the time */
+			case "time":
+				DateTimeFormatter df =  
+	            new DateTimeFormatterBuilder().appendPattern("[HH][.mm]")
+	            .parseDefaulting(ChronoField.HOUR_OF_AMPM, 0)
+	            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+	            .toFormatter(); 
+				mergedDateTimeValue = df.format(dateTimeRawValue);
+				break;
+			/* for getting month in string - January, February */
+			case "monthstring" :
+				mergedDateTimeValue = dateTimeRawValue.getMonth();
+				break;
+			/* for getting date-formatter slash */
+			case "/":
+				mergedDateTimeValue = "/";
+				break;
+			/* for getting hours */
+			case "hours" :
+				mergedDateTimeValue = dateTimeRawValue.getHour();
+				break;
+			/* for getting minutes */
+			case "minutes" :
+				mergedDateTimeValue = dateTimeRawValue.getMinute();
+				break;
+			/* for getting seconds */
+			case "seconds" :
+				mergedDateTimeValue = dateTimeRawValue.getSecond();
+				break;
+			default:
+				break;
+			}
+		}
+		return mergedDateTimeValue;
+	}
+	
+	
 
 }
