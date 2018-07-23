@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.Logger;
 import org.javamoney.moneta.Money;
 
+import com.amazonaws.services.simpleworkflow.flow.worker.SynchronousActivityTaskPoller;
+
 import life.genny.qwanda.Link;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
@@ -28,6 +30,7 @@ public class MergeUtil {
     public static final String ANSI_RED = "\u001B[31m";
 	
     /* [VARIABLENAME.ATTRIBUTE] pattern */
+    /* Used for baseentity-attribute merging */
 	public static final String REGEX_START = "[";
 	public static final String REGEX_END = "]";
 	public static final String REGEX_START_PATTERN = Pattern.quote(REGEX_START);
@@ -37,10 +40,18 @@ public class MergeUtil {
     public static final String PATTERN_BASEENTITY = REGEX_START_PATTERN + "(?s)(.*?)" + REGEX_END_PATTERN;
     public static final Pattern PATTEN_MATCHER = Pattern.compile(PATTERN_BASEENTITY);
     
-    /* ${VARIABLE} pattern */
+    /* {{VARIABLE}} pattern */
+    /* this is for direct merging */
     public static final String VARIABLE_REGEX_START = "{{";
     public static final String VARIABLE_REGEX_END = "}}";
-    public static final Pattern PATTERN_VARIABLE = Pattern.compile(Pattern.quote(VARIABLE_REGEX_START) + "(.*)" + Pattern.quote(VARIABLE_REGEX_END));    
+    public static final Pattern PATTERN_VARIABLE = Pattern.compile(Pattern.quote(VARIABLE_REGEX_START) + "(.*)" + Pattern.quote(VARIABLE_REGEX_END));  
+    
+    /* ((DATEFORMAT)) pattern */
+    /* this is for date-format pattern merging */
+    public static final String DATEFORMAT_VARIABLE_REGEX_START = "((";
+    public static final String DATEFORMATVARIABLE_REGEX_END = "))";
+    public static final Pattern DATEFORMAT_PATTERN_VARIABLE = Pattern.compile(Pattern.quote(DATEFORMAT_VARIABLE_REGEX_START) + "(.*)" + Pattern.quote(DATEFORMATVARIABLE_REGEX_END));  
+    
     
 	public static String merge(String mergeStr, Map<String, Object> templateEntityMap) { 
 		
@@ -99,17 +110,16 @@ public class MergeUtil {
 				if(entitymap.containsKey(keyCode)) {
 					
 					Object value = entitymap.get(keyCode);
+					
 					if(value.getClass().equals(BaseEntity.class)) {
 						
 						BaseEntity be = (BaseEntity)value;
 
 						String attributeCode = entityArr[1];
 						
-						/* TODO: to be removed. a good way to do that is to use getLoopValue(.., Class) of BaseEntity class and check if the value returned is null.
-								 if it is it means the cast did not work and therefore the attribute is not a Money class and you can proceed to the second test */
 						Object attributeValue = be.getValue(attributeCode, null);
 						
-						if(attributeValue instanceof org.javamoney.moneta.Money) {
+						if(attributeValue != null && attributeValue instanceof org.javamoney.moneta.Money) {
 							System.out.println("price attributes 1");
 							DecimalFormat df = new DecimalFormat("#.00"); 
 							Money money = (Money) attributeValue; 
@@ -119,20 +129,23 @@ public class MergeUtil {
 							} else {
 								return DEFAULT;
 							}
+						}else if(attributeValue != null && attributeValue instanceof java.time.LocalDateTime) {
+							/* we split the date-time related merge text to merge into 3 components: BE.PRI.TimeDateformat... becomes [BE, PRI...] */
+							if(entityArr != null && entityArr.length > 2) {
+								Matcher matchVariables = DATEFORMAT_PATTERN_VARIABLE.matcher(entityArr[2]);
+								if(matchVariables.find()) {
+									return mergeDateTimeAttributeValue(attributeCode, attributeValue, matchVariables.group(1));
+								}					
+							}
+						} else if(attributeValue instanceof java.lang.String){
+							return getBaseEntityAttrValueAsString(be, attributeCode);
 						}
 						
-						/*if(attributeValue instanceof java.time.LocalDateTime) {
-							 we split the date-time related merge text to merge into 3 components: BE.PRI.TimeDateformat... becomes [BE, PRI...] 
-							if(entityArr != null && entityArr.length > 2) {
-								
-							}
-						}*/
-						
-						if(attributeCode.equals("PRI_DRIVER_CONFIRM_PICKUP_DATETIME")) {
+						/*if(attributeCode.equals("PRI_DRIVER_CONFIRM_PICKUP_DATETIME")) {
 													
 							LocalDateTime dateTimeRawValue = be.getValue(attributeCode, null);
 							
-							/*To print in this format : 9am AEST, Monday, 22 January 2018*/
+							To print in this format : 9am AEST, Monday, 22 January 2018
 							int ampmIntVal = dateTimeRawValue.get(ChronoField.AMPM_OF_DAY);
 							String ampm = null;
 							if(ampmIntVal == 0) {
@@ -166,7 +179,7 @@ public class MergeUtil {
 							
 						}else {
 							return getBaseEntityAttrValueAsString(be, attributeCode);
-						}
+						}*/
 					}
 					else if (value.getClass().equals(String.class)) {
 						return (String)value;
@@ -176,8 +189,7 @@ public class MergeUtil {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
-			
+		
 		}
 		
 		return DEFAULT;	
@@ -314,7 +326,7 @@ public class MergeUtil {
 	public static String mergeDateTimeAttributeValue(String attributeCode, Object attributeValue, String dateTimeFormatValue) {
 		
 		LocalDateTime dateTimeRawValue = (LocalDateTime) attributeValue;
-		String[] mergeValue = dateTimeFormatValue.split("\\.");
+		String[] mergeValue = dateTimeFormatValue.split(",");
 		String mergedFormattedDateTimeValue = "";
 		for(String format : mergeValue) {
 			mergedFormattedDateTimeValue = mergedFormattedDateTimeValue + getMergedDateTimeValue(dateTimeRawValue, format.toLowerCase());
@@ -382,15 +394,19 @@ public class MergeUtil {
 				break;
 			/* for getting hours */
 			case "hours" :
-				mergedDateTimeValue = dateTimeRawValue.getHour();
+				mergedDateTimeValue = String.format("%02d", dateTimeRawValue.getHour());
 				break;
 			/* for getting minutes */
 			case "minutes" :
-				mergedDateTimeValue = dateTimeRawValue.getMinute();
+				mergedDateTimeValue = String.format("%02d",dateTimeRawValue.getMinute());
 				break;
 			/* for getting seconds */
 			case "seconds" :
-				mergedDateTimeValue = dateTimeRawValue.getSecond();
+				mergedDateTimeValue = String.format("%02d",dateTimeRawValue.getSecond());
+				break;
+			/* for getting timevalues-seperator */
+			case ":":
+				mergedDateTimeValue = ":";
 				break;
 			default:
 				break;
@@ -398,6 +414,19 @@ public class MergeUtil {
 		}
 		return mergedDateTimeValue;
 	}
+	
+	/*public static void main(String[] args) {
+		LocalDateTime dateTime = LocalDateTime.now();
+		Object dateTimeObj = dateTime;
+		String format = "time,space,ampm,comma,space,dayofweekstring,comma,space,dd,space,monthstring,space,yy";
+		String format1 = "dd,/,mm,/,yy,space,hours,:,minutes,:,seconds";
+		String formattedDate = mergeDateTimeAttributeValue("time", dateTimeObj, format);
+		String formattedDate1 = mergeDateTimeAttributeValue("some", dateTimeObj, format1);
+		System.out.println("formatted date ::"+formattedDate);
+		System.out.println("formatted date 1 ::"+formattedDate1);
+		
+		
+	}*/
 	
 	
 
