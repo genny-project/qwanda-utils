@@ -130,12 +130,19 @@ public class MergeUtil {
 								return DEFAULT;
 							}
 						}else if(attributeValue != null && attributeValue instanceof java.time.LocalDateTime) {
-							/* we split the date-time related merge text to merge into 3 components: BE.PRI.TimeDateformat... becomes [BE, PRI...] */
+							/* If the date-related mergeString needs to formatter to a particultar format -> we split the date-time related merge text to merge into 3 components: BE.PRI.TimeDateformat... becomes [BE, PRI...] */
+							/* 1st component -> BaseEntity code ; 2nd component -> attribute code ; 3rd component -> (date-Format) */
 							if(entityArr != null && entityArr.length > 2) {
+								/* the date merge field has a format-merge-string */
+								System.out.println("This date attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
 								Matcher matchVariables = DATEFORMAT_PATTERN_VARIABLE.matcher(entityArr[2]);
 								if(matchVariables.find()) {
-									return mergeDateTimeAttributeValue(attributeCode, attributeValue, matchVariables.group(1));
+									return mergeDateTimeAttributeValue(attributeValue, matchVariables.group(1));
 								}					
+							} else {
+								System.out.println("This date attribute code ::"+attributeCode+ " needs no formatting");
+								/* if date needs no formatting, we directly return the string value for the attributeValue */
+								return getBaseEntityAttrValueAsString(be, attributeCode);
 							}
 						} else if(attributeValue instanceof java.lang.String){
 							return getBaseEntityAttrValueAsString(be, attributeCode);
@@ -322,18 +329,30 @@ public class MergeUtil {
 
 	}
 	
-	
-	public static String mergeDateTimeAttributeValue(String attributeCode, Object attributeValue, String dateTimeFormatValue) {
+	/**
+	 * input -> comma seperated date-time format string 
+	 * output -> get the formatted localDateTime value 
+	 * example input -> attributeValue : LocalDateTime.now() ; 
+	 * 					dateTimeFormatValue : "time,space,ampm,comma,space,dayofweekstring,comma,space,dd,space,monthstring,space,yy"
+	 * example output -> 12.51 PM, monday, 23 JULY 2018
+	*/
+	public static String mergeDateTimeAttributeValue(Object attributeValue, String dateTimeFormatValue) {
 		
 		LocalDateTime dateTimeRawValue = (LocalDateTime) attributeValue;
 		String[] mergeValue = dateTimeFormatValue.split(",");
-		String mergedFormattedDateTimeValue = "";
+		StringBuilder mergedFormattedDateTimeValue = new StringBuilder();
 		for(String format : mergeValue) {
-			mergedFormattedDateTimeValue = mergedFormattedDateTimeValue + getMergedDateTimeValue(dateTimeRawValue, format.toLowerCase());
+			mergedFormattedDateTimeValue.append(getMergedDateTimeValue(dateTimeRawValue, format.toLowerCase()));
 		}
-		return mergedFormattedDateTimeValue;
+		return mergedFormattedDateTimeValue.toString();
 	}
 
+	/**
+	 * 
+	 * @param dateTimeRawValue
+	 * @param formatToBeMerged
+	 * @return the equivalent datetime-value for the format passed in the argument
+	 */
 	private static Object getMergedDateTimeValue(LocalDateTime dateTimeRawValue, String formatToBeMerged) {
 		
 		Object mergedDateTimeValue = null;
@@ -342,7 +361,7 @@ public class MergeUtil {
 			
 			/* for date 1,2*/
 			case "dd":
-				mergedDateTimeValue = dateTimeRawValue.getDayOfMonth();
+				mergedDateTimeValue = String.format("%02d", dateTimeRawValue.getDayOfMonth());
 				break;
 			/* for year - 2018 */
 			case "yy":
@@ -350,7 +369,7 @@ public class MergeUtil {
 				break;
 			/* for month - 1 to 12 */
 			case "mm":
-				mergedDateTimeValue = dateTimeRawValue.getMonthValue();
+				mergedDateTimeValue = String.format("%02d", dateTimeRawValue.getMonthValue());
 				break;
 			/* for space between formatting */
 			case "space":
@@ -373,7 +392,7 @@ public class MergeUtil {
 				break;
 			/* for getting weekday - Monday, Tuesday */
 			case "dayofweekstring":
-				mergedDateTimeValue = dateTimeRawValue.getDayOfWeek().toString().toLowerCase();
+				mergedDateTimeValue = dateTimeRawValue.getDayOfWeek().toString();
 				break;
 			/* for getting the time */
 			case "time":
@@ -386,7 +405,7 @@ public class MergeUtil {
 				break;
 			/* for getting month in string - January, February */
 			case "monthstring" :
-				mergedDateTimeValue = dateTimeRawValue.getMonth();
+				mergedDateTimeValue = dateTimeRawValue.getMonth().toString().toLowerCase();
 				break;
 			/* for getting date-formatter slash */
 			case "/":
@@ -420,12 +439,11 @@ public class MergeUtil {
 		Object dateTimeObj = dateTime;
 		String format = "time,space,ampm,comma,space,dayofweekstring,comma,space,dd,space,monthstring,space,yy";
 		String format1 = "dd,/,mm,/,yy,space,hours,:,minutes,:,seconds";
-		String formattedDate = mergeDateTimeAttributeValue("time", dateTimeObj, format);
-		String formattedDate1 = mergeDateTimeAttributeValue("some", dateTimeObj, format1);
+		String formattedDate = mergeDateTimeAttributeValue(dateTimeObj, format);
+		String formattedDate1 = mergeDateTimeAttributeValue(dateTimeObj, format1);
 		System.out.println("formatted date ::"+formattedDate);
 		System.out.println("formatted date 1 ::"+formattedDate1);
-		
-		
+			
 	}*/
 	
 	
