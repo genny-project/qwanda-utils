@@ -8,7 +8,7 @@ public class GennySettings {
 	public final static Boolean isRulesManager = "TRUE".equalsIgnoreCase(System.getenv("RULESMANAGER"));
 	public final static Boolean isDdtHost = "TRUE".equalsIgnoreCase(System.getenv("DDTHOST"));
 
-	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + System.getenv("HOSTIP") + ":8089")
+	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + System.getenv("HOSTIP") + ":"+System.getenv("CACHE_API_PORT"))
 			: System.getenv("DDT_URL");
 
 	public static final String username = (System.getenv("USER") == null ? "GENNY" : System.getenv("USER"));
