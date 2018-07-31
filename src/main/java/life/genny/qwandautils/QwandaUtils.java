@@ -57,6 +57,7 @@ import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.EntityEntity;
 import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.entity.SearchEntity;
+import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QBulkMessage;
 import life.genny.qwanda.message.QDataAnswerMessage;
@@ -363,20 +364,45 @@ public class QwandaUtils {
 
 		String uname = getNormalisedUsername(username);
 		String code = "PER_" + uname.toUpperCase();
+		System.out.println("test");
 
 		Person person = new Person(code, firstname + " " + lastname);
 
 		postBaseEntity(qwandaUrl, token, person);
 
-		List<Answer> answers = new ArrayList<Answer>();
-
-		answers.add((new Answer(code, code, "PRI_USERNAME", username)));
-		answers.add((new Answer(code, code, "PRI_FIRSTNAME", firstname)));
-		answers.add((new Answer(code, code, "PRI_LASTNAME", lastname)));
-		answers.add((new Answer(code, code, "PRI_EMAIL", email)));
-		answers.add((new Answer(code, code, "PRI_REALM", realm)));
-		answers.add((new Answer(code, code, "PRI_NAME", name)));
-		answers.add((new Answer(code, code, "PRI_KEYCLOAK_ID", keycloakId)));
+		List<Answer> answers = new ArrayList<>();
+		
+		try {
+			
+			Answer usernameAnswer = new Answer(code, code, "PRI_USERNAME", username);
+			answers.add(usernameAnswer);
+			person.addAnswer(usernameAnswer);
+			
+			Answer lastnameAnswer = new Answer(code, code, "PRI_LASTNAME", lastname);
+			answers.add(lastnameAnswer);
+			person.addAnswer(lastnameAnswer);
+			
+			Answer firstnameAnswer = new Answer(code, code, "PRI_FIRSTNAME", firstname);
+			answers.add(firstnameAnswer);
+			person.addAnswer(firstnameAnswer);
+			
+			Answer emailAnswer = new Answer(code, code, "PRI_EMAIL", firstname);
+			answers.add(emailAnswer);
+			person.addAnswer(emailAnswer);
+			
+			Answer realmAnswer = new Answer(code, code, "PRI_REALM", realm);
+			answers.add(realmAnswer);
+			person.addAnswer(realmAnswer);
+			
+			Answer nameAnswer = new Answer(code, code, "PRI_NAME", realm);
+			answers.add(nameAnswer);
+			person.addAnswer(nameAnswer);
+			
+			Answer keycloakIdAnswer = new Answer(code, code, "PRI_KEYCLOAK_ID", realm);
+			answers.add(keycloakIdAnswer);
+			person.addAnswer(keycloakIdAnswer);
+		}
+		catch(Exception e) {}
 		
 		if(attributes != null) {
 			
@@ -386,7 +412,12 @@ public class QwandaUtils {
 				String value = attributes.get(attributeCode);
 				
 				/* we create an answer */
-				answers.add(new Answer(code, code, attributeCode, value));
+				Answer baseEntityAnswer = new Answer(code, code, attributeCode, value);
+				answers.add(baseEntityAnswer);
+				try {
+					person.addAnswer(baseEntityAnswer);
+				} 
+				catch (BadDataException e) {}
 			}
 		}
 
