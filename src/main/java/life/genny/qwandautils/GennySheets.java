@@ -235,11 +235,13 @@ public class GennySheets {
 			final String code = (String) object.get("code");
 			final String name = (String) object.get("name");
 			final String icon = (String) object.get("icon");
+            final String deployCode = (String) object.get("deploy_code");
 			Map<String, String> fields = new HashMap<String, String>();
 			fields.put("code", code);
 			fields.put("name", name);
 			fields.put("icon", icon);
-			map.put(code, fields);
+            fields.put("deploy_code", deployCode);
+ 			map.put(code, fields);
 			return map;
 		}).reduce((ac, acc) -> {
 			ac.putAll(acc);
@@ -318,7 +320,7 @@ public class GennySheets {
 			final String disabled = (String) object.get("disabled");
 			if ((disabled == null) || (StringUtils.isBlank(disabled)) || ("FALSE".equalsIgnoreCase(disabled))
 					|| ("NO".equalsIgnoreCase(disabled))) {
-
+			    final String deployCode = (String) object.get("deploy_code");
 				final String code = (String) object.get("code");
 				final String name = (String) object.get("name");
 				final String dataType = (String) object.get("datatype");
@@ -337,6 +339,8 @@ public class GennySheets {
 				fields.put("help", help);
 				fields.put("placeholder", placeholder);
 				fields.put("defaultValue", defaultValue);
+                fields.put("deploy_code", deployCode);
+
 				map.put(code, fields);
 			}
 			return map;
@@ -389,18 +393,22 @@ public class GennySheets {
 
 				final String baseEntityCode = (String) object.get("baseEntityCode");
 				final String attributeCode = (String) object.get("attributeCode");
+                final String deployCode = (String) object.get("deploy_code");
+
 				if ("PRI_PRICE".equalsIgnoreCase(attributeCode)) {
 					System.out.println("dummy");
 				}
 				final String weight = (String) object.get("weight");
 				final String valueString = (String) object.get("valueString");
 				final String privacy = (String) object.get("privacy");
+				
 				Map<String, String> fields = new HashMap<String, String>();
 				fields.put("baseEntityCode", baseEntityCode);
 				fields.put("attributeCode", attributeCode);
 				fields.put("weight", weight);
 				fields.put("valueString", valueString);
 				fields.put("privacy", privacy);
+				fields.put("deploy_code", deployCode);
 				map.put(baseEntityCode + attributeCode, fields);
 			}
 			return map;
@@ -423,7 +431,7 @@ public class GennySheets {
 			final String disabled = (String) object.get("disabled");
 			if ((disabled == null) || (StringUtils.isBlank(disabled)) || ("FALSE".equalsIgnoreCase(disabled))
 					|| ("NO".equalsIgnoreCase(disabled))) {
-
+			    final String deployCode = (String) object.get("deploy_code");
 				final String parentCode = (String) object.get("parentCode");
 				final String targetCode = (String) object.get("targetCode");
 				final String linkCode = (String) object.get("linkCode");
@@ -435,6 +443,7 @@ public class GennySheets {
 				fields.put("linkCode", linkCode);
 				fields.put("weight", weight);
 				fields.put("valueString", valueString);
+                fields.put("deploy_code", deployCode);
 				map.put(targetCode + parentCode + linkCode, fields);
 			}
 			return map;
@@ -498,12 +507,13 @@ public class GennySheets {
 				// }
 				final String weight = (String) object.get("weight");
 				final String mandatory = (String) object.get("mandatory");
+				final String deployCode = (String) object.get("deploy_code");
 				Map<String, String> fields = new HashMap<String, String>();
 				fields.put("parentCode", parentCode);
 				fields.put("targetCode", targetCode);
 				fields.put("weight", weight);
 				fields.put("mandatory", mandatory);
-
+				fields.put("deploy_code", deployCode);
 				map.put(targetCode + parentCode, fields);
 			}
 			return map;
