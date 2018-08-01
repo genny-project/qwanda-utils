@@ -148,45 +148,6 @@ public class MergeUtil {
 							return getBaseEntityAttrValueAsString(be, attributeCode);
 						}
 						
-						/*if(attributeCode.equals("PRI_DRIVER_CONFIRM_PICKUP_DATETIME")) {
-													
-							LocalDateTime dateTimeRawValue = be.getValue(attributeCode, null);
-							
-							To print in this format : 9am AEST, Monday, 22 January 2018
-							int ampmIntVal = dateTimeRawValue.get(ChronoField.AMPM_OF_DAY);
-							String ampm = null;
-							if(ampmIntVal == 0) {
-								ampm = "AM";
-							} else {
-								ampm = "PM";
-							}
-							
-						   DateTimeFormatter df =  
-						            new DateTimeFormatterBuilder().appendPattern("[HH][.mm]")
-						            .parseDefaulting(ChronoField.HOUR_OF_AMPM, 0)
-						            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
-						            .toFormatter(); 
-						   String time = df.format(dateTimeRawValue);
-
-							
-							String editedDateTime = time + " " + ampm + ", " + dateTimeRawValue.getDayOfWeek().toString().toLowerCase() + ", " + dateTimeRawValue.getDayOfMonth() + " " + dateTimeRawValue + " " + dateTimeRawValue.getYear();
-							return editedDateTime.toLowerCase();
-							
-						} else if(attributeCode.equals("PRI_DROPOFF_DATETIME")) {
-							LocalDateTime dateTimeRawValue = be.getValue(attributeCode, null);
-							String formattedDate = "";
-							
-							if(dateTimeRawValue!= null) {
-								DateTimeFormatter df =  
-							            new DateTimeFormatterBuilder().appendPattern("dd/MM/yy HH:mm:ss").toFormatter();
-								formattedDate = df.format(dateTimeRawValue);
-							}
-							
-							return formattedDate;
-							
-						}else {
-							return getBaseEntityAttrValueAsString(be, attributeCode);
-						}*/
 					}
 					else if (value.getClass().equals(String.class)) {
 						return (String)value;
