@@ -12,4 +12,8 @@ public class GennySettings {
 			: System.getenv("DDT_URL");
 
 	public static final String username = (System.getenv("USER") == null ? "GENNY" : System.getenv("USER"));
+
+	public static final String defaultServiceKey = (System.getenv("DEFAULT_SERVICE_KEY") == null ?  "WubbaLubbaDubDub" : System.getenv("DEFAULT_SERVICE_KEY"));
+
+	public static final String defaultServicePassword = (System.getenv("DEFAULT_SERVICE_PASSWORD") == null ?  "Yo!Dude!IamapublicPassword" : System.getenv("DEFAULT_SERVICE_PASSWORD"));
 }
