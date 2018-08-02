@@ -3,6 +3,7 @@ package life.genny.qwandautils;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -137,7 +138,8 @@ public class MergeUtil {
 								System.out.println("This date attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
 								Matcher matchVariables = DATEFORMAT_PATTERN_VARIABLE.matcher(entityArr[2]);
 								if(matchVariables.find()) {
-									return mergeDateTimeAttributeValue(attributeValue, matchVariables.group(1));
+									String formattedDate = getFormattedDateString((LocalDateTime) attributeValue, matchVariables.group(1));
+									return formattedDate;
 								}					
 							} else {
 								System.out.println("This date attribute code ::"+attributeCode+ " needs no formatting");
@@ -290,121 +292,24 @@ public class MergeUtil {
 
 	}
 	
-	/**
-	 * input -> comma seperated date-time format string 
-	 * output -> get the formatted localDateTime value 
-	 * example input -> attributeValue : LocalDateTime.now() ; 
-	 * 					dateTimeFormatValue : "time,space,ampm,comma,space,dayofweekstring,comma,space,dd,space,monthstring,space,yy"
-	 * example output -> 12.51 PM, monday, 23 JULY 2018
-	*/
-	public static String mergeDateTimeAttributeValue(Object attributeValue, String dateTimeFormatValue) {
-		
-		LocalDateTime dateTimeRawValue = (LocalDateTime) attributeValue;
-		String[] mergeValue = dateTimeFormatValue.split(",");
-		StringBuilder mergedFormattedDateTimeValue = new StringBuilder();
-		for(String format : mergeValue) {
-			mergedFormattedDateTimeValue.append(getMergedDateTimeValue(dateTimeRawValue, format.toLowerCase()));
+	public static String getFormattedDateString(LocalDateTime dateToBeFormatted, String format) {
+		if(dateToBeFormatted != null && format != null) {
+			DateTimeFormatter dateformat = DateTimeFormatter.ofPattern(format);
+			String formattedDate = dateToBeFormatted.format(dateformat);
+			return formattedDate;
 		}
-		return mergedFormattedDateTimeValue.toString();
+		return null;
 	}
 
-	/**
-	 * 
-	 * @param dateTimeRawValue
-	 * @param formatToBeMerged
-	 * @return the equivalent datetime-value for the format passed in the argument
-	 */
-	private static Object getMergedDateTimeValue(LocalDateTime dateTimeRawValue, String formatToBeMerged) {
-		
-		Object mergedDateTimeValue = null;
-		if(formatToBeMerged != null) {
-			switch (formatToBeMerged) {
-			
-			/* for date 1,2*/
-			case "dd":
-				mergedDateTimeValue = String.format("%02d", dateTimeRawValue.getDayOfMonth());
-				break;
-			/* for year - 2018 */
-			case "yy":
-				mergedDateTimeValue = dateTimeRawValue.getYear();
-				break;
-			/* for month - 1 to 12 */
-			case "mm":
-				mergedDateTimeValue = String.format("%02d", dateTimeRawValue.getMonthValue());
-				break;
-			/* for space between formatting */
-			case "space":
-				mergedDateTimeValue = " ";
-				break;
-			/* for getting if the time is AM or PM */
-			case "ampm":
-				int ampmIntVal = dateTimeRawValue.get(ChronoField.AMPM_OF_DAY);
-				String ampm = null;
-				if(ampmIntVal == 0) {
-					ampm = "AM";
-				} else {
-					ampm = "PM";
-				}
-				mergedDateTimeValue = ampm;
-				break;
-			/* for having commas between formatting */
-			case "comma":
-				mergedDateTimeValue = ",";
-				break;
-			/* for getting weekday - Monday, Tuesday */
-			case "dayofweekstring":
-				mergedDateTimeValue = dateTimeRawValue.getDayOfWeek().toString();
-				break;
-			/* for getting the time */
-			case "time":
-				DateTimeFormatter df =  
-	            new DateTimeFormatterBuilder().appendPattern("[HH][.mm]")
-	            .parseDefaulting(ChronoField.HOUR_OF_AMPM, 0)
-	            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
-	            .toFormatter(); 
-				mergedDateTimeValue = df.format(dateTimeRawValue);
-				break;
-			/* for getting month in string - January, February */
-			case "monthstring" :
-				mergedDateTimeValue = dateTimeRawValue.getMonth().toString().toLowerCase();
-				break;
-			/* for getting date-formatter slash */
-			case "/":
-				mergedDateTimeValue = "/";
-				break;
-			/* for getting hours */
-			case "hours" :
-				mergedDateTimeValue = String.format("%02d", dateTimeRawValue.getHour());
-				break;
-			/* for getting minutes */
-			case "minutes" :
-				mergedDateTimeValue = String.format("%02d",dateTimeRawValue.getMinute());
-				break;
-			/* for getting seconds */
-			case "seconds" :
-				mergedDateTimeValue = String.format("%02d",dateTimeRawValue.getSecond());
-				break;
-			/* for getting timevalues-seperator */
-			case ":":
-				mergedDateTimeValue = ":";
-				break;
-			default:
-				break;
-			}
-		}
-		return mergedDateTimeValue;
-	}
 	
 	/*public static void main(String[] args) {
-		LocalDateTime dateTime = LocalDateTime.now();
-		Object dateTimeObj = dateTime;
-		String format = "time,space,ampm,comma,space,dayofweekstring,comma,space,dd,space,monthstring,space,yy";
-		String format1 = "dd,/,mm,/,yy,space,hours,:,minutes,:,seconds";
-		String formattedDate = mergeDateTimeAttributeValue(dateTimeObj, format);
-		String formattedDate1 = mergeDateTimeAttributeValue(dateTimeObj, format1);
-		System.out.println("formatted date ::"+formattedDate);
-		System.out.println("formatted date 1 ::"+formattedDate1);
-			
+		DateTimeFormatter dateformat = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss");
+		DateTimeFormatter dateformat1 = DateTimeFormatter.ofPattern("H:m a, EE, dd, MMMM, yyyy");
+		LocalDateTime localDateTime = LocalDateTime.now();
+		String text = localDateTime.format(dateformat);
+		String text1 = localDateTime.format(dateformat1);
+		System.out.println("formattedDate ::"+text);
+		System.out.println("formattedDate ::"+text1);
 	}*/
 	
 	
