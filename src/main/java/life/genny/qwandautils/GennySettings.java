@@ -31,6 +31,8 @@ public class GennySettings {
 
 	public static final String startupWebHook = System.getenv("STARTUP_WEB_HOOK") != null ? System.getenv("STARTUP_WEB_HOOK") : "http://"+hostIP+":"+webhookPort+"/event/"+mainrealm ;  // trigger any startup webhook notification
 
+	public static final String layoutCacheUrl = System.getenv("LAYOUT_CACHE_HOST") != null ? System.getenv("LAYOUT_CACHE_HOST") : "http://"+hostIP+":2223";
+	
 	public static String dynamicRealm()
 	{
 		return dynamicRealm(GennySettings.mainrealm);
