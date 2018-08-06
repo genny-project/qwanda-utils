@@ -8,7 +8,7 @@ public class GennySettings {
 	public static String cacheApiPort = System.getenv("CACHE_API_PORT") != null ? System.getenv("CACHE_API_PORT") : "8089";
 	public static String apiPort = System.getenv("API_PORT") != null ? System.getenv("API_PORT") : "8088";
 	public static String webhookPort = System.getenv("WEBHOOK_PORT") != null ? System.getenv("WEBHOOK_PORT") : "9123";
-	
+
 	public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL") != null ? System.getenv("REACT_APP_QWANDA_API_URL") : "http://"+hostIP+":8280";
 	public static final String vertxUrl = System.getenv("REACT_APP_VERTX_URL") != null ? System.getenv("REACT_APP_VERTX_URL") :  "http://"+hostIP+":"+apiPort;
 	public static final Boolean devMode = ("TRUE".equalsIgnoreCase(System.getenv("DEV_MODE"))||"TRUE".equalsIgnoreCase(System.getenv("GENNYDEV"))) ? true : false;
@@ -23,21 +23,21 @@ public class GennySettings {
 	public static final String username = (System.getenv("USER") == null ? "GENNY" : System.getenv("USER"));
 
 	public static final String defaultServiceKey = (System.getenv("DEFAULT_SERVICE_KEY") == null ?  "WubbaLubbaDubDub" : System.getenv("DEFAULT_SERVICE_KEY"));
-	public static final String defaultServiceEncryptedPassword = (System.getenv("DEFAULT_SERVICE_PASSWORD") == null ?  "vRO+tCumKcZ9XbPWDcAXpU7tcSltpNpktHcgzRkxj8o=" : System.getenv("DEFAULT_SERVICE_PASSWORD")); 
+	public static final String defaultServiceEncryptedPassword = (System.getenv("DEFAULT_SERVICE_PASSWORD") == null ?  "vRO+tCumKcZ9XbPWDcAXpU7tcSltpNpktHcgzRkxj8o=" : System.getenv("DEFAULT_SERVICE_PASSWORD"));
 	public static final String defaultServicePassword = (System.getenv("DEFAULT_SERVICE_UNENCRYPTED_PASSWORD") == null ?  "Yo!Dude!IamapublicPassword" : System.getenv("DEFAULT_SERVICE_UNENCRYPTED_PASSWORD"));
-	
+
 	public static final String realmDir = System.getenv("REALM_DIR") != null ? System.getenv("REALM_DIR") : "./realm";
 	public static final String rulesDir = System.getenv("RULES_DIR") != null ? System.getenv("RULES_DIR") : "/rules" ;  // TODO, docker focused
 
 	public static final String startupWebHook = System.getenv("STARTUP_WEB_HOOK") != null ? System.getenv("STARTUP_WEB_HOOK") : "http://"+hostIP+":"+webhookPort+"/event/"+mainrealm ;  // trigger any startup webhook notification
 
 	public static final String layoutCacheUrl = System.getenv("LAYOUT_CACHE_HOST") != null ? System.getenv("LAYOUT_CACHE_HOST") : "http://"+hostIP+":2223";
-	
+
 	public static String dynamicRealm()
 	{
 		return dynamicRealm(GennySettings.mainrealm);
 	}
-	
+
 	public static String dynamicRealm(final String realm) {
 		/* In Eclipse dev mode - Keycloak uses "genny" realm */
 		if (devMode) {
@@ -49,8 +49,8 @@ public class GennySettings {
 		}
 		return realm;
 	}
-	
-	
+
+
 	public static String dynamicKey(final String realm)
 	{
 		String envSecurityKey = System.getenv("ENV_SECURITY_KEY"+"_"+realm.toUpperCase());
@@ -60,7 +60,7 @@ public class GennySettings {
 			return envSecurityKey;
 		}
 	}
-	
+
 	public static String dynamicEncryptedPassword(final String realm)
 	{
 		String envServiceEncryptedPassword = System.getenv("ENV_SERVICE_PASSWORD"+"_"+realm.toUpperCase());
@@ -70,14 +70,14 @@ public class GennySettings {
 			return envServiceEncryptedPassword;
 		}
 	}
-	
+
 	public static String dynamicInitVector(final String realm)
 	{
 		String initVector = "PRJ_" + realm.toUpperCase();
 		initVector = StringUtils.rightPad(initVector, 16, '*');
 		return initVector;
 	}
-	
+
 	public static String dynamicPassword(final String realm)
 	{
 		String password = SecurityUtils.decrypt(dynamicKey(realm), dynamicInitVector(realm), dynamicEncryptedPassword(realm));
