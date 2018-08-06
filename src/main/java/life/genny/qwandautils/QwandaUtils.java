@@ -376,30 +376,25 @@ public class QwandaUtils {
 			
 			Answer usernameAnswer = new Answer(code, code, "PRI_USERNAME", username);
 			answers.add(usernameAnswer);
-			person.addAnswer(usernameAnswer);
-			
 			Answer lastnameAnswer = new Answer(code, code, "PRI_LASTNAME", lastname);
 			answers.add(lastnameAnswer);
-			person.addAnswer(lastnameAnswer);
-			
 			Answer firstnameAnswer = new Answer(code, code, "PRI_FIRSTNAME", firstname);
 			answers.add(firstnameAnswer);
-			person.addAnswer(firstnameAnswer);
-			
-			Answer emailAnswer = new Answer(code, code, "PRI_EMAIL", firstname);
+			Answer emailAnswer = new Answer(code, code, "PRI_EMAIL", email);
 			answers.add(emailAnswer);
-			person.addAnswer(emailAnswer);
-			
 			Answer realmAnswer = new Answer(code, code, "PRI_REALM", realm);
 			answers.add(realmAnswer);
-			person.addAnswer(realmAnswer);
-			
 			Answer nameAnswer = new Answer(code, code, "PRI_NAME", realm);
 			answers.add(nameAnswer);
-			person.addAnswer(nameAnswer);
-			
 			Answer keycloakIdAnswer = new Answer(code, code, "PRI_KEYCLOAK_ID", realm);
 			answers.add(keycloakIdAnswer);
+			
+			person.addAnswer(usernameAnswer);
+			person.addAnswer(lastnameAnswer);	
+			person.addAnswer(firstnameAnswer);	
+			person.addAnswer(emailAnswer);	
+			person.addAnswer(realmAnswer);
+			person.addAnswer(nameAnswer);
 			person.addAnswer(keycloakIdAnswer);
 		}
 		catch(Exception e) {}
