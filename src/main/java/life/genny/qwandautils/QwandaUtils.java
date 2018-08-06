@@ -292,6 +292,7 @@ public class QwandaUtils {
 
 		String retStr = QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/baseentitys", jsonBE, token);
 		if (retStr.equals("<html><head><title>Error</title></head><body>Internal Server Error</body></html>")) {
+			log.error("Internal Server Error trying to post ["+be.getCode()+"]");
 			return null;
 		}
 		try {
@@ -299,7 +300,7 @@ public class QwandaUtils {
 			be.setId(ret);
 			return ret;
 		} catch (NumberFormatException e) {
-			log.error("Error in posting BaseEntity "+retStr);
+			log.error("Error in posting BaseEntity ["+be.getCode()+"] ["+retStr+"] , json sent is ["+jsonBE+"]+ the qwandaServiceUrl='"+qwandaUrl+"'");
 			return -1L;
 		}
 	}
@@ -364,7 +365,7 @@ public class QwandaUtils {
 
 		String uname = getNormalisedUsername(username);
 		String code = "PER_" + uname.toUpperCase();
-		System.out.println("test");
+		System.out.println("Creating User:"+username);
 
 		Person person = new Person(code, firstname + " " + lastname);
 
