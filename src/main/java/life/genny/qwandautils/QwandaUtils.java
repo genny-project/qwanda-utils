@@ -384,7 +384,7 @@ public class QwandaUtils {
 			answers.add(emailAnswer);
 			Answer realmAnswer = new Answer(code, code, "PRI_REALM", realm);
 			answers.add(realmAnswer);
-			Answer nameAnswer = new Answer(code, code, "PRI_NAME", realm);
+			Answer nameAnswer = new Answer(code, code, "PRI_NAME", name);
 			answers.add(nameAnswer);
 			Answer keycloakIdAnswer = new Answer(code, code, "PRI_KEYCLOAK_ID", realm);
 			answers.add(keycloakIdAnswer);
