@@ -46,6 +46,7 @@ public class SecurityUtils {
     }
 
     
+    
     public static void main(String[] args) {
         String key = "Bar12345Bar12345"; // 128 bit key
         String initVector = "RandomInitVector"; // 16 bytes IV

@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -566,7 +567,7 @@ public class GennySheets {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return obj.stream().map(data -> {
+		Optional<List<Map>> ret = obj.stream().map(data -> {
 			final List<Map> map = new ArrayList<Map>();
 			String code = (String) data.get("code");
 			String name = (String) data.get("name");
@@ -583,7 +584,12 @@ public class GennySheets {
 		}).reduce((ac, acc) -> {
 			ac.addAll(acc);
 			return ac;
-		}).get();
+		});
+		if(ret.isPresent()) {
+			return ret.get();
+		} else {
+			return new ArrayList<Map>();
+		}
 	}
 
 	public List<Map> hostingImport() {
