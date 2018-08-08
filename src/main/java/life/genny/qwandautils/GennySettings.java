@@ -22,9 +22,9 @@ public class GennySettings {
 
 	public static final String username = (System.getenv("USER") == null ? "GENNY" : System.getenv("USER"));
 
-	public static final String defaultServiceKey = (System.getenv("DEFAULT_SERVICE_KEY") == null ?  "WubbaLubbaDubDub" : System.getenv("DEFAULT_SERVICE_KEY"));
-	public static final String defaultServiceEncryptedPassword = (System.getenv("DEFAULT_SERVICE_PASSWORD") == null ?  "vRO+tCumKcZ9XbPWDcAXpU7tcSltpNpktHcgzRkxj8o=" : System.getenv("DEFAULT_SERVICE_PASSWORD"));
-	public static final String defaultServicePassword = (System.getenv("DEFAULT_SERVICE_UNENCRYPTED_PASSWORD") == null ?  "Yo!Dude!IamapublicPassword" : System.getenv("DEFAULT_SERVICE_UNENCRYPTED_PASSWORD"));
+	public static final String defaultServiceKey = (System.getenv("ENV_SECURITY_KEY") == null ?  "WubbaLubbaDubDub" : System.getenv("ENV_SECURITY_KEY"));
+	public static final String defaultServiceEncryptedPassword = (System.getenv("ENV_SERVICE_PASSWORD") == null ?  "vRO+tCumKcZ9XbPWDcAXpU7tcSltpNpktHcgzRkxj8o=" : System.getenv("ENV_SERVICE_PASSWORD"));
+	public static final String defaultServicePassword = (System.getenv("DENV_SERVICE_UNENCRYPTED_PASSWORD") == null ?  "Wubba!Lubba!Dub!Dub!" : System.getenv("ENV_SERVICE_UNENCRYPTED_PASSWORD"));
 
 	public static final String realmDir = System.getenv("REALM_DIR") != null ? System.getenv("REALM_DIR") : "./realm";
 	public static final String rulesDir = System.getenv("RULES_DIR") != null ? System.getenv("RULES_DIR") : "/rules" ;  // TODO, docker focused
