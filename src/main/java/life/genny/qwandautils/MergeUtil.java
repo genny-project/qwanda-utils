@@ -149,6 +149,9 @@ public class MergeUtil {
 						} else if(attributeValue instanceof java.lang.String){
 							return getBaseEntityAttrValueAsString(be, attributeCode);
 						}
+						else {
+							return getBaseEntityAttrValueAsString(be, attributeCode);
+						}
 						
 					}
 					else if (value.getClass().equals(String.class)) {
