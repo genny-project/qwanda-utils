@@ -40,6 +40,7 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.keycloak.OAuth2Constants;
+import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessTokenResponse;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -48,6 +49,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.vertx.core.json.JsonObject;
+import life.genny.qwanda.message.QDataRegisterMessage;
 
 
 public class KeycloakUtils {
@@ -55,14 +57,15 @@ public class KeycloakUtils {
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
+	public static String register(final String token,QDataRegisterMessage register) throws IOException 
+	{
+		String newRealmRoles = "user,offline_access,uma_authorization";
+		String newGroupRoles = "/users";
+				
+		String ret = createUser(token, register.getRealm(), register.getUsername(), register.getFirstname(), register.getLastname(), register.getEmail(), register.getPassword(),newRealmRoles, newGroupRoles);
 
-	// static public String getToken(String keycloakUrl, String realm, String
-	// clientId, String secret,
-	// String username, String password) throws IOException {
-	//
-	// return
-	// getAccessToken(keycloakUrl,realm,clientId,secret,username,password).getToken();
-	// }
+		return ret;
+	}
 
 	public static String getToken(String keycloakUrl, String realm, String clientId, String secret, String username,
 			String password) throws IOException {
@@ -308,12 +311,37 @@ public class KeycloakUtils {
 	public static String createUser(String token, String realm, String newUsername,
 			String newFirstname, String newLastname, String newEmail, String newRealmRoles, String newGroupRoles)
 			throws IOException {
+		return createUser(token, realm, newUsername, newFirstname, newLastname, newEmail, "password1",newRealmRoles, newGroupRoles);
+	}
+//	public static void main(String...newGroupRoles) {
+//		try {
+//			
+//			String svcToken = getToken("https://bouncer.outcome-hub.com", "fourdegrees",  "fourdegrees",  "2b9f30c8-c40f-4469-9611-26d8ed7a1b3b",  "service", "ahzfQt6n+sIbnZ4d8TRGGw==");
+//			System.out.println(svcToken);
+//			String newRealmRoles = "user,offline_access,uma_authorization";
+//			String newGroupRoles2 = "users";
+//			
+//
+//			String id = createUser(svcToken, "fourdegrees", "cd8@gmail.com", "Callan","Delbridge", "cd8@gmail.com", "password1", newRealmRoles, newGroupRoles2);
+//			System.out.println(id);
+//			String token = getToken("https://bouncer.outcome-hub.com", "fourdegrees",  "fourdegrees",  "2b9f30c8-c40f-4469-9611-26d8ed7a1b3b",  "cd8@gmail.com", "password1");
+//			System.out.println(token);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
+	public static String createUser(String token, String realm, String newUsername,
+			String newFirstname, String newLastname, String newEmail, String password,String newRealmRoles, String newGroupRoles)
+			throws IOException {
 
 		String json = "{ " + "\"username\" : \"" + newUsername + "\"," + "\"email\" : \"" + newEmail + "\" , "
 				+ "\"enabled\" : true, " + "\"emailVerified\" : true, " + "\"firstName\" : \"" + newFirstname + "\", "
 				+ "\"lastName\" : \"" + newLastname + "\", " + "\"groups\" : [" + " \"" + newGroupRoles + "\" " + "],"
 				+ "\"realmRoles\" : [" + "\"" + newRealmRoles + "\" " + "]" + "}";
 
+		log.info("CreateUserjson="+json);
+		
 		HttpClient httpClient = new DefaultHttpClient();
 		String keycloakUrl = getKeycloakUrl();
 		
@@ -339,7 +367,7 @@ public class KeycloakUtils {
 				String locationUrl = headers[0].getValue();
 				content = locationUrl.replaceFirst(".*/(\\w+)", "$1");
 				if(content.length() > 0) {
-					KeycloakUtils.setPassword(token, keycloakUrl, realm, content, "password1");
+					KeycloakUtils.setPassword(token, keycloakUrl, realm, content, password);
 				}
 				
 				return content;
@@ -378,7 +406,7 @@ public class KeycloakUtils {
 
 	public static int setPassword(String token, String keycloakUrl, String realm, String userId, String password)
 			throws IOException {
-		String json = "{\"type\": \"password\", " + "\"temporary\": true," + "\"value\": \"" + password + "\"" + "}";
+		String json = "{\"type\": \"password\", " + "\"temporary\": false," + "\"value\": \"" + password + "\"" + "}";
 
 		HttpClient httpClient = new DefaultHttpClient();
 
