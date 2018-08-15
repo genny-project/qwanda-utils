@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>life.genny</groupId>
 	<artifactId>qwanda-utils</artifactId>
-	<version>1.0.54</version>
+	<version>1.0.55</version>
 	<name>qwanda-utils</name>
 	<description>Question and Answer Engine Utilities</description>
 
@@ -17,7 +17,7 @@
 	</licenses>
 
 	<properties>
-		<qwanda.version>1.0.54</qwanda.version>
+		<qwanda.version>1.0.55</qwanda.version>
 		<jar.finalName>${project.name}</jar.finalName>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
