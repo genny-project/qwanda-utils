@@ -3,6 +3,8 @@ package life.genny.qwandautils;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.simple.JSONArray;
+
 public class StringFormattingUtils {
 
 	
@@ -92,6 +94,25 @@ public class StringFormattingUtils {
 		
 		return splitListIgnoringSpaces;
 	}
+	
+	/**
+	 * 
+	 * @param stringifiedJSONArray - a JSON array in String format
+	 * @return returns an ArrayList of Strings that was parsed using JsonUtils
+	 * 
+	 */
+	public static ArrayList<String> convertToStringArray(String stringifiedJSONArray) {
+		if(stringifiedJSONArray != null) {
+			JSONArray arr = JsonUtils.fromJson(stringifiedJSONArray, JSONArray.class);
+			if(arr.size() > 0) {
+				return arr;
+			}
+			return null;
+		}
+		return null;
+	}
+	
+	
 
 
 }
