@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 public class GennySettings {
 	public static String defaultLocalIP = "10.123.123.123";
 	public static String hostIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : System.getenv("MYIP");   // remember to set up this local IP on the host
+	public static String myIP = System.getenv("MYIP") != null ? System.getenv("MYIP") : System.getenv("HOSTIP");   // remember to set up this local IP on the host
 	public static String cacheApiPort = System.getenv("CACHE_API_PORT") != null ? System.getenv("CACHE_API_PORT") : "8089";
 	public static String apiPort = System.getenv("API_PORT") != null ? System.getenv("API_PORT") : "8088";
 	public static String pontoonPort = System.getenv("PONTOON_PORT") != null ? System.getenv("PONTOON_PORT") : "8086";
