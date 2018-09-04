@@ -1457,5 +1457,9 @@ public class QwandaUtils {
 		return qwandaServiceUrl;
 	}
 
+	public static String getUniqueCode(int numberOfDigitsForUniqueCode) {
+		String uniqueCode = UUID.randomUUID().toString().substring(0, numberOfDigitsForUniqueCode).toUpperCase();
+		return uniqueCode;
+	}
 
 }
