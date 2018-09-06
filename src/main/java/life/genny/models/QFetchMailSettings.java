@@ -8,8 +8,8 @@ public class QFetchMailSettings {
 	private String mailHost;
 	private String emailUsername;
 	private String emailPassword;
-	private String imapInbox;
-	private String imapArchive;
+	private String imapNew;
+	private String imapProcessed;
 	private String imapError;
 	
 	private String[] column2attributeMapping;
@@ -21,19 +21,34 @@ public class QFetchMailSettings {
 	 * @param mailHost
 	 * @param emailUsername
 	 * @param emailPassword
-	 * @param imapInbox
-	 * @param imapArchive
+	 * @param imapNew
+	 * @param imapProcessed
 	 * @param imapError
 	 * @param column2attributeMapping
 	 */
 	public QFetchMailSettings(BaseEntity sourceBaseEntity, String mailHost, String emailUsername, String emailPassword,
-			String imapInbox, String imapArchive, String imapError, String[] column2attributeMapping) {
+			String imapNew, String imapProcessed, String imapError) {
+		this(sourceBaseEntity, mailHost, emailUsername, emailPassword, imapNew, imapProcessed, imapError,new String[0]);
+	}
+	
+	/**
+	 * @param sourceBaseEntityCode
+	 * @param mailHost
+	 * @param emailUsername
+	 * @param emailPassword
+	 * @param imapNew
+	 * @param imapProcessed
+	 * @param imapError
+	 * @param column2attributeMapping
+	 */
+	public QFetchMailSettings(BaseEntity sourceBaseEntity, String mailHost, String emailUsername, String emailPassword,
+			String imapNew, String imapProcessed, String imapError, String[] column2attributeMapping) {
 		this.sourceBaseEntity = sourceBaseEntity;
 		this.mailHost = mailHost;
 		this.emailUsername = emailUsername;
 		this.emailPassword = emailPassword;
-		this.imapInbox = imapInbox;
-		this.imapArchive = imapArchive;
+		this.imapNew = imapNew;
+		this.imapProcessed = imapProcessed;
 		this.imapError = imapError;
 		this.column2attributeMapping = column2attributeMapping;
 	}
@@ -67,17 +82,17 @@ public class QFetchMailSettings {
 	}
 
 	/**
-	 * @return the imapInbox
+	 * @return the imapNew
 	 */
-	public String getImapInbox() {
-		return imapInbox;
+	public String getImapNew() {
+		return imapNew;
 	}
 
 	/**
-	 * @return the imapArchive
+	 * @return the imapProcessed
 	 */
-	public String getImapArchive() {
-		return imapArchive;
+	public String getImapProcessed() {
+		return imapProcessed;
 	}
 
 	/**
