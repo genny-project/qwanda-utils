@@ -3,9 +3,22 @@ package life.genny.qwandautils;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.security.auth.x500.X500Principal;
+import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
+import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
+
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -18,97 +31,81 @@ import static io.jsonwebtoken.SignatureAlgorithm.RS256;
 import static java.lang.Boolean.TRUE;
 
 public class SecurityUtils {
-    public static String encrypt(String key, String initVector, String value) {
-        try {
-            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+	public static String encrypt(String key, String initVector, String value) {
+		try {
+			IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
+			SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
 
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+			cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
 
-            byte[] encrypted = cipher.doFinal(value.getBytes());
-            System.out.println("encrypted string: "
-                    + Base64.encodeBase64String(encrypted));
+			byte[] encrypted = cipher.doFinal(value.getBytes());
+			System.out.println("encrypted string: " + Base64.encodeBase64String(encrypted));
 
-            return Base64.encodeBase64String(encrypted);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+			return Base64.encodeBase64String(encrypted);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    public static String decrypt(String key, String initVector, String encrypted) {
-        try {
-            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+	public static String decrypt(String key, String initVector, String encrypted) {
+		try {
+			IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
+			SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
 
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-            cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+			cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
 
-            byte[] original = cipher.doFinal(Base64.decodeBase64(encrypted));
+			byte[] original = cipher.doFinal(Base64.decodeBase64(encrypted));
 
-            return new String(original);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+			return new String(original);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    
-    
-    public static void main(String[] args) {
-        String key = "Bar12345Bar12345"; // 128 bit key
-        String initVector = "RandomInitVector"; // 16 bytes IV
+	public static void main(String[] args) {
+		String key = "Bar12345Bar12345"; // 128 bit key
+		String initVector = "RandomInitVector"; // 16 bytes IV
 
-        System.out.println(decrypt(key, initVector,
-                encrypt(key, initVector, "Hello World")));
-    }
-    
-  
+		System.out.println(decrypt(key, initVector, encrypt(key, initVector, "Hello World")));
+	}
 
-    public static String createJWT() 
-                throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
 
-            // Sample JWT creation. The example uses SHA256withRSA signature algorithm.
 
-            // API key information (substitute actual credential values)
-            String orgId = "048ABCD8562023457F000101@AdobeOrg";
-            String technicalAccountId = "AABCD8DB57F4B32801234033@techacct.adobe.com";
-            String apiKey = "ec9a2091e2c64f0492c612344700abcd";
-
-            // Set expirationDate in milliseconds since epoch to 24 hours ahead of now 
-            Long expirationTime = System.currentTimeMillis() / 1000 + 86400L;
-
-            // Metascopes associated to key
-            String metascopes[] = new String[]{"genny"};
-
-            // Secret key as byte array. Secret key file should be in DER encoded format.
-            byte[] privateKeyFileContent = Files.readAllBytes(Paths.get("/path/to/secret/key"));
-
-            String imsHost = "app.genny.life";
-
-            // Create the private key
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            KeySpec ks = new PKCS8EncodedKeySpec(privateKeyFileContent);
-            RSAPrivateKey privateKey = (RSAPrivateKey) keyFactory.generatePrivate(ks);
-
-            // Create JWT payload
-            Map jwtClaims = new HashMap<>();
-            jwtClaims.put("iss", orgId);
-            jwtClaims.put("sub", technicalAccountId);
-            jwtClaims.put("exp", expirationTime);
-            jwtClaims.put("aud", "https://" + imsHost + "/c/" + apiKey);
-            for (String metascope : metascopes) {
-                jwtClaims.put("https://" + imsHost + "/s/" + metascope, TRUE);
-            }
-
-            // Create the final JWT token
-            String jwtToken = Jwts.builder().setClaims(jwtClaims).signWith(RS256, privateKey).compact();
-
-            return jwtToken;
-        }
-
+	public static String createJwt(String id, String issuer, String subject, long ttlMillis, String apiSecret, Map<String,Object> claims) {
+	 
+	    //The JWT signature algorithm we will be using to sign the token
+	    SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+	 
+	    long nowMillis = System.currentTimeMillis();
+	    Date now = new Date(nowMillis);
+	 
+	    //We will sign our JWT with our ApiKey secret
+	    byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(apiSecret);
+	    Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
+	 
+	    //Let's set the JWT Claims
+	    JwtBuilder builder = Jwts.builder().setId(id)
+	                                .setIssuedAt(now)
+	                                .setSubject(subject)
+	                                .setIssuer(issuer)
+	                                .addClaims(claims)
+	                                .signWith(signatureAlgorithm, signingKey);
+	 
+	    //if it has been specified, let's add the expiration
+	    if (ttlMillis >= 0) {
+	    long expMillis = nowMillis + ttlMillis;
+	        Date exp = new Date(expMillis);
+	        builder.setExpiration(exp);
+	    }
+	 
+	    //Builds the JWT and serializes it to a compact, URL-safe string
+	    return builder.compact();
+	}
 
 }
