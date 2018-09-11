@@ -169,7 +169,7 @@ public class MailUtils
 			store = session.getStore("imaps");
 			store.connect(settings.getMailHost(), settings.getEmailUsername(), settings.getEmailPassword());
 
-			inbox = store.getFolder(settings.getImapInbox());
+			inbox = store.getFolder(settings.getImapNew());
 			inbox.open(Folder.READ_ONLY);
 			int messageCount = inbox.getMessageCount();
 			System.out.println("Number of messagesa in inbox = " + messageCount);

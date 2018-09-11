@@ -5,6 +5,17 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
+import io.jsonwebtoken.Jwts;
+
+import java.io.IOException;
+import java.nio.file.*;
+import java.security.*;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.spec.*;
+import java.util.*;
+
+import static io.jsonwebtoken.SignatureAlgorithm.RS256;
+import static java.lang.Boolean.TRUE;
 
 public class SecurityUtils {
     public static String encrypt(String key, String initVector, String value) {
@@ -54,4 +65,50 @@ public class SecurityUtils {
         System.out.println(decrypt(key, initVector,
                 encrypt(key, initVector, "Hello World")));
     }
+    
+  
+
+    public static String createJWT() 
+                throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+
+            // Sample JWT creation. The example uses SHA256withRSA signature algorithm.
+
+            // API key information (substitute actual credential values)
+            String orgId = "048ABCD8562023457F000101@AdobeOrg";
+            String technicalAccountId = "AABCD8DB57F4B32801234033@techacct.adobe.com";
+            String apiKey = "ec9a2091e2c64f0492c612344700abcd";
+
+            // Set expirationDate in milliseconds since epoch to 24 hours ahead of now 
+            Long expirationTime = System.currentTimeMillis() / 1000 + 86400L;
+
+            // Metascopes associated to key
+            String metascopes[] = new String[]{"genny"};
+
+            // Secret key as byte array. Secret key file should be in DER encoded format.
+            byte[] privateKeyFileContent = Files.readAllBytes(Paths.get("/path/to/secret/key"));
+
+            String imsHost = "app.genny.life";
+
+            // Create the private key
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            KeySpec ks = new PKCS8EncodedKeySpec(privateKeyFileContent);
+            RSAPrivateKey privateKey = (RSAPrivateKey) keyFactory.generatePrivate(ks);
+
+            // Create JWT payload
+            Map jwtClaims = new HashMap<>();
+            jwtClaims.put("iss", orgId);
+            jwtClaims.put("sub", technicalAccountId);
+            jwtClaims.put("exp", expirationTime);
+            jwtClaims.put("aud", "https://" + imsHost + "/c/" + apiKey);
+            for (String metascope : metascopes) {
+                jwtClaims.put("https://" + imsHost + "/s/" + metascope, TRUE);
+            }
+
+            // Create the final JWT token
+            String jwtToken = Jwts.builder().setClaims(jwtClaims).signWith(RS256, privateKey).compact();
+
+            return jwtToken;
+        }
+
+
 }
