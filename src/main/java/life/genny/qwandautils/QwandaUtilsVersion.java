@@ -29,7 +29,7 @@ public class QwandaUtilsVersion {
 		   Properties properties = new Properties();
 		    try {
 		    	QwandaUtilsVersion qv = new QwandaUtilsVersion();
-		    	properties.load(qv.getClass().getResourceAsStream("/git.properties" ));
+		    	properties.load(qv.getClass().getResourceAsStream("/qwanda-utils-git.properties" ));
 		     // properties.load(Thread.currentThread().getContextClassLoader().getResource("git.properties")
 		      //    .openStream());
 		    } catch (IOException e) {
