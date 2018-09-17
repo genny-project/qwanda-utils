@@ -14,14 +14,24 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
 
 public class GitUtils {
+  
+  public static final String GIT_PROP_EXTENSION = "-git.properties";
+  
   public static String gitGet(final String branch, final String project,
-      final String repositoryName, final String layoutFilename) throws ClientProtocolException,
-      IOException, InvalidRemoteException, TransportException, GitAPIException {
+      final String repositoryName, final String layoutFilename) throws IOException,
+          GitAPIException {
     String retJson = "";
 
     final Git git = Git.cloneRepository()
@@ -61,6 +71,28 @@ public class GitUtils {
       }
     }
     return retJson;
+  }
+  
+  public static String getGitVersionString(String projectDependencies) throws IOException {
+    Properties gitProperties;
+    JsonObject response = new JsonObject();
+    JsonArray versionArray = new JsonArray();
+    Map<String,Object> versionMap;
+    StringTokenizer st = new StringTokenizer(projectDependencies, ",");
+    while (st.hasMoreElements()) {
+      String projectName = st.nextToken();
+      String gitPropertiesFileName = projectName + GIT_PROP_EXTENSION;
+      URL gitPropertiesURL = Thread.currentThread().getContextClassLoader().getResource(gitPropertiesFileName);
+      if(gitPropertiesURL != null && gitPropertiesURL.getFile() != "") {
+        gitProperties = new Properties();
+        gitProperties.load(gitPropertiesURL.openStream());
+        versionMap = new HashMap<>();
+        versionMap.put(projectName, new JsonObject(JsonUtils.toJson(gitProperties)));
+        versionArray.add(versionMap);
+      }
+      response.put("version", versionArray);
+    }
+    return response.toString();
   }
 
 
