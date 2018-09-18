@@ -67,6 +67,16 @@
 		<system>jenkins</system>
 		<url>https://jenkins.outcome-hub.com</url>
 	</ciManagement>
+	<distributionManagement>
+	  <repository>
+	    <id>life.genny</id>
+	    <url>https://nexus.outcome-hub.com/nexus/content/repositories/life.genny</url>
+	  </repository>
+	   <snapshotRepository>
+	      <id>nexus-snapshots</id>
+	      <url>http://nexus.outcome-hub.com/nexus/content/repositories/snapshots</url>
+	   </snapshotRepository>
+	</distributionManagement>
 	<repositories>
 		<repository>
 			<id>JBoss repository</id>
@@ -485,6 +495,25 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+			   <groupId>org.sonatype.plugins</groupId>
+			   <artifactId>nexus-staging-maven-plugin</artifactId>
+			   <version>1.5.1</version>
+			   <executions>
+			      <execution>
+			         <id>default-deploy</id>
+			         <phase>deploy</phase>
+			         <goals>
+			            <goal>deploy</goal>
+			         </goals>
+			      </execution>
+			   </executions>
+			   <configuration>
+			      <serverId>life.genny</serverId>
+			      <nexusUrl>https://nexus.outcome-hub.com/nexus/</nexusUrl>
+			      <skipStaging>true</skipStaging>
+			   </configuration>
 			</plugin>
 		</plugins>
 	</build>
