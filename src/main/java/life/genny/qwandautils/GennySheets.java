@@ -334,6 +334,7 @@ public class GennySheets {
 				fields.put("name", name);
 				fields.put("dataType", dataType);
 				fields.put("privacy", privacy);
+				
 				fields.put("description", description);
 				fields.put("help", help);
 				fields.put("placeholder", placeholder);
@@ -468,6 +469,7 @@ public class GennySheets {
 				fields.put("name", name);
 				fields.put("attribute_code", attribute_code);
 				fields.put("html", html);
+				fields.put("readonly",  getBooleanString(object.get("readonly")));
 				map.put(code, fields);
 			}
 			return map;
@@ -504,7 +506,7 @@ public class GennySheets {
 				fields.put("targetCode", targetCode);
 				fields.put("weight", weight);
 				fields.put("mandatory", mandatory);
-
+				fields.put("readonly",  getBooleanString(object.get("readonly")));
 				map.put(targetCode + parentCode, fields);
 			}
 			return map;
@@ -525,6 +527,7 @@ public class GennySheets {
 		return obj.stream().map(object -> {
 			final Map<String, Map> map = new HashMap<String, Map>();
 			final String disabled = (String) object.get("disabled");
+
 			if ((disabled == null) || (StringUtils.isBlank(disabled)) || ("FALSE".equalsIgnoreCase(disabled))
 					|| ("NO".equalsIgnoreCase(disabled))) {
 
@@ -533,11 +536,9 @@ public class GennySheets {
 				final String sourceCode = (String) object.get("sourceCode");
 				final String targetCode = (String) object.get("targetCode");
 				final String attributeCode = (String) object.get("attributeCode");
-				final String refused = (String) object.get("refused");
-				final String expired = (String) object.get("expired");
 				final String expectedId = (String) object.get("expectedId");
 				final String weight = (String) object.get("weight");
-				final String mandatory = (String) object.get("mandatory");
+				
 				Map<String, String> fields = new HashMap<String, String>();
 				fields.put("question_code", question_code);
 				fields.put("name", name);
@@ -545,12 +546,13 @@ public class GennySheets {
 				fields.put("targetCode", targetCode);
 				fields.put("sourceCode", sourceCode);
 				fields.put("attributeCode", attributeCode);
-				fields.put("refused", refused);
-				fields.put("expired", expired);
 				fields.put("expectedId", expectedId);
 				fields.put("weight", weight);
-				fields.put("mandatory", mandatory);
-
+				fields.put("refused",  getBooleanString(object.get("refused")));
+				fields.put("expired",  getBooleanString(object.get("expired")));
+				fields.put("mandatory",  getBooleanString(object.get("mandatory")));
+				fields.put("readonly",  getBooleanString(object.get("readonly")));
+				fields.put("hidden",  getBooleanString(object.get("hidden")));
 				map.put(question_code + sourceCode + targetCode, fields);
 			}
 			return map;
@@ -560,6 +562,14 @@ public class GennySheets {
 		}).get();
 	}
 
+	private String getBooleanString(Object obj) 
+	{
+		final String fieldValue = (String) obj;
+		String ret = ((fieldValue == null) || (StringUtils.isBlank(fieldValue)) || ("FALSE".equalsIgnoreCase(fieldValue))
+				|| ("NO".equalsIgnoreCase(fieldValue))) ? "FALSE":"TRUE";
+		return ret;
+	}
+	
 	public List<Map> projectsImport() {
 		List<Map> obj = new ArrayList<Map>();
 		try {
