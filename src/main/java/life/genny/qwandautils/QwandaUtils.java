@@ -1335,6 +1335,10 @@ public class QwandaUtils {
 
 	}
 
+	/*
+	 * Sends the current UTC datetime of the server TimeZone
+	 * It is same as in the Rulesservice, can be removed from here later 
+	 */
 	public static String getCurrentUTCDateTime() {
 
 		ZonedDateTime now = ZonedDateTime.now( ZoneOffset.UTC );
