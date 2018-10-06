@@ -5,11 +5,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.invoke.MethodHandles;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 import javax.mail.Address;
 import javax.mail.BodyPart;
@@ -81,7 +84,7 @@ public class MailUtils
     return new String(newStringBuffer);
   }
 
-	public static List<BaseEntity> readCSV(BaseEntity source, InputStream is, final String filename, String[] mapping) {
+	public static List<BaseEntity> readCSV(BaseEntity source, InputStream is, String msgId,final String filename, String[] mapping, final String bePrefix) {
 
 		List<BaseEntity> baseEntitys = new ArrayList<BaseEntity>();
 
@@ -117,7 +120,7 @@ public class MailUtils
 					continue; // skip header line
 				}
 
-				BaseEntity be = new BaseEntity(QwandaUtils.getUniqueId("RAW"), filename + "-" + rowIndex);
+				BaseEntity be = new BaseEntity(bePrefix+"_"+msgId+"-"+UUID.randomUUID().toString().substring(0, 10), filename + "-" + rowIndex);
 				int columnIndex = 0;
 				for (String columnValue : nextRecord) {
 					String value = StringUtils.trim(columnValue).replaceAll("\\p{C}", "?");
@@ -149,7 +152,7 @@ public class MailUtils
 		return baseEntitys;
 	}
 	
-	public static List<BaseEntity> fetchMail(QFetchMailSettings settings) {
+	public static List<BaseEntity> fetchMail(QFetchMailSettings settings, final String bePrefix) {
 		
 		List<BaseEntity> importBEs = new ArrayList<BaseEntity>();
 		
@@ -187,6 +190,7 @@ public class MailUtils
 	            System.out.println(msg.getFlags());
 	            System.out.println("Body: \n"+ msg.getContent());
 	            System.out.println(msg.getContentType());
+	            System.out.print(msg.getReceivedDate()); // Use this as unique id
 
 				try {
 					Multipart multipart = (Multipart) msg.getContent();
@@ -202,7 +206,13 @@ public class MailUtils
 						System.out.println("\tMessage attachment filename is " + bodyPart.getFileName());
 						System.out.println("\tMessage attachment type is " + bodyPart.getContentType());
 						InputStream is = bodyPart.getInputStream();
-						List<BaseEntity> importBEsFromEmail = readCSV(settings.getSourceBaseEntity(),is,bodyPart.getFileName(),settings.getColumn2attributeMapping());
+						Date rxDate = msg.getReceivedDate();
+						String pattern = "yyyyMMddHHmmss";
+						SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+
+						String date = simpleDateFormat.format(rxDate);
+						
+						List<BaseEntity> importBEsFromEmail = readCSV(settings.getSourceBaseEntity(),is,date,bodyPart.getFileName(),settings.getColumn2attributeMapping(), bePrefix);
 						importBEs.addAll(importBEsFromEmail);
 						
 						for (BaseEntity be : importBEs) {
