@@ -10,6 +10,8 @@ public class GennySettings {
 	public static String apiPort = System.getenv("API_PORT") != null ? System.getenv("API_PORT") : "8088";
 	public static String pontoonPort = System.getenv("PONTOON_PORT") != null ? System.getenv("PONTOON_PORT") : "8086";
 	public static String webhookPort = System.getenv("WEBHOOK_PORT") != null ? System.getenv("WEBHOOK_PORT") : "9123";
+	
+	public static int  timeoutInSecs = 30;  // used in api timeout
 
 	public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL") != null ? System.getenv("REACT_APP_QWANDA_API_URL") : "http://"+hostIP+":8280";
 	public static final String vertxUrl = System.getenv("REACT_APP_VERTX_URL") != null ? System.getenv("REACT_APP_VERTX_URL") :  "http://"+hostIP+":"+apiPort;

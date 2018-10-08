@@ -68,9 +68,6 @@ import life.genny.qwanda.validation.Validation;
 
 public class QwandaUtils {
 
-	private static int apiPort = System.getenv("API_PORT") != null ? (Integer.parseInt(System.getenv("API_PORT")))
-			: 8088;
-	private static String hostIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : "127.0.0.1";
 
 
 	private static String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
@@ -88,14 +85,11 @@ public class QwandaUtils {
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
-	public static String apiGet(String getUrl, final String authToken) throws ClientProtocolException, IOException {
+	public static String apiGet(String getUrl, final String authToken, final int timeout) throws ClientProtocolException, IOException {
 
 		log.debug("GET:" + getUrl + ":");
-		if ("http://qwanda-service.genny.life/qwanda/baseentitys/PER_SHARONCROW66_AT_GMAILCOM/attributes".equalsIgnoreCase(getUrl)) {
-			log.debug("match");
-		}
 
-		int timeout = 20;
+
 		RequestConfig config = RequestConfig.custom()
 				.setConnectTimeout(timeout * 1000)
 				.setConnectionRequestTimeout(timeout * 1000)
@@ -139,6 +133,12 @@ public class QwandaUtils {
 			IOUtils.closeQuietly(httpclient);
 		}
 
+	}
+	
+	
+	public static String apiGet(String getUrl, final String authToken) throws ClientProtocolException, IOException {
+
+		return apiGet(getUrl, authToken, GennySettings.timeoutInSecs);
 	}
 	
 
@@ -387,7 +387,7 @@ public class QwandaUtils {
 			answers.add(realmAnswer);
 			Answer nameAnswer = new Answer(code, code, "PRI_NAME", name);
 			answers.add(nameAnswer);
-			Answer keycloakIdAnswer = new Answer(code, code, "PRI_KEYCLOAK_ID", realm);
+			Answer keycloakIdAnswer = new Answer(code, code, "PRI_KEYCLOAK_UUID", realm);
 			answers.add(keycloakIdAnswer);
 			
 			person.addAnswer(usernameAnswer);
@@ -1146,7 +1146,7 @@ public class QwandaUtils {
 				.setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();
 		CloseableHttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
 
-		final HttpPost post = new HttpPost("http://" + hostIP + ":" + apiPort + "/" + key + "/" + uuJson);
+		final HttpPost post = new HttpPost("http://" + GennySettings.hostIP + ":" + GennySettings.apiPort + "/" + key + "/" + uuJson);
 		post.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 
 		final StringEntity input = new StringEntity(json); // Do this to test out
@@ -1175,7 +1175,7 @@ public class QwandaUtils {
 		RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 1000)
 				.setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();
 		CloseableHttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-		HttpGet request = new HttpGet("http://" + hostIP + ":" + apiPort + "/" + key); // GET Request
+		HttpGet request = new HttpGet("http://" + GennySettings.hostIP + ":" + GennySettings.apiPort + "/" + key); // GET Request
 
 		if (authToken != null) {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
@@ -1440,19 +1440,7 @@ public class QwandaUtils {
 	}
 
 
-	/**
-	 * @return the apiPort
-	 */
-	public static int getApiPort() {
-		return apiPort;
-	}
-
-	/**
-	 * @return the hostIP
-	 */
-	public static String getHostIP() {
-		return hostIP;
-	}
+	
 
 	/**
 	 * @return the qwandaServiceUrl

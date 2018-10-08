@@ -64,7 +64,7 @@ public class MailUtilsTest {
 			QFetchMailSettings settings = new QFetchMailSettings(source, host, username, password, "Genny",
 					"Genny/Archive", "Genny/Error", COLUMN_ATTRIBUTE_MAPPING);
 
-			MailUtils.fetchMail(settings);
+			MailUtils.fetchMail(settings,"BEG_");
 		}
 	}
 
