@@ -120,7 +120,7 @@ public class MailUtils
 					continue; // skip header line
 				}
 
-				BaseEntity be = new BaseEntity(bePrefix+"_"+msgId+"-"+UUID.randomUUID().toString().substring(0, 10), filename + "-" + rowIndex);
+				BaseEntity be = new BaseEntity(bePrefix+"_"+msgId+"-"+String.format("%03d", rowIndex), filename + "-" + rowIndex);
 				int columnIndex = 0;
 				for (String columnValue : nextRecord) {
 					String value = StringUtils.trim(columnValue).replaceAll("\\p{C}", "?");
