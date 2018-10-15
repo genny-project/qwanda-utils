@@ -161,24 +161,6 @@ public class GennySheets {
     return credential;
   }
 
-  public <T> List<T> transform(final List<List<Object>> values, final Class object) {
-    final List<String> keys = new ArrayList<String>();
-    final List<T> k = new ArrayList<T>();
-    for (final Object key : values.get(0)) {
-      keys.add((String) key);
-    }
-    values.remove(0);
-    for (final List row : values) {
-      final Map<String, Object> mapper = new HashMap<String, Object>();
-      for (int counter = 0; counter < row.size(); counter++) {
-        mapper.put(keys.get(counter), row.get(counter));
-      }
-      // out.println(mapper);
-      final T lo = (T) JsonUtils.fromJson(mapper.toString(), object);
-      k.add(lo);
-    }
-    return k;
-  }
 
   public <T> List<T> transformNotKnown(final List<List<Object>> values) {
     final List<String> keys = new ArrayList<String>();
@@ -197,31 +179,11 @@ public class GennySheets {
     return k;
   }
 
-  public <T> List<T> getBeans(final Class clazz) throws IOException {
-    final String range = clazz.getSimpleName() + RANGE;
-    final ValueRange response = service.spreadsheets().values().get(sheetId, range).execute();
-    final List<List<Object>> values = response.getValues();
-    return transform(values, clazz);
-  }
-
-  public List<List<Object>> getStrings(final String sheetName, final String range)
-      throws IOException {
-    final String absoluteRange = sheetName + RANGE;
-    final ValueRange response =
-        service.spreadsheets().values().get(sheetId, absoluteRange).execute();
-    final List<List<Object>> values = response.getValues();
-    return values;
-  }
 
   public <T> List<T> fetchTable(final String sheetName) throws IOException {
     final String absoluteRange = sheetName + RANGE;
     final ValueRange response;
-    // try {
     response = service.spreadsheets().values().get(sheetId, absoluteRange).execute();
-    // } catch (GoogleJsonResponseException e) {
-    // System.out.println("dfsdfsdfsdfsd");
-    // return null;
-    // }
     final List<List<Object>> values = response.getValues();
     return transformNotKnown(values);
   }
@@ -248,36 +210,7 @@ public class GennySheets {
 
     return null;
   }
-
-//  enum ColumnName {
-//    CODE, NAME, ICON, DEPLOY_CODE, REGEX, GROUP_CODES, RECURSIVE, MULTI_ALLOWED, VALIDATIONS, INPUTMASK, DISABLED, PRIVACY, DESCRIPTION, HELP, DEFAULTVALUE, WEIGHT, VALUESTRING, BASEENTITYCODE, ATTRIBUTECODE, PARENTCODE, TARGETCODE, LINKCODE, HTML, MANDATORY, QUESTION_CODE, SOURCECODE, REFUSED, EXPIRED, EXPECTEDID, MODULE, SHEETID, CLIENTSECRET, SUBJECT, SMS, EMAIL, TOAST, PLACEHOLDER, DATATYPE
-//  }
-
-
-  public static void main(String... ac) {
-//    String name2 = ColumnName.CODE.name();
-
-    List<Map<String, String>> rowFields = new ArrayList<Map<String, String>>();
-    HashMap<String, String> hashMap = new HashMap<String, String>();
-    hashMap.put("code", "CODE_STRING");
-    rowFields.add(hashMap);
-    hashMap = new HashMap<String, String>();
-    hashMap.put("deploy_code", "hel, lsd");
-    rowFields.add(hashMap);
-
-    Set<String> collect2 = rowFields.stream().flatMap(field -> {
-      final Map<String, Map> map = new HashMap<String, Map>();
-
-      Set<String> collect = field.keySet().stream().map(columnName -> columnName.toUpperCase())
-          .collect(Collectors.toSet());
-
-      return collect.stream();
-    }).collect(Collectors.toSet());
-
-    collect2.stream().forEach(System.out::println);
-    // ColumnName.valueOf(arg0);
-  }
-
+  
   private final String CODE = "code";
   private final String BASEENTITYCODE = "baseEntityCode";
   private final String ATTRIBUTECODE = "attributeCode";

@@ -215,7 +215,7 @@ public class GoogleUtilsTest {
     public void getA() {
       List<Map> objs = null;
       try {
-        objs = sheets.row2DoubleTuples("DataType");
+        objs = sheets.fetchTable("DataType");
       } catch (final IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
