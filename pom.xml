@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>life.genny</groupId>
 	<artifactId>qwanda-utils</artifactId>
-	<version>1.0.59</version>
+	<version>1.0.64</version>
 	<name>qwanda-utils</name>
 	<description>Question and Answer Engine Utilities</description>
 
@@ -17,7 +17,7 @@
 	</licenses>
 
 	<properties>
-		<qwanda.version>1.0.59</qwanda.version>
+		<qwanda.version>1.0.64</qwanda.version>
 		<jar.finalName>${project.name}</jar.finalName>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -45,7 +45,7 @@
 
 
 		<!-- <jackson.version>2.8.7</jackson.version> -->
-		<jackson.version>2.6.3</jackson.version>
+		<jackson.version>2.8.7</jackson.version>
 		<version.mysql-connector>6.0.6</version.mysql-connector>
 		<jersey-version>2.13</jersey-version>
 		<version.apache-httpclient>4.5.5</version.apache-httpclient>
@@ -152,7 +152,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-                        <version>3.7</version>
+                        <version>3.8.1</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -185,7 +185,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.9.1</version>
+			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.keycloak</groupId>
@@ -224,11 +224,12 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-jaxrs</artifactId>
-			<version>1.9.13</version>
-		</dependency>
+<dependency>
+    <groupId>org.codehaus.jackson</groupId>
+    <artifactId>jackson-jaxrs</artifactId>
+    <version>1.9.13</version>
+</dependency>
+
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
