@@ -165,6 +165,8 @@ public class MailUtils
         Session session = null;
         Store store = null;
         Folder inbox = null;
+        Folder processed = null;
+        Folder error = null;
 	    try
 		{
 			// Connect to the server
@@ -173,6 +175,9 @@ public class MailUtils
 			store.connect(settings.getMailHost(), settings.getEmailUsername(), settings.getEmailPassword());
 
 			inbox = store.getFolder(settings.getImapNew());
+			processed = store.getFolder(settings.getImapProcessed());
+			error = store.getFolder(settings.getImapError());
+			
 			inbox.open(Folder.READ_ONLY);
 			int messageCount = inbox.getMessageCount();
 			System.out.println("Number of messagesa in inbox = " + messageCount);
@@ -212,17 +217,26 @@ public class MailUtils
 
 						String date = simpleDateFormat.format(rxDate);
 						
-						List<BaseEntity> importBEsFromEmail = readCSV(settings.getSourceBaseEntity(),is,date,bodyPart.getFileName(),settings.getColumn2attributeMapping(), bePrefix);
-						importBEs.addAll(importBEsFromEmail);
-						
-						for (BaseEntity be : importBEs) {
-							System.out.println(be);
-							for (EntityAttribute ea : be.getBaseEntityAttributes()) {
-								System.out.print(ea.getAttributeCode()+":"+ea.getValueString()+", ");
+						try {
+							List<BaseEntity> importBEsFromEmail = readCSV(settings.getSourceBaseEntity(),is,date,bodyPart.getFileName(),settings.getColumn2attributeMapping(), bePrefix);
+							importBEs.addAll(importBEsFromEmail);
+							
+							for (BaseEntity be : importBEs) {
+								System.out.println(be);
+								for (EntityAttribute ea : be.getBaseEntityAttributes()) {
+									System.out.print(ea.getAttributeCode()+":"+ea.getValueString()+", ");
+								}
+								System.out.println();
 							}
-							System.out.println();
-						}
 
+							Message[] processedMessages = new Message[1];
+							processedMessages[0] = msg;
+							inbox.copyMessages(processedMessages, processed);
+						} catch (Exception e) {
+							Message[] errorMessages = new Message[1];
+							errorMessages[0] = msg;
+							inbox.copyMessages(errorMessages, error);
+						}
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -251,4 +265,6 @@ public class MailUtils
 	    return importBEs;
 }
 
+	
+	
 }
