@@ -129,8 +129,10 @@ public class QwandaUtils {
 		}
 
 		finally {
-			IOUtils.closeQuietly(response);
-			IOUtils.closeQuietly(httpclient);
+			response.close();
+			httpclient.close();
+			//IOUtils.closeQuietly(response);  removed commons-io
+			//IOUtils.closeQuietly(httpclient);
 		}
 
 	}
@@ -169,8 +171,10 @@ public class QwandaUtils {
 			return responseString;
 		} 
 		finally {
-			IOUtils.closeQuietly(response);
-			IOUtils.closeQuietly(httpclient);
+			response.close();
+			httpclient.close();
+		//	IOUtils.closeQuietly(response);
+		//	IOUtils.closeQuietly(httpclient);
 		}
 
 	}
@@ -209,8 +213,10 @@ public class QwandaUtils {
 
 			return responseString;
 		} finally {
-			IOUtils.closeQuietly(response);
-			IOUtils.closeQuietly(httpclient);
+			response.close();
+			httpclient.close();
+			//IOUtils.closeQuietly(response);
+			//IOUtils.closeQuietly(httpclient);
 		}
 	}
 
@@ -240,8 +246,10 @@ public class QwandaUtils {
 
 			return responseString;
 		} finally {
-			IOUtils.closeQuietly(response);
-			IOUtils.closeQuietly(httpclient);
+			response.close();
+			httpclient.close();
+		//	IOUtils.closeQuietly(response);
+		//	IOUtils.closeQuietly(httpclient);
 		}
 	}
 	public static String apiPutEntity(final String postUrl, final String entityString, final String authToken)
@@ -265,8 +273,10 @@ public class QwandaUtils {
 			String responseString = EntityUtils.toString(entity);
 			return responseString;
 		} finally {
-			IOUtils.closeQuietly(response);
-			IOUtils.closeQuietly(httpclient);
+			response.close();
+			httpclient.close();
+			//IOUtils.closeQuietly(response);
+			//IOUtils.closeQuietly(httpclient);
 		}
 
 	}

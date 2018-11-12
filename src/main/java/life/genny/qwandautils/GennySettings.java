@@ -3,7 +3,7 @@ package life.genny.qwandautils;
 import org.apache.commons.lang3.StringUtils;
 
 public class GennySettings {
-	public static String defaultLocalIP = "10.123.123.123";
+	public static String defaultLocalIP = System.getenv("DEFAULT_LOCAL_IP") != null ? System.getenv("DEFAULT_LOCAL_IP") :"10.123.123.123";
 	public static String hostIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : System.getenv("MYIP");   // remember to set up this local IP on the host
 	public static String myIP = System.getenv("MYIP") != null ? System.getenv("MYIP") : System.getenv("HOSTIP");   // remember to set up this local IP on the host
 	public static String cacheApiPort = System.getenv("CACHE_API_PORT") != null ? System.getenv("CACHE_API_PORT") : "8089";
