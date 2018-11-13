@@ -6,10 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.UUID;
-
 import org.apache.commons.io.IOUtils;
-
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -18,13 +15,12 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectResult;
-
 import life.genny.qwanda.FileUploadDetails;
 import life.genny.qwanda.entity.BaseEntity;
 
 public class StorageUtils {
 	
+  private StorageUtils() {}
 	private static AmazonS3 getAmazonClientObj(BaseEntity projectBe) {
 		
 		String key = projectBe.getValue("PRI_AWS_S3_STORAGE_KEY", null);
@@ -32,12 +28,9 @@ public class StorageUtils {
 		String clientRegion = projectBe.getValue("PRI_AWS_S3_STORAGE_CLIENT_REGION", null);
 		
 		BasicAWSCredentials awsCreds = new BasicAWSCredentials(key, secret);
-		AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+		return AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds)).withRegion(clientRegion)
                 .build();
-		
-		return s3Client;
-		
 	}
 	
 
@@ -88,7 +81,7 @@ public class StorageUtils {
 				metadata.addUserMetadata(fileUploadDetails.getUserMetaDataObjKey(), fileUploadDetails.getUserMetaDataObjValue());
 	            request.setMetadata(metadata);
 	            request.withCannedAcl(CannedAccessControlList.PublicRead);
-	            PutObjectResult result = s3Client.putObject(request);
+	            s3Client.putObject(request);
 	            
 	            String uploadedUrl = String.valueOf(s3Client.getUrl(bucketName, file.getName()));
 	                        
@@ -99,24 +92,14 @@ public class StorageUtils {
 				outputStream.close();
 	            
 	        }
-	        catch(AmazonServiceException e) {
+	        catch(SdkClientException | IOException e) {
 	            // The call was transmitted successfully, but Amazon S3 couldn't process 
 	            // it, so it returned an error response.
 	            e.printStackTrace();
 	        }
-	        catch(SdkClientException e) {
-	            // Amazon S3 couldn't be contacted for a response, or the client
-	            // couldn't parse the response from Amazon S3.
-	            e.printStackTrace();
-	        } catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
-		
-		
 		System.out.println("fileUploadDetails ::"+fileUploadDetails);
 		return fileUploadDetails;
-
 	}
 	
 	
@@ -133,9 +116,6 @@ public class StorageUtils {
 	                     
 	         System.out.println("uploaded url ::"+uploadedUrl);
 		}
-		
 		return uploadedUrl;
-		
 	}
-
 }

@@ -1,5 +1,11 @@
 package life.genny.qwandautils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -9,16 +15,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-// import org.apache.http.HttpEntity;
-// import org.apache.http.HttpResponse;
-// import org.apache.http.NameValuePair;
-// import org.apache.http.client.HttpClient;
-// import org.apache.http.client.entity.UrlEncodedFormEntity;
-// import org.apache.http.client.methods.HttpGet;
-// import org.apache.http.client.methods.HttpPost;
-// import org.apache.http.impl.client.DefaultHttpClient;
-// import org.apache.http.message.BasicNameValuePair;
-//// import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.common.util.KeycloakUriBuilder;
@@ -26,12 +22,6 @@ import org.keycloak.constants.ServiceUrlConstants;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.util.JsonSerialization;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 
 
 
@@ -93,7 +83,7 @@ public class KeycloakService {
 
       post.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-      final List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+      final List<NameValuePair> formParams = new ArrayList<>();
       formParams.add(new BasicNameValuePair("username", username));
       formParams.add(new BasicNameValuePair("password", password));
       formParams.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, "password"));
@@ -126,8 +116,9 @@ public class KeycloakService {
   }
 
   public static String getContent(final HttpEntity httpEntity) throws IOException {
-    if (httpEntity == null)
+    if (httpEntity == null) {
       return null;
+    }
     final InputStream is = httpEntity.getContent();
     try {
       final ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -136,13 +127,12 @@ public class KeycloakService {
         os.write(c);
       }
       final byte[] bytes = os.toByteArray();
-      final String data = new String(bytes);
-      return data;
+      return new String(bytes);
     } finally {
       try {
         is.close();
       } catch (final IOException ignored) {
-
+        ignored.printStackTrace();
       }
     }
 
@@ -162,7 +152,7 @@ public class KeycloakService {
         final HttpEntity entity = response.getEntity();
         final InputStream is = entity.getContent();
         try {
-          return JsonSerialization.readValue(is, (new ArrayList<UserRepresentation>()).getClass());
+          return JsonSerialization.readValue(is, new ArrayList<UserRepresentation>().getClass());
         } finally {
           is.close();
         }

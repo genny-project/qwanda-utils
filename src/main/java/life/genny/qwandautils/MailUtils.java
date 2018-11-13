@@ -12,8 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
-
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Folder;
@@ -23,12 +21,9 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
-
 import com.opencsv.CSVReader;
-
 import life.genny.models.QFetchMailSettings;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.attribute.Attribute;
@@ -46,15 +41,17 @@ public class MailUtils
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
+  private MailUtils() {}
+  
   private static String getFrom(Message javaMailMessage) 
   throws MessagingException
   {
     String from = "";
-    Address a[] = javaMailMessage.getFrom();
-    if ( a==null ) return null;
-    for ( int i=0; i<a.length; i++ )
-    {
-      Address address = a[i];
+    Address[] a = javaMailMessage.getFrom();
+    if ( a==null ) {
+      return null;
+    }
+    for (Address address : a) {
       from = from + address.toString();
     }
 
@@ -64,10 +61,12 @@ public class MailUtils
   private static String removeQuotes(String stringToModify)
   {
     int indexOfFind = stringToModify.indexOf(stringToModify);
-    if ( indexOfFind < 0 ) return stringToModify;
+    if ( indexOfFind < 0 ) {
+      return stringToModify;
+    }
 
-    StringBuffer oldStringBuffer = new StringBuffer(stringToModify);
-    StringBuffer newStringBuffer = new StringBuffer();
+    StringBuilder oldStringBuffer = new StringBuilder(stringToModify);
+    StringBuilder newStringBuffer = new StringBuilder();
     for ( int i=0, length=oldStringBuffer.length(); i<length; i++ )
     {
       char c = oldStringBuffer.charAt(i);
@@ -86,9 +85,9 @@ public class MailUtils
 
 	public static List<BaseEntity> readCSV(BaseEntity source, InputStream is, String msgId,final String filename, String[] mapping, final String bePrefix) {
 
-		List<BaseEntity> baseEntitys = new ArrayList<BaseEntity>();
+		List<BaseEntity> baseEntitys = new ArrayList<>();
 
-		Map<String, String> attributeCodeMap = new HashMap<String, String>();
+		Map<String, String> attributeCodeMap = new HashMap<>();
 		String[] attributeArray = new String[mapping.length];
 		String[] columnArray = new String[mapping.length];
 		int index = 0;
@@ -109,10 +108,7 @@ public class MailUtils
 			while ((nextRecord = csvReader.readNext()) != null) {
 				// check if header
 				String firstColumnValue = nextRecord[0].replaceAll("\\p{C}", "");
-				;
 				firstColumnValue = StringUtils.trimToNull(firstColumnValue);
-				char v = firstColumnValue.charAt(0);
-
 				String columnName = StringUtils.trim(columnArray[0]);
 				if (columnName.equalsIgnoreCase(firstColumnValue)) {
 					System.out.println("Skipping Header:");
@@ -126,7 +122,6 @@ public class MailUtils
 					String value = StringUtils.trim(columnValue).replaceAll("\\p{C}", "?");
 					if (columnIndex < attributeArray.length) {
 						String attributeCode = attributeArray[columnIndex];
-						// System.out.print(attributeCode+":"+value+",");
 						Attribute mockAttribute = new AttributeText(attributeCode, columnArray[columnIndex]);
 						Answer answer = new Answer(source, be, mockAttribute, value);
 						try {
@@ -142,11 +137,9 @@ public class MailUtils
 				}
 				baseEntitys.add(be);
 				System.out.println();
-				;
 				rowIndex++;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return baseEntitys;
@@ -154,7 +147,7 @@ public class MailUtils
 	
 	public static List<BaseEntity> fetchMail(QFetchMailSettings settings, final String bePrefix) {
 		
-		List<BaseEntity> importBEs = new ArrayList<BaseEntity>();
+		List<BaseEntity> importBEs = new ArrayList<>();
 		
         Properties props = System.getProperties();
         props.setProperty("mail.store.protocol", "imaps");
@@ -203,7 +196,7 @@ public class MailUtils
 					for (int i = 0; i < multipart.getCount(); i++) {
 						BodyPart bodyPart = multipart.getBodyPart(i);
 						if (!Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())
-								|| (StringUtils.isBlank(bodyPart.getFileName()))) {
+								|| StringUtils.isBlank(bodyPart.getFileName())) {
 							System.out.println("\tMessage has no attachments");
 							continue; // dealing with attachments only
 
@@ -238,11 +231,9 @@ public class MailUtils
 							inbox.copyMessages(errorMessages, error);
 						}
 					}
-				} catch (IOException e) {
+				} catch (MessagingException | IOException e) {
 					e.printStackTrace();
-				} catch (MessagingException e) {
-					e.printStackTrace();
-				}
+				} 
 			}
 
 		} catch (Exception e)
@@ -256,7 +247,6 @@ public class MailUtils
 	    		 if (inbox != null && inbox.isOpen()) { inbox.close(true); }
 	             if (store != null) { store.close(); }
 			} catch (MessagingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	      

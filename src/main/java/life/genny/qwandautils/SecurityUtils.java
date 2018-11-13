@@ -1,34 +1,16 @@
 package life.genny.qwandautils;
 
+import java.security.Key;
+import java.util.Date;
+import java.util.Map;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import javax.security.auth.x500.X500Principal;
 import javax.xml.bind.DatatypeConverter;
-
 import org.apache.commons.codec.binary.Base64;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
-import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
-
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-
-import java.io.IOException;
-import java.nio.file.*;
-import java.security.*;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.spec.*;
-import java.util.*;
-
-import static io.jsonwebtoken.SignatureAlgorithm.RS256;
-import static java.lang.Boolean.TRUE;
 
 public class SecurityUtils {
 	public static String encrypt(String key, String initVector, String value) {

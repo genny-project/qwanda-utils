@@ -3,9 +3,7 @@ package life.genny.qwandautils;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.logging.log4j.Logger;
-
 import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.message.QBaseMSGAttachment;
 import life.genny.qwanda.message.QBaseMSGAttachment.AttachmentType;
@@ -18,17 +16,20 @@ public class MessageUtils {
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
-	public static JsonObject prepareSMSTemplate(String templateCode, String BEGCode, String recipientLinkValue,
+	private MessageUtils() {}
+	
+	public static JsonObject prepareSMSTemplate(String templateCode, String begCode, String recipientLinkValue,
 			String[] attachments, String token) {
 
-		String code = "code:" + BEGCode;
+		String code = "code:" + begCode;
 		String recipient = "recipient:" + recipientLinkValue;
 		String[] msgMessageData = { code, recipient };
 
 		// Creating messageData MSG_MESSAGE
 		QMSGMessage msgMessage = new QMSGMessage("MSG_MESSAGE", templateCode, msgMessageData, QBaseMSGMessageType.SMS,
 				attachments);
-		JsonObject jsonMessage = new JsonObject().mapFrom(msgMessage);
+		new JsonObject();
+    JsonObject jsonMessage = JsonObject.mapFrom(msgMessage);
 
 		log.info("------------------------------------------------------------------------");
 		log.info("MESSAGE TO OWNER   ::   " + jsonMessage.toString());
@@ -39,17 +40,18 @@ public class MessageUtils {
 		return jsonMessage;
 	}
 
-	public static JsonObject prepareEmailTemplate(String templateCode, String BEGCode, String recipientLinkValue,
+	public static JsonObject prepareEmailTemplate(String templateCode, String begCode, String recipientLinkValue,
 			String[] attachments, String token) {
 
-		String code = "code:" + BEGCode;
+		String code = "code:" + begCode;
 		String recipient = "recipient:" + recipientLinkValue;
 		String[] msgMessageData = { code, recipient };
 
 		// Creating messageData MSG_MESSAGE
 		QMSGMessage msgMessage = new QMSGMessage("MSG_MESSAGE", templateCode, msgMessageData, QBaseMSGMessageType.EMAIL,
 				attachments);
-		JsonObject jsonMessage = new JsonObject().mapFrom(msgMessage);
+		new JsonObject();
+    JsonObject jsonMessage = JsonObject.mapFrom(msgMessage);
 
 		log.info("------------------------------------------------------------------------");
 		log.info("MESSAGE TO OWNER   ::   " + jsonMessage.toString());
@@ -182,8 +184,6 @@ public class MessageUtils {
 			type = QBaseMSGMessageType.TOAST;
 		}
 
-		/*QMessageGennyMSG msgMessage = new QMessageGennyMSG("MSG_MESSAGE", type, templateCode, contextMap,
-				recipientArray, attachmentList);*/
 		QMessageGennyMSG msgMessage = new QMessageGennyMSG(messageType, templateCode, type, contextMap, attachmentList, to);
 		
 		JsonObject jsonMessage = JsonObject.mapFrom(msgMessage);

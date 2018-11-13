@@ -1,10 +1,15 @@
 package life.genny.qwandautils;
 
-import org.apache.http.client.ClientProtocolException;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
@@ -16,18 +21,12 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.StringTokenizer;
 
 public class GitUtils {
   
   public static final String GIT_PROP_EXTENSION = "-git.properties";
+  
+  private GitUtils() {}
   
   public static String gitGet(final String branch, final String project,
       final String repositoryName, final String layoutFilename) throws IOException,

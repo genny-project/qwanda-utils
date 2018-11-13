@@ -1,18 +1,18 @@
 package life.genny.qwandautils;
 
 import java.io.IOException;
-import java.util.HashMap;
-
+import java.util.Map;
 import org.json.simple.JSONObject;
-
 import com.google.gson.Gson;
 
 public class PDFHelper {
 	
-	final public static String PDF_GEN_SERVICE_API_URL = System.getenv("PDF_GEN_SERVICE_API_URL") == null ? "http://localhost:7331"
+    public static final String PDF_GEN_SERVICE_API_URL = System.getenv("PDF_GEN_SERVICE_API_URL") == null ? "http://localhost:7331"
 			: System.getenv("PDF_GEN_SERVICE_API_URL");
 	
-	public static String getDownloadablePdfLinkForHtml(String htmlUrl, HashMap<String, Object> contextMap){
+	private PDFHelper() {}
+	
+	public static String getDownloadablePdfLinkForHtml(String htmlUrl, Map<String, Object> contextMap){
 		
 		String content = null;
 		String downloadablePdfUrl = null;

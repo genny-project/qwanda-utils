@@ -1,26 +1,19 @@
 package life.genny.qwandautils;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
-
-import org.apache.http.client.ClientProtocolException;
 import org.json.JSONArray;
 import org.w3c.dom.Document;
-
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.GPS;
@@ -41,6 +34,8 @@ public class GPSUtils {
 	static String loadId = null;
 	static JSONArray loadAttributes = new JSONArray();
 
+	private GPSUtils() {}
+	
 	public static QCmdGeofenceMessage[] geofenceJob(BaseEntity be, final String driverCode, Double radius,
 			final String qwandaServiceUrl, String token, Map<String, Object> decodedToken) {
 
@@ -110,7 +105,6 @@ public class GPSUtils {
 		responseCode = httpConnection.getResponseCode();
 		if (responseCode == 200) {
 			DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			;
 			Document document = dBuilder.parse(httpConnection.getInputStream());
 			XPathFactory xPathfactory = XPathFactory.newInstance();
 			XPath xpath = xPathfactory.newXPath();
@@ -155,7 +149,7 @@ public class GPSUtils {
 				return distanceValue.doubleValue();
 			}
 		} catch (Exception e) {
-
+		    e.printStackTrace();
 		}
 
 		return -1.0;
@@ -197,7 +191,7 @@ public class GPSUtils {
 			}
 
 		} catch (Exception e) {
-
+		    e.printStackTrace();
 		}
 
 		return -1.0;
@@ -223,7 +217,6 @@ public class GPSUtils {
 				result = new GPSLocation(lat, lng);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return result;
@@ -242,7 +235,6 @@ public class GPSUtils {
 			if ("OK".equalsIgnoreCase(jsonObject.getString("status"))) {
 				JsonArray routes = jsonObject.getJsonArray("routes");
 				for (Object route : routes) {
-					List<GPSLeg> legs = new ArrayList<GPSLeg>();
 					JsonObject routeObj = (JsonObject) route;
 					JsonArray legsJson = routeObj.getJsonArray("legs");
 
@@ -254,17 +246,15 @@ public class GPSUtils {
 						Long distanceLong2 = distanceJson2.getLong("value"); // in m
 						JsonObject durationJson2 = legJson.getJsonObject("duration");
 						Long durationLong2 = durationJson2.getLong("value"); // in s
-						Double distance_m2 = Double.valueOf(distanceLong2+"");
-						Double duration_s2 = Double.valueOf(durationLong2+"");
-						String start_address = legJson.getString("start_address");
-						JsonObject start_location = legJson.getJsonObject("start_location");
-						GPSLocation startLoc = new GPSLocation(start_location.getDouble("lat"),start_location.getDouble("lng"));
-						String end_address = legJson.getString("end_address");
-						JsonObject end_location = legJson.getJsonObject("end_location");
-						GPSLocation endLoc = new GPSLocation(end_location.getDouble("lat"),end_location.getDouble("lng"));
+						Double distanceM2 = Double.valueOf(distanceLong2+"");
+						Double durationS2 = Double.valueOf(durationLong2+"");
+						JsonObject startLocation = legJson.getJsonObject("start_location");
+						GPSLocation startLoc = new GPSLocation(startLocation.getDouble("lat"),startLocation.getDouble("lng"));
+						JsonObject endLocation = legJson.getJsonObject("end_location");
+						GPSLocation endLoc = new GPSLocation(endLocation.getDouble("lat"),endLocation.getDouble("lng"));
 						JsonArray stepsArray = legJson.getJsonArray("steps");
 						
-						GPSLeg gpsLeg = new GPSLeg(startLoc, endLoc, distance_m2, duration_s2);
+						GPSLeg gpsLeg = new GPSLeg(startLoc, endLoc, distanceM2, durationS2);
 
 						for (Object step : stepsArray) {
 							JsonObject stepJson = (JsonObject) step;
@@ -272,16 +262,16 @@ public class GPSUtils {
 							Long distanceLong3 = distanceJson3.getLong("value"); // in m
 							JsonObject durationJson3 = stepJson.getJsonObject("duration");
 							Long durationLong3 = durationJson3.getLong("value"); // in s
-							Double distance_m3 = Double.valueOf(distanceLong3+"");
-							JsonObject start_location3 = stepJson.getJsonObject("start_location");
-							JsonObject end_location3 = stepJson.getJsonObject("end_location");
-							Double duration_s3 = Double.valueOf(durationLong3+"");
-							GPSLocation startLoc3 = new GPSLocation(start_location3.getDouble("lat"),start_location3.getDouble("lng"));
-							GPSLocation endLoc3 = new GPSLocation(end_location3.getDouble("lat"),end_location3.getDouble("lng"));
-							String html_instructions = stepJson.getString("html_instructions");
+							Double distanceM3 = Double.valueOf(distanceLong3+"");
+							JsonObject startLocation3 = stepJson.getJsonObject("start_location");
+							JsonObject endLocation3 = stepJson.getJsonObject("end_location");
+							Double durationS3 = Double.valueOf(durationLong3+"");
+							GPSLocation startLoc3 = new GPSLocation(startLocation3.getDouble("lat"),startLocation3.getDouble("lng"));
+							GPSLocation endLoc3 = new GPSLocation(endLocation3.getDouble("lat"),endLocation3.getDouble("lng"));
+							String htmlInstructions = stepJson.getString("html_instructions");
 							System.out.println(stepJson);
-							GPSStep gpsStep = new GPSStep(startLoc3, endLoc3, distance_m3, duration_s3);
-							gpsStep.setHtmlInstruction(html_instructions);
+							GPSStep gpsStep = new GPSStep(startLoc3, endLoc3, distanceM3, durationS3);
+							gpsStep.setHtmlInstruction(htmlInstructions);
 							gpsLeg.add(gpsStep);
 						}
 						
@@ -294,7 +284,6 @@ public class GPSUtils {
 			}
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println(apiUrl);
@@ -302,7 +291,7 @@ public class GPSUtils {
 	}
 
 
-	static public GPSRouteStatus fetchCurrentRouteStatusByDuration(final GPSRoute route, final Double currentSeconds)
+	public static GPSRouteStatus fetchCurrentRouteStatusByDuration(final GPSRoute route, final Double currentSeconds)
 	{
 		GPSRouteStatus result = null;
 		GPSLocation currentLocation = null;
@@ -312,13 +301,13 @@ public class GPSUtils {
 		
 		for (GPSLeg leg : route.getLegList()) {
 			Double legSecs = leg.getDuration_s();
-			if ((secondsSum+legSecs) > currentSeconds) {
+			if (secondsSum+legSecs > currentSeconds) {
 				// go into leg
 				Double stepSum = 0.0;
 				Double stepDistanceSum = 0.0;
 				for (GPSStep step : leg.getStepList()) {
 					stepSum += step.getDuration();
-					if ((secondsSum+stepSum) > currentSeconds) {
+					if (secondsSum+stepSum > currentSeconds) {
 						// work out ratio
 						// apply dumb time ratio to distance
 						Double currentStepSecs = currentSeconds - (secondsSum + stepSum - step.getDuration());
@@ -329,13 +318,12 @@ public class GPSUtils {
 						stepSum += stepDuration;
 						distanceSum += stepDistanceSum;
 						// Ideally a google api could map to an actual GPS location on the route (road).
-					//	currentLocation = step.getStart();
 						GPSLocation stepEndLoc = step.getEnd();
 						// interpolate between the start and end GPS (ignore sticking to road)
 						Double latDiff = stepEndLoc.getLatitude() - step.getStart().getLatitude();
 						Double lngDiff = stepEndLoc.getLongitude() - step.getStart().getLongitude();
-						Double guessLat = step.getStart().getLatitude() + (latDiff * timeRatio);
-						Double guessLng = step.getStart().getLongitude() + (lngDiff * timeRatio);
+						Double guessLat = step.getStart().getLatitude() + latDiff * timeRatio;
+						Double guessLng = step.getStart().getLongitude() + lngDiff * timeRatio;
 						currentLocation = new GPSLocation(guessLat, guessLng);
 						break;
 						
@@ -357,7 +345,7 @@ public class GPSUtils {
 		return result;
 	}
 
-	static public GPSRouteStatus fetchCurrentRouteStatusByPercentageDistance(final GPSRoute route, final Double percentage100)
+	public static GPSRouteStatus fetchCurrentRouteStatusByPercentageDistance(final GPSRoute route, final Double percentage100)
 	{
 		GPSRouteStatus result = null;
 		GPSLocation currentLocation = null;
@@ -369,13 +357,12 @@ public class GPSUtils {
 		
 		for (GPSLeg leg : route.getLegList()) {
 			Double legM = leg.getDistance_m();
-			if ((distanceSum+legM) > targetDistance) {
+			if (distanceSum+legM > targetDistance) {
 				// go into leg
 				Double stepSum = 0.0;
-				Double stepDurationSum = 0.0;
 				for (GPSStep step : leg.getStepList()) {
 					stepSum += step.getDistance();
-					if ((distanceSum+stepSum) > targetDistance) {
+					if (distanceSum+stepSum > targetDistance) {
 						// work out ratio
 						// apply dumb time ratio to distance
 						Double currentStepM = targetDistance - (distanceSum + stepSum - step.getDistance());
@@ -386,13 +373,12 @@ public class GPSUtils {
 						durationSum += stepDuration;
 
 						// Ideally a google api could map to an actual GPS location on the route (road).
-					//	currentLocation = step.getStart();
 						GPSLocation stepEndLoc = step.getEnd();
 						// interpolate between the start and end GPS (ignore sticking to road)
 						Double latDiff = stepEndLoc.getLatitude() - step.getStart().getLatitude();
 						Double lngDiff = stepEndLoc.getLongitude() - step.getStart().getLongitude();
-						Double guessLat = step.getStart().getLatitude() + (latDiff * distanceRatio);
-						Double guessLng = step.getStart().getLongitude() + (lngDiff * distanceRatio);
+						Double guessLat = step.getStart().getLatitude() + latDiff * distanceRatio;
+						Double guessLng = step.getStart().getLongitude() + lngDiff * distanceRatio;
 						currentLocation = new GPSLocation(guessLat, guessLng);
 						break;
 						

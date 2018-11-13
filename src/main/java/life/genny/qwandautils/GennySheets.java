@@ -11,11 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
-
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -29,8 +27,6 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
-import com.google.gson.Gson;
-
 import life.genny.qwanda.Ask;
 import life.genny.qwanda.Question;
 import life.genny.qwanda.QuestionQuestion;
@@ -50,7 +46,7 @@ public class GennySheets {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName()); 
 
 	/** Range of Columns to read or write */
-	private final String RANGE = "!A1:Z";
+	private static final String RANGE = "!A1:Z";
 
 	private String appName = "Google Sheets API Java Quickstart";
 
@@ -64,13 +60,13 @@ public class GennySheets {
 	private String sheetId;
 
 
-	private FileDataStoreFactory DATA_STORE_FACTORY;
+	private FileDataStoreFactory dataStoreFactory;
 
 	/** Global instance of the JSON factory. */
-	private final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+	private final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
 	/** Global instance of the HTTP transport. */
-	private HttpTransport HTTP_TRANSPORT;
+	private HttpTransport httpTransport;
 
 	/** Directory to store user credentials for this application. */
 	private File dataStoreDir;
@@ -81,7 +77,7 @@ public class GennySheets {
 	 * If modifying these scopes, delete your previously saved credentials at
 	 * ~/.credentials/sheets.googleapis.com-java-quickstart
 	 */
-	private final List<String> SCOPES = Arrays.asList(SheetsScopes.SPREADSHEETS);
+	private final List<String> scopes = Arrays.asList(SheetsScopes.SPREADSHEETS);
 
 	private Sheets service;
 
@@ -90,13 +86,12 @@ public class GennySheets {
 		this.sheetId = sheetId;
 		this.dataStoreDir = dataStoreDir;
 		try {
-			DATA_STORE_FACTORY = new FileDataStoreFactory(this.dataStoreDir);
-			HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+			dataStoreFactory = new FileDataStoreFactory(this.dataStoreDir);
+			httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 			service = getSheetsService();
 		} catch (final IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (final Throwable t) {
+		} catch (final Exception t) {
 			t.printStackTrace();
 			System.exit(1);
 		}
@@ -140,20 +135,16 @@ public class GennySheets {
 
 	public Sheets getSheetsService() throws Exception {
 		final Credential credential = authorize();
-		return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(appName).build();
+		return new Sheets.Builder(httpTransport, jsonFactory, credential).setApplicationName(appName).build();
 	}
 
 	public Credential authorize() throws Exception {
-		// Load client secrets.
-		// out.println(System.getProperty("user.home"));
-		// InputStream in =
-		// GennySheets.class.getResourceAsStream("/client_secret_2.json");
 		final InputStream in = IOUtils.toInputStream(clientSecret, "UTF-8");
-		final GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+		final GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(jsonFactory, new InputStreamReader(in));
 
 		// Build flow and trigger user authorization request.
-		final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
-				clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
+		final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory,
+				clientSecrets, scopes).setDataStoreFactory(dataStoreFactory).setAccessType("offline").build();
 		final Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
 				.authorize("user");
 		System.out.println("Credentials saved to " + dataStoreDir.getAbsolutePath());
@@ -161,18 +152,17 @@ public class GennySheets {
 	}
 
 	public <T> List<T> transform(final List<List<Object>> values, final Class object) {
-		final List<String> keys = new ArrayList<String>();
-		final List<T> k = new ArrayList<T>();
+		final List<String> keys = new ArrayList<>();
+		final List<T> k = new ArrayList<>();
 		for (final Object key : values.get(0)) {
 			keys.add((String) key);
 		}
 		values.remove(0);
 		for (final List row : values) {
-			final Map<String, Object> mapper = new HashMap<String, Object>();
+			final Map<String, Object> mapper = new HashMap<>();
 			for (int counter = 0; counter < row.size(); counter++) {
 				mapper.put(keys.get(counter), row.get(counter));
 			}
-			// out.println(mapper);
 			final T lo = (T) JsonUtils.fromJson(mapper.toString(), object);
 			k.add(lo);
 		}
@@ -180,14 +170,14 @@ public class GennySheets {
 	}
 
 	public <T> List<T> transformNotKnown(final List<List<Object>> values) {
-		final List<String> keys = new ArrayList<String>();
-		final List<T> k = new ArrayList<T>();
+		final List<String> keys = new ArrayList<>();
+		final List<T> k = new ArrayList<>();
 		for (final Object key : values.get(0)) {
 			keys.add((String) key);
 		}
 		values.remove(0);
 		for (final List row : values) {
-			final Map<String, Object> mapper = new HashMap<String, Object>();
+			final Map<String, Object> mapper = new HashMap<>();
 			for (int counter = 0; counter < row.size(); counter++) {
 				mapper.put(keys.get(counter), row.get(counter));
 			}
@@ -213,30 +203,24 @@ public class GennySheets {
 	public <T> List<T> row2DoubleTuples(final String sheetName) throws IOException {
 		final String absoluteRange = sheetName + RANGE;
 		final ValueRange response;
-		// try {
 		response = service.spreadsheets().values().get(sheetId, absoluteRange).execute();
-		// } catch (GoogleJsonResponseException e) {
-		// System.out.println("dfsdfsdfsdfsd");
-		// return null;
-		// }
 		final List<List<Object>> values = response.getValues();
 		return transformNotKnown(values);
 	}
 
 	public Map<String, Map> newGetBase() {
-		List<Map> obj = new ArrayList<Map>();
+		List<Map> obj = new ArrayList<>();
 		try {
 			obj = row2DoubleTuples(BaseEntity.class.getSimpleName());
 		} catch (final IOException e1) {
-			// TODO Auto-generated catch block
 			return null;
 		}
 		return obj.stream().map(object -> {
-			final Map<String, Map> map = new HashMap<String, Map>();
+			final Map<String, Map> map = new HashMap<>();
 			final String code = (String) object.get("code");
 			final String name = (String) object.get("name");
 			final String icon = (String) object.get("icon");
-			Map<String, String> fields = new HashMap<String, String>();
+			Map<String, String> fields = new HashMap<>();
 			fields.put("code", code);
 			fields.put("name", name);
 			fields.put("icon", icon);
@@ -249,22 +233,21 @@ public class GennySheets {
 	}
 
 	public Map<String, Map> newGetVal() {
-		List<Map> obj = new ArrayList<Map>();
+		List<Map> obj = new ArrayList<>();
 		try {
 			obj = row2DoubleTuples(Validation.class.getSimpleName());
 		} catch (final IOException e1) {
-			// TODO Auto-generated catch block
 			return null;
 		}
 		return obj.stream().map(object -> {
-			final Map<String, Map> map = new HashMap<String, Map>();
+			final Map<String, Map> map = new HashMap<>();
 			final String code = (String) object.get("code");
 			final String name = (String) object.get("name");
 			final String regex = (String) object.get("regex");
 			final String group_codes = (String) object.get("group_codes");
 			final String recursive = (String) object.get("recursive");
 			final String multi_allowed = (String) object.get("multi_allowed");
-			Map<String, String> fields = new HashMap<String, String>();
+			Map<String, String> fields = new HashMap<>();
 			fields.put("code", code);
 			fields.put("name", name);
 			fields.put("regex", regex);
@@ -280,20 +263,19 @@ public class GennySheets {
 	}
 
 	public Map<String, Map> newGetDType() {
-		List<Map> obj = new ArrayList<Map>();
+		List<Map> obj = new ArrayList<>();
 		try {
 			obj = row2DoubleTuples(DataType.class.getSimpleName());
 		} catch (final IOException e1) {
-			// TODO Auto-generated catch block
 			return null;
 		}
 		return obj.stream().map(object -> {
-			final Map<String, Map> map = new HashMap<String, Map>();
+			final Map<String, Map> map = new HashMap<>();
 			final String code = (String) object.get("code");
 			final String name = (String) object.get("name");
 			final String validations = (String) object.get("validations");
 			final String inputmask = (String) object.get("inputmask");
-			Map<String, String> fields = new HashMap<String, String>();
+			Map<String, String> fields = new HashMap<>();
 			fields.put("code", code);
 			fields.put("name", name);
 			fields.put("validations", validations);
@@ -307,18 +289,17 @@ public class GennySheets {
 	}
 
 	public Map<String, Map> newGetAttr() {
-		List<Map> obj = new ArrayList<Map>();
+		List<Map> obj = new ArrayList<>();
 		try {
 			obj = row2DoubleTuples(Attribute.class.getSimpleName());
 		} catch (final IOException e1) {
-			// TODO Auto-generated catch block
 			return null;
 		}
 		return obj.stream().map(object -> {
-			final Map<String, Map> map = new HashMap<String, Map>();
+			final Map<String, Map> map = new HashMap<>();
 			final String disabled = (String) object.get("disabled");
-			if ((disabled == null) || (StringUtils.isBlank(disabled)) || ("FALSE".equalsIgnoreCase(disabled))
-					|| ("NO".equalsIgnoreCase(disabled))) {
+			if (disabled == null || StringUtils.isBlank(disabled) || "FALSE".equalsIgnoreCase(disabled)
+					|| "NO".equalsIgnoreCase(disabled)) {
 
 				final String code = (String) object.get("code");
 				final String name = (String) object.get("name");
@@ -329,7 +310,7 @@ public class GennySheets {
 				final String placeholder = (String) object.get("placeholder");
 				final String defaultValue = (String) object.get("defaultValue");
 				
-				Map<String, String> fields = new HashMap<String, String>();
+				Map<String, String> fields = new HashMap<>();
 				fields.put("code", code);
 				fields.put("name", name);
 				fields.put("dataType", dataType);
@@ -349,20 +330,19 @@ public class GennySheets {
 	}
 
 	public Map<String, Map> newGetAttrLink() {
-		List<Map> obj = new ArrayList<Map>();
+		List<Map> obj = new ArrayList<>();
 		try {
 			obj = row2DoubleTuples(AttributeLink.class.getSimpleName());
 		} catch (final IOException e1) {
-			// TODO Auto-generated catch block
 			return null;
 		}
 		return obj.stream().map(object -> {
-			final Map<String, Map> map = new HashMap<String, Map>();
+			final Map<String, Map> map = new HashMap<>();
 			final String code = (String) object.get("code");
 			final String name = (String) object.get("name");
 			final String dataType = (String) object.get("datatype");
 			final String privacy = (String) object.get("privacy");
-			Map<String, String> fields = new HashMap<String, String>();
+			Map<String, String> fields = new HashMap<>();
 			fields.put("code", code);
 			fields.put("name", name);
 			fields.put("dataType", dataType);
@@ -376,18 +356,17 @@ public class GennySheets {
 	}
 
 	public Map<String, Map> newGetEntAttr() {
-		List<Map> obj = new ArrayList<Map>();
+		List<Map> obj = new ArrayList<>();
 		try {
 			obj = row2DoubleTuples(EntityAttribute.class.getSimpleName());
 		} catch (final IOException e1) {
-			// TODO Auto-generated catch block
 			return null;
 		}
 		return obj.stream().map(object -> {
-			final Map<String, Map> map = new HashMap<String, Map>();
+			final Map<String, Map> map = new HashMap<>();
 			final String disabled = (String) object.get("disabled");
-			if ((disabled == null) || (StringUtils.isBlank(disabled)) || ("FALSE".equalsIgnoreCase(disabled))
-					|| ("NO".equalsIgnoreCase(disabled))) {
+			if (disabled == null || StringUtils.isBlank(disabled) || "FALSE".equalsIgnoreCase(disabled)
+					|| "NO".equalsIgnoreCase(disabled)) {
 
 				final String baseEntityCode = (String) object.get("baseEntityCode");
 				final String attributeCode = (String) object.get("attributeCode");
@@ -397,7 +376,7 @@ public class GennySheets {
 				final String weight = (String) object.get("weight");
 				final String valueString = (String) object.get("valueString");
 				final String privacy = (String) object.get("privacy");
-				Map<String, String> fields = new HashMap<String, String>();
+				Map<String, String> fields = new HashMap<>();
 				fields.put("baseEntityCode", baseEntityCode);
 				fields.put("attributeCode", attributeCode);
 				fields.put("weight", weight);
@@ -413,25 +392,24 @@ public class GennySheets {
 	}
 
 	public Map<String, Map> newGetEntEnt() {
-		List<Map> obj = new ArrayList<Map>();
+		List<Map> obj = new ArrayList<>();
 		try {
 			obj = row2DoubleTuples(EntityEntity.class.getSimpleName());
 		} catch (final IOException e1) {
-			// TODO Auto-generated catch block
 			return null;
 		}
 		return obj.stream().map(object -> {
-			final Map<String, Map> map = new HashMap<String, Map>();
+			final Map<String, Map> map = new HashMap<>();
 			final String disabled = (String) object.get("disabled");
-			if ((disabled == null) || (StringUtils.isBlank(disabled)) || ("FALSE".equalsIgnoreCase(disabled))
-					|| ("NO".equalsIgnoreCase(disabled))) {
+			if (disabled == null || StringUtils.isBlank(disabled) || "FALSE".equalsIgnoreCase(disabled)
+					|| "NO".equalsIgnoreCase(disabled)) {
 
 				final String parentCode = (String) object.get("parentCode");
 				final String targetCode = (String) object.get("targetCode");
 				final String linkCode = (String) object.get("linkCode");
 				final String weight = (String) object.get("weight");
 				final String valueString = (String) object.get("valueString");
-				Map<String, String> fields = new HashMap<String, String>();
+				Map<String, String> fields = new HashMap<>();
 				fields.put("parentCode", parentCode);
 				fields.put("targetCode", targetCode);
 				fields.put("linkCode", linkCode);
@@ -447,24 +425,23 @@ public class GennySheets {
 	}
 
 	public Map<String, Map> newGetQtn() {
-		List<Map> obj = new ArrayList<Map>();
+		List<Map> obj = new ArrayList<>();
 		try {
 			obj = row2DoubleTuples(Question.class.getSimpleName());
 		} catch (final IOException e1) {
-			// TODO Auto-generated catch block
 			return null;
 		}
 		return obj.stream().map(object -> {
-			final Map<String, Map> map = new HashMap<String, Map>();
+			final Map<String, Map> map = new HashMap<>();
 			final String disabled = (String) object.get("disabled");
-			if ((disabled == null) || (StringUtils.isBlank(disabled)) || ("FALSE".equalsIgnoreCase(disabled))
-					|| ("NO".equalsIgnoreCase(disabled))) {
+			if (disabled == null || StringUtils.isBlank(disabled) || "FALSE".equalsIgnoreCase(disabled)
+					|| "NO".equalsIgnoreCase(disabled)) {
 
 				final String code = (String) object.get("code");
 				final String name = (String) object.get("name");
 				final String html = (String) object.get("html");
 				final String attribute_code = (String) object.get("attribute_code");
-				Map<String, String> fields = new HashMap<String, String>();
+				Map<String, String> fields = new HashMap<>();
 				fields.put("code", code);
 				fields.put("name", name);
 				fields.put("attribute_code", attribute_code);
@@ -480,28 +457,23 @@ public class GennySheets {
 	}
 
 	public Map<String, Map> newGetQueQue() {
-		List<Map> obj = new ArrayList<Map>();
+		List<Map> obj = new ArrayList<>();
 		try {
 			obj = row2DoubleTuples(QuestionQuestion.class.getSimpleName());
 		} catch (final IOException e1) {
-			// TODO Auto-generated catch block
 			return null;
 		}
 		return obj.stream().map(object -> {
 
-			final Map<String, Map> map = new HashMap<String, Map>();
+			final Map<String, Map> map = new HashMap<>();
 			final String disabled = (String) object.get("disabled");
-			if ((disabled == null) || (StringUtils.isBlank(disabled)) || ("FALSE".equalsIgnoreCase(disabled))
-					|| ("NO".equalsIgnoreCase(disabled))) {
+			if (disabled == null || StringUtils.isBlank(disabled) || "FALSE".equalsIgnoreCase(disabled)
+					|| "NO".equalsIgnoreCase(disabled)) {
 				final String parentCode = (String) object.get("parentCode");
 				final String targetCode = (String) object.get("targetCode");
-				// if ("QUE_USER_SELECT_ROLE".equals(targetCode))
-				// {
-				// System.out.println("dummy");
-				// }
 				final String weight = (String) object.get("weight");
 				final String mandatory = (String) object.get("mandatory");
-				Map<String, String> fields = new HashMap<String, String>();
+				Map<String, String> fields = new HashMap<>();
 				fields.put("parentCode", parentCode);
 				fields.put("targetCode", targetCode);
 				fields.put("weight", weight);
@@ -517,19 +489,18 @@ public class GennySheets {
 	}
 
 	public Map<String, Map> newGetAsk() {
-		List<Map> obj = new ArrayList<Map>();
+		List<Map> obj = new ArrayList<>();
 		try {
 			obj = row2DoubleTuples(Ask.class.getSimpleName());
 		} catch (final IOException e1) {
-			// TODO Auto-generated catch block
 			return null;
 		}
 		return obj.stream().map(object -> {
-			final Map<String, Map> map = new HashMap<String, Map>();
+			final Map<String, Map> map = new HashMap<>();
 			final String disabled = (String) object.get("disabled");
 
-			if ((disabled == null) || (StringUtils.isBlank(disabled)) || ("FALSE".equalsIgnoreCase(disabled))
-					|| ("NO".equalsIgnoreCase(disabled))) {
+			if (disabled == null || StringUtils.isBlank(disabled) || "FALSE".equalsIgnoreCase(disabled)
+					|| "NO".equalsIgnoreCase(disabled)) {
 
 				final String question_code = (String) object.get("question_code");
 				final String name = (String) object.get("name");
@@ -539,7 +510,7 @@ public class GennySheets {
 				final String expectedId = (String) object.get("expectedId");
 				final String weight = (String) object.get("weight");
 				
-				Map<String, String> fields = new HashMap<String, String>();
+				Map<String, String> fields = new HashMap<>();
 				fields.put("question_code", question_code);
 				fields.put("name", name);
 				fields.put("sourceCode", sourceCode);
@@ -565,26 +536,25 @@ public class GennySheets {
 	private String getBooleanString(Object obj) 
 	{
 		final String fieldValue = (String) obj;
-		String ret = ((fieldValue == null) || (StringUtils.isBlank(fieldValue)) || ("FALSE".equalsIgnoreCase(fieldValue))
-				|| ("NO".equalsIgnoreCase(fieldValue))) ? "FALSE":"TRUE";
-		return ret;
+		return fieldValue == null || StringUtils.isBlank(fieldValue) || "FALSE".equalsIgnoreCase(fieldValue)
+				|| "NO".equalsIgnoreCase(fieldValue) ? "FALSE":"TRUE";
 	}
 	
 	public List<Map> projectsImport() {
-		List<Map> obj = new ArrayList<Map>();
+		List<Map> obj = new ArrayList<>();
 		try {
 			obj = row2DoubleTuples("Modules");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		Optional<List<Map>> ret = obj.stream().map(data -> {
-			final List<Map> map = new ArrayList<Map>();
+			final List<Map> map = new ArrayList<>();
 			String code = (String) data.get("code");
 			String name = (String) data.get("name");
 			String module = (String) data.get("module");
 			String sheetID = (String) data.get("sheetID");
 			Object clientSecret = data.get("clientSecret");
-			Map<String, Object> fields = new HashMap<String, Object>();
+			Map<String, Object> fields = new HashMap<>();
 			fields.put("sheetID", sheetID);
 			fields.put("name", name);
 			fields.put("module", module);
@@ -598,25 +568,25 @@ public class GennySheets {
 		if(ret.isPresent()) {
 			return ret.get();
 		} else {
-			return new ArrayList<Map>();
+			return new ArrayList<>();
 		}
 	}
 
 	public List<Map> hostingImport() {
-		List<Map> obj = new ArrayList<Map>();
+		List<Map> obj = new ArrayList<>();
 		try {
 			obj = row2DoubleTuples("Projects");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return obj.stream().map(data -> {
-			final List<Map> map = new ArrayList<Map>();
+			final List<Map> map = new ArrayList<>();
 			String code = (String) data.get("code");
 			String name = (String) data.get("name");
 			String module = (String) data.get("module");
 			String sheetID = (String) data.get("sheetID");
 			Object clientSecret = data.get("clientSecret");
-			Map<String, Object> fields = new HashMap<String, Object>();
+			Map<String, Object> fields = new HashMap<>();
 			fields.put("sheetID", sheetID);
 			fields.put("name", name);
 			fields.put("module", module);
@@ -630,14 +600,14 @@ public class GennySheets {
 	}
 
 	public Map<String, Map> getMessageTemplates() {
-		List<Map> obj = new ArrayList<Map>();
+		List<Map> obj = new ArrayList<>();
 		try {
 			obj = row2DoubleTuples("Notifications");
 		} catch (final IOException e) {
 			return null;
 		}
 		return obj.stream().map(object -> {
-			final Map<String, Map> map = new HashMap<String, Map>();
+			final Map<String, Map> map = new HashMap<>();
 			final String code = (String) object.get("code");
 			final String name = (String) object.get("name");
 			final String description = (String) object.get("description");
@@ -646,7 +616,7 @@ public class GennySheets {
 			final String sms = (String) object.get("sms");
 			final String toast = (String) object.get("toast");
 			
-			Map<String, String> fields = new HashMap<String, String>();
+			Map<String, String> fields = new HashMap<>();
 			fields.put("code", code);
 			fields.put("name", name);
 			fields.put("description", description);

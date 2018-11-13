@@ -8,10 +8,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.logging.log4j.Logger;
 import org.javamoney.moneta.Money;
-
 import life.genny.qwanda.Link;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
@@ -48,6 +46,7 @@ public class MergeUtil {
     public static final String DATEFORMATVARIABLE_REGEX_END = "))";
     public static final Pattern DATEFORMAT_PATTERN_VARIABLE = Pattern.compile(Pattern.quote(DATEFORMAT_VARIABLE_REGEX_START) + "(.*)" + Pattern.quote(DATEFORMATVARIABLE_REGEX_END));  
     
+    private MergeUtil() {}
     
 	public static String merge(String mergeStr, Map<String, Object> templateEntityMap) { 
 		
@@ -96,8 +95,9 @@ public class MergeUtil {
 				String[] entityArr = mergeText.split("\\.");
 				String keyCode = entityArr[0];
 				
-				if((entityArr.length == 0))
-					return DEFAULT;
+				if(entityArr.length == 0) {
+          return DEFAULT;
+        }
 				
 				if(entitymap.containsKey(keyCode)) {
 					
@@ -124,7 +124,7 @@ public class MergeUtil {
 						}else if(attributeValue instanceof java.time.LocalDateTime) {
 							/* If the date-related mergeString needs to formatter to a particultar format -> we split the date-time related merge text to merge into 3 components: BE.PRI.TimeDateformat... becomes [BE, PRI...] */
 							/* 1st component -> BaseEntity code ; 2nd component -> attribute code ; 3rd component -> (date-Format) */
-							if(entityArr != null && entityArr.length > 2) {
+							if(entityArr.length > 2) {
 								/* the date merge field has a format-merge-string */
 								log.info("This date attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
 								Matcher matchVariables = DATEFORMAT_PATTERN_VARIABLE.matcher(entityArr[2]);
@@ -278,18 +278,4 @@ public class MergeUtil {
 		}
 		return null;
 	}
-
-	
-	/*public static void main(String[] args) {
-		DateTimeFormatter dateformat = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss");
-		DateTimeFormatter dateformat1 = DateTimeFormatter.ofPattern("H:m a, EE, dd, MMMM, yyyy");
-		LocalDateTime localDateTime = LocalDateTime.now();
-		String text = localDateTime.format(dateformat);
-		String text1 = localDateTime.format(dateformat1);
-		System.out.println("formattedDate ::"+text);
-		System.out.println("formattedDate ::"+text1);
-	}*/
-	
-	
-
 }

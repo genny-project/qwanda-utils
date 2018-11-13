@@ -2,47 +2,42 @@ package life.genny.qwandautils;
 
 import java.io.IOException;
 import java.util.Properties;
-
 import com.google.gson.Gson;
-
-import life.genny.qwanda.QwandaVersion;
 
 public class QwandaUtilsVersion {
 
-	static public String getVersion()
+    private QwandaUtilsVersion() {}
+    
+    public static String getVersion()
 	{
 		return getProperties().getProperty("git.build.version");
 	}
 	
-	static public String getBuildDate()
+	public static String getBuildDate()
 	{
 		return getProperties().getProperty("git.build.time");
 	}
 	
-	static public String getCommitDate()
+	public static String getCommitDate()
 	{
 		    return getProperties().getProperty("git.commit.time");
 	}
 	
-	static public Properties getProperties()
+	public static Properties getProperties()
 	{
 		   Properties properties = new Properties();
 		    try {
-		    	QwandaUtilsVersion qv = new QwandaUtilsVersion();
+		    	Class qv = QwandaUtilsVersion.class;
 		    	properties.load(qv.getClass().getResourceAsStream("/qwanda-utils-git.properties" ));
-		     // properties.load(Thread.currentThread().getContextClassLoader().getResource("git.properties")
-		      //    .openStream());
 		    } catch (IOException e) {
-		      // TODO Auto-generated catch block
 		      e.printStackTrace();
 		    }
 		    return properties;
 	}
 	
-	static public String getJson()
+	public static String getJson()
 	{
 		Gson gsonObj = new Gson();
-		String strJson =  gsonObj.toJson(getProperties());
-		return strJson;
+		return  gsonObj.toJson(getProperties());
 	}
 }

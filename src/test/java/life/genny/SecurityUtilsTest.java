@@ -16,10 +16,10 @@ public class SecurityUtilsTest {
 	@Test
 	public void versionTest()
 	{
-		        String key        = GennySettings.defaultServiceKey; // 128 bit key
+		        String key        = GennySettings.DEFAULT_SERVICE_KEY; // 128 bit key
 		        String initVector = "PRJ_GENNY*******"; // 16 bytes IV
 
-		        String encrypted = SecurityUtils.encrypt(key, initVector, GennySettings.defaultServicePassword);
+		        String encrypted = SecurityUtils.encrypt(key, initVector, GennySettings.DEFAULT_SERVICE_PASSWORD);
 		        System.out.println("["+encrypted+"]");;
 		        System.out.println(SecurityUtils.decrypt(key, initVector, encrypted
 		                ));

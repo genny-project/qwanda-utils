@@ -1,7 +1,6 @@
 package life.genny.qwandautils;
 
 import static java.lang.System.out;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,10 +11,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.IOUtils;
-
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -30,7 +27,6 @@ import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.gson.Gson;
-
 import life.genny.qwanda.Ask;
 import life.genny.qwanda.Question;
 import life.genny.qwanda.attribute.Attribute;
@@ -44,11 +40,9 @@ import life.genny.qwanda.validation.Validation;
 import life.genny.qwanda.validation.ValidationList;
 
 public class GennySheets2 {
-  // public static final String SHEETID = System.getenv("GOOGLE_SHEETID");
-  // public static final String SHEETID = "1VSXJUn8_BHG1aW0DQrFDnvLjx_jxcNiD33QzqO5D-jc";
 
   /** Range of Columns to read or write */
-  private final String RANGE = "!A1:ZZ";
+  private static final String RANGE = "!A1:ZZ";
 
   private String appName = "Google Sheets API Java Quickstart";
 
@@ -64,13 +58,13 @@ public class GennySheets2 {
   /** Global instance of the {@link Gson}. */
   private Gson g = new Gson();
 
-  private FileDataStoreFactory DATA_STORE_FACTORY;
+  private FileDataStoreFactory dataSourceFactory;
 
   /** Global instance of the JSON factory. */
-  private final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+  private final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
   /** Global instance of the HTTP transport. */
-  private HttpTransport HTTP_TRANSPORT;
+  private HttpTransport httpTransport;
 
   /** Directory to store user credentials for this application. */
   private File dataStoreDir;
@@ -81,7 +75,7 @@ public class GennySheets2 {
    * If modifying these scopes, delete your previously saved credentials at
    * ~/.credentials/sheets.googleapis.com-java-quickstart
    */
-  private final List<String> SCOPES = Arrays.asList(SheetsScopes.SPREADSHEETS);
+  private final List<String> scopes = Arrays.asList(SheetsScopes.SPREADSHEETS);
 
   private Sheets service;
 
@@ -90,13 +84,12 @@ public class GennySheets2 {
     this.sheetId = sheetId;
     this.dataStoreDir = dataStoreDir;
     try {
-      DATA_STORE_FACTORY = new FileDataStoreFactory(this.dataStoreDir);
-      HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+      dataSourceFactory = new FileDataStoreFactory(this.dataStoreDir);
+      httpTransport = GoogleNetHttpTransport.newTrustedTransport();
       service = getSheetsService();
     } catch (final IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
-    } catch (final Throwable t) {
+    } catch (final Exception t) {
       t.printStackTrace();
       System.exit(1);
     }
@@ -139,22 +132,21 @@ public class GennySheets2 {
 
   public Sheets getSheetsService() throws Exception {
     final Credential credential = authorize();
-    return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(appName)
+    return new Sheets.Builder(httpTransport, jsonFactory, credential).setApplicationName(appName)
         .build();
   }
 
   public Credential authorize() throws Exception {
     // Load client secrets.
     out.println(System.getProperty("user.home"));
-    // InputStream in = GennySheets.class.getResourceAsStream("/client_secret_2.json");
     final InputStream in = IOUtils.toInputStream(clientSecret, "UTF-8");
     final GoogleClientSecrets clientSecrets =
-        GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+        GoogleClientSecrets.load(jsonFactory, new InputStreamReader(in));
 
     // Build flow and trigger user authorization request.
     final GoogleAuthorizationCodeFlow flow =
-        new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-            .setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
+        new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
+            .setDataStoreFactory(dataSourceFactory).setAccessType("offline").build();
     final Credential credential =
         new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
     System.out.println("Credentials saved to " + dataStoreDir.getAbsolutePath());
@@ -162,18 +154,17 @@ public class GennySheets2 {
   }
 
   public <T> List<T> transform(final List<List<Object>> values, final Class object) {
-    final List<String> keys = new ArrayList<String>();
-    final List<T> k = new ArrayList<T>();
+    final List<String> keys = new ArrayList<>();
+    final List<T> k = new ArrayList<>();
     for (final Object key : values.get(0)) {
       keys.add((String) key);
     }
     values.remove(0);
     for (final List row : values) {
-      final Map<String, Object> mapper = new HashMap<String, Object>();
+      final Map<String, Object> mapper = new HashMap<>();
       for (int counter = 0; counter < row.size(); counter++) {
         mapper.put(keys.get(counter), row.get(counter));
       }
-      // out.println(mapper);
       final T lo = (T) g.fromJson(mapper.toString(), object);
       k.add(lo);
     }
@@ -181,14 +172,14 @@ public class GennySheets2 {
   }
 
   public <T> List<T> transformNotKnown(final List<List<Object>> values) {
-    final List<String> keys = new ArrayList<String>();
-    final List<T> k = new ArrayList<T>();
+    final List<String> keys = new ArrayList<>();
+    final List<T> k = new ArrayList<>();
     for (final Object key : values.get(0)) {
       keys.add((String) key);
     }
     values.remove(0);
     for (final List row : values) {
-      final Map<String, Object> mapper = new HashMap<String, Object>();
+      final Map<String, Object> mapper = new HashMap<>();
       for (int counter = 0; counter < row.size(); counter++) {
         mapper.put(keys.get(counter), row.get(counter));
       }
@@ -209,8 +200,7 @@ public class GennySheets2 {
     final String absoluteRange = sheetName + RANGE;
     final ValueRange response =
         service.spreadsheets().values().get(sheetId, absoluteRange).execute();
-    final List<List<Object>> values = response.getValues();
-    return values;
+    return response.getValues();
   }
 
   public <T> List<T> row2DoubleTuples(final String sheetName) throws IOException {
@@ -225,19 +215,19 @@ public class GennySheets2 {
     try {
       return getBeans(BaseEntity.class);
     } catch (final IOException e) {
-      return new ArrayList<BaseEntity>();
+      return new ArrayList<>();
     }
   }
 
   public Map<String, Validation> validationData() {
-    List<Validation> validations = new ArrayList<Validation>();
+    List<Validation> validations = new ArrayList<>();
     try {
       validations = getBeans(Validation.class);
     } catch (final IOException e2) {
       e2.printStackTrace();
     }
     return validations.stream().map(valObject -> {
-      final Map<String, Validation> map = new HashMap<String, Validation>();
+      final Map<String, Validation> map = new HashMap<>();
       map.put(valObject.getCode(), valObject);
       return map;
     }).reduce((ac, acc) -> {
@@ -247,15 +237,14 @@ public class GennySheets2 {
   }
 
   public Map<String, DataType> dataTypesData(final Map<String, Validation> validationData) {
-    List<Map> obj = new ArrayList<Map>();
+    List<Map> obj = new ArrayList<>();
     try {
       obj = row2DoubleTuples(DataType.class.getSimpleName());
     } catch (final IOException e1) {
-      // TODO Auto-generated catch block
       e1.printStackTrace();
     }
     return obj.stream().map(object -> {
-      final Map<String, DataType> dataTypeMap = new HashMap<String, DataType>();
+      final Map<String, DataType> dataTypeMap = new HashMap<>();
       if (object.get("code") != null) {
         final String code = (String) object.get("code");
         final String name = (String) object.get("name");
@@ -285,11 +274,10 @@ public class GennySheets2 {
     try {
       attrs = row2DoubleTuples(Attribute.class.getSimpleName());
     } catch (final IOException e2) {
-      // TODO Auto-generated catch block
       e2.printStackTrace();
     }
     return attrs.stream().map(data -> {
-      final Map<String, Attribute> attributeMap = new HashMap<String, Attribute>();
+      final Map<String, Attribute> attributeMap = new HashMap<>();
       Attribute attribute = null;
       final String code = (String) data.get("code");
       final String name = (String) data.get("name");
@@ -312,11 +300,10 @@ public class GennySheets2 {
       bes.stream().forEach(object -> {
       });
     } catch (final IOException e2) {
-      // TODO Auto-generated catch block
       e2.printStackTrace();
     }
     return bes.stream().map(valObject -> {
-      final Map<String, BaseEntity> map = new HashMap<String, BaseEntity>();
+      final Map<String, BaseEntity> map = new HashMap<>();
       map.put(valObject.getCode(), valObject);
       return map;
     }).reduce((ac, acc) -> {
@@ -337,11 +324,10 @@ public class GennySheets2 {
     try {
       obj2 = row2DoubleTuples(EntityAttribute.class.getSimpleName());
     } catch (final IOException e1) {
-      // TODO Auto-generated catch block
       e1.printStackTrace();
     }
     return obj2.stream().map(object -> {
-      final Map<String, BaseEntity> map = new HashMap<String, BaseEntity>();
+      final Map<String, BaseEntity> map = new HashMap<>();
       final String beCode = (String) object.get("baseEntityCode");
       final String attributeCode = (String) object.get("attributeCode");
       final String weightStr = (String) object.get("weight");
@@ -356,18 +342,13 @@ public class GennySheets2 {
         BeanUtils.copyProperties(attribute, findAttributeByCode.get(attributeCode));
         BeanUtils.copyProperties(be, findBaseEntityByCode.get(beCode));
       } catch (IllegalAccessException | InvocationTargetException e1) {
-        // TODO Auto-generated catch block
         e1.printStackTrace();
       }
       System.out.println("============================" + be + "============================");
-      // service.update(be);
-      // attribute = findAttributeByCode.get(attributeCode);
-      // be = findBaseEntityByCode.get(beCode);
       final Double weight = Double.valueOf(weightStr);
       try {
         be.addAttribute(attribute, weight, valueString);
       } catch (final BadDataException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
       map.put(beCode, be);
@@ -383,11 +364,10 @@ public class GennySheets2 {
     try {
       obj2 = row2DoubleTuples(AttributeLink.class.getSimpleName());
     } catch (final IOException e1) {
-      // TODO Auto-generated catch block
       e1.printStackTrace();
     }
     return obj2.stream().map(object -> {
-      final Map<String, AttributeLink> map = new HashMap<String, AttributeLink>();
+      final Map<String, AttributeLink> map = new HashMap<>();
       final String code = (String) object.get("code");
       final String name = (String) object.get("name");
       final AttributeLink linkAttribute = new AttributeLink(code, name);
@@ -406,11 +386,10 @@ public class GennySheets2 {
     try {
       obj3 = row2DoubleTuples(EntityEntity.class.getSimpleName());
     } catch (final IOException e1) {
-      // TODO Auto-generated catch block
       e1.printStackTrace();
     }
     return obj3.stream().map(object -> {
-      final Map<String, BaseEntity> map = new HashMap<String, BaseEntity>();
+      final Map<String, BaseEntity> map = new HashMap<>();
       final String parentCode = (String) object.get("parentCode");
       final String targetCode = (String) object.get("targetCode");
       final String linkCode = (String) object.get("linkCode");
@@ -427,13 +406,10 @@ public class GennySheets2 {
         final Double weight = Double.valueOf(weightStr);
         sbe.addTarget(tbe, linkAttribute2, weight);
        } catch (final IllegalAccessException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       } catch (final InvocationTargetException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       } catch (final BadDataException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
       map.put(tbe.getCode(), tbe);
@@ -449,11 +425,10 @@ public class GennySheets2 {
     try {
       obj4 = row2DoubleTuples(Question.class.getSimpleName());
     } catch (final IOException e1) {
-      // TODO Auto-generated catch block
       e1.printStackTrace();
     }
     return obj4.stream().map(object -> {
-      final Map<String, Question> map = new HashMap<String, Question>();
+      final Map<String, Question> map = new HashMap<>();
       final String code = (String) object.get("code");
       final String name = (String) object.get("name");
       final String attrCode = (String) object.get("attribute_code");
@@ -474,11 +449,10 @@ public class GennySheets2 {
     try {
       obj5 = row2DoubleTuples(Ask.class.getSimpleName());
     } catch (final IOException e1) {
-      // TODO Auto-generated catch block
       e1.printStackTrace();
     }
     return obj5.stream().map(object -> {
-      final Map<String, Ask> map = new HashMap<String, Ask>();
+      final Map<String, Ask> map = new HashMap<>();
       final String qCode = (String) object.get("question_code");
       object.get("name");
       final String source = (String) object.get("source");

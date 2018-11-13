@@ -2,12 +2,11 @@ package life.genny.qwandautils;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.simple.JSONArray;
 
 public class StringFormattingUtils {
 
-	
+	private StringFormattingUtils() {}
 	/**
 	 * 
 	 * @param str - String to be masked
@@ -21,11 +20,17 @@ public class StringFormattingUtils {
 	public static String maskWithRange(String str, int start, int end, String maskCharacter, Character[] ignoreCharacterArrayForMask) {
 		
 		/* we check if we are not out of range or if the passed str is null */
-		if(str == null || str.length() == 0) return null; 
-		if(end - start < 0) return null;
+		if(str == null || str.length() == 0) {
+      return null;
+    } 
+		if(end - start < 0) {
+      return null;
+    }
 		
 		int maskLength = end - start;
-		if(maskLength > str.length()) return null;
+		if(maskLength > str.length()) {
+      return null;
+    }
 		
 		StringBuilder newStr = new StringBuilder();
 		
@@ -101,10 +106,10 @@ public class StringFormattingUtils {
 	 * @return returns an ArrayList of Strings that was parsed using JsonUtils
 	 * 
 	 */
-	public static ArrayList<String> convertToStringArray(String stringifiedJSONArray) {
+	public static List<String> convertToStringArray(String stringifiedJSONArray) {
 		if(stringifiedJSONArray != null) {
 			JSONArray arr = JsonUtils.fromJson(stringifiedJSONArray, JSONArray.class);
-			if(arr.size() > 0) {
+			if(arr.isEmpty()) {
 				return arr;
 			}
 			return null;
