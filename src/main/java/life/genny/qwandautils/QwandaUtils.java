@@ -1,7 +1,6 @@
 package life.genny.qwandautils;
 
 import java.io.BufferedReader;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
@@ -13,15 +12,12 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
+import java.util.function.Consumer;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -43,28 +39,23 @@ import org.javamoney.moneta.Money;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
 import com.google.gson.JsonObject;
-
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.Ask;
 import life.genny.qwanda.CodedEntity;
 import life.genny.qwanda.Link;
 import life.genny.qwanda.attribute.Attribute;
 import life.genny.qwanda.attribute.EntityAttribute;
-import life.genny.qwanda.datatype.DataType;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.EntityEntity;
 import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.entity.SearchEntity;
 import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
-import life.genny.qwanda.message.QBulkMessage;
 import life.genny.qwanda.message.QDataAnswerMessage;
 import life.genny.qwanda.message.QDataAskMessage;
 import life.genny.qwanda.message.QDataAttributeMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
-import life.genny.qwanda.validation.Validation;
 
 public class QwandaUtils {
 
@@ -180,7 +171,7 @@ public class QwandaUtils {
 	}
 
 	public static String apiPost(final String postUrl, final ArrayList<BasicNameValuePair> nameValuePairs, final String authToken) throws IOException {
-		return apiPostEntity(postUrl, (new UrlEncodedFormEntity(nameValuePairs)).toString(), authToken, null);
+		return apiPostEntity(postUrl, new UrlEncodedFormEntity(nameValuePairs).toString(), authToken, null);
 	}
 
 	public static String apiDelete(final String deleteUrl, final String authToken)
@@ -191,6 +182,8 @@ public class QwandaUtils {
 		if (authToken != null) {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 		}
+		request.setHeader("Content-Type", "application/json; charset=UTF-8");
+
 
 		CloseableHttpResponse response = httpclient.execute(request);
 		// The underlying HTTP connection is still held by the response object
@@ -222,6 +215,8 @@ public class QwandaUtils {
 		if (authToken != null) {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 		}
+		request.setHeader("Content-Type", "application/json; charset=UTF-8");
+
 
 		CloseableHttpResponse response = httpclient.execute(request);
 		// The underlying HTTP connection is still held by the response object
@@ -464,7 +459,7 @@ public class QwandaUtils {
 
 		String attributeString = QwandaUtils.apiGet(qwandaUrl + "/qwanda/baseentitys/" + code, userToken);
 
-		if ((attributeString == null) || attributeString.contains("Error")
+		if (attributeString == null || attributeString.contains("Error")
 				|| attributeString.contains("Unauthorized")) {
 			System.out.println("baseentity not found");
 			tokenExists = false;
@@ -502,7 +497,7 @@ public class QwandaUtils {
 	 *         all the mandatory fields in the Question Group has been entered
 	 *         </p>
 	 */
-	static Map<String, String> askMap = new ConcurrentHashMap<String, String>();
+	static Map<String, String> askMap = new ConcurrentHashMap<>();
 
 	public static Boolean isMandatoryFieldsEntered(String sourceBaseEntityCode, String targetBaseEntityCode,
 			String questionCode, final String userToken) {
@@ -725,7 +720,7 @@ public class QwandaUtils {
 	@SuppressWarnings("unchecked")
 	public static Map<String, BaseEntity> getBaseEntWithChildrenForAttributeCode(String attributeCode, String token) {
 
-		Map<String, BaseEntity> entityTemplateContextMap = new HashMap<String, BaseEntity>();
+		Map<String, BaseEntity> entityTemplateContextMap = new HashMap<>();
 
 		List linkList = getLinkList(attributeCode, token);
 
@@ -777,7 +772,7 @@ public class QwandaUtils {
 
 		for (String str : strarr) {
 			System.out.println("str :" + str);
-			initials = (str != null && (str.length() > 0)) ? initials.concat(str.substring(0, 2)) : initials.concat("");
+			initials = str != null && str.length() > 0 ? initials.concat(str.substring(0, 2)) : initials.concat("");
 		}
 
 		return initials.toUpperCase();
@@ -1038,8 +1033,9 @@ public class QwandaUtils {
 				Boolean isExists = false;
 				Link link = JsonUtils.fromJson(item.toString(), Link.class);
 				if (link.getAttributeCode().equals(linkCode) && link.getTargetCode().equals(targetCode)
-						&& link.getLinkValue().equals(linkValue))
-					isExists = true;
+						&& link.getLinkValue().equals(linkValue)) {
+          isExists = true;
+        }
 				return isExists;
 			});
 		}
@@ -1381,7 +1377,7 @@ public class QwandaUtils {
 
 			if (be != null) {
 
-				List<BaseEntity> beList = new ArrayList<BaseEntity>();
+				List<BaseEntity> beList = new ArrayList<>();
 
 				Set<EntityEntity> entityEntities = be.getLinks();
 
