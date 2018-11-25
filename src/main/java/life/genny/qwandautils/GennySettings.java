@@ -4,6 +4,12 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Optional;
 
 public class GennySettings {
+
+    //Constants 
+    public final static String LOCALHOST = "localhost";
+    public final static String DEFAULT_CACHE_SERVER_NAME = "keisha-service";
+
+    //Others 
 	public static String defaultLocalIP = "10.123.123.123";
 	public static String hostIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : System.getenv("MYIP");   // remember to set up this local IP on the host
 	public static String myIP = System.getenv("MYIP") != null ? System.getenv("MYIP") : System.getenv("HOSTIP");   // remember to set up this local IP on the host
@@ -39,11 +45,18 @@ public class GennySettings {
 
 	public static final String layoutCacheUrl = System.getenv("LAYOUT_CACHE_HOST") != null ? System.getenv("LAYOUT_CACHE_HOST") : "http://"+hostIP+":2223";
 
-    public static final String CACHE_SERVER;
+    public static final String cacheServerName;
+    public static final Boolean isCacheServer;
 
     static{
-        Optional<String> cacheServer = Optional.ofNullable(System.getenv("CACHE_SERVER"));
-        CACHE_SERVER = cacheServer.orElse("keisha");
+        Optional<String> cacheServerNameOptional = Optional.ofNullable(System.getenv("CACHE_SERVER_NAME"));
+        Optional<String> isCacheServerOptional = Optional.ofNullable(System.getenv("IS_CACHE_SERVER"));
+        if(devMode){
+            cacheServerName = cacheServerNameOptional.orElse(LOCALHOST);
+        }else{
+            cacheServerName = cacheServerNameOptional.orElse(DEFAULT_CACHE_SERVER_NAME);
+        }
+        isCacheServer = isCacheServerOptional.map(env -> Boolean.parseBoolean(env)).orElse(false);
     }
 
 	public static String dynamicRealm()
