@@ -1212,15 +1212,10 @@ public class QwandaUtils {
 		}
 	}
 	
-	public static String testMethod() {
-	  return "SUCCESS";
-	}
-
 	/*
 	 * Checks if all the mandatory fields are completed
 	 */
 	public static Boolean isMandatoryFieldsCompleted(QDataAskMessage asks, List<BaseEntity> baseEntityList) {
-	  System.out.println("Inside isMandatoryFieldsCompleted method");
 		return isMandatoryFieldsCompleted(asks.getItems(), baseEntityList);
 	}
 
