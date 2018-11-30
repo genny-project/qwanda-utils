@@ -188,6 +188,7 @@ public class QwandaUtils {
 
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpDeleteWithBody request = new HttpDeleteWithBody(deleteUrl);
+		request.setHeader("Content-Type", "application/json; charset=UTF-8");
 		if (authToken != null) {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 		}
@@ -219,6 +220,9 @@ public class QwandaUtils {
 
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpDeleteWithBody request = new HttpDeleteWithBody(deleteUrl);
+		request.setHeader("Content-Type", "application/json; charset=UTF-8");
+		StringEntity deleteEntity = new StringEntity(entityString, "UTF-8");
+        request.setEntity(deleteEntity);
 		if (authToken != null) {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 		}
@@ -1207,11 +1211,16 @@ public class QwandaUtils {
 			return null;
 		}
 	}
+	
+	public static String testMethod() {
+	  return "SUCCESS";
+	}
 
 	/*
 	 * Checks if all the mandatory fields are completed
 	 */
 	public static Boolean isMandatoryFieldsCompleted(QDataAskMessage asks, List<BaseEntity> baseEntityList) {
+	  System.out.println("Inside isMandatoryFieldsCompleted method");
 		return isMandatoryFieldsCompleted(asks.getItems(), baseEntityList);
 	}
 
