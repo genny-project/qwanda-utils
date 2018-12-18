@@ -1250,13 +1250,19 @@ public class QwandaUtils {
 	public static String getUserCode(String token) {
 
 		org.json.JSONObject decodedToken = KeycloakUtils.getDecodedToken(token);
-		//	System.out.println("decoded token object ::" + decodedToken);
-
 		String username = decodedToken.getString("preferred_username");
-		String uname = QwandaUtils.getNormalisedUsername(username);
-		String code = "PER_" + uname.toUpperCase();
+		return getUserCodeFromUserName(username);
 
-		return code;
+	}
+	
+	public static String getUserCodeFromUserName(String username) {
+	  String uname = QwandaUtils.getNormalisedUsername(username);
+	  if(uname != null) {
+	    return "PER_" + uname.toUpperCase();
+	  } else {
+	    return null;
+	  }
+      
 	}
 
 	/**
