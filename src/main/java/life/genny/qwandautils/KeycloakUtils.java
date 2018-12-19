@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,8 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
@@ -42,14 +45,20 @@ import org.json.JSONObject;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessTokenResponse;
-
+import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.util.JsonSerialization;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.vertx.core.json.JsonObject;
+import life.genny.qwanda.attribute.AttributeLink;
+import life.genny.qwanda.entity.Group;
+import life.genny.qwanda.entity.Person;
+import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.message.QDataRegisterMessage;
+import life.genny.qwandautils.KeycloakService;
 
 
 public class KeycloakUtils {
@@ -359,6 +368,7 @@ public class KeycloakUtils {
 			HttpResponse response = httpClient.execute(post);
 
 			int statusCode = response.getStatusLine().getStatusCode();
+			System.out.println("StatusCode: " + statusCode);
 
 			HttpEntity entity = response.getEntity();
 			String content = null;
@@ -369,21 +379,25 @@ public class KeycloakUtils {
 				if(content.length() > 0) {
 					KeycloakUtils.setPassword(token, keycloakUrl, realm, content, password);
 				}
-				
-				return content;
+				String keycloakUserId = getKeycloakUserId(token, realm, newUsername);
+                System.out.println("Keycloak User ID: " + keycloakUserId);
+                return keycloakUserId;
 			} else if (statusCode == 204) {
 				Header[] headers = response.getHeaders("Location");
 				String locationUrl = headers[0].getValue();
 				content = locationUrl.replaceFirst(".*/(\\w+)", "$1");
-				return content;
+				String keycloakUserId = getKeycloakUserId(token, realm, newUsername);
+                System.out.println("Keycloak User ID: " + keycloakUserId);
+                return keycloakUserId;
 			} else if (statusCode == 409) {
 				throw new IOException("Email is already taken. Please use a different email address.");
 			}
 			if (entity == null) {
 				throw new IOException("We could not create the new user. Please try again.");
 			} else {
-				content = getContent(entity);
-				throw new IOException(response + "");
+				String keycloakUserId = getKeycloakUserId(token, realm, newUsername);
+	              System.out.println("Keycloak User ID: " + keycloakUserId);
+	              return keycloakUserId;
 			}
 		}
 
@@ -391,6 +405,74 @@ public class KeycloakUtils {
 			httpClient.getConnectionManager().shutdown();
 		}
 	}
+	/** Remove user from Keycloak using the URL: /admin/realms/{realm}/users/{id} */
+	public static String removeUser(String token, String realm, String userId)
+        throws IOException {
+
+    String keycloakUrl = getKeycloakUrl();
+    
+    HttpClient httpClient = new DefaultHttpClient();
+    
+    try {
+        HttpDelete post = new HttpDelete(keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId);
+
+        post.addHeader("Content-Type", "application/json");
+        post.addHeader("Authorization", "Bearer " + token);
+
+        HttpResponse response = httpClient.execute(post);
+
+        int statusCode = response.getStatusLine().getStatusCode();
+        if(statusCode == 200) {
+          return "Success";
+        } else {
+          return "Failed";
+        }
+    } catch (Exception e) {
+      e.printStackTrace();
+      return "Failed";
+    }
+    finally {
+      httpClient.getConnectionManager().shutdown();
+    }
+ }
+
+    
+	
+	public static String getKeycloakUserId(final String token, final String realm, final String username) throws IOException {
+
+    final List<LinkedHashMap> users = fetchKeycloakUsers(token, realm, username);
+    if(!users.isEmpty()) {
+      return (String) users.get(0).get("id");
+    }
+    return null;
+}
+	
+	public static List<LinkedHashMap> fetchKeycloakUsers(final String token, final String realm, final String username) {
+	    final HttpClient client = new DefaultHttpClient();
+	    String keycloakUrl = getKeycloakUrl();
+	    try {
+	      final HttpGet get =
+	          new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm + "/users?username=" + username);
+	      get.addHeader("Authorization", "Bearer " + token);
+	      try {
+	        final HttpResponse response = client.execute(get);
+	        if (response.getStatusLine().getStatusCode() != 200) {
+	          throw new IOException();
+	        }
+	        final HttpEntity entity = response.getEntity();
+	        final InputStream is = entity.getContent();
+	        try {
+	          return JsonSerialization.readValue(is, (new ArrayList<UserRepresentation>()).getClass());
+	        } finally {
+	          is.close();
+	        }
+	      } catch (final IOException e) {
+	        throw new RuntimeException(e);
+	      }
+	    } finally {
+	      client.getConnectionManager().shutdown();
+	    }
+	  }
 
 	public static String getKeycloakUrl() {
 		String keycloakProto =

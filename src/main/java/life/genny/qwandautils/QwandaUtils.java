@@ -396,7 +396,8 @@ public class QwandaUtils {
 			answers.add(realmAnswer);
 			Answer nameAnswer = new Answer(code, code, "PRI_NAME", name);
 			answers.add(nameAnswer);
-			Answer keycloakIdAnswer = new Answer(code, code, "PRI_KEYCLOAK_UUID", realm);
+			System.out.println("keycloakId value: " + keycloakId);
+			Answer keycloakIdAnswer = new Answer(code, code, "PRI_KEYCLOAK_UUID", keycloakId);
 			answers.add(keycloakIdAnswer);
 			
 			person.addAnswer(usernameAnswer);
