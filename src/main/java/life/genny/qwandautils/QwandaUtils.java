@@ -120,8 +120,10 @@ public class QwandaUtils {
 		}
 
 		finally {
-			IOUtils.closeQuietly(response);
-			IOUtils.closeQuietly(httpclient);
+			response.close();
+			httpclient.close();
+			//IOUtils.closeQuietly(response);  removed commons-io
+			//IOUtils.closeQuietly(httpclient);
 		}
 
 	}
@@ -160,8 +162,10 @@ public class QwandaUtils {
 			return responseString;
 		} 
 		finally {
-			IOUtils.closeQuietly(response);
-			IOUtils.closeQuietly(httpclient);
+			response.close();
+			httpclient.close();
+		//	IOUtils.closeQuietly(response);
+		//	IOUtils.closeQuietly(httpclient);
 		}
 
 	}
@@ -179,10 +183,12 @@ public class QwandaUtils {
 
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpDeleteWithBody request = new HttpDeleteWithBody(deleteUrl);
+		request.setHeader("Content-Type", "application/json; charset=UTF-8");
 		if (authToken != null) {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 		}
 		request.setHeader("Content-Type", "application/json; charset=UTF-8");
+
 
 		CloseableHttpResponse response = httpclient.execute(request);
 		// The underlying HTTP connection is still held by the response object
@@ -201,8 +207,10 @@ public class QwandaUtils {
 
 			return responseString;
 		} finally {
-			IOUtils.closeQuietly(response);
-			IOUtils.closeQuietly(httpclient);
+			response.close();
+			httpclient.close();
+			//IOUtils.closeQuietly(response);
+			//IOUtils.closeQuietly(httpclient);
 		}
 	}
 
@@ -211,9 +219,14 @@ public class QwandaUtils {
 
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpDeleteWithBody request = new HttpDeleteWithBody(deleteUrl);
+		request.setHeader("Content-Type", "application/json; charset=UTF-8");
+		StringEntity deleteEntity = new StringEntity(entityString, "UTF-8");
+        request.setEntity(deleteEntity);
 		if (authToken != null) {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 		}
+		request.setHeader("Content-Type", "application/json; charset=UTF-8");
+
 
 		request.setHeader("Content-Type", "application/json; charset=UTF-8");
 
@@ -234,8 +247,10 @@ public class QwandaUtils {
 
 			return responseString;
 		} finally {
-			IOUtils.closeQuietly(response);
-			IOUtils.closeQuietly(httpclient);
+			response.close();
+			httpclient.close();
+		//	IOUtils.closeQuietly(response);
+		//	IOUtils.closeQuietly(httpclient);
 		}
 	}
 	public static String apiPutEntity(final String postUrl, final String entityString, final String authToken)
@@ -259,8 +274,10 @@ public class QwandaUtils {
 			String responseString = EntityUtils.toString(entity);
 			return responseString;
 		} finally {
-			IOUtils.closeQuietly(response);
-			IOUtils.closeQuietly(httpclient);
+			response.close();
+			httpclient.close();
+			//IOUtils.closeQuietly(response);
+			//IOUtils.closeQuietly(httpclient);
 		}
 
 	}
@@ -382,7 +399,8 @@ public class QwandaUtils {
 			answers.add(realmAnswer);
 			Answer nameAnswer = new Answer(code, code, "PRI_NAME", name);
 			answers.add(nameAnswer);
-			Answer keycloakIdAnswer = new Answer(code, code, "PRI_KEYCLOAK_UUID", realm);
+			System.out.println("keycloakId value: " + keycloakId);
+			Answer keycloakIdAnswer = new Answer(code, code, "PRI_KEYCLOAK_UUID", keycloakId);
 			answers.add(keycloakIdAnswer);
 			
 			person.addAnswer(usernameAnswer);
@@ -1204,7 +1222,7 @@ public class QwandaUtils {
 			return null;
 		}
 	}
-
+	
 	/*
 	 * Checks if all the mandatory fields are completed
 	 */

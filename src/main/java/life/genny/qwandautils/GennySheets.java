@@ -86,6 +86,7 @@ public class GennySheets {
 	private Sheets service;
 
 	public GennySheets(final String clientSecret, final String sheetId, final File dataStoreDir) {
+		log.info("Google Credentials located at "+dataStoreDir);
 		this.clientSecret = clientSecret;
 		this.sheetId = sheetId;
 		this.dataStoreDir = dataStoreDir;
@@ -603,6 +604,7 @@ public class GennySheets {
 	}
 
 	public List<Map> hostingImport() {
+		log.info("secret=["+clientSecret+"]");
 		List<Map> obj = new ArrayList<Map>();
 		try {
 			obj = row2DoubleTuples("Projects");

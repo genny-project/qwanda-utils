@@ -20,6 +20,7 @@ import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.NoSuchProviderException;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
@@ -28,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 
 import com.opencsv.CSVReader;
+import com.sun.mail.util.MailSSLSocketFactory;
 
 import life.genny.models.QFetchMailSettings;
 import life.genny.qwanda.Answer;
@@ -158,7 +160,15 @@ public class MailUtils
 		
         Properties props = System.getProperties();
         props.setProperty("mail.store.protocol", "imaps");
-        
+    //    props.put("mail.imap.ssl.enable", true);
+    //    props.setProperty("mail.imap.port", "993");
+   //     props.setProperty("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+   //     props.setProperty("mail.imap.socketFactory.fallback","true");
+    //    props.setProperty("mail.imap.socketFactory.port", "993");
+     //   props.setProperty("mail.imap.starttls.enable", "true");
+        props.put("mail.smtp.starttls.enable",true);
+        props.put("mail.smtp.auth", true);  // If you need to authenticate
+
         // establish Mapping
         
 
@@ -170,17 +180,33 @@ public class MailUtils
 	    try
 		{
 			// Connect to the server
-			session = Session.getDefaultInstance(props, null);
-			store = session.getStore("imaps");
-			store.connect(settings.getMailHost(), settings.getEmailUsername(), settings.getEmailPassword());
+	    	MailSSLSocketFactory socketFactory= new MailSSLSocketFactory();
+	        socketFactory.setTrustAllHosts(true);
+	 //       props.put("mail.imaps.ssl.socketFactory", socketFactory);
 
+			session = Session.getDefaultInstance(props, null);
+			System.out.println("Host:"+settings.getMailHost()+" Username: "+settings.getEmailUsername()+" Password: ["+settings.getEmailPassword()+"]");
+			System.out.println("PRE STORE");
+			try {
+				store = session.getStore("imaps");  // getStore("imaps")
+			} catch (NoSuchProviderException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			System.out.println("Store Fetched");
+			if (store == null) {
+				System.out.println("Store is null!");
+			}
+			store.connect(settings.getMailHost(), settings.getEmailUsername(), settings.getEmailPassword());
+			System.out.println("Store Connected");
+			if (store.isConnected()) {
 			inbox = store.getFolder(settings.getImapNew());
 			processed = store.getFolder(settings.getImapProcessed());
 			error = store.getFolder(settings.getImapError());
 			
 			inbox.open(Folder.READ_ONLY);
 			int messageCount = inbox.getMessageCount();
-			System.out.println("Number of messagesa in inbox = " + messageCount);
+			System.out.println("Number of messages in inbox = " + messageCount);
 
 			Message[] messages = inbox.getMessages();
 			System.out.println("------------------------------");
@@ -244,17 +270,21 @@ public class MailUtils
 					e.printStackTrace();
 				}
 			}
-
+			}
+			else {
+				System.out.println("Cannot connect to imap server");
+			}
 		} catch (Exception e)
 	    {
-	    	System.out.println(e.getStackTrace());
-	
+	    	e.getStackTrace();
+	    	System.out.println("Mail Fetch Exception "+e.getLocalizedMessage());
 	
 	  }
 	    finally {
 	    	 try {
 	    		 if (inbox != null && inbox.isOpen()) { inbox.close(true); }
 	             if (store != null) { store.close(); }
+	             System.out.println("Closing IMAP");
 			} catch (MessagingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
