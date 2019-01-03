@@ -112,7 +112,7 @@ public class GennySettings {
 	public static String dynamicPassword(final String realm)
 	{
 		String password = SecurityUtils.decrypt(dynamicKey(realm), dynamicInitVector(realm), dynamicEncryptedPassword(realm));
-		if (GennySettings.devMode) {
+		if (GennySettings.devMode || GennySettings.defaultLocalIP.equals(GennySettings.hostIP)) {
 			password = GennySettings.defaultServicePassword;
 		}
 		return password;
