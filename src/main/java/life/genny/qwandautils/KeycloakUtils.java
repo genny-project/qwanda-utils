@@ -76,7 +76,7 @@ public class KeycloakUtils {
 		
     try {
     	
-    		JsonObject content = KeycloakUtils.getAccessToken(keycloakUrl, realm, clientId, secret, username, password);
+    		JsonObject content = KeycloakUtils.getToken(keycloakUrl, realm, clientId, secret, username, password);
     		if(content != null) {
     			return content.getString("access_token");
     		}
@@ -92,7 +92,7 @@ public class KeycloakUtils {
 	public static AccessTokenResponse getAccessTokenResponse(String keycloakUrl, String realm, String clientId, String secret,
 			String username, String password) throws IOException {
 
-		JsonObject content = KeycloakUtils.getAccessToken(keycloakUrl, realm, clientId, secret, username, password);
+		JsonObject content = KeycloakUtils.getSecureTokenPayload(keycloakUrl, realm, clientId, secret, username, password);
 		if(content != null) {
 			return JsonUtils.fromJson(content.toString(), AccessTokenResponse.class);
 		}
@@ -107,6 +107,10 @@ public class KeycloakUtils {
 		secureTokenPayload.put("access_token", fullTokenPayload.getString("access_token"));
 		secureTokenPayload.put("refresh_token", fullTokenPayload.getString("refresh_token"));
 		return secureTokenPayload;
+	}
+
+	public static JsonObject getSecureTokenPayload(String keycloakUrl, String realm, String clientId, String secret, String username, String password) throws IOException {
+		return KeycloakUtils.getSecureTokenPayload(keycloakUrl, realm, clientId, secret, username, password, null);
 	}
 
 	public static JsonObject getToken(String keycloakUrl, String realm, String clientId, String secret, String username, String password, String refreshToken) throws IOException {
@@ -574,7 +578,7 @@ public class KeycloakUtils {
 //					+ "keycloakurl: " + keycloakurl + "\n" + "key : " + key + "\n" + "initVector : " + initVector + "\n"
 //					+ "enc pw : " + encryptedPassword + "\n" + "password : " + password + "\n");
 
-			String token = KeycloakUtils.getToken(keycloakUrl, realm, realm, secret, "service", password);
+			String token = KeycloakUtils.getAccessToken(keycloakUrl, realm, realm, secret, "service", password);
 //			println("token = " + token);
 			return token;
 
