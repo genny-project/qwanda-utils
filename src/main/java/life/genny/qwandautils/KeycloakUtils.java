@@ -102,7 +102,7 @@ public class KeycloakUtils {
 
 	public static JsonObject getSecureTokenPayload(String keycloakUrl, String realm, String clientId, String secret, String username, String password, String refreshToken) throws IOException {
 
-		JsonObject fullTokenPayload = KeycloakUtils.getToken(keycloakUrl, realm, clientId, secret, username, password);
+		JsonObject fullTokenPayload = KeycloakUtils.getToken(keycloakUrl, realm, clientId, secret, username, password, refreshToken);
 		JsonObject secureTokenPayload = new JsonObject();
 		secureTokenPayload.put("access_token", fullTokenPayload.getString("access_token"));
 		secureTokenPayload.put("refresh_token", fullTokenPayload.getString("refresh_token"));
