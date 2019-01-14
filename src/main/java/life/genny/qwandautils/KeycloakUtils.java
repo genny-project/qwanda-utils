@@ -35,11 +35,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
-// import org.keycloak.OAuth2Constants;
-// import org.keycloak.common.util.KeycloakUriBuilder;
-// import org.keycloak.constants.ServiceUrlConstants;
-// import org.keycloak.representations.AccessTokenResponse;
-// import org.keycloak.util.JsonSerialization;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.keycloak.OAuth2Constants;
@@ -76,7 +71,7 @@ public class KeycloakUtils {
 		return ret;
 	}
 
-	public static String getToken(String keycloakUrl, String realm, String clientId, String secret, String username,
+	public static String getAccessToken(String keycloakUrl, String realm, String clientId, String secret, String username,
 			String password) throws IOException {
 		
     try {
@@ -105,27 +100,39 @@ public class KeycloakUtils {
 		return null;
 	}
 
-	public static JsonObject getAccessToken(String keycloakUrl, String realm, String clientId, String secret,
-			String username, String password) throws IOException {
+	public static JsonObject getSecureTokenPayload(String keycloakUrl, String realm, String clientId, String secret, String username, String password, String refreshToken) throws IOException {
+
+		JsonObject fullTokenPayload = KeycloakUtils.getToken(keycloakUrl, realm, clientId, secret, username, password);
+		JsonObject secureTokenPayload = new JsonObject();
+		secureTokenPayload.put("access_token", fullTokenPayload.getString("access_token"));
+		secureTokenPayload.put("refresh_token", fullTokenPayload.getString("refresh_token"));
+		return secureTokenPayload;
+	}
+
+	public static JsonObject getToken(String keycloakUrl, String realm, String clientId, String secret, String username, String password, String refreshToken) throws IOException {
 
 		HttpClient httpClient = new DefaultHttpClient();
 
 		try {
+
 			URI uri = new URI(keycloakUrl+"/auth/realms/"+realm+"/protocol/openid-connect/token");
 			HttpPost post = new HttpPost(uri);
-//			HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl + "/auth")
-//					.path(ServiceUrlConstants.TOKEN_PATH).build(realm));
-			// System.out.println("url token post=" + keycloakUrl + "/auth" + ",tokenpath="
-			// + ServiceUrlConstants.TOKEN_PATH + ":realm=" + realm + ":clientid=" +
-			// clientId + ":secret" + secret
-			// + ":un:" + username + "pw:" + password);
-			// ;
+
 			post.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
 			List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-			formParams.add(new BasicNameValuePair("username", username));
-			formParams.add(new BasicNameValuePair("password", password));
-			formParams.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, "password"));
+			
+			/* if we don't have a refresh token, we generate a new token using username and password */
+			if(refreshToken == null) {
+				formParams.add(new BasicNameValuePair("username", username));
+				formParams.add(new BasicNameValuePair("password", password));
+				formParams.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, "password"));
+			}
+			else {
+				formParams.add(new BasicNameValuePair("refresh_token", refreshToken));
+				formParams.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, "refresh_token"));
+			}
+
 			formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_ID, clientId));
 			formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_SECRET, secret));
 			UrlEncodedFormEntity form = new UrlEncodedFormEntity(formParams, "UTF-8");
@@ -165,6 +172,11 @@ public class KeycloakUtils {
 		}
 		
 		return null;
+	}
+
+	public static JsonObject getToken(String keycloakUrl, String realm, String clientId, String secret,
+			String username, String password) throws IOException {
+				return KeycloakUtils.getToken(keycloakUrl, realm, clientId, secret, username, password, null);
 	}
 
 	public static String getContent(final HttpEntity httpEntity) throws IOException {
