@@ -128,7 +128,7 @@ public class KeycloakUtils {
 
 			List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 			
-			System.out.println("===================== Generating new token =====================");
+			System.out.println("===================== Generating new token (KeycloakUtils) =====================");
 
 			/* if we have a refresh token */
 			if(refreshToken != null) {
@@ -148,7 +148,7 @@ public class KeycloakUtils {
 				/* if the difference is negative it means the expiry time is less than the nowTime 
 					if the difference < 180000, it means the token will expire in 3 hours
 				*/
-				if(duration <= 10800) {
+				if(duration <= GennySettings.ACCESS_TOKEN_EXPIRY_LIMIT_SECONDS) {
 
 					/* if the refresh token is about to expire, we must re-generate a new one */
 					refreshToken = null;
