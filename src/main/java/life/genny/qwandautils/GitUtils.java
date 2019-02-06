@@ -1,6 +1,7 @@
 package life.genny.qwandautils;
 
 import org.apache.http.client.ClientProtocolException;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
@@ -18,6 +19,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.io.File;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,6 +28,9 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 public class GitUtils {
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
   
   public static final String GIT_PROP_EXTENSION = "-git.properties";
   
@@ -48,7 +53,7 @@ public class GitUtils {
         final RevCommit commit = revWalk.parseCommit(lastCommitId);
         // and using commit's tree find the path
         final RevTree tree = commit.getTree();
-        System.out.println("Having tree: " + tree);
+        log.info("Having tree: " + tree);
 
         // now try to find a specific file
         try (TreeWalk treeWalk = new TreeWalk(repository)) {

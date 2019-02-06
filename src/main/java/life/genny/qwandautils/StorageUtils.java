@@ -4,10 +4,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.Logger;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
@@ -24,6 +26,9 @@ import life.genny.qwanda.FileUploadDetails;
 import life.genny.qwanda.entity.BaseEntity;
 
 public class StorageUtils {
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
 	
 	private static AmazonS3 getAmazonClientObj(BaseEntity projectBe) {
 		
@@ -57,7 +62,7 @@ public class StorageUtils {
 				
 				/* unique ID for file */
 				String fileUUID = UUID.randomUUID().toString();
-				System.out.println("fileUUID ::"+fileUUID);
+				log.info("fileUUID ::"+fileUUID);
 				
 				/* get content from URL and convert to inputstream */
 				URL url = new URL(downloadableUrl);
@@ -70,8 +75,8 @@ public class StorageUtils {
 				OutputStream outputStream = new FileOutputStream(file);
 				IOUtils.copy(is, outputStream);
 				
-				System.out.println("file ::"+file.getName());
-				System.out.println("file path ::"+file.getAbsolutePath());
+				log.info("file ::"+file.getName());
+				log.info("file path ::"+file.getAbsolutePath());
 					
 				// Upload a file as a new object with ContentType and title specified.
 				
@@ -92,7 +97,7 @@ public class StorageUtils {
 	            
 	            String uploadedUrl = String.valueOf(s3Client.getUrl(bucketName, file.getName()));
 	                        
-	            System.out.println("uploaded url ::"+uploadedUrl);
+	            log.info("uploaded url ::"+uploadedUrl);
 	            fileUploadDetails.setUploadedFilePath(uploadedUrl);
 	            
 				is.close();
@@ -114,7 +119,7 @@ public class StorageUtils {
 		}
 		
 		
-		System.out.println("fileUploadDetails ::"+fileUploadDetails);
+		log.info("fileUploadDetails ::"+fileUploadDetails);
 		return fileUploadDetails;
 
 	}
@@ -131,7 +136,7 @@ public class StorageUtils {
 	                bucketName, 
 	                fileName));
 	                     
-	         System.out.println("uploaded url ::"+uploadedUrl);
+	         log.info("uploaded url ::"+uploadedUrl);
 		}
 		
 		return uploadedUrl;

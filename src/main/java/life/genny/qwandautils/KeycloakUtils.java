@@ -128,7 +128,7 @@ public class KeycloakUtils {
 
 			List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 			
-			System.out.println("===================== Generating new token (KeycloakUtils) =====================");
+			log.info("===================== Generating new token (KeycloakUtils) =====================");
 
 			/* if we have a refresh token */
 			if(refreshToken != null) {
@@ -159,14 +159,14 @@ public class KeycloakUtils {
 			if(refreshToken == null) {
 				formParams.add(new BasicNameValuePair("username", username));
 				formParams.add(new BasicNameValuePair("password", password));
-				System.out.println("using username");
+				log.info("using username");
 				formParams.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, "password"));
 			}
 			else {
 				formParams.add(new BasicNameValuePair("refresh_token", refreshToken));
 				formParams.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, "refresh_token"));
-				System.out.println("using refresh token");
-				System.out.println(refreshToken);
+				log.info("using refresh token");
+				log.info(refreshToken);
 			}
 
 			formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_ID, clientId));
@@ -251,7 +251,7 @@ public class KeycloakUtils {
 			decodedJson = new String(decodedClaims);
 			jsonObj = new JSONObject(decodedJson);
 		} catch (final JSONException e1) {
-			System.out.println("bearerToken=" + bearerToken + "  decodedJson=" + decodedJson + ":" + e1.getMessage());
+			log.info("bearerToken=" + bearerToken + "  decodedJson=" + decodedJson + ":" + e1.getMessage());
 		}
 		return jsonObj;
 	}
@@ -321,7 +321,7 @@ public class KeycloakUtils {
 			String keycloakUrl = getKeycloakUrl();
 			HttpPut putRequest = new HttpPut(
 					keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password");
-			System.out.println(keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password");
+			log.info(keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password");
 
 			putRequest.addHeader("Content-Type", "application/json");
 			putRequest.addHeader("Authorization", "Bearer " + token);
@@ -376,15 +376,15 @@ public class KeycloakUtils {
 //		try {
 //			
 //			String svcToken = getToken("https://bouncer.outcome-hub.com", "fourdegrees",  "fourdegrees",  "2b9f30c8-c40f-4469-9611-26d8ed7a1b3b",  "service", "ahzfQt6n+sIbnZ4d8TRGGw==");
-//			System.out.println(svcToken);
+//			log.info(svcToken);
 //			String newRealmRoles = "user,offline_access,uma_authorization";
 //			String newGroupRoles2 = "users";
 //			
 //
 //			String id = createUser(svcToken, "fourdegrees", "cd8@gmail.com", "Callan","Delbridge", "cd8@gmail.com", "password1", newRealmRoles, newGroupRoles2);
-//			System.out.println(id);
+//			log.info(id);
 //			String token = getToken("https://bouncer.outcome-hub.com", "fourdegrees",  "fourdegrees",  "2b9f30c8-c40f-4469-9611-26d8ed7a1b3b",  "cd8@gmail.com", "password1");
-//			System.out.println(token);
+//			log.info(token);
 //		} catch (IOException e) {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
@@ -418,7 +418,7 @@ public class KeycloakUtils {
 			HttpResponse response = httpClient.execute(post);
 
 			int statusCode = response.getStatusLine().getStatusCode();
-			System.out.println("StatusCode: " + statusCode);
+			log.info("StatusCode: " + statusCode);
 
 			HttpEntity entity = response.getEntity();
 			String content = null;
@@ -430,14 +430,14 @@ public class KeycloakUtils {
 					KeycloakUtils.setPassword(token, keycloakUrl, realm, content, password);
 				}
 				String keycloakUserId = getKeycloakUserId(token, realm, newUsername);
-                System.out.println("Keycloak User ID: " + keycloakUserId);
+                log.info("Keycloak User ID: " + keycloakUserId);
                 return keycloakUserId;
 			} else if (statusCode == 204) {
 				Header[] headers = response.getHeaders("Location");
 				String locationUrl = headers[0].getValue();
 				content = locationUrl.replaceFirst(".*/(\\w+)", "$1");
 				String keycloakUserId = getKeycloakUserId(token, realm, newUsername);
-                System.out.println("Keycloak User ID: " + keycloakUserId);
+                log.info("Keycloak User ID: " + keycloakUserId);
                 return keycloakUserId;
 			} else if (statusCode == 409) {
 				throw new IOException("Email is already taken. Please use a different email address.");
@@ -446,7 +446,7 @@ public class KeycloakUtils {
 				throw new IOException("We could not create the new user. Please try again.");
 			} else {
 				String keycloakUserId = getKeycloakUserId(token, realm, newUsername);
-	              System.out.println("Keycloak User ID: " + keycloakUserId);
+	              log.info("Keycloak User ID: " + keycloakUserId);
 	              return keycloakUserId;
 			}
 		}
@@ -586,7 +586,7 @@ public class KeycloakUtils {
 
         String encryptedPassword = encrypt(newkey, initVector, password);
         if (!key.equals(newkey)) {
-        	System.out.println("NEW KEY = ["+newkey+"]");;
+        	log.info("NEW KEY = ["+newkey+"]");;
         }
 		return encryptedPassword;
 	}
@@ -600,7 +600,7 @@ public class KeycloakUtils {
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
 
             byte[] encrypted = cipher.doFinal(value.getBytes());
-//            System.out.println("encrypted string: "
+//            log.info("encrypted string: "
 //                    + Base64.encodeBase64String(encrypted));
 
             return Base64.encodeBase64String(encrypted);

@@ -52,7 +52,7 @@ public class JsonUtils {
 	                      item = (T)gson.fromJson(json, clazz);
 	                	}
 	                } catch (Exception e) {
-	                	     System.out.println("The JSON file received is  :::  "+json);;
+	                	     log.info("The JSON file received is  :::  "+json);;
 	                     log.error("Bad Deserialisation for "+clazz.getSimpleName());
 	                }
 	        }
@@ -67,7 +67,7 @@ public class JsonUtils {
 	                      item = (T)gson.fromJson(json, clazz);
 
 	                } catch (Exception e) {
-	                	     System.out.println("The JSON file received is  :::  "+json);;
+	                	     log.info("The JSON file received is  :::  "+json);;
 	                     log.error("Bad Deserialisation for "+clazz.getTypeName());
 	                }
 	        }
