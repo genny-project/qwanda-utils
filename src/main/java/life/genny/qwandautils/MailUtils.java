@@ -128,7 +128,6 @@ public class MailUtils
 					String value = StringUtils.trim(columnValue).replaceAll("\\p{C}", "?");
 					if (columnIndex < attributeArray.length) {
 						String attributeCode = attributeArray[columnIndex];
-						// System.out.print(attributeCode+":"+value+",");
 						Attribute mockAttribute = new AttributeText(attributeCode, columnArray[columnIndex]);
 						Answer answer = new Answer(source, be, mockAttribute, value);
 						try {
@@ -143,8 +142,7 @@ public class MailUtils
 					}
 				}
 				baseEntitys.add(be);
-				log.info();
-				;
+
 				rowIndex++;
 			}
 		} catch (IOException e) {
@@ -221,7 +219,7 @@ public class MailUtils
 	            log.info(msg.getFlags());
 	            log.info("Body: \n"+ msg.getContent());
 	            log.info(msg.getContentType());
-	            System.out.print(msg.getReceivedDate()); // Use this as unique id
+	            log.info(msg.getReceivedDate()); // Use this as unique id
 
 				try {
 					Multipart multipart = (Multipart) msg.getContent();
@@ -250,9 +248,9 @@ public class MailUtils
 							for (BaseEntity be : importBEs) {
 								log.info(be);
 								for (EntityAttribute ea : be.getBaseEntityAttributes()) {
-									System.out.print(ea.getAttributeCode()+":"+ea.getValueString()+", ");
+									log.info(ea.getAttributeCode()+":"+ea.getValueString()+", ");
 								}
-								log.info();
+	
 							}
 
 							Message[] processedMessages = new Message[1];
