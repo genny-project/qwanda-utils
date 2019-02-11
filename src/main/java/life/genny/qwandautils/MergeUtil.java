@@ -286,8 +286,8 @@ public class MergeUtil {
 		LocalDateTime localDateTime = LocalDateTime.now();
 		String text = localDateTime.format(dateformat);
 		String text1 = localDateTime.format(dateformat1);
-		System.out.println("formattedDate ::"+text);
-		System.out.println("formattedDate ::"+text1);
+		log.info("formattedDate ::"+text);
+		log.info("formattedDate ::"+text1);
 	}*/
 	
 	
