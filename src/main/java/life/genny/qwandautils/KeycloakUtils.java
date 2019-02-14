@@ -255,6 +255,12 @@ public class KeycloakUtils {
 		}
 		return jsonObj;
 	}
+	
+	public static String getRealmFromToken(final String bearerToken)
+	{
+		return getDecodedToken(bearerToken).getString("aud"); // return the realm
+		
+	}
 
 	// Send the decoded Json token in the map
 	public static Map<String, Object> getJsonMap(final String json) {
