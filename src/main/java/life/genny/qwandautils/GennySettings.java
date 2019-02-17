@@ -10,7 +10,7 @@ public class GennySettings {
 
     //Constants 
     public final static String LOCALHOST = "localhost";
-    public final static String DEFAULT_CACHE_SERVER_NAME = "keisha-service";
+    public final static String DEFAULT_CACHE_SERVER_NAME = "bridge-service";
 
 	public static int ACCESS_TOKEN_EXPIRY_LIMIT_SECONDS = 60;
 
@@ -25,13 +25,16 @@ public class GennySettings {
 
 	public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL") != null ? System.getenv("REACT_APP_QWANDA_API_URL") : "http://"+hostIP+":8280";
 	public static final String vertxUrl = System.getenv("REACT_APP_VERTX_URL") != null ? System.getenv("REACT_APP_VERTX_URL") :  "http://"+hostIP+":"+apiPort;
+	public static final String bridgeServiceUrl = System.getenv("BRIDGE_SERVICE_API") != null ? System.getenv("BRIDGE_SERVICE_API") :  System.getenv("REACT_APP_VERTX_SERVICE_API");
 	public static final String pontoonUrl = System.getenv("PONTOON_URL") != null ? System.getenv("PONTOON_URL") :  "http://"+hostIP+":"+pontoonPort;
 	public static final Boolean devMode = ("TRUE".equalsIgnoreCase(System.getenv("DEV_MODE"))||"TRUE".equalsIgnoreCase(System.getenv("GENNYDEV"))) ? true : false;
 	public static final String projectUrl = System.getenv("PROJECT_URL");
 	public final static String mainrealm = System.getenv("PROJECT_REALM") != null ? System.getenv("PROJECT_REALM") : "genny"; // UGLY
 	public final static Boolean isRulesManager = "TRUE".equalsIgnoreCase(System.getenv("RULESMANAGER"));
 	public final static Boolean isDdtHost = "TRUE".equalsIgnoreCase(System.getenv("DDTHOST"));
-
+	public final static Boolean forceEventBusApi = "TRUE".equalsIgnoreCase(System.getenv("FORCE_EVENTBUS_USE_API"));
+	public final static Boolean forceCacheApi = "TRUE".equalsIgnoreCase(System.getenv("FORCE_CACHE_USE_API"));	
+	
 	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + hostIP + ":"+cacheApiPort)
 			: System.getenv("DDT_URL");
 

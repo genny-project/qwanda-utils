@@ -19,6 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -139,6 +140,9 @@ public class QwandaUtils {
 	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken, final Consumer<String> callback)
 			throws IOException {
 
+		if (StringUtils.isBlank(postUrl)) {
+			log.error("Blank url in apiPostEntity");
+		}
 		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
 		CloseableHttpResponse response = null;
 		try {
@@ -162,7 +166,11 @@ public class QwandaUtils {
 			return responseString;
 		} 
 		finally {
+			if (response != null) {
 			response.close();
+			} else {
+				log.error("postApi response was null");
+			}
 			httpclient.close();
 		//	IOUtils.closeQuietly(response);
 		//	IOUtils.closeQuietly(httpclient);
