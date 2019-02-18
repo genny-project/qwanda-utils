@@ -258,7 +258,7 @@ public class KeycloakUtils {
 	
 	public static String getRealmFromToken(final String bearerToken)
 	{
-		return getDecodedToken(bearerToken).getString("aud"); // return the realm
+		return getDecodedToken(bearerToken).getString("azp"); // return the realm
 		
 	}
 
