@@ -106,6 +106,10 @@ public class QwandaUtils {
 
 			HttpEntity entity1 = response.getEntity();
 			String responseString = EntityUtils.toString(entity1);
+			
+			if (StringUtils.isBlank(responseString)) {
+				return "";
+			}
 
 			EntityUtils.consume(entity1);
 
@@ -116,8 +120,8 @@ public class QwandaUtils {
 			return null;
 		}
 		catch (Exception e) {
-			log.error("API Get call timeout - "+timeout+" secs to "+getUrl);
-			return null;
+			log.error("API Get exception -for  "+getUrl+" :");
+			return "";
 		}
 
 		finally {
