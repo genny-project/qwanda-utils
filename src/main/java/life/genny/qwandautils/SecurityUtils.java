@@ -7,6 +7,7 @@ import javax.security.auth.x500.X500Principal;
 import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
 import org.bouncycastle.operator.ContentSigner;
@@ -21,6 +22,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.nio.file.*;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
@@ -31,6 +33,9 @@ import static io.jsonwebtoken.SignatureAlgorithm.RS256;
 import static java.lang.Boolean.TRUE;
 
 public class SecurityUtils {
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
 	public static String encrypt(String key, String initVector, String value) {
 		try {
 			IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
@@ -40,7 +45,7 @@ public class SecurityUtils {
 			cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
 
 			byte[] encrypted = cipher.doFinal(value.getBytes());
-			System.out.println("encrypted string: " + Base64.encodeBase64String(encrypted));
+			log.info("encrypted string: " + Base64.encodeBase64String(encrypted));
 
 			return Base64.encodeBase64String(encrypted);
 		} catch (Exception ex) {
@@ -72,7 +77,7 @@ public class SecurityUtils {
 		String key = "Bar12345Bar12345"; // 128 bit key
 		String initVector = "RandomInitVector"; // 16 bytes IV
 
-		System.out.println(decrypt(key, initVector, encrypt(key, initVector, "Hello World")));
+		log.info(decrypt(key, initVector, encrypt(key, initVector, "Hello World")));
 	}
 
 

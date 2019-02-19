@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.Logger;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -44,7 +46,11 @@ import life.genny.qwanda.validation.Validation;
 import life.genny.qwanda.validation.ValidationList;
 
 public class GennySheets2 {
-  // public static final String SHEETID = System.getenv("GOOGLE_SHEETID");
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
+	
+	 // public static final String SHEETID = System.getenv("GOOGLE_SHEETID");
   // public static final String SHEETID = "1VSXJUn8_BHG1aW0DQrFDnvLjx_jxcNiD33QzqO5D-jc";
 
   /** Range of Columns to read or write */
@@ -157,7 +163,7 @@ public class GennySheets2 {
             .setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
     final Credential credential =
         new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
-    System.out.println("Credentials saved to " + dataStoreDir.getAbsolutePath());
+    log.info("Credentials saved to " + dataStoreDir.getAbsolutePath());
     return credential;
   }
 
@@ -346,11 +352,11 @@ public class GennySheets2 {
       final String attributeCode = (String) object.get("attributeCode");
       final String weightStr = (String) object.get("weight");
       final String valueString = (String) object.get("valueString");
-      System.out.println("BECode:" + beCode + ":attCode" + attributeCode + ":weight:" + weightStr
+      log.info("BECode:" + beCode + ":attCode" + attributeCode + ":weight:" + weightStr
           + ": valueString:" + valueString);
       final Attribute attribute = new Attribute("ds", "dsd", null);
       final BaseEntity be = new BaseEntity("ds", "dsd");
-      System.out.println("==============11==============" + findBaseEntityByCode.get(beCode)
+      log.info("==============11==============" + findBaseEntityByCode.get(beCode)
           + "============================");
       try {
         BeanUtils.copyProperties(attribute, findAttributeByCode.get(attributeCode));
@@ -359,7 +365,7 @@ public class GennySheets2 {
         // TODO Auto-generated catch block
         e1.printStackTrace();
       }
-      System.out.println("============================" + be + "============================");
+      log.info("============================" + be + "============================");
       // service.update(be);
       // attribute = findAttributeByCode.get(attributeCode);
       // be = findBaseEntityByCode.get(beCode);

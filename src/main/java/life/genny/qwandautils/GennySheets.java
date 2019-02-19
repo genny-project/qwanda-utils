@@ -86,6 +86,7 @@ public class GennySheets {
 	private Sheets service;
 
 	public GennySheets(final String clientSecret, final String sheetId, final File dataStoreDir) {
+		log.info("Google Credentials located at "+dataStoreDir);
 		this.clientSecret = clientSecret;
 		this.sheetId = sheetId;
 		this.dataStoreDir = dataStoreDir;
@@ -156,7 +157,7 @@ public class GennySheets {
 				clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
 		final Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
 				.authorize("user");
-		System.out.println("Credentials saved to " + dataStoreDir.getAbsolutePath());
+		log.info("Credentials saved to " + dataStoreDir.getAbsolutePath());
 		return credential;
 	}
 
@@ -216,7 +217,7 @@ public class GennySheets {
 		// try {
 		response = service.spreadsheets().values().get(sheetId, absoluteRange).execute();
 		// } catch (GoogleJsonResponseException e) {
-		// System.out.println("dfsdfsdfsdfsd");
+		// log.info("dfsdfsdfsdfsd");
 		// return null;
 		// }
 		final List<List<Object>> values = response.getValues();
@@ -392,7 +393,7 @@ public class GennySheets {
 				final String baseEntityCode = (String) object.get("baseEntityCode");
 				final String attributeCode = (String) object.get("attributeCode");
 				if ("PRI_PRICE".equalsIgnoreCase(attributeCode)) {
-					System.out.println("dummy");
+					log.info("dummy");
 				}
 				final String weight = (String) object.get("weight");
 				final String valueString = (String) object.get("valueString");
@@ -497,7 +498,7 @@ public class GennySheets {
 				final String targetCode = (String) object.get("targetCode");
 				// if ("QUE_USER_SELECT_ROLE".equals(targetCode))
 				// {
-				// System.out.println("dummy");
+				// log.info("dummy");
 				// }
 				final String weight = (String) object.get("weight");
 				final String mandatory = (String) object.get("mandatory");
@@ -603,6 +604,7 @@ public class GennySheets {
 	}
 
 	public List<Map> hostingImport() {
+		log.info("secret=["+clientSecret+"]");
 		List<Map> obj = new ArrayList<Map>();
 		try {
 			obj = row2DoubleTuples("Projects");
@@ -661,8 +663,8 @@ public class GennySheets {
 			}	
 			
 			map.put(code, fields);
-			System.out.println("**********************templates*****************************");
-			System.out.println(map);
+			log.info("**********************templates*****************************");
+			log.info(map);
 			return map;
 		}).reduce((ac, acc) -> {
 			ac.putAll(acc);

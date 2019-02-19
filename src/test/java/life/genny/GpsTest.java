@@ -14,15 +14,11 @@ public class GpsTest {
 		final String googleApiKey = "AIzaSyCtaue7XGY-pNto0DgjZUyMudu2o0NkI88"; 
 		GPSLocation origin = GPSUtils.getGPSLocation("64A Fakenham Rd, Ashburton, VIC, 3147", googleApiKey);
 		GPSLocation end = GPSUtils.getGPSLocation("121 Cardigan St, Carlton, VIC, 3053", googleApiKey);
-		GPSRoute route = GPSUtils.getRoute(origin, end, googleApiKey);
-		
-		Double duration = route.getDuration_s();
-		Double distance = route.getDistance_m();
-		System.out.println(route);
-		GPSRouteStatus status = GPSUtils.fetchCurrentRouteStatusByPercentageDistance(route,50.0);
-		System.out.println(status);
+		if(origin != null && end != null) {
+		  GPSRoute route = GPSUtils.getRoute(origin, end, googleApiKey);
+	        System.out.println(route);
+	        GPSRouteStatus status = GPSUtils.fetchCurrentRouteStatusByPercentageDistance(route,50.0);
+	        System.out.println(status);
+		}
 	}
-	
-	
-
 }

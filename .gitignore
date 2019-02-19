@@ -15,3 +15,8 @@ buildNumber.properties
 src/main/resources/rebel.xml
 .project
 ./.project
+.vscode/
+.settings/
+.factorypath/
+./.factorypath
+./.project

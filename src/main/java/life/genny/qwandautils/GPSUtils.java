@@ -2,6 +2,7 @@ package life.genny.qwandautils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.invoke.MethodHandles;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -18,6 +19,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.http.client.ClientProtocolException;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.w3c.dom.Document;
 
@@ -34,6 +36,9 @@ import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QCmdGeofenceMessage;
 
 public class GPSUtils {
+
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	/*
 	 * Sends QCmdGeofenceMessage for the given beg, address and radius
@@ -103,7 +108,7 @@ public class GPSUtils {
 		int responseCode = 0;
 		String api = "http://maps.googleapis.com/maps/api/geocode/xml?address=" + URLEncoder.encode(address, "UTF-8")
 				+ "&sensor=true";
-		System.out.println("API URL : " + api);
+		log.info("API URL : " + api);
 		URL url = new URL(api);
 		HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
 		httpConnection.connect();
@@ -145,7 +150,7 @@ public class GPSUtils {
 					+ coordinates1[0] + "," + coordinates1[1] + "&destinations=" + coordinates2[0] + ","
 					+ coordinates2[1] + "&mode=driving&language=pl-PL", null);
 
-			System.out.println(response);
+			log.info(response);
 			if (response != null) {
 
 				JsonObject distanceMatrix = new JsonObject(response);
@@ -219,7 +224,7 @@ public class GPSUtils {
 				JsonObject location = geometry.getJsonObject("location");
 				Double lat = location.getDouble("lat");
 				Double lng = location.getDouble("lng");
-				System.out.println(lat + "," + lng);
+				log.info(lat + "," + lng);
 				result = new GPSLocation(lat, lng);
 			}
 		} catch (IOException e) {
@@ -279,7 +284,7 @@ public class GPSUtils {
 							GPSLocation startLoc3 = new GPSLocation(start_location3.getDouble("lat"),start_location3.getDouble("lng"));
 							GPSLocation endLoc3 = new GPSLocation(end_location3.getDouble("lat"),end_location3.getDouble("lng"));
 							String html_instructions = stepJson.getString("html_instructions");
-							System.out.println(stepJson);
+							log.info(stepJson);
 							GPSStep gpsStep = new GPSStep(startLoc3, endLoc3, distance_m3, duration_s3);
 							gpsStep.setHtmlInstruction(html_instructions);
 							gpsLeg.add(gpsStep);
@@ -297,7 +302,7 @@ public class GPSUtils {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println(apiUrl);
+		log.info(apiUrl);
 		return routeResult;
 	}
 

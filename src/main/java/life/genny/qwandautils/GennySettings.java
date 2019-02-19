@@ -1,9 +1,19 @@
 package life.genny.qwandautils;
 
 import org.apache.commons.lang3.StringUtils;
+import java.util.Optional;
 
 public class GennySettings {
-	public static String defaultLocalIP = "10.123.123.123";
+
+	public static String defaultLocalIP = System.getenv("DEFAULT_LOCAL_IP") != null ? System.getenv("DEFAULT_LOCAL_IP") :"10.123.123.123";
+
+
+    //Constants 
+    public final static String LOCALHOST = "localhost";
+    public final static String DEFAULT_CACHE_SERVER_NAME = "bridge-service";
+
+	public static int ACCESS_TOKEN_EXPIRY_LIMIT_SECONDS = 60;
+
 	public static String hostIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : System.getenv("MYIP");   // remember to set up this local IP on the host
 	public static String myIP = System.getenv("MYIP") != null ? System.getenv("MYIP") : System.getenv("HOSTIP");   // remember to set up this local IP on the host
 	public static String cacheApiPort = System.getenv("CACHE_API_PORT") != null ? System.getenv("CACHE_API_PORT") : "8089";
@@ -15,13 +25,17 @@ public class GennySettings {
 
 	public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL") != null ? System.getenv("REACT_APP_QWANDA_API_URL") : "http://"+hostIP+":8280";
 	public static final String vertxUrl = System.getenv("REACT_APP_VERTX_URL") != null ? System.getenv("REACT_APP_VERTX_URL") :  "http://"+hostIP+":"+apiPort;
+	public static final String bridgeServiceUrl = System.getenv("BRIDGE_SERVICE_API") != null ? System.getenv("BRIDGE_SERVICE_API") :  System.getenv("REACT_APP_VERTX_SERVICE_API");
 	public static final String pontoonUrl = System.getenv("PONTOON_URL") != null ? System.getenv("PONTOON_URL") :  "http://"+hostIP+":"+pontoonPort;
 	public static final Boolean devMode = ("TRUE".equalsIgnoreCase(System.getenv("DEV_MODE"))||"TRUE".equalsIgnoreCase(System.getenv("GENNYDEV"))) ? true : false;
 	public static final String projectUrl = System.getenv("PROJECT_URL");
 	public final static String mainrealm = System.getenv("PROJECT_REALM") != null ? System.getenv("PROJECT_REALM") : "genny"; // UGLY
 	public final static Boolean isRulesManager = "TRUE".equalsIgnoreCase(System.getenv("RULESMANAGER"));
 	public final static Boolean isDdtHost = "TRUE".equalsIgnoreCase(System.getenv("DDTHOST"));
-
+	public final static Boolean forceEventBusApi = "TRUE".equalsIgnoreCase(System.getenv("FORCE_EVENTBUS_USE_API"));
+	public final static Boolean forceCacheApi = "TRUE".equalsIgnoreCase(System.getenv("FORCE_CACHE_USE_API"));	
+	public final static Boolean disableLayoutLoading = "TRUE".equalsIgnoreCase(System.getenv("DISABLE_LAYOUT_LOADING"));
+	
 	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + hostIP + ":"+cacheApiPort)
 			: System.getenv("DDT_URL");
 
@@ -37,6 +51,20 @@ public class GennySettings {
 	public static final String startupWebHook = System.getenv("STARTUP_WEB_HOOK") != null ? System.getenv("STARTUP_WEB_HOOK") : "http://"+hostIP+":"+webhookPort+"/event/"+mainrealm ;  // trigger any startup webhook notification
 
 	public static final String layoutCacheUrl = System.getenv("LAYOUT_CACHE_HOST") != null ? System.getenv("LAYOUT_CACHE_HOST") : "http://"+hostIP+":2223";
+
+    public static final String cacheServerName;
+    public static final Boolean isCacheServer;
+
+    static{
+        Optional<String> cacheServerNameOptional = Optional.ofNullable(System.getenv("CACHE_SERVER_NAME"));
+        Optional<String> isCacheServerOptional = Optional.ofNullable(System.getenv("IS_CACHE_SERVER"));
+        if(devMode){
+            cacheServerName = cacheServerNameOptional.orElse(LOCALHOST);
+        }else{
+            cacheServerName = cacheServerNameOptional.orElse(DEFAULT_CACHE_SERVER_NAME);
+        }
+        isCacheServer = isCacheServerOptional.map(env -> Boolean.parseBoolean(env)).orElse(false);
+    }
 
 	public static String dynamicRealm()
 	{
