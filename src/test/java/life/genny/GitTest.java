@@ -24,13 +24,18 @@ public class GitTest {
   private static final Logger log = org.apache.logging.log4j.LogManager
       .getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
-//  @Test
+ // @Test
 public void gitTest() throws MissingObjectException, IOException, InvalidRemoteException, TransportException, GitAPIException, BadDataException
 {
 
 	  List<BaseEntity> layouts = GitUtils.getLayoutBaseEntitys(REMOTE_URL, BRANCH,"internmatch");
 	  
 	  log.info("Layouts loaded = "+layouts.size());
+	  for (BaseEntity layout : layouts) {
+		  if (layout.getCode().equalsIgnoreCase("LAY_INTERNMATCH_-974673200")) {
+			  log.info("found it LAY_INTERNMATCH_-974673200");
+		  }
+	  }
 }
 
 }

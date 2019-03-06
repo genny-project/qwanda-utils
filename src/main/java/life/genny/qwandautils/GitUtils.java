@@ -1,5 +1,6 @@
 package life.genny.qwandautils;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Git;
@@ -136,6 +137,38 @@ public class GitUtils {
 	  List<BaseEntity> layouts = new ArrayList<BaseEntity>();
 	  
 	  String gitFolder = ("genny".equalsIgnoreCase(realm))?realm:(realm+"-new");
+	  
+	//   Process pp = Runtime.getRuntime().exec("cd /tmp;git clone -b "+branch+" "+remoteUrl);
+
+	  
+//	  String tmpDir = "/tmp/git";
+//	  try {
+//          File directory = new File(tmpDir);
+//
+//          // Deletes a directory recursively. When deletion process is fail an
+//          // IOException is thrown and that's why we catch the exception.
+//          FileUtils.deleteDirectory(directory);
+//      } catch (IOException e) {
+//          e.printStackTrace();
+//      }
+	  
+//	  Git git = Git.cloneRepository()
+//	  
+//			  .setURI( remoteUrl )
+//			  .setDirectory( new File(tmpDir) )
+//			  .setBranch(branch)
+//			  .call();
+	  
+	  log.info("Set up Git");
+
+//    git.fetch()
+//            .setRemote(remoteUrl)
+//            .setRefSpecs(new RefSpec("+refs/heads/*:refs/heads/*"))
+//            .call();
+    
+    
+    
+//    Repository repo = git.getRepository();
 	  
       DfsRepositoryDescription repoDesc = new DfsRepositoryDescription();
       InMemoryRepository repo = new InMemoryRepository(repoDesc);
