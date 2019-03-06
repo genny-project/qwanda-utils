@@ -154,7 +154,7 @@ public class GitUtils {
 
       RevCommit commit = walk.parseCommit(lastCommitId);
       RevTree tree = commit.getTree();
-      System.out.println("Having tree: " + tree);
+      log.info("Having tree: " + tree);
 
       // now use a TreeWalk to iterate over all files in the Tree recursively
       // you can set Filters to narrow down the results if needed
