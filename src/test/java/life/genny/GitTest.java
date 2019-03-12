@@ -28,13 +28,14 @@ public class GitTest {
 public void gitTest() throws MissingObjectException, IOException, InvalidRemoteException, TransportException, GitAPIException, BadDataException
 {
 
-	//  List<BaseEntity> layouts = GitUtils.getLayoutBaseEntitys(REMOTE_URL, BRANCH,"internmatch","genny",false);
-	  List<BaseEntity> layouts2 = GitUtils.getLayoutBaseEntitys(REMOTE_URL, BRANCH,"internmatch","internmatch-new",true);
+	  List<BaseEntity> layouts = GitUtils.getLayoutBaseEntitys(REMOTE_URL, BRANCH,"internmatch","genny",false);
+	//  List<BaseEntity> layouts2 = GitUtils.getLayoutBaseEntitys(REMOTE_URL, BRANCH,"internmatch","internmatch-new",true);
+
 	  
-	  log.info("Layouts loaded = "+layouts2.size());
-	  for (BaseEntity layout : layouts2) {
+	  log.info("Layouts loaded = "+layouts.size());
+	  for (BaseEntity layout : layouts) {
 		  if (layout.getCode().equalsIgnoreCase("LAY_INTERNMATCH_-974673200")) {
-			  log.info("found it LAY_INTERNMATCH_-974673200");
+			  log.info(layout);
 		  }
 	  }
 }

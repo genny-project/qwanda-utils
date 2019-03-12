@@ -239,6 +239,10 @@ public class GitUtils {
 						filepath = filepath.substring("sublayouts/".length());
 					}
 				}
+				filepath = StringUtils.removeEndIgnoreCase(filepath, "index");
+				if (StringUtils.endsWith(filepath, "bucket/")) {
+					filepath = StringUtils.removeEndIgnoreCase(filepath, "/");
+				}
 
 				String precode = String.valueOf(filepath.replaceAll("[^a-zA-Z0-9]", "").toUpperCase().hashCode());
 				layoutCode = ("LAY_" + realm + "_" + precode).toUpperCase();
