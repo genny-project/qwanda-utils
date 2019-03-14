@@ -68,14 +68,14 @@
 		<url>https://jenkins.outcome-hub.com</url>
 	</ciManagement>
 	<distributionManagement>
-	  <repository>
-	    <id>life.genny</id>
-	    <url>https://nexus.outcome-hub.com/nexus/content/repositories/life.genny</url>
-	  </repository>
-	   <snapshotRepository>
-	      <id>nexus-snapshots</id>
-	      <url>http://nexus.outcome-hub.com/nexus/content/repositories/snapshots</url>
-	   </snapshotRepository>
+		<repository>
+			<id>life.genny</id>
+			<url>https://nexus.outcome-hub.com/nexus/content/repositories/life.genny</url>
+		</repository>
+		<snapshotRepository>
+			<id>nexus-snapshots</id>
+			<url>http://nexus.outcome-hub.com/nexus/content/repositories/snapshots</url>
+		</snapshotRepository>
 	</distributionManagement>
 	<repositories>
 		<repository>
@@ -98,11 +98,8 @@
 	</repositories>
 
 	<dependencies>
-<!--<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.5</version>
-</dependency>-->
+		<!--<dependency> <groupId>commons-io</groupId> <artifactId>commons-io</artifactId> 
+			<version>2.5</version> </dependency> -->
 		<dependency>
 			<groupId>org.javamoney</groupId>
 			<artifactId>moneta</artifactId>
@@ -125,7 +122,7 @@
 		<dependency>
 			<groupId>org.eclipse.jgit</groupId>
 			<artifactId>org.eclipse.jgit</artifactId>
-			<version>4.8.0.201706111038-r</version>
+			<version>5.2.1.201812262042-r</version>
 		</dependency>
 
 		<dependency>
@@ -150,7 +147,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-                        <version>3.8.1</version>
+			<version>3.8.1</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -218,11 +215,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-<dependency>
-    <groupId>org.codehaus.jackson</groupId>
-    <artifactId>jackson-jaxrs</artifactId>
-    <version>1.9.13</version>
-</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-jaxrs</artifactId>
+			<version>1.9.13</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
@@ -278,7 +275,11 @@
 			<artifactId>jjwt</artifactId>
 			<version>0.9.1</version>
 		</dependency>
-
+		<dependency>
+			<groupId>io.vavr</groupId>
+			<artifactId>vavr</artifactId>
+			<version>0.9.1</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -487,23 +488,23 @@
 				</executions>
 			</plugin>
 			<plugin>
-			   <groupId>org.sonatype.plugins</groupId>
-			   <artifactId>nexus-staging-maven-plugin</artifactId>
-			   <version>1.5.1</version>
-			   <executions>
-			      <execution>
-			         <id>default-deploy</id>
-			         <phase>deploy</phase>
-			         <goals>
-			            <goal>deploy</goal>
-			         </goals>
-			      </execution>
-			   </executions>
-			   <configuration>
-			      <serverId>life.genny</serverId>
-			      <nexusUrl>https://nexus.outcome-hub.com/nexus/</nexusUrl>
-			      <skipStaging>true</skipStaging>
-			   </configuration>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.5.1</version>
+				<executions>
+					<execution>
+						<id>default-deploy</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<serverId>life.genny</serverId>
+					<nexusUrl>https://nexus.outcome-hub.com/nexus/</nexusUrl>
+					<skipStaging>true</skipStaging>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

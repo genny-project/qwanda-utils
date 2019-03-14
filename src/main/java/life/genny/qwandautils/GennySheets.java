@@ -404,7 +404,7 @@ public class GennySheets {
 				fields.put("weight", weight);
 				fields.put("valueString", valueString);
 				fields.put("privacy", privacy);
-				map.put(baseEntityCode + attributeCode, fields);
+				map.put(baseEntityCode + attributeCode, fields); 
 			}
 			return map;
 		}).reduce((ac, acc) -> {
