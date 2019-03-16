@@ -79,7 +79,7 @@ public class QwandaUtils {
 	
 	public static String apiGet(String getUrl, final String authToken, final int timeout) throws ClientProtocolException, IOException {
 
-		log.debug("GET:" + getUrl + ":");
+	//	log.debug("GET:" + getUrl + ":");
 
 
 		RequestConfig config = RequestConfig.custom()
