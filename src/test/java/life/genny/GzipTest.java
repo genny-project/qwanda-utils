@@ -12,6 +12,8 @@ import org.junit.Test;
 
 import com.google.gson.Gson;
 
+import io.vertx.core.json.JsonObject;
+
 public class GzipTest {
 
 	@Test
@@ -21,6 +23,9 @@ public class GzipTest {
 		byte[] zippedData = null;
 		try {
 			zippedData = zipped(originalStr);
+			JsonObject json = new JsonObject();
+			json.put("zip",zippedData);
+			System.out.println(json);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
