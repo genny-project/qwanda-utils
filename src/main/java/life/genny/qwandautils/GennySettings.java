@@ -27,7 +27,8 @@ public class GennySettings {
 	public static final String vertxUrl = System.getenv("REACT_APP_VERTX_URL") != null ? System.getenv("REACT_APP_VERTX_URL") :  "http://"+hostIP+":"+apiPort;
 	public static final String bridgeServiceUrl = System.getenv("BRIDGE_SERVICE_API") != null ? System.getenv("BRIDGE_SERVICE_API") :  System.getenv("REACT_APP_VERTX_SERVICE_API");
 	public static final String pontoonUrl = System.getenv("PONTOON_URL") != null ? System.getenv("PONTOON_URL") :  "http://"+hostIP+":"+pontoonPort;
-	public static final Boolean devMode = "TRUE".equalsIgnoreCase(System.getenv("DEV_MODE"))||"TRUE".equalsIgnoreCase(System.getenv("GENNYDEV")) ? true : false;
+	public static final Boolean devMode = ("TRUE".equalsIgnoreCase(System.getenv("DEV_MODE"))||"TRUE".equalsIgnoreCase(System.getenv("GENNYDEV"))) ? true : false;
+	public static final Boolean zipMode = ("TRUE".equalsIgnoreCase(System.getenv("ZIP_MODE"))) ? true : false;
 	public static final String projectUrl = System.getenv("PROJECT_URL");
 	public final static String mainrealm = System.getenv("PROJECT_REALM") != null ? System.getenv("PROJECT_REALM") : "genny"; // UGLY
 	public final static Boolean isRulesManager = "TRUE".equalsIgnoreCase(System.getenv("RULESMANAGER"));
@@ -35,6 +36,11 @@ public class GennySettings {
 	public final static Boolean forceEventBusApi = "TRUE".equalsIgnoreCase(System.getenv("FORCE_EVENTBUS_USE_API"));
 	public final static Boolean forceCacheApi = "TRUE".equalsIgnoreCase(System.getenv("FORCE_CACHE_USE_API"));	
 	public final static Boolean disableLayoutLoading = "TRUE".equalsIgnoreCase(System.getenv("DISABLE_LAYOUT_LOADING"));
+	public final static Boolean loadDdtInStartup = "TRUE".equalsIgnoreCase(System.getenv("LOAD_DDT_IN_STARTUP"));
+	public final static Boolean skipGoogleDocInStartup = "TRUE".equalsIgnoreCase(System.getenv("SKIP_GOOGLE_DOC_IN_STARTUP"));
+	public final static Boolean skipGithubInStartup = "TRUE".equalsIgnoreCase(System.getenv("SKIP_GITHUB_IN_STARTUP"));
+	public final static String  githubLayoutsUrl = System.getenv("GITHUB_LAYOUTS_URL") == null ? ("http://github.com/genny-project/layouts.git")
+			: System.getenv("GITHUB_LAYOUTS_URL");
 	
 	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + hostIP + ":"+cacheApiPort)
 			: System.getenv("DDT_URL");
@@ -54,6 +60,7 @@ public class GennySettings {
 
     public static final String cacheServerName;
     public static final Boolean isCacheServer;
+    public static final String KEYCLOAK_JSON = "keycloak.json";
 
     static{
         Optional<String> cacheServerNameOptional = Optional.ofNullable(System.getenv("CACHE_SERVER_NAME"));

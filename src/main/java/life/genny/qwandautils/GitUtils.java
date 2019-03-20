@@ -1,8 +1,27 @@
 package life.genny.qwandautils;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.TimeZone;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -11,8 +30,6 @@ import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryDescription;
-import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
@@ -27,43 +44,14 @@ import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.treewalk.filter.PathSuffixFilter;
 
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.Answer;
-import life.genny.qwanda.attribute.Attribute;
-import life.genny.qwanda.attribute.AttributeDateTime;
 import life.genny.qwanda.attribute.AttributeText;
-import life.genny.qwanda.datatype.DataType;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.exception.BadDataException;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.invoke.MethodHandles;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.TimeZone;
-
-import io.vavr.Tuple;
-import io.vavr.Tuple2;
-import io.vavr.Tuple3;
 
 public class GitUtils {
 	protected static final Logger log = org.apache.logging.log4j.LogManager
@@ -142,6 +130,8 @@ public class GitUtils {
 
 		List<BaseEntity> layouts = new ArrayList<BaseEntity>();
 
+		Map<String, String> lays = new HashMap<String, String>();
+
 		String gitFolder = gitrealm;
 		String realmFilter = gitFolder;// +"/sublayouts";
 
@@ -210,64 +200,82 @@ public class GitUtils {
 
 			String layoutCode = "";
 			String name = "";
-			String filepath = "";
+			String uri = "";
 			String fullpath = "";
 
 			fullpath = treeWalk.getPathString(); // .substring(realmFilter.length()+1); // get rid of
 													// realm+"-new/sublayouts/"
 
-			// only allow genny/<filename> or genny/sublayouts
-
-			if (((!recursive) && (StringUtils.countMatches(fullpath, "/")==1))  || (recursive)){
-			
-			Path p = Paths.get(fullpath);
-
-			if (p.getParent() != null) {
-				filepath = ("genny".equals(gitrealm) ? "/" : "") + p.getParent().toString();
+			if (fullpath.equals("internmatch-new/sublayouts/home/agent/bucket/index.json")) {
+				log.info("hello");
+				//continue;
 			}
-			name = p.getFileName().toString().replaceFirst("[.][^.]+$", "");
 
-			if (!name.equals(gitrealm)) { // avoid root folder
-				String content = new String(loader.getBytes());
+				// only allow genny/<filename> or genny/sublayouts
 
-				if ("genny".equals(gitrealm)) {
-					filepath = filepath + name;
-				} else {
-					filepath = fullpath.replaceFirst("[.][^.]+$", "");
-					filepath = filepath.substring(gitrealm.length()+1);
-					if (filepath.startsWith("sublayouts")) {
-						filepath = filepath.substring("sublayouts/".length());
+				if (((!recursive) && (StringUtils.countMatches(fullpath, "/") == 1)) || (recursive)) {
+
+					Path p = Paths.get(fullpath);
+
+					if (p.getParent() != null) {
+						uri = ("genny".equals(gitrealm) ? "/" : "") + p.getParent().toString();
+					}
+					name = p.getFileName().toString().replaceFirst("[.][^.]+$", "");
+
+					if (!name.equals(gitrealm)) { // avoid root folder
+						String content = new String(loader.getBytes());
+
+						if ("genny".equals(gitrealm)) {
+							uri = uri + name;
+						} else {
+							uri = fullpath.replaceFirst("[.][^.]+$", "");
+							uri = uri.substring(gitrealm.length() + 1);
+							if (uri.startsWith("sublayouts")) {
+								uri = uri.substring("sublayouts/".length());
+							}
+						}
+						uri = StringUtils.removeEndIgnoreCase(uri, "index");
+						if (StringUtils.endsWith(uri, "bucket/")) {
+							uri = StringUtils.removeEndIgnoreCase(uri, "/");
+						}
+
+						String precode = String.valueOf(uri.replaceAll("[^a-zA-Z0-9]", "").toUpperCase().hashCode());
+						layoutCode = ("LAY_" + realm + "_" + precode).toUpperCase();
+
+						String existingUrl = lays.get(layoutCode);
+						if (existingUrl != null) {
+							log.info("DUPLICATE - " + layoutCode + ":" + existingUrl + "--->" + fullpath);
+						//	continue;
+						} else {
+							lays.put(layoutCode, fullpath);
+						}
+
+						BaseEntity layout = new BaseEntity(layoutCode, name);
+						layout.addAnswer(new Answer(layout, layout, new AttributeText("PRI_LAYOUT_DATA", "Layout Data"),
+								content));
+						layout.addAnswer(
+								new Answer(layout, layout, new AttributeText("PRI_LAYOUT_URI", "Layout URI"), uri));
+						layout.addAnswer(new Answer(layout, layout, new AttributeText("PRI_LAYOUT_URL", "Layout URL"),
+								"http://layout-cache-service/" + fullpath));
+						layout.addAnswer(
+								new Answer(layout, layout, new AttributeText("PRI_LAYOUT_NAME", "Layout Name"), name));
+						layout.addAnswer(
+								new Answer(layout, layout, new AttributeText("PRI_BRANCH", "Branch"), branch));
+						long secs = commit.getCommitTime();
+						LocalDateTime commitDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(secs * 1000),
+								TimeZone.getDefault().toZoneId());
+
+						String lastCommitDateTimeString = commitDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+						layout.addAnswer(new Answer(layout, layout,
+								new AttributeText("PRI_LAYOUT_MODIFIED_DATE", "Modified"), lastCommitDateTimeString)); // if
+																														// new
+						layout.setRealm(realm);
+						layout.setUpdated(commitDateTime);
+						layouts.add(layout);
 					}
 				}
-				filepath = StringUtils.removeEndIgnoreCase(filepath, "index");
-				if (StringUtils.endsWith(filepath, "bucket/")) {
-					filepath = StringUtils.removeEndIgnoreCase(filepath, "/");
-				}
+			
 
-				String precode = String.valueOf(filepath.replaceAll("[^a-zA-Z0-9]", "").toUpperCase().hashCode());
-				layoutCode = ("LAY_" + realm + "_" + precode).toUpperCase();
-
-				BaseEntity layout = new BaseEntity(layoutCode, name);
-				layout.addAnswer(
-						new Answer(layout, layout, new AttributeText("PRI_LAYOUT_DATA", "Layout Data"), content));
-				layout.addAnswer(
-						new Answer(layout, layout, new AttributeText("PRI_LAYOUT_URI", "Layout URI"), filepath));
-				layout.addAnswer(new Answer(layout, layout, new AttributeText("PRI_LAYOUT_URL", "Layout URL"),
-						"http://layout-cache-service/" + fullpath));
-				layout.addAnswer(new Answer(layout, layout, new AttributeText("PRI_LAYOUT_NAME", "Layout Name"), name));
-				long secs = commit.getCommitTime();
-				LocalDateTime commitDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(secs * 1000),
-						TimeZone.getDefault().toZoneId());
-
-				String lastCommitDateTimeString = commitDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-				layout.addAnswer(new Answer(layout, layout, new AttributeText("PRI_LAYOUT_MODIFIED_DATE", "Modified"),
-						lastCommitDateTimeString)); // if new
-				layout.setRealm(realm);
-				layout.setUpdated(commitDateTime);
-				layouts.add(layout);
-			}
-			} 
-		
 		}
 
 		return layouts;
@@ -457,4 +465,6 @@ public class GitUtils {
 				.useDelimiter("\\A");
 		return s.hasNext() ? s.next() : "";
 	}
+	
+
 }
