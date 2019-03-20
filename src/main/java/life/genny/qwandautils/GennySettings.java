@@ -61,6 +61,7 @@ public class GennySettings {
 
     public static final String cacheServerName;
     public static final Boolean isCacheServer;
+    public static final String KEYCLOAK_JSON = "keycloak.json";
 
     static{
         Optional<String> cacheServerNameOptional = Optional.ofNullable(System.getenv("CACHE_SERVER_NAME"));
