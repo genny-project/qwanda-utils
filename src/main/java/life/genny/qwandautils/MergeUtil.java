@@ -6,6 +6,8 @@ import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -111,6 +113,13 @@ public class MergeUtil {
 						
 						Object attributeValue = be.getValue(attributeCode, null);
 						
+						if(entityArr != null && entityArr.length > 2) {
+							switch(entityArr[2]) {
+							case "name" :
+								return getAttributeName(be, attributeCode);
+							}
+						}
+						
 						if(attributeValue instanceof org.javamoney.moneta.Money) {
 							log.info("price attributes 1");
 							DecimalFormat df = new DecimalFormat("#.00"); 
@@ -126,11 +135,12 @@ public class MergeUtil {
 							/* 1st component -> BaseEntity code ; 2nd component -> attribute code ; 3rd component -> (date-Format) */
 							if(entityArr != null && entityArr.length > 2) {
 								/* the date merge field has a format-merge-string */
-								log.info("This date attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
+								
 								Matcher matchVariables = DATEFORMAT_PATTERN_VARIABLE.matcher(entityArr[2]);
 								if(matchVariables.find()) {
+									log.info("This date attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
 									return getFormattedDateString((LocalDateTime) attributeValue, matchVariables.group(1));
-								}					
+								} 
 							} else {
 								log.info("This date attribute code ::"+attributeCode+ " needs no formatting");
 								/* if date needs no formatting, we directly return the string value for the attributeValue */
@@ -289,6 +299,23 @@ public class MergeUtil {
 		log.info("formattedDate ::"+text);
 		log.info("formattedDate ::"+text1);
 	}*/
+	
+	/* to return the name of the attribute */
+	public static String getAttributeName(BaseEntity parentBe, String attributeCode) {
+
+		String attributeName = null;
+
+		if (parentBe != null) {
+			Optional<EntityAttribute> updatedAttributeOp = parentBe.getBaseEntityAttributes().stream()
+					.filter(Objects::nonNull).filter(ea -> ea.getAttributeCode().equals(attributeCode)).findFirst();
+			if (updatedAttributeOp.isPresent()) {
+				EntityAttribute updatedAttribute = updatedAttributeOp.get();
+				attributeName = updatedAttribute.getAttributeName();
+			}
+		}
+
+		return attributeName;
+	}
 	
 	
 
