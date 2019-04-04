@@ -19,10 +19,16 @@ import com.google.api.services.drive.Drive;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.logging.log4j.Logger;
+
 public class GoogleDocs {
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
     /** Application name. */
     private static final String APPLICATION_NAME =
         "Drive API Java Quickstart";
@@ -85,7 +91,7 @@ public class GoogleDocs {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-        System.out.println(
+        log.info(
                 "Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
         return credential;
     }

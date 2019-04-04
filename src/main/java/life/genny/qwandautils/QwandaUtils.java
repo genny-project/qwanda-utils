@@ -19,6 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -78,7 +79,7 @@ public class QwandaUtils {
 	
 	public static String apiGet(String getUrl, final String authToken, final int timeout) throws ClientProtocolException, IOException {
 
-		log.debug("GET:" + getUrl + ":");
+	//	log.debug("GET:" + getUrl + ":");
 
 
 		RequestConfig config = RequestConfig.custom()
@@ -105,6 +106,10 @@ public class QwandaUtils {
 
 			HttpEntity entity1 = response.getEntity();
 			String responseString = EntityUtils.toString(entity1);
+			
+			if (StringUtils.isBlank(responseString)) {
+				return "";
+			}
 
 			EntityUtils.consume(entity1);
 
@@ -115,8 +120,8 @@ public class QwandaUtils {
 			return null;
 		}
 		catch (Exception e) {
-			log.error("API Get call timeout - "+timeout+" secs to "+getUrl);
-			return null;
+			log.error("API Get exception -for  "+getUrl+" :");
+			return "";
 		}
 
 		finally {
@@ -139,6 +144,9 @@ public class QwandaUtils {
 	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken, final Consumer<String> callback)
 			throws IOException {
 
+		if (StringUtils.isBlank(postUrl)) {
+			log.error("Blank url in apiPostEntity");
+		}
 		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
 		CloseableHttpResponse response = null;
 		try {
@@ -162,7 +170,11 @@ public class QwandaUtils {
 			return responseString;
 		} 
 		finally {
+			if (response != null) {
 			response.close();
+			} else {
+				log.error("postApi response was null");
+			}
 			httpclient.close();
 		//	IOUtils.closeQuietly(response);
 		//	IOUtils.closeQuietly(httpclient);
@@ -374,7 +386,7 @@ public class QwandaUtils {
 
 		String uname = getNormalisedUsername(username);
 		String code = "PER_" + uname.toUpperCase();
-		System.out.println("Creating User:"+username);
+		log.info("Creating User:"+username);
 
 		Person person = new Person(code, firstname + " " + lastname);
 
@@ -396,7 +408,7 @@ public class QwandaUtils {
 			answers.add(realmAnswer);
 			Answer nameAnswer = new Answer(code, code, "PRI_NAME", name);
 			answers.add(nameAnswer);
-			System.out.println("keycloakId value: " + keycloakId);
+			log.info("keycloakId value: " + keycloakId);
 			Answer keycloakIdAnswer = new Answer(code, code, "PRI_KEYCLOAK_UUID", keycloakId);
 			answers.add(keycloakIdAnswer);
 			
@@ -458,25 +470,25 @@ public class QwandaUtils {
 	public static Boolean checkUserTokenExists(final String qwandaUrl, final String userToken) throws IOException {
 		JSONObject decodedToken = KeycloakUtils.getDecodedToken(userToken);
 		String tokenSub = decodedToken.getString("sub");
-		System.out.println("sub token::" + tokenSub);
+		log.info("sub token::" + tokenSub);
 
 		String username = decodedToken.getString("preferred_username");
 
 		String uname = getNormalisedUsername(username);
 		String code = "PER_" + uname.toUpperCase();
 
-		System.out.println("username ::" + username);
-		System.out.println("uname::" + uname);
-		System.out.println("code::" + code);
+		log.info("username ::" + username);
+		log.info("uname::" + uname);
+		log.info("code::" + code);
 
-		System.out.println("code::" + code);
+		log.info("code::" + code);
 		Boolean tokenExists = false;
 
 		String attributeString = QwandaUtils.apiGet(qwandaUrl + "/qwanda/baseentitys/" + code, userToken);
 
 		if (attributeString == null || attributeString.contains("Error")
 				|| attributeString.contains("Unauthorized")) {
-			System.out.println("baseentity not found");
+			log.info("baseentity not found");
 			tokenExists = false;
 		} else {
 			tokenExists = true;
@@ -486,13 +498,13 @@ public class QwandaUtils {
 		 * else { String attributeVal = MergeUtil.getAttrValue(code,
 		 * "PRI_KEYCLOAK_UUID", userToken);
 		 *
-		 * System.out.println("pri_keycloak_UUID for the code::"+attributeVal);
+		 * log.info("pri_keycloak_UUID for the code::"+attributeVal);
 		 * if(attributeVal == null){ tokenExists = false;
-		 * System.out.println("baseentity found and UUID is null"); }else
+		 * log.info("baseentity found and UUID is null"); }else
 		 * if(tokenSub.equals(attributeVal)) {
-		 * System.out.println("baseentity found and UUID matched"); tokenExists = true;
+		 * log.info("baseentity found and UUID matched"); tokenExists = true;
 		 * } else if(!tokenSub.equals(attributeVal)) {
-		 * System.out.println("baseentity code found but keycloak UUID not matched");
+		 * log.info("baseentity code found but keycloak UUID not matched");
 		 * tokenExists = false; } }
 		 */
 
@@ -569,10 +581,10 @@ public class QwandaUtils {
 			 * Optional<EntityAttribute> attributeVal =
 			 * be.findEntityAttribute(basicChildAsk.getAttributeCode()); if
 			 * (attributeVal.isPresent()) { if (attributeVal.get() == null) {
-			 * System.out.println("This attribute value of "+basicChildAsk.getAttributeCode(
+			 * log.info("This attribute value of "+basicChildAsk.getAttributeCode(
 			 * ) +" is not filled and is null"); return false; } } else { return false; }
 			 */
-			// System.out.println("child ask attribute code
+			// log.info("child ask attribute code
 			// ::"+basicChildAsk.getAttributeCode());
 			Object attributeVal = MergeUtil.getBaseEntityAttrObjectValue(be,
 					asks.getAttributeCode());
@@ -580,7 +592,7 @@ public class QwandaUtils {
 			}
 
 			if (attributeVal == null) {
-				// System.out.println(basicChildAsk.getAttributeCode() + " is null");
+				// log.info(basicChildAsk.getAttributeCode() + " is null");
 				return false;
 			}
 		}
@@ -658,13 +670,13 @@ public class QwandaUtils {
 			String attributeString = QwandaUtils.apiGet(qwandaServiceUrl
 					+ "/qwanda/baseentitys/GRP_PEOPLE/linkcodes/LNK_CORE/attributes?PRI_USERNAME=" + username,
 					userToken);
-			System.out.println("attribute string::" + attributeString);
+			log.info("attribute string::" + attributeString);
 
 			QDataBaseEntityMessage msg = JsonUtils.fromJson(attributeString, QDataBaseEntityMessage.class);
 
 			for (BaseEntity be : msg.getItems()) {
 				baseEntityCode = be.getCode();
-				System.out.println("baseEntity code for username ::" + baseEntityCode);
+				log.info("baseEntity code for username ::" + baseEntityCode);
 				return baseEntityCode;
 			}
 
@@ -689,7 +701,7 @@ public class QwandaUtils {
 		try {
 			attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/templates/" + templateCode, token);
 			template = JsonUtils.fromJson(attributeString, QBaseMSGMessageTemplate.class);
-			System.out.println("template sms:" + template.getSms_template());
+			log.info("template sms:" + template.getSms_template());
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -740,12 +752,12 @@ public class QwandaUtils {
 		List linkList = getLinkList(attributeCode, token);
 
 		if (linkList != null) {
-			System.out.println(ANSI_BLUE + "Got BEG string" + ANSI_RESET + linkList.toString());
+			log.info(ANSI_BLUE + "Got BEG string" + ANSI_RESET + linkList.toString());
 
 			linkList.forEach(item -> {
 				Link link = JsonUtils.fromJson(item.toString(), Link.class);
 				String baseEntAttributeCode = link.getTargetCode();
-				System.out.println("base attribute target code ::" + baseEntAttributeCode);
+				log.info("base attribute target code ::" + baseEntAttributeCode);
 				if (link.getLinkValue() != null) {
 
 					/**
@@ -760,7 +772,7 @@ public class QwandaUtils {
 
 		}
 
-		System.out.println("base entity context map ::" + entityTemplateContextMap);
+		log.info("base entity context map ::" + entityTemplateContextMap);
 		return entityTemplateContextMap;
 
 	}
@@ -786,7 +798,7 @@ public class QwandaUtils {
 		String initials = "";
 
 		for (String str : strarr) {
-			System.out.println("str :" + str);
+			log.info("str :" + str);
 			initials = str != null && str.length() > 0 ? initials.concat(str.substring(0, 2)) : initials.concat("");
 		}
 
@@ -834,27 +846,27 @@ public class QwandaUtils {
 		for (EntityAttribute ea : be.getBaseEntityAttributes()) {
 			if (ea.getAttributeCode().equals("PRI_" + targetCode + "_STREET_ADDRESS1")) {
 				street = ea.getObjectAsString();
-				System.out.println("street ::" + street);
+				log.info("street ::" + street);
 			}
 
 			if (ea.getAttributeCode().equals("PRI_" + targetCode + "_CITY")) {
 				city = ea.getObjectAsString();
-				System.out.println("city ::" + city);
+				log.info("city ::" + city);
 			}
 
 			if (ea.getAttributeCode().equals("PRI_" + targetCode + "_STATE")) {
 				state = ea.getObjectAsString();
-				System.out.println("state ::" + state);
+				log.info("state ::" + state);
 			}
 
 			if (ea.getAttributeCode().equals("PRI_" + targetCode + "_POSTCODE")) {
 				postcode = ea.getObjectAsString();
-				System.out.println("postcode ::" + postcode);
+				log.info("postcode ::" + postcode);
 			}
 
 			if (ea.getAttributeCode().equals("PRI_" + targetCode + "_COUNTRY")) {
 				country = ea.getObjectAsString();
-				System.out.println("country ::" + country);
+				log.info("country ::" + country);
 			}
 		}
 
@@ -1261,13 +1273,19 @@ public class QwandaUtils {
 	public static String getUserCode(String token) {
 
 		org.json.JSONObject decodedToken = KeycloakUtils.getDecodedToken(token);
-		//	System.out.println("decoded token object ::" + decodedToken);
-
 		String username = decodedToken.getString("preferred_username");
-		String uname = QwandaUtils.getNormalisedUsername(username);
-		String code = "PER_" + uname.toUpperCase();
+		return getUserCodeFromUserName(username);
 
-		return code;
+	}
+	
+	public static String getUserCodeFromUserName(String username) {
+	  String uname = QwandaUtils.getNormalisedUsername(username);
+	  if(uname != null) {
+	    return "PER_" + uname.toUpperCase();
+	  } else {
+	    return null;
+	  }
+      
 	}
 
 	/**
@@ -1304,7 +1322,7 @@ public class QwandaUtils {
 				org.json.simple.JSONObject priceObject = (org.json.simple.JSONObject) parser
 						.parse(stringifiedMoneyJson);
 				amount = priceObject.get("amount").toString();
-				System.out.println("amount ::" + amount);
+				log.info("amount ::" + amount);
 
 			} catch (ParseException e) {
 				e.printStackTrace();
@@ -1340,7 +1358,7 @@ public class QwandaUtils {
 		ZonedDateTime zdt = ldt.atZone(ZoneOffset.UTC);  //Using UTC Time
 		String iso8601DateString = zdt.toString(); // zdt.toString(); MUST USE UMT!!!!
 
-		System.out.println("datetime ::" + iso8601DateString);
+		log.info("datetime ::" + iso8601DateString);
 
 		return iso8601DateString;
 
@@ -1354,7 +1372,7 @@ public class QwandaUtils {
 
 		ZonedDateTime now = ZonedDateTime.now( ZoneOffset.UTC );
 		String dateTimeString = now.toString();
-		System.out.println("UTC datetime is ::" + dateTimeString);
+		log.info("UTC datetime is ::" + dateTimeString);
 
 		return dateTimeString;
 	}
@@ -1363,7 +1381,7 @@ public class QwandaUtils {
 	{
 		QDataBaseEntityMessage results = null;
 		SearchEntity se = new SearchEntity(searchBE);
-		System.out.println("se="+se.getCode());
+		log.info("se="+se.getCode());
 		//	if (searchBE.getCode().startsWith("SBE_")) {
 
 		String jsonSearchBE = JsonUtils.toJson(searchBE);

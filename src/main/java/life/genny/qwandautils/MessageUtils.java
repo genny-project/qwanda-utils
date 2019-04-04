@@ -18,7 +18,33 @@ public class MessageUtils {
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
-	public static JsonObject prepareSMSTemplate(String templateCode, String BEGCode, String recipientLinkValue,
+
+
+	public static QMSGMessage prepareEmailTemplate(String templateCode, String BEGCode, String recipientLinkValue,
+			String[] attachments, String token) {
+
+		return prepareTemplate(QBaseMSGMessageType.EMAIL,templateCode, BEGCode, recipientLinkValue, attachments, token);		
+	}
+	
+	public static QMSGMessage prepareSMSTemplate(String templateCode, String BEGCode, String recipientLinkValue,
+			String[] attachments, String token) {
+
+		return prepareTemplate(QBaseMSGMessageType.SMS,templateCode, BEGCode, recipientLinkValue, attachments, token);		
+	}
+	
+	public static QMSGMessage prepareToastTemplate(String templateCode, String BEGCode, String recipientLinkValue,
+			String[] attachments, String token) {
+
+		return prepareTemplate(QBaseMSGMessageType.TOAST,templateCode, BEGCode, recipientLinkValue, attachments, token);		
+	}
+	
+	public static QMSGMessage prepareVoiceTemplate(String templateCode, String BEGCode, String recipientLinkValue,
+			String[] attachments, String token) {
+
+		return prepareTemplate(QBaseMSGMessageType.VOICE,templateCode, BEGCode, recipientLinkValue, attachments, token);		
+	}
+
+	public static QMSGMessage prepareTemplate(QBaseMSGMessageType messageType, String templateCode, String BEGCode, String recipientLinkValue,
 			String[] attachments, String token) {
 
 		String code = "code:" + BEGCode;
@@ -26,89 +52,50 @@ public class MessageUtils {
 		String[] msgMessageData = { code, recipient };
 
 		// Creating messageData MSG_MESSAGE
-		QMSGMessage msgMessage = new QMSGMessage("MSG_MESSAGE", templateCode, msgMessageData, QBaseMSGMessageType.SMS,
+		QMSGMessage msgMessage = new QMSGMessage("MSG_MESSAGE", templateCode, msgMessageData, messageType,
 				attachments);
-		JsonObject jsonMessage = new JsonObject().mapFrom(msgMessage);
+		msgMessage.setToken(token);
 
 		log.info("------------------------------------------------------------------------");
-		log.info("MESSAGE TO OWNER   ::   " + jsonMessage.toString());
+		log.info("MESSAGE TO OWNER   ::   " + msgMessage);
 		log.info("------------------------------------------------------------------------");
 
-		jsonMessage.put("token", token);
 
-		return jsonMessage;
+		return msgMessage;
 	}
 
-	public static JsonObject prepareEmailTemplate(String templateCode, String BEGCode, String recipientLinkValue,
-			String[] attachments, String token) {
-
-		String code = "code:" + BEGCode;
-		String recipient = "recipient:" + recipientLinkValue;
-		String[] msgMessageData = { code, recipient };
-
-		// Creating messageData MSG_MESSAGE
-		QMSGMessage msgMessage = new QMSGMessage("MSG_MESSAGE", templateCode, msgMessageData, QBaseMSGMessageType.EMAIL,
-				attachments);
-		JsonObject jsonMessage = new JsonObject().mapFrom(msgMessage);
-
-		log.info("------------------------------------------------------------------------");
-		log.info("MESSAGE TO OWNER   ::   " + jsonMessage.toString());
-		log.info("------------------------------------------------------------------------");
-
-		jsonMessage.put("token", token);
-
-		return jsonMessage;
-	}
-
-	public static JsonObject prepareMessageTemplate(String templateCode, String messageType,
+	
+	public static QMessageGennyMSG prepareMessageTemplate(String templateCode, QBaseMSGMessageType messageType,
 			Map<String, String> contextMap, String[] recipientArray, String token) {
 
-		QBaseMSGMessageType type = null;
-		if (messageType.equals("SMS")) {
-			type = QBaseMSGMessageType.SMS;
-		} else if (messageType.equals("EMAIL")) {
-			type = QBaseMSGMessageType.EMAIL;
-		} else if (messageType.equals("TOAST")) {
-			type = QBaseMSGMessageType.TOAST;
-		}
 
-		QMessageGennyMSG msgMessage = new QMessageGennyMSG("MSG_MESSAGE", type, templateCode, contextMap,
+		QMessageGennyMSG msgMessage = new QMessageGennyMSG("MSG_MESSAGE", messageType, templateCode, contextMap,
 				recipientArray);
-		JsonObject jsonMessage = JsonObject.mapFrom(msgMessage);
+		msgMessage.setToken(token);
 
 		log.info("------------------------------------------------------------------------");
-		log.info("MESSAGE ::   " + jsonMessage.toString());
+		log.info("MESSAGE ::   " + msgMessage);
 		log.info("------------------------------------------------------------------------");
 
-		jsonMessage.put("token", token);
 
-		return jsonMessage;
+		return msgMessage;
 	}
 
-	public static JsonObject prepareMessageTemplateWithAttachments(String templateCode, String messageType,
+	public static QMessageGennyMSG prepareMessageTemplateWithAttachments(String templateCode, QBaseMSGMessageType messageType,
 			Map<String, String> contextMap, String[] recipientArray, List<QBaseMSGAttachment> attachmentList,
 			String token) {
 
-		QBaseMSGMessageType type = null;
-		if (messageType.equals("SMS")) {
-			type = QBaseMSGMessageType.SMS;
-		} else if (messageType.equals("EMAIL")) {
-			type = QBaseMSGMessageType.EMAIL;
-		} else if (messageType.equals("TOAST")) {
-			type = QBaseMSGMessageType.TOAST;
-		}
 
-		QMessageGennyMSG msgMessage = new QMessageGennyMSG("MSG_MESSAGE", type, templateCode, contextMap,
+		QMessageGennyMSG msgMessage = new QMessageGennyMSG("MSG_MESSAGE", messageType, templateCode, contextMap,
 				recipientArray, attachmentList);
-		JsonObject jsonMessage = JsonObject.mapFrom(msgMessage);
+		msgMessage.setToken(token);
 
 		log.info("------------------------------------------------------------------------");
-		log.info("MESSAGE ::   " + jsonMessage.toString());
+		log.info("MESSAGE ::   " + msgMessage);
 		log.info("------------------------------------------------------------------------");
 
-		jsonMessage.put("token", token);
 
-		return jsonMessage;
+		return msgMessage;
 	}
 
 	public static QBaseMSGAttachment prepareAttachment(String attachmentType, String contentType, String attachmentUrl,
@@ -143,58 +130,35 @@ public class MessageUtils {
 		return attachment;
 	}
 
-	public static JsonObject prepareMessageTemplateForDirectRecipients(String templateCode, String messageType,
+	public static QMessageGennyMSG prepareMessageTemplateForDirectRecipients(String templateCode, QBaseMSGMessageType messageType,
 			Map<String, String> contextMap, String[] to, String token) {
 
-		QBaseMSGMessageType type = null;
-		if (messageType.equals("SMS")) {
-			type = QBaseMSGMessageType.SMS;
-		} else if (messageType.equals("EMAIL")) {
-			type = QBaseMSGMessageType.EMAIL;
-		} else if (messageType.equals("TOAST")) {
-			type = QBaseMSGMessageType.TOAST;
-		}
-
-		QMessageGennyMSG msgMessage = new QMessageGennyMSG(messageType, templateCode, type, contextMap, to);
-		
-		JsonObject jsonMessage = JsonObject.mapFrom(msgMessage);
+		QMessageGennyMSG msgMessage = new QMessageGennyMSG(messageType.name(), templateCode, messageType, contextMap, to);
+		msgMessage.setToken(token);
 
 		log.info("------------------------------------------------------------------------");
-		log.info("MESSAGE ::   " + jsonMessage.toString());
+		log.info("MESSAGE ::   " + msgMessage.toString());
 		log.info("------------------------------------------------------------------------");
 
-		jsonMessage.put("token", token);
 
-		return jsonMessage;
+		return msgMessage;
 	}
 	
+
 	
-	public static JsonObject prepareMessageTemplateWithAttachmentForDirectRecipients(String templateCode, String messageType,
+	public static QMessageGennyMSG prepareMessageTemplateWithAttachmentForDirectRecipients(String templateCode, QBaseMSGMessageType messageType,
 			Map<String, String> contextMap, String[] to, List<QBaseMSGAttachment> attachmentList,
 			String token) {
 
-		QBaseMSGMessageType type = null;
-		if (messageType.equals("SMS")) {
-			type = QBaseMSGMessageType.SMS;
-		} else if (messageType.equals("EMAIL")) {
-			type = QBaseMSGMessageType.EMAIL;
-		} else if (messageType.equals("TOAST")) {
-			type = QBaseMSGMessageType.TOAST;
-		}
-
-		/*QMessageGennyMSG msgMessage = new QMessageGennyMSG("MSG_MESSAGE", type, templateCode, contextMap,
-				recipientArray, attachmentList);*/
-		QMessageGennyMSG msgMessage = new QMessageGennyMSG(messageType, templateCode, type, contextMap, attachmentList, to);
-		
-		JsonObject jsonMessage = JsonObject.mapFrom(msgMessage);
+		QMessageGennyMSG msgMessage = new QMessageGennyMSG(messageType.name(), templateCode, messageType, contextMap, attachmentList, to);
+		msgMessage.setToken(token);
 
 		log.info("------------------------------------------------------------------------");
-		log.info("MESSAGE ::   " + jsonMessage.toString());
+		log.info("MESSAGE ::   " + msgMessage);
 		log.info("------------------------------------------------------------------------");
 
-		jsonMessage.put("token", token);
 
-		return jsonMessage;
+		return msgMessage;
 	}
 
 }

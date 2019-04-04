@@ -1,14 +1,19 @@
 package life.genny.qwandautils;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 
+import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
 
 import com.google.gson.Gson;
 
 public class PDFHelper {
 	
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
 	final public static String PDF_GEN_SERVICE_API_URL = System.getenv("PDF_GEN_SERVICE_API_URL") == null ? "http://localhost:7331"
 			: System.getenv("PDF_GEN_SERVICE_API_URL");
 	
@@ -28,12 +33,12 @@ public class PDFHelper {
 		}
 				
 		String path = getHtmlStringToPdfInByte(content);
-		System.out.println("path ::"+path);
+		log.info("path ::"+path);
 
 		if(path != null) {
 		    
 			downloadablePdfUrl = PDF_GEN_SERVICE_API_URL + path;
-			System.out.println("download url ::"+downloadablePdfUrl);
+			log.info("download url ::"+downloadablePdfUrl);
 			return downloadablePdfUrl;
 		}
 		
@@ -55,7 +60,7 @@ public class PDFHelper {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("response for attachment ::" + resp);
+		log.info("response for attachment ::" + resp);
 
 		if(resp != null) {
 			JSONObject respObj = JsonUtils.fromJson(resp, JSONObject.class);
