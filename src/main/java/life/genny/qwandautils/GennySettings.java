@@ -37,6 +37,7 @@ public class GennySettings {
 	public final static Boolean forceEventBusApi = "TRUE".equalsIgnoreCase(System.getenv("FORCE_EVENTBUS_USE_API"));
 	public final static Boolean forceCacheApi = "TRUE".equalsIgnoreCase(System.getenv("FORCE_CACHE_USE_API"));	
 	public final static Boolean disableLayoutLoading = "TRUE".equalsIgnoreCase(System.getenv("DISABLE_LAYOUT_LOADING"));
+	public final static Boolean enableSlackSending = "TRUE".equalsIgnoreCase(System.getenv("ENABLE_SLACK_SENDING"));
 	public final static Boolean loadDdtInStartup = "TRUE".equalsIgnoreCase(System.getenv("LOAD_DDT_IN_STARTUP"));
 	public final static Boolean skipGoogleDocInStartup = "TRUE".equalsIgnoreCase(System.getenv("SKIP_GOOGLE_DOC_IN_STARTUP"));
 	public final static Boolean skipGithubInStartup = "TRUE".equalsIgnoreCase(System.getenv("SKIP_GITHUB_IN_STARTUP"));
