@@ -584,12 +584,17 @@ public class GennySheets {
 			String name = (String) data.get("name");
 			String module = (String) data.get("module");
 			String sheetID = (String) data.get("sheetID");
-			Object clientSecret = data.get("clientSecret");
+			String clientSecret = (String)data.get("clientSecret");
+			String keycloakUrl = (String)data.get("keycloakUrl");
+			String urlList = (String)data.get("urlList");
 			Map<String, Object> fields = new HashMap<String, Object>();
 			fields.put("sheetID", sheetID);
 			fields.put("name", name);
 			fields.put("module", module);
 			fields.put("clientSecret", clientSecret);
+			fields.put("keycloakUrl", keycloakUrl);
+			fields.put("urlList", urlList);
+			fields.put("code", code);
 			map.add(fields);
 			return map;
 		}).reduce((ac, acc) -> {
@@ -617,12 +622,20 @@ public class GennySheets {
 			String name = (String) data.get("name");
 			String module = (String) data.get("module");
 			String sheetID = (String) data.get("sheetID");
-			Object clientSecret = data.get("clientSecret");
+			String keycloakUrl = (String) data.get("keycloakUrl");			
+			String clientSecret = (String)data.get("clientSecret");
+			String urlList = (String)data.get("urlList");
+			String disable = getBooleanString(data.get("disable"));
+			
 			Map<String, Object> fields = new HashMap<String, Object>();
 			fields.put("sheetID", sheetID);
 			fields.put("name", name);
+			fields.put("code", code);
 			fields.put("module", module);
 			fields.put("clientSecret", clientSecret);
+			fields.put("keycloakUrl",keycloakUrl);
+			fields.put("urlList",urlList);
+			fields.put("disable", disable);
 			map.add(fields);
 			return map;
 		}).reduce((ac, acc) -> {
