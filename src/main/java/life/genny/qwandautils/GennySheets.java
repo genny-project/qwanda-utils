@@ -587,6 +587,8 @@ public class GennySheets {
 			String clientSecret = (String)data.get("clientSecret");
 			String keycloakUrl = (String)data.get("keycloakUrl");
 			String urlList = (String)data.get("urlList");
+			String ENV_SECURITY_KEY = (String)data.get("ENV_SECURITY_KEY");
+			String ENV_SERVICE_PASSWORD = (String)data.get("ENV_SERVICE_PASSWORD");
 			Map<String, Object> fields = new HashMap<String, Object>();
 			fields.put("sheetID", sheetID);
 			fields.put("name", name);
@@ -595,6 +597,8 @@ public class GennySheets {
 			fields.put("keycloakUrl", keycloakUrl);
 			fields.put("urlList", urlList);
 			fields.put("code", code);
+			fields.put("ENV_SECURITY_KEY",ENV_SECURITY_KEY);
+			fields.put("ENV_SERVICE_PASSWORD", ENV_SERVICE_PASSWORD);
 			map.add(fields);
 			return map;
 		}).reduce((ac, acc) -> {
