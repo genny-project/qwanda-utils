@@ -30,6 +30,7 @@ public class GennySettings {
 	public static final Boolean devMode = ("TRUE".equalsIgnoreCase(System.getenv("DEV_MODE"))||"TRUE".equalsIgnoreCase(System.getenv("GENNYDEV"))) ? true : false;
 	public static final Boolean miniKubeMode = "TRUE".equalsIgnoreCase(System.getenv("MINIKUBE_MODE"));
 	public static final Boolean zipMode = ("TRUE".equalsIgnoreCase(System.getenv("ZIP_MODE"))) ? true : false;
+	public static final Integer zipMinimumThresholdBytes = System.getenv("ZIP_MIN_THRESHOLD_BYTES")==null?524287:(Integer.parseInt(System.getenv("ZIP_MIN_THRESHOLD_BYTES")));
 	public static final String projectUrl = System.getenv("PROJECT_URL");
 	public final static String mainrealm = System.getenv("PROJECT_REALM") != null ? System.getenv("PROJECT_REALM") : "genny"; // UGLY
 	public final static Boolean isRulesManager = "TRUE".equalsIgnoreCase(System.getenv("RULESMANAGER"));
@@ -37,6 +38,7 @@ public class GennySettings {
 	public final static Boolean forceEventBusApi = "TRUE".equalsIgnoreCase(System.getenv("FORCE_EVENTBUS_USE_API"));
 	public final static Boolean forceCacheApi = "TRUE".equalsIgnoreCase(System.getenv("FORCE_CACHE_USE_API"));	
 	public final static Boolean disableLayoutLoading = "TRUE".equalsIgnoreCase(System.getenv("DISABLE_LAYOUT_LOADING"));
+	public final static Boolean enableSlackSending = "TRUE".equalsIgnoreCase(System.getenv("ENABLE_SLACK_SENDING"));
 	public final static Boolean loadDdtInStartup = "TRUE".equalsIgnoreCase(System.getenv("LOAD_DDT_IN_STARTUP"));
 	public final static Boolean skipGoogleDocInStartup = "TRUE".equalsIgnoreCase(System.getenv("SKIP_GOOGLE_DOC_IN_STARTUP"));
 	public final static Boolean skipGithubInStartup = "TRUE".equalsIgnoreCase(System.getenv("SKIP_GITHUB_IN_STARTUP"));
