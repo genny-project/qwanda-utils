@@ -1,6 +1,7 @@
 package life.genny.qwandautils;
 
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -35,10 +36,13 @@ public class JsonUtils {
 	static GsonBuilder gsonBuilder = new GsonBuilder();       
 
 	static public Gson gson = gsonBuilder.registerTypeAdapter(Money.class, new MoneyDeserializer())
-			.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer()).setPrettyPrinting()
+			.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer())
 			.registerTypeAdapter(LocalDate.class, new LocalDateConverter())
-
-			.excludeFieldsWithoutExposeAnnotation().create();
+		//	.excludeFieldsWithModifiers(Modifier.STATIC, Modifier.TRANSIENT, Modifier.VOLATILE)
+			.excludeFieldsWithoutExposeAnnotation()
+		//    .disableHtmlEscaping()
+		    .setPrettyPrinting()
+			.create();
 	
 	
 	public static <T> T fromJson(final String json, Class clazz)

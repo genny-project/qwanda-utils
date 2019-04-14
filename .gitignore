@@ -18,5 +18,8 @@ src/main/resources/rebel.xml
 .vscode/
 .settings/
 .factorypath/
+.factorypath
 ./.factorypath
 ./.project
+**/bin/*
+bin
