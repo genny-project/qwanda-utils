@@ -240,6 +240,8 @@ public class QwandaUtils {
 		request.setHeader("Content-Type", "application/json; charset=UTF-8");
 
 
+		request.setHeader("Content-Type", "application/json; charset=UTF-8");
+
 		CloseableHttpResponse response = httpclient.execute(request);
 		// The underlying HTTP connection is still held by the response object
 		// to allow the response content to be streamed directly from the network
@@ -387,8 +389,10 @@ public class QwandaUtils {
 		String uname = getNormalisedUsername(username);
 		String code = "PER_" + uname.toUpperCase();
 		log.info("Creating User:"+username);
+        log.info("Project realm: "+System.getenv("PROJECT_REALM"));
 
 		Person person = new Person(code, firstname + " " + lastname);
+		person.setRealm(System.getenv("PROJECT_REALM"));
 
 		postBaseEntity(qwandaUrl, token, person);
 
@@ -881,6 +885,7 @@ public class QwandaUtils {
 	// creating new BaseEntity by only baseentityCode
 	public static BaseEntity createBaseEntityByCode(String entityCode, String name, String qwandaUrl, String token) {
 		BaseEntity beg = new BaseEntity(entityCode, name);
+		beg.setRealm(System.getenv("PROJECT_REALM"));
 
 		String jsonBE = JsonUtils.toJson(beg);
 		try {
