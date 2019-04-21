@@ -584,12 +584,21 @@ public class GennySheets {
 			String name = (String) data.get("name");
 			String module = (String) data.get("module");
 			String sheetID = (String) data.get("sheetID");
-			Object clientSecret = data.get("clientSecret");
+			String clientSecret = (String)data.get("clientSecret");
+			String keycloakUrl = (String)data.get("keycloakUrl");
+			String urlList = (String)data.get("urlList");
+			String ENV_SECURITY_KEY = (String)data.get("ENV_SECURITY_KEY");
+			String ENV_SERVICE_PASSWORD = (String)data.get("ENV_SERVICE_PASSWORD");
 			Map<String, Object> fields = new HashMap<String, Object>();
 			fields.put("sheetID", sheetID);
 			fields.put("name", name);
 			fields.put("module", module);
 			fields.put("clientSecret", clientSecret);
+			fields.put("keycloakUrl", keycloakUrl);
+			fields.put("urlList", urlList);
+			fields.put("code", code);
+			fields.put("ENV_SECURITY_KEY",ENV_SECURITY_KEY);
+			fields.put("ENV_SERVICE_PASSWORD", ENV_SERVICE_PASSWORD);
 			map.add(fields);
 			return map;
 		}).reduce((ac, acc) -> {
@@ -617,12 +626,25 @@ public class GennySheets {
 			String name = (String) data.get("name");
 			String module = (String) data.get("module");
 			String sheetID = (String) data.get("sheetID");
-			Object clientSecret = data.get("clientSecret");
+			String keycloakUrl = (String) data.get("keycloakUrl");			
+			String clientSecret = (String)data.get("clientSecret");
+			String urlList = (String)data.get("urlList");
+			String disable = getBooleanString(data.get("disable"));
+			String ENV_SECURITY_KEY = (String)data.get("ENV_SECURITY_KEY");
+			String ENV_SERVICE_PASSWORD = (String)data.get("ENV_SERVICE_PASSWORD");
+			
 			Map<String, Object> fields = new HashMap<String, Object>();
 			fields.put("sheetID", sheetID);
 			fields.put("name", name);
+			fields.put("code", code);
 			fields.put("module", module);
 			fields.put("clientSecret", clientSecret);
+			fields.put("keycloakUrl",keycloakUrl);
+			fields.put("urlList",urlList);
+			fields.put("disable", disable);
+			fields.put("ENV_SECURITY_KEY",ENV_SECURITY_KEY);
+			fields.put("ENV_SERVICE_PASSWORD", ENV_SERVICE_PASSWORD);
+
 			map.add(fields);
 			return map;
 		}).reduce((ac, acc) -> {
