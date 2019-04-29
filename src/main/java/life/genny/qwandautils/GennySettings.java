@@ -11,6 +11,7 @@ public class GennySettings {
     //Constants 
     public final static String LOCALHOST = "localhost";
     public final static String DEFAULT_CACHE_SERVER_NAME = "bridge-service";
+    public final static String GENNY_REALM = "jenny"; //deliberatly not genny
 
 	public static int ACCESS_TOKEN_EXPIRY_LIMIT_SECONDS = 60;
 
@@ -30,7 +31,10 @@ public class GennySettings {
 	public static final Boolean devMode = ("TRUE".equalsIgnoreCase(System.getenv("DEV_MODE"))||"TRUE".equalsIgnoreCase(System.getenv("GENNYDEV"))) ? true : false;
 	public static final Boolean miniKubeMode = "TRUE".equalsIgnoreCase(System.getenv("MINIKUBE_MODE"));
 	public static final Boolean zipMode = ("TRUE".equalsIgnoreCase(System.getenv("ZIP_MODE"))) ? true : false;
-	public static final Integer zipMinimumThresholdBytes = System.getenv("ZIP_MIN_THRESHOLD_BYTES")==null?524287:(Integer.parseInt(System.getenv("ZIP_MIN_THRESHOLD_BYTES")));
+	
+	
+	// 2^19-1 = 524287 2^23-1=8388607
+	public static final Integer zipMinimumThresholdBytes = System.getenv("ZIP_MIN_THRESHOLD_BYTES")==null?8388607:(Integer.parseInt(System.getenv("ZIP_MIN_THRESHOLD_BYTES")));
 	public static final String projectUrl = System.getenv("PROJECT_URL");
 	public final static String mainrealm = System.getenv("PROJECT_REALM") != null ? System.getenv("PROJECT_REALM") : "genny"; // UGLY
 	public final static Boolean isRulesManager = "TRUE".equalsIgnoreCase(System.getenv("RULESMANAGER"));
@@ -55,7 +59,7 @@ public class GennySettings {
 	public static final String defaultServiceEncryptedPassword = System.getenv("ENV_SERVICE_PASSWORD") == null ?  "vRO+tCumKcZ9XbPWDcAXpU7tcSltpNpktHcgzRkxj8o=" : System.getenv("ENV_SERVICE_PASSWORD");
 	public static final String defaultServicePassword = System.getenv("DENV_SERVICE_UNENCRYPTED_PASSWORD") == null ?  "Wubba!Lubba!Dub!Dub!" : System.getenv("ENV_SERVICE_UNENCRYPTED_PASSWORD");
 
-	public static final String realmDir = System.getenv("REALM_DIR") != null ? System.getenv("REALM_DIR") : "./realm/" + mainrealm;
+	public static final String realmDir = System.getenv("REALM_DIR") != null ? System.getenv("REALM_DIR") : "./realm" ;
 	public static final String rulesDir = System.getenv("RULES_DIR") != null ? System.getenv("RULES_DIR") : "/rules" ;  // TODO, docker focused
 
 	public static final String startupWebHook = System.getenv("STARTUP_WEB_HOOK") != null ? System.getenv("STARTUP_WEB_HOOK") : "http://"+hostIP+":"+webhookPort+"/event/"+mainrealm ;  // trigger any startup webhook notification
