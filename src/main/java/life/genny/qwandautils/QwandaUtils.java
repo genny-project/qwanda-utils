@@ -389,10 +389,10 @@ public class QwandaUtils {
 		String uname = getNormalisedUsername(username);
 		String code = "PER_" + uname.toUpperCase();
 		log.info("Creating User:"+username);
-        log.info("Project realm: "+System.getenv("PROJECT_REALM"));
+        log.info("Project realm: "+realm);
 
 		Person person = new Person(code, firstname + " " + lastname);
-		person.setRealm(System.getenv("PROJECT_REALM"));
+		person.setRealm(realm);
 
 		postBaseEntity(qwandaUrl, token, person);
 
