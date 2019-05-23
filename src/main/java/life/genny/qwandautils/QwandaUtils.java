@@ -62,7 +62,7 @@ public class QwandaUtils {
 
 
 
-	private static String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
+
 
 	public static final String ANSI_RESET = "\u001B[0m";
 	public static final String ANSI_BLUE = "\u001B[34m";
@@ -312,7 +312,7 @@ public class QwandaUtils {
 			throws IOException {
 
 		String jsonBE = JsonUtils.toJson(be);
-
+		
 		String retStr = QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/baseentitys", jsonBE, token);
 		if (retStr.equals("<html><head><title>Error</title></head><body>Internal Server Error</body></html>")) {
 			log.error("Internal Server Error trying to post ["+be.getCode()+"]");
@@ -323,7 +323,7 @@ public class QwandaUtils {
 			be.setId(ret);
 			return ret;
 		} catch (NumberFormatException e) {
-			log.error("Error in posting BaseEntity ["+be.getCode()+"] ["+retStr+"] , json sent is ["+jsonBE+"]+ the qwandaServiceUrl='"+qwandaUrl+"'");
+			//log.error("Error in posting BaseEntity ["+be.getCode()+"] ["+retStr+"] , json sent is ["+jsonBE+"]+ the GennySettings.qwandaServiceUrl='"+qwandaUrl+"'");
 			return -1L;
 		}
 	}
@@ -533,8 +533,6 @@ public class QwandaUtils {
 	public static Boolean isMandatoryFieldsEntered(String sourceBaseEntityCode, String targetBaseEntityCode,
 			String questionCode, final String userToken) {
 
-		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
-		// String qwandaServiceUrl = "http://localhost:8280";
 		try {
 			String attributeString = null;
 			String key = sourceBaseEntityCode + ":" + questionCode + ":" + targetBaseEntityCode
@@ -542,7 +540,7 @@ public class QwandaUtils {
 			//	if (askMap.containsKey(key)) {
 			//		attributeString = askMap.get(key);
 			//	} else {
-			attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
+			attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
 					+ "/asks3/" + questionCode + "/" + targetBaseEntityCode, userToken);
 			//		askMap.put(key, attributeString);
 			//	}
@@ -570,7 +568,7 @@ public class QwandaUtils {
 
 				}
 			} else {
-				log.error("AskMsg is NULL! "+qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
+				log.error("AskMsg is NULL! "+GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
 						+ "/asks3/" + questionCode + "/" + targetBaseEntityCode);
 			}
 		} catch (IOException e) {
@@ -616,14 +614,14 @@ public class QwandaUtils {
 		BaseEntity be = null;
 		try {
 			attributeString = QwandaUtils
-					.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode, token);
+					.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode, token);
 			be = JsonUtils.fromJson(attributeString, BaseEntity.class);
 			if (be == null) {
 				throw new IOException("Cannot find BE "+baseEntAttributeCode);
 			}
 
 		} catch (IOException e)  {
-			throw new IOException("Cannot connect to QwandaURL "+qwandaServiceUrl);
+			throw new IOException("Cannot connect to QwandaURL "+GennySettings.qwandaServiceUrl);
 		}
 
 
@@ -643,7 +641,7 @@ public class QwandaUtils {
 		BaseEntity be = null;
 		try {
 
-			attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode+"/attributes", token);
+			attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode+"/attributes", token);
 			if(attributeString != null) {
 				be = JsonUtils.fromJson(attributeString, BaseEntity.class);
 			}
@@ -652,7 +650,7 @@ public class QwandaUtils {
 			}
 
 		} catch (IOException e)  {
-			throw new IOException("Cannot connect to QwandaURL "+qwandaServiceUrl);
+			throw new IOException("Cannot connect to QwandaURL "+GennySettings.qwandaServiceUrl);
 		}
 
 
@@ -666,12 +664,10 @@ public class QwandaUtils {
 	 */
 	public static String getBaseEntityCodeForUserName(String username, String userToken) {
 
-		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
-		// String qwandaServiceUrl = "http://localhost:8280";
 
 		String baseEntityCode = null;
 		try {
-			String attributeString = QwandaUtils.apiGet(qwandaServiceUrl
+			String attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl
 					+ "/qwanda/baseentitys/GRP_PEOPLE/linkcodes/LNK_CORE/attributes?PRI_USERNAME=" + username,
 					userToken);
 			log.info("attribute string::" + attributeString);
@@ -699,11 +695,10 @@ public class QwandaUtils {
 	 */
 	public static QBaseMSGMessageTemplate getTemplate(String templateCode, String token) {
 
-		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 		String attributeString;
 		QBaseMSGMessageTemplate template = null;
 		try {
-			attributeString = QwandaUtils.apiGet(qwandaServiceUrl + "/qwanda/templates/" + templateCode, token);
+			attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/templates/" + templateCode, token);
 			template = JsonUtils.fromJson(attributeString, QBaseMSGMessageTemplate.class);
 			log.info("template sms:" + template.getSms_template());
 
@@ -722,13 +717,11 @@ public class QwandaUtils {
 	 */
 	public static List getLinkList(String groupCode, String token) {
 
-		// String qwandaServiceUrl = "http://localhost:8280";
-		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 		List linkList = null;
 
 		try {
 			String attributeString = QwandaUtils.apiGet(
-					qwandaServiceUrl + "/qwanda/entityentitys/" + groupCode + "/linkcodes/LNK_BEG/children", token);
+					GennySettings.qwandaServiceUrl + "/qwanda/entityentitys/" + groupCode + "/linkcodes/LNK_BEG/children", token);
 			if (attributeString != null) {
 				linkList = JsonUtils.fromJson(attributeString, List.class);
 			}
@@ -811,13 +804,11 @@ public class QwandaUtils {
 
 	public static QDataBaseEntityMessage getDataBEMessage(String groupCode, String linkCode, String token) {
 
-		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
-		//String qwandaServiceUrl = "http://localhost:8280";
 		QDataBaseEntityMessage dataBEMessage = null;
 
 		try {
 			String attributeString = QwandaUtils.apiGet(
-					qwandaServiceUrl + "/qwanda/baseentitys/" + groupCode + "/linkcodes/" + linkCode + "/attributes",
+					GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" + groupCode + "/linkcodes/" + linkCode + "/attributes",
 					token);
 			dataBEMessage = JsonUtils.fromJson(attributeString, QDataBaseEntityMessage.class);
 
@@ -1125,12 +1116,11 @@ public class QwandaUtils {
 
 		log.info("CREATING LINK between " + groupCode + "and" + targetCode + "with LINK VALUE = " + linkValue);
 
-		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 		Link link = new Link(groupCode, targetCode, linkCode, linkValue);
 		link.setWeight(weight);
 
 		try {
-			postLink(qwandaServiceUrl, token, link);
+			postLink(GennySettings.qwandaServiceUrl, token, link);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -1390,7 +1380,7 @@ public class QwandaUtils {
 		//	if (searchBE.getCode().startsWith("SBE_")) {
 
 		String jsonSearchBE = JsonUtils.toJson(searchBE);
-		String result = QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/baseentitys/search", jsonSearchBE,
+		String result = QwandaUtils.apiPostEntity(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/search", jsonSearchBE,
 				token);
 
 		results = JsonUtils.fromJson(result, QDataBaseEntityMessage.class);
@@ -1458,7 +1448,7 @@ public class QwandaUtils {
 
 		try {
 
-			String response = QwandaUtils.apiGet(QwandaUtils.qwandaServiceUrl + "/qwanda/attributes/", token);
+			String response = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/attributes/", token);
 			QDataAttributeMessage attributeMessage = JsonUtils.fromJson(response, QDataAttributeMessage.class);
 			for(Attribute attribute: attributeMessage.getItems()) {
 				if(attribute.getCode().equals(attributeCode)) {
@@ -1476,12 +1466,6 @@ public class QwandaUtils {
 
 	
 
-	/**
-	 * @return the qwandaServiceUrl
-	 */
-	public static String getQwandaServiceUrl() {
-		return qwandaServiceUrl;
-	}
 
 	public static String getUniqueCode(int numberOfDigitsForUniqueCode) {
 		String uniqueCode = UUID.randomUUID().toString().substring(0, numberOfDigitsForUniqueCode).toUpperCase();
