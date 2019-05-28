@@ -1,6 +1,7 @@
 package life.genny.qwandautils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,16 +12,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
-
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -29,8 +29,6 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
-import com.google.gson.Gson;
-
 import life.genny.qwanda.Ask;
 import life.genny.qwanda.Question;
 import life.genny.qwanda.QuestionQuestion;
@@ -145,20 +143,24 @@ public class GennySheets {
 	}
 
 	public Credential authorize() throws Exception {
-		// Load client secrets.
-		// out.println(System.getProperty("user.home"));
-		// InputStream in =
-		// GennySheets.class.getResourceAsStream("/client_secret_2.json");
-		final InputStream in = IOUtils.toInputStream(clientSecret, "UTF-8");
-		final GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+		Optional<String> path = Optional.ofNullable(System.getenv("GOOGLE_SVC_ACC_PATH"));
 
-		// Build flow and trigger user authorization request.
-		final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
-				clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
-		final Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
-				.authorize("user");
-		log.info("Credentials saved to " + dataStoreDir.getAbsolutePath());
-		return credential;
+        if(!path.isPresent()){
+		    final InputStream in = IOUtils.toInputStream(clientSecret, "UTF-8");
+		    final GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+
+		    final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
+		    		clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
+		    final Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
+		    		.authorize("user");
+		    return credential;
+        }else{
+		    GoogleCredential credential = GoogleCredential
+                .fromStream(new FileInputStream(path.get()),HTTP_TRANSPORT,JSON_FACTORY)
+                .createScoped(SCOPES);
+
+		    return credential;
+        }
 	}
 
 	public <T> List<T> transform(final List<List<Object>> values, final Class object) {
