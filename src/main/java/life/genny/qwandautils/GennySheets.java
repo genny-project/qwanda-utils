@@ -143,28 +143,24 @@ public class GennySheets {
 	}
 
 	public Credential authorize() throws Exception {
-		// Load client secrets.
-		// out.println(System.getProperty("user.home"));
-		// InputStream in =
-		// GennySheets.class.getResourceAsStream("/client_secret_2.json");
-//		final InputStream in = IOUtils.toInputStream(clientSecret, "UTF-8");
-//		final GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-//
-//		// Build flow and trigger user authorization request.
-//		final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
-//				clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
-//		final Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
-//				.authorize("user");
-//		log.info("Credentials saved to " + dataStoreDir.getAbsolutePath());
+		Optional<String> path = Optional.ofNullable(System.getenv("GOOGLE_SVC_ACC_PATH"));
 
-//		This is the path "/Users/helios/Downloads/token-secret-service-account.json"
-//
-		String path = System.getenv("GOOGLE_SVC_ACC_PATH");
-		GoogleCredential credentials = GoogleCredential
-            .fromStream(new FileInputStream(path),HTTP_TRANSPORT,JSON_FACTORY)
-            .createScoped(SCOPES);
+        if(!path.isPresent()){
+		    final InputStream in = IOUtils.toInputStream(clientSecret, "UTF-8");
+		    final GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
-		return credentials;
+		    final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
+		    		clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
+		    final Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
+		    		.authorize("user");
+		    return credential;
+        }else{
+		    GoogleCredential credential = GoogleCredential
+                .fromStream(new FileInputStream(path.get()),HTTP_TRANSPORT,JSON_FACTORY)
+                .createScoped(SCOPES);
+
+		    return credential;
+        }
 	}
 
 	public <T> List<T> transform(final List<List<Object>> values, final Class object) {
