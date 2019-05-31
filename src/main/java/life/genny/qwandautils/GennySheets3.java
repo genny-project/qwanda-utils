@@ -40,7 +40,7 @@ import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.EntityEntity;
 import life.genny.qwanda.validation.Validation;
 
-public class GennySheets {
+public class GennySheets3 {
 	/**
 	 * Stores logger object.
 	 */
@@ -60,8 +60,6 @@ public class GennySheets {
 	 * spreedsheet between the d/ and trailing slash ( / ) .
 	 */
 	private String sheetId;
-	
-	private String realm="genny";
 
 
 	private FileDataStoreFactory DATA_STORE_FACTORY;
@@ -85,8 +83,8 @@ public class GennySheets {
 
 	private Sheets service;
 
-	public GennySheets(final String clientSecret, final String sheetId, final File dataStoreDir) {
-		log.info("["+getRealm()+"] Google Credentials located at "+dataStoreDir);
+	public GennySheets3(final String clientSecret, final String sheetId, final File dataStoreDir) {
+		log.info("Google Credentials located at "+dataStoreDir);
 		this.clientSecret = clientSecret;
 		this.sheetId = sheetId;
 		this.dataStoreDir = dataStoreDir;
@@ -104,7 +102,7 @@ public class GennySheets {
 
 	}
 
-	public GennySheets(final String clientSecret, final String sheetId, final File dataStoreDir, final String appName) {
+	public GennySheets3(final String clientSecret, final String sheetId, final File dataStoreDir, final String appName) {
 		this(clientSecret, sheetId, dataStoreDir);
 		this.appName = appName;
 	}
@@ -396,7 +394,9 @@ public class GennySheets {
 
 				final String baseEntityCode = (String) object.get("baseEntityCode");
 				final String attributeCode = (String) object.get("attributeCode");
-
+				if ("PRI_PRICE".equalsIgnoreCase(attributeCode)) {
+					log.info("dummy");
+				}
 				final String weight = (String) object.get("weight");
 				final String valueString = (String) object.get("valueString");
 				final String privacy = (String) object.get("privacy");
@@ -576,7 +576,6 @@ public class GennySheets {
 	public List<Map> projectsImport() {
 		List<Map> obj = new ArrayList<Map>();
 		try {
-			
 			obj = row2DoubleTuples("Modules");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -616,7 +615,7 @@ public class GennySheets {
 	}
 
 	public List<Map> hostingImport() {
-		log.info("["+getRealm()+"secret=["+clientSecret+"]");
+		log.info("secret=["+clientSecret+"]");
 		List<Map> obj = new ArrayList<Map>();
 		try {
 			obj = row2DoubleTuples("Projects");
@@ -688,8 +687,8 @@ public class GennySheets {
 			}	
 			
 			map.put(code, fields);
-			log.info("["+getRealm()+" **********************templates*****************************");
-			log.info("["+getRealm()+" "+map);
+			log.info("**********************templates*****************************");
+			log.info(map);
 			return map;
 		}).reduce((ac, acc) -> {
 			ac.putAll(acc);
@@ -697,13 +696,4 @@ public class GennySheets {
 		}).get();
 	}
 
-	public String getRealm() {
-		return realm;
-	}
-
-	public void setRealm(String realm) {
-		this.realm = realm;
-	}
-
-	
 }
