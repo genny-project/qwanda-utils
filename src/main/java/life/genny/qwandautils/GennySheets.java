@@ -602,6 +602,8 @@ public class GennySheets {
 			fields.put("code", code);
 			fields.put("ENV_SECURITY_KEY",ENV_SECURITY_KEY);
 			fields.put("ENV_SERVICE_PASSWORD", ENV_SERVICE_PASSWORD);
+			fields.put("disable",  getBooleanString(data.get("disable")));
+			fields.put("skipGoogleDoc",  getBooleanString(data.get("skipGoogleDoc")));
 			map.add(fields);
 			return map;
 		}).reduce((ac, acc) -> {
@@ -615,6 +617,53 @@ public class GennySheets {
 		}
 	}
 
+	public List<Map> projectImport(final String realm) {
+		List<Map> obj = new ArrayList<Map>();
+		try {
+			
+			obj = row2DoubleTuples("Modules");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Optional<List<Map>> ret = obj.stream().map(data -> {
+			final List<Map> map = new ArrayList<Map>();
+			String code = (String) data.get("code");
+			String name = (String) data.get("name");
+			String module = (String) data.get("module");
+			String sheetID = (String) data.get("sheetID");
+			String clientSecret = (String)data.get("clientSecret");
+			String keycloakUrl = (String)data.get("keycloakUrl");
+			String urlList = (String)data.get("urlList");
+			String ENV_SECURITY_KEY = (String)data.get("ENV_SECURITY_KEY");
+			String ENV_SERVICE_PASSWORD = (String)data.get("ENV_SERVICE_PASSWORD");
+			Map<String, Object> fields = new HashMap<String, Object>();
+			fields.put("sheetID", sheetID);
+			fields.put("name", name);
+			fields.put("module", module);
+			fields.put("clientSecret", clientSecret);
+			fields.put("keycloakUrl", keycloakUrl);
+			fields.put("urlList", urlList);
+			fields.put("code", code);
+			fields.put("ENV_SECURITY_KEY",ENV_SECURITY_KEY);
+			fields.put("ENV_SERVICE_PASSWORD", ENV_SERVICE_PASSWORD);
+			fields.put("disable",  getBooleanString(data.get("disable")));
+			fields.put("skipGoogleDoc",  getBooleanString(data.get("skipGoogleDoc")));
+			if (realm.equals(code)) {
+				map.add(fields);
+			}
+			return map;
+		}).reduce((ac, acc) -> {
+			ac.addAll(acc);
+			return ac;
+		});
+		if(ret.isPresent()) {
+			return ret.get();
+		} else {
+			return new ArrayList<Map>();
+		}
+	}
+	
+	
 	public List<Map> hostingImport() {
 		log.info("["+getRealm()+"secret=["+clientSecret+"]");
 		List<Map> obj = new ArrayList<Map>();
@@ -647,6 +696,8 @@ public class GennySheets {
 			fields.put("disable", disable);
 			fields.put("ENV_SECURITY_KEY",ENV_SECURITY_KEY);
 			fields.put("ENV_SERVICE_PASSWORD", ENV_SERVICE_PASSWORD);
+			fields.put("disable",  getBooleanString(data.get("disable")));
+			fields.put("skipGoogleDoc",  getBooleanString(data.get("skipGoogleDoc")));
 
 			map.add(fields);
 			return map;
