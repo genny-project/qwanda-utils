@@ -17,6 +17,7 @@ src/main/resources/rebel.xml
 ./.project
 .vscode/
 .settings/
+.settings/org.eclipse.wst.common.component
 .factorypath/
 .factorypath
 ./.factorypath
