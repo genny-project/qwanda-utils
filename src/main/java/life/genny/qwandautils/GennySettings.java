@@ -24,7 +24,9 @@ public class GennySettings {
 	
 	public static int  timeoutInSecs = 30;  // used in api timeout
 
-	public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL") != null ? System.getenv("REACT_APP_QWANDA_API_URL") : "http://alyson7.genny.life";
+	public static final String projectUrl = System.getenv("PROJECT_URL");
+
+	public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL") != null ? System.getenv("REACT_APP_QWANDA_API_URL") : projectUrl;
 	public static final String vertxUrl = System.getenv("REACT_APP_VERTX_URL") != null ? System.getenv("REACT_APP_VERTX_URL") :  "http://"+hostIP+":"+apiPort;
 	public static final String bridgeServiceUrl = System.getenv("BRIDGE_SERVICE_API") != null ? System.getenv("BRIDGE_SERVICE_API") :  "http://alyson7.genny.life";
 	public static final String pontoonUrl = System.getenv("PONTOON_URL") != null ? System.getenv("PONTOON_URL") :  "http://"+hostIP+":"+pontoonPort;
@@ -35,7 +37,6 @@ public class GennySettings {
 	
 	// 2^19-1 = 524287 2^23-1=8388607
 	public static final Integer zipMinimumThresholdBytes = System.getenv("ZIP_MIN_THRESHOLD_BYTES")==null?8388607:(Integer.parseInt(System.getenv("ZIP_MIN_THRESHOLD_BYTES")));
-	public static final String projectUrl = System.getenv("PROJECT_URL");
 	public final static String mainrealm = System.getenv("PROJECT_REALM") != null ? System.getenv("PROJECT_REALM") : "genny"; // UGLY
 	public final static Boolean isRulesManager = "TRUE".equalsIgnoreCase(System.getenv("RULESMANAGER"));
 	public final static Boolean isDdtHost = "TRUE".equalsIgnoreCase(System.getenv("DDTHOST"));
@@ -51,7 +52,7 @@ public class GennySettings {
 	
 	public final static Boolean hideRuleStates = "TRUE".equalsIgnoreCase(System.getenv("HIDE_RULE_STATES"));
 	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + hostIP + ":"+cacheApiPort)
-			: System.getenv("DDT_URL");
+			: projectUrl;
 
 	public static final String username = System.getenv("USER") == null ? "GENNY" : System.getenv("USER");
 
