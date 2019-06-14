@@ -28,7 +28,7 @@ public class GennySettings {
 
 	public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL") != null ? System.getenv("REACT_APP_QWANDA_API_URL") : projectUrl;
 	public static final String vertxUrl = System.getenv("REACT_APP_VERTX_URL") != null ? System.getenv("REACT_APP_VERTX_URL") :  "http://"+hostIP+":"+apiPort;
-	public static final String bridgeServiceUrl = System.getenv("BRIDGE_SERVICE_API") != null ? System.getenv("BRIDGE_SERVICE_API") :  "http://alyson7.genny.life";
+	public static final String bridgeServiceUrl = System.getenv("BRIDGE_SERVICE_API") != null ? System.getenv("BRIDGE_SERVICE_API") :  "http://alyson7.genny.life:8088/api/service";
 	public static final String pontoonUrl = System.getenv("PONTOON_URL") != null ? System.getenv("PONTOON_URL") :  "http://"+hostIP+":"+pontoonPort;
 	public static final Boolean devMode = ("TRUE".equalsIgnoreCase(System.getenv("DEV_MODE"))||"TRUE".equalsIgnoreCase(System.getenv("GENNYDEV"))) ? true : false;
 	public static final Boolean miniKubeMode = "TRUE".equalsIgnoreCase(System.getenv("MINIKUBE_MODE"));
