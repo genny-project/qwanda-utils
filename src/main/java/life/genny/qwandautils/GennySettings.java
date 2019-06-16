@@ -33,7 +33,8 @@ public class GennySettings {
 	public static final Boolean devMode = ("TRUE".equalsIgnoreCase(System.getenv("DEV_MODE"))||"TRUE".equalsIgnoreCase(System.getenv("GENNYDEV"))) ? true : false;
 	public static final Boolean miniKubeMode = "TRUE".equalsIgnoreCase(System.getenv("MINIKUBE_MODE"));
 	public static final Boolean zipMode = ("TRUE".equalsIgnoreCase(System.getenv("ZIP_MODE"))) ? true : false;
-	
+
+	public static final Boolean multiBridgeMode = ("TRUE".equalsIgnoreCase(System.getenv("MULTI_BRIDGE_MODE"))) ? true : false;
 	
 	// 2^19-1 = 524287 2^23-1=8388607
 	public static final Integer zipMinimumThresholdBytes = System.getenv("ZIP_MIN_THRESHOLD_BYTES")==null?8388607:(Integer.parseInt(System.getenv("ZIP_MIN_THRESHOLD_BYTES")));
