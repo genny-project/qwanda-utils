@@ -1,5 +1,6 @@
 package life.genny.models;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,7 +18,7 @@ import life.genny.qwandautils.KeycloakUtils;
 import life.genny.qwandautils.QwandaUtils;
 import life.genny.qwandautils.SecurityUtils;
 
-public class GennyToken {
+public class GennyToken implements Serializable {
 	String code;
 	String token;
 	Map<String, Object> adecodedTokenMap = null;
