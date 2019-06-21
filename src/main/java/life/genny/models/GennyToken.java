@@ -20,6 +20,7 @@ import life.genny.qwandautils.SecurityUtils;
 
 public class GennyToken implements Serializable {
 	String code;
+	String userCode;
 	String token;
 	Map<String, Object> adecodedTokenMap = null;
 	String realm = null;
@@ -37,35 +38,23 @@ public class GennyToken implements Serializable {
 			adecodedTokenMap.put("realm", realm);
 			this.token = token;
 			this.realm = realm;
-			
 			String username = (String)adecodedTokenMap.get("preferred_username");
 			String normalisedUsername = QwandaUtils.getNormalisedUsername(username);
-			this.code = "PER_"+normalisedUsername.toUpperCase();
-			setupRoles();
-		}
+			this.userCode = "PER_"+normalisedUsername.toUpperCase();
 
+			setupRoles();
+			
+			
+		}
+		
 	}
 	
 	
 	
 	public GennyToken(final String code,final String token) {
-		if ((token != null) && (!token.isEmpty())) {
-			// Getting decoded token in Hash Map from QwandaUtils
-			adecodedTokenMap = KeycloakUtils.getJsonMap(token);
 
-			// Extracting realm name from iss value
-			final String realm = (adecodedTokenMap.get("iss").toString()
-					.substring(adecodedTokenMap.get("iss").toString().lastIndexOf("/") + 1));
-			// Adding realm name to the decoded token
-			adecodedTokenMap.put("realm", realm);
-			this.token = token;
-			this.realm = realm;
+			this(token);
 			this.code = code;
-			setupRoles();
-			
-			
-		}
-
 	}
 
 	public GennyToken(final String code, final String id, final String issuer, final String subject, final long ttl, final String secret,
@@ -88,6 +77,9 @@ public class GennyToken implements Serializable {
 		jwtToken = SecurityUtils.createJwt(id, issuer, subject, ttl, secret, adecodedTokenMap);
 		token = jwtToken;
 		this.realm = realm;
+		String normalisedUsername = QwandaUtils.getNormalisedUsername(username);
+		this.userCode = "PER_"+normalisedUsername.toUpperCase();
+
 		this.code = code;
 		setupRoles();
 	}
@@ -100,9 +92,6 @@ public class GennyToken implements Serializable {
 		return token;
 	}
 
-	public void setToken(String token) {
-		this.token = token;
-	}
 
 	public Map<String, Object> getAdecodedTokenMap() {
 		return adecodedTokenMap;
@@ -131,9 +120,11 @@ public class GennyToken implements Serializable {
 		return userRoles.contains(role);
 	}
 	
+	
+	
 	@Override
 	public String toString() {
-		return "GennyToken [token=" + token + "]";
+		return getCode()+":"+getUserCode()+":"+this.userRoles;
 	}
 	
 	public String getRealm()
@@ -150,5 +141,18 @@ public class GennyToken implements Serializable {
 	{
 		return code;
 	}
+
+
+
+	/**
+	 * @return the userCode
+	 */
+	public String getUserCode() {
+		return userCode;
+	}
+
+
+
+	
 
 }
