@@ -45,6 +45,7 @@ import org.json.simple.parser.ParseException;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import life.genny.models.GennyToken;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.Ask;
 import life.genny.qwanda.CodedEntity;
@@ -881,12 +882,15 @@ public class QwandaUtils {
 	// creating new BaseEntity by only baseentityCode
 	public static BaseEntity createBaseEntityByCode(String entityCode, String name, String qwandaUrl, String token) {
 		BaseEntity beg = new BaseEntity(entityCode, name);
-		beg.setRealm(System.getenv("PROJECT_REALM"));
+		GennyToken userToken = new GennyToken(token);
+		beg.setRealm(userToken.getRealm());
 
 		String jsonBE = JsonUtils.toJson(beg);
 		try {
 			// save BE
-			QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/baseentitys", jsonBE, token);
+			String idStr = QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/baseentitys", jsonBE, token);
+			Long id = Long.parseLong(idStr);
+			beg.setId(id);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
