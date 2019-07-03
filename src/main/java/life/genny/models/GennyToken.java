@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,7 +65,10 @@ public class GennyToken implements Serializable {
 		adecodedTokenMap.put("name", name);
 		adecodedTokenMap.put("realm", realm);
 		adecodedTokenMap.put("azp", realm);
+		adecodedTokenMap.put("aud", realm);
 		adecodedTokenMap.put("realm_access", "[user," + role + "]");
+		adecodedTokenMap.put("session_state", UUID.randomUUID().toString().substring(0, 32)); // TODO set size ot same as keycloak
+		
 
 		userRoles = new HashSet<String>();
 		userRoles.add("user");
@@ -142,7 +146,15 @@ public class GennyToken implements Serializable {
 		return code;
 	}
 
-
+	public String getSessionCode()
+	{
+		return getString("session_state");
+	}
+	
+	public String getClientCode()
+	{
+		return getString("aud");
+	}
 
 	/**
 	 * @return the userCode
