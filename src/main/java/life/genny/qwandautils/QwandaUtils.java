@@ -892,7 +892,7 @@ public class QwandaUtils {
 			Long id = Long.parseLong(idStr);
 			beg.setId(id);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.warn("Baseentity code "+entityCode+" not found");
 		}
 
 		return beg;
