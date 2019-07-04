@@ -20,6 +20,10 @@ import life.genny.qwandautils.QwandaUtils;
 import life.genny.qwandautils.SecurityUtils;
 
 public class GennyToken implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	String code;
 	String userCode;
 	String token;
