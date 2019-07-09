@@ -1,14 +1,20 @@
 package life.genny.models;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.persistence.Transient;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -165,6 +171,41 @@ public class GennyToken implements Serializable {
 	public String getUserCode() {
 		return userCode;
 	}
+
+	@XmlTransient
+	@Transient
+	public LocalDateTime getAuthDateTime()
+	{
+		long auth_timestamp = (long)adecodedTokenMap.get("auth_time");
+		LocalDateTime authTime =
+			       LocalDateTime.ofInstant(Instant.ofEpochSecond(auth_timestamp),
+			                               TimeZone.getDefault().toZoneId());
+		return authTime;
+	}
+	
+	@XmlTransient
+	@Transient
+	public LocalDateTime getExpiryDateTime()
+	{
+		long exp_timestamp = (long)adecodedTokenMap.get("exp");
+		LocalDateTime expTime =
+			       LocalDateTime.ofInstant(Instant.ofEpochSecond(exp_timestamp),
+			                               TimeZone.getDefault().toZoneId());
+		return expTime;
+	}
+	
+	@XmlTransient
+	@Transient
+	public LocalDateTime getiatDateTime()
+	{
+		long iat_timestamp = (long)adecodedTokenMap.get("iat");
+		LocalDateTime iatTime =
+			       LocalDateTime.ofInstant(Instant.ofEpochSecond(iat_timestamp),
+			                               TimeZone.getDefault().toZoneId());
+		return iatTime;
+	}
+
+
 
 
 
