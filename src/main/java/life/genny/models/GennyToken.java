@@ -194,6 +194,8 @@ public class GennyToken implements Serializable {
 		return expTime;
 	}
 	
+	
+	// JWT Issue DateTime
 	@XmlTransient
 	@Transient
 	public LocalDateTime getiatDateTime()
@@ -205,8 +207,14 @@ public class GennyToken implements Serializable {
 		return iatTime;
 	}
 
-
-
+	
+	// Unique token  id
+	@XmlTransient
+	@Transient
+	public String getUniqueId()
+	{
+		return  (String)adecodedTokenMap.get("jti");
+	}
 
 
 	
