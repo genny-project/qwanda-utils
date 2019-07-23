@@ -176,7 +176,7 @@ public class GennyToken implements Serializable {
 	@Transient
 	public LocalDateTime getAuthDateTime()
 	{
-		long auth_timestamp = (long)adecodedTokenMap.get("auth_time");
+		long auth_timestamp = (long)(int)adecodedTokenMap.get("auth_time");
 		LocalDateTime authTime =
 			       LocalDateTime.ofInstant(Instant.ofEpochSecond(auth_timestamp),
 			                               TimeZone.getDefault().toZoneId());
@@ -187,7 +187,7 @@ public class GennyToken implements Serializable {
 	@Transient
 	public LocalDateTime getExpiryDateTime()
 	{
-		long exp_timestamp = (long)adecodedTokenMap.get("exp");
+		long exp_timestamp = (long)(int)adecodedTokenMap.get("exp");
 		LocalDateTime expTime =
 			       LocalDateTime.ofInstant(Instant.ofEpochSecond(exp_timestamp),
 			                               TimeZone.getDefault().toZoneId());
@@ -200,7 +200,7 @@ public class GennyToken implements Serializable {
 	@Transient
 	public LocalDateTime getiatDateTime()
 	{
-		long iat_timestamp = (long)adecodedTokenMap.get("iat");
+		long iat_timestamp = (long)(int)adecodedTokenMap.get("iat");
 		LocalDateTime iatTime =
 			       LocalDateTime.ofInstant(Instant.ofEpochSecond(iat_timestamp),
 			                               TimeZone.getDefault().toZoneId());
