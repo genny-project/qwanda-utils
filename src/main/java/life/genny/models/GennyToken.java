@@ -3,6 +3,9 @@ package life.genny.models;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -192,6 +195,21 @@ public class GennyToken implements Serializable {
 			       LocalDateTime.ofInstant(Instant.ofEpochSecond(exp_timestamp),
 			                               TimeZone.getDefault().toZoneId());
 		return expTime;
+	}
+	
+	
+	@XmlTransient
+	@Transient
+	public OffsetDateTime getExpiryDateTimeInUTC() {
+				
+		long exp_timestamp = (long)(int)adecodedTokenMap.get("exp");
+		LocalDateTime expTime =
+			       LocalDateTime.ofInstant(Instant.ofEpochSecond(exp_timestamp),
+			                               TimeZone.getDefault().toZoneId());
+		ZonedDateTime ldtZoned = expTime.atZone(ZoneId.systemDefault());
+		ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
+		
+		return utcZoned.toOffsetDateTime();
 	}
 	
 	
