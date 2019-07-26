@@ -3,6 +3,9 @@ package life.genny.models;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,10 +46,12 @@ public class GennyToken implements Serializable {
 			adecodedTokenMap = KeycloakUtils.getJsonMap(token);
 
 			// Extracting realm name from iss value
+
 			String realm = (adecodedTokenMap.get("azp").toString());
 			if (realm == null) {
 				realm = (adecodedTokenMap.get("aud").toString());  // handle non Keycloak 6+
 			}
+
 			// Adding realm name to the decoded token
 			adecodedTokenMap.put("realm", realm);
 			this.token = token;
@@ -179,7 +184,7 @@ public class GennyToken implements Serializable {
 	@Transient
 	public LocalDateTime getAuthDateTime()
 	{
-		long auth_timestamp = (long)adecodedTokenMap.get("auth_time");
+		long auth_timestamp = (long)(int)adecodedTokenMap.get("auth_time");
 		LocalDateTime authTime =
 			       LocalDateTime.ofInstant(Instant.ofEpochSecond(auth_timestamp),
 			                               TimeZone.getDefault().toZoneId());
@@ -190,11 +195,26 @@ public class GennyToken implements Serializable {
 	@Transient
 	public LocalDateTime getExpiryDateTime()
 	{
-		long exp_timestamp = (long)adecodedTokenMap.get("exp");
+		long exp_timestamp = (long)(int)adecodedTokenMap.get("exp");
 		LocalDateTime expTime =
 			       LocalDateTime.ofInstant(Instant.ofEpochSecond(exp_timestamp),
 			                               TimeZone.getDefault().toZoneId());
 		return expTime;
+	}
+	
+	
+	@XmlTransient
+	@Transient
+	public OffsetDateTime getExpiryDateTimeInUTC() {
+				
+		long exp_timestamp = (long)(int)adecodedTokenMap.get("exp");
+		LocalDateTime expTime =
+			       LocalDateTime.ofInstant(Instant.ofEpochSecond(exp_timestamp),
+			                               TimeZone.getDefault().toZoneId());
+		ZonedDateTime ldtZoned = expTime.atZone(ZoneId.systemDefault());
+		ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
+		
+		return utcZoned.toOffsetDateTime();
 	}
 	
 	
@@ -203,7 +223,7 @@ public class GennyToken implements Serializable {
 	@Transient
 	public LocalDateTime getiatDateTime()
 	{
-		long iat_timestamp = (long)adecodedTokenMap.get("iat");
+		long iat_timestamp = (long)(int)adecodedTokenMap.get("iat");
 		LocalDateTime iatTime =
 			       LocalDateTime.ofInstant(Instant.ofEpochSecond(iat_timestamp),
 			                               TimeZone.getDefault().toZoneId());
