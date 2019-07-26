@@ -46,7 +46,7 @@ public class GennyToken implements Serializable {
 			adecodedTokenMap = KeycloakUtils.getJsonMap(token);
 
 			// Extracting realm name from iss value
-			final String realm = (adecodedTokenMap.get("aud").toString());
+			final String realm = (adecodedTokenMap.get("azp").toString());
 			// Adding realm name to the decoded token
 			adecodedTokenMap.put("realm", realm);
 			this.token = token;
