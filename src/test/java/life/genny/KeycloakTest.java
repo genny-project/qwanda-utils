@@ -75,14 +75,7 @@ public class KeycloakTest {
 
   }
 
-@Test
-public void migrateUsers()
-{
-	 List<LinkedHashMap> users = fetchAllKeycloakUsers();
-	
-	System.out.println("Number of users = "+users.size());
-	
-}
+
 public  List<LinkedHashMap>  fetchAllKeycloakUsers()
 {
 	String realm = System.getenv("PROJECT_REALM");
