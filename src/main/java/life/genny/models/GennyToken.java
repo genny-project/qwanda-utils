@@ -75,8 +75,16 @@ public class GennyToken implements Serializable {
 			this.code = code;
 	}
 
+	
 	public GennyToken(final String code, final String id, final String issuer, final String subject, final long ttl, final String secret,
 			final String realm, final String username, final String name, final String role) {
+		
+		this(code,id,issuer,subject, ttl,secret,realm,username, name, role,LocalDateTime.now().plusSeconds(24*60*60)); // 1 day expiry
+	}
+	
+	
+	public GennyToken(final String code, final String id, final String issuer, final String subject, final long ttl, final String secret,
+			final String realm, final String username, final String name, final String role, final LocalDateTime expiryDateTime) {
 		adecodedTokenMap = new HashMap<String, Object>();
 		adecodedTokenMap.put("preferred_username", username);
 		adecodedTokenMap.put("name", name);
@@ -84,6 +92,9 @@ public class GennyToken implements Serializable {
 		adecodedTokenMap.put("azp", realm);
 		adecodedTokenMap.put("aud", realm);
 		adecodedTokenMap.put("realm_access", "[user," + role + "]");
+		adecodedTokenMap.put("exp", expiryDateTime.atZone(ZoneId.of("UTC")).toEpochSecond());
+		adecodedTokenMap.put("iat", LocalDateTime.now().atZone(ZoneId.of("UTC")).toEpochSecond());		
+		adecodedTokenMap.put("auth_time", LocalDateTime.now().atZone(ZoneId.of("UTC")).toEpochSecond());
 		adecodedTokenMap.put("session_state", UUID.randomUUID().toString().substring(0, 32)); // TODO set size ot same as keycloak
 		
 
@@ -106,8 +117,13 @@ public class GennyToken implements Serializable {
 	}
 
 	public GennyToken(final String code,final String realm, final String username, final String name, final String role) {
-		this(code,"ABBCD", "Genny Project", "Test JWT", 100000, "IamASecret", realm, username, name, role);
+		this(code,"ABBCD", "Genny Project", "Test JWT", 100000, "IamASecret", realm, username, name, role,LocalDateTime.now().plusSeconds(24*60*60));
 	}
+
+	public GennyToken(final String code,final String realm, final String username, final String name, final String role,LocalDateTime expiryDateTime) {
+		this(code,"ABBCD", "Genny Project", "Test JWT", 100000, "IamASecret", realm, username, name, role,expiryDateTime);
+	}
+
 
 	public String getToken() {
 		return token;
@@ -184,7 +200,7 @@ public class GennyToken implements Serializable {
 	@Transient
 	public LocalDateTime getAuthDateTime()
 	{
-		long auth_timestamp = (long)(int)adecodedTokenMap.get("auth_time");
+		Long auth_timestamp = (Long)adecodedTokenMap.get("auth_time");
 		LocalDateTime authTime =
 			       LocalDateTime.ofInstant(Instant.ofEpochSecond(auth_timestamp),
 			                               TimeZone.getDefault().toZoneId());
@@ -195,7 +211,7 @@ public class GennyToken implements Serializable {
 	@Transient
 	public LocalDateTime getExpiryDateTime()
 	{
-		long exp_timestamp = (long)(int)adecodedTokenMap.get("exp");
+		Long exp_timestamp = (Long)adecodedTokenMap.get("exp");
 		LocalDateTime expTime =
 			       LocalDateTime.ofInstant(Instant.ofEpochSecond(exp_timestamp),
 			                               TimeZone.getDefault().toZoneId());
@@ -207,7 +223,7 @@ public class GennyToken implements Serializable {
 	@Transient
 	public OffsetDateTime getExpiryDateTimeInUTC() {
 				
-		long exp_timestamp = (long)(int)adecodedTokenMap.get("exp");
+		Long exp_timestamp = (Long)adecodedTokenMap.get("exp");
 		LocalDateTime expTime =
 			       LocalDateTime.ofInstant(Instant.ofEpochSecond(exp_timestamp),
 			                               TimeZone.getDefault().toZoneId());
@@ -223,7 +239,7 @@ public class GennyToken implements Serializable {
 	@Transient
 	public LocalDateTime getiatDateTime()
 	{
-		long iat_timestamp = (long)(int)adecodedTokenMap.get("iat");
+		Long iat_timestamp = (Long)adecodedTokenMap.get("iat");
 		LocalDateTime iatTime =
 			       LocalDateTime.ofInstant(Instant.ofEpochSecond(iat_timestamp),
 			                               TimeZone.getDefault().toZoneId());
