@@ -200,7 +200,7 @@ public class GennyToken implements Serializable {
 	@Transient
 	public LocalDateTime getAuthDateTime()
 	{
-		Long auth_timestamp = (Long)adecodedTokenMap.get("auth_time");
+		Long auth_timestamp = ((Number)adecodedTokenMap.get("auth_time")).longValue();
 		LocalDateTime authTime =
 			       LocalDateTime.ofInstant(Instant.ofEpochSecond(auth_timestamp),
 			                               TimeZone.getDefault().toZoneId());
@@ -211,7 +211,7 @@ public class GennyToken implements Serializable {
 	@Transient
 	public LocalDateTime getExpiryDateTime()
 	{
-		Long exp_timestamp = (Long)adecodedTokenMap.get("exp");
+		Long exp_timestamp = ((Number)adecodedTokenMap.get("exp")).longValue();
 		LocalDateTime expTime =
 			       LocalDateTime.ofInstant(Instant.ofEpochSecond(exp_timestamp),
 			                               TimeZone.getDefault().toZoneId());
@@ -223,7 +223,7 @@ public class GennyToken implements Serializable {
 	@Transient
 	public OffsetDateTime getExpiryDateTimeInUTC() {
 				
-		Long exp_timestamp = (Long)adecodedTokenMap.get("exp");
+		Long exp_timestamp = ((Number)adecodedTokenMap.get("exp")).longValue();
 		LocalDateTime expTime =
 			       LocalDateTime.ofInstant(Instant.ofEpochSecond(exp_timestamp),
 			                               TimeZone.getDefault().toZoneId());
@@ -239,7 +239,7 @@ public class GennyToken implements Serializable {
 	@Transient
 	public LocalDateTime getiatDateTime()
 	{
-		Long iat_timestamp = (Long)adecodedTokenMap.get("iat");
+		Long iat_timestamp = ((Number)adecodedTokenMap.get("iat")).longValue();
 		LocalDateTime iatTime =
 			       LocalDateTime.ofInstant(Instant.ofEpochSecond(iat_timestamp),
 			                               TimeZone.getDefault().toZoneId());
