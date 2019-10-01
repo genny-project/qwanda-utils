@@ -56,8 +56,8 @@ public class JsonUtils {
 	                      item = (T)gson.fromJson(json, clazz);
 	                	}
 	                } catch (Exception e) {
-	                	     log.info("The JSON file received is  :::  "+json);;
-	                     log.error("Bad Deserialisation for "+clazz.getSimpleName());
+	                	     log.debug("The JSON file received is  :::  "+json);;
+	                     log.error("Bad Deserialisation for "+clazz.getSimpleName()+":"+e.getLocalizedMessage());
 	                }
 	        }
 	        return item;
@@ -71,8 +71,8 @@ public class JsonUtils {
 	                      item = (T)gson.fromJson(json, clazz);
 
 	                } catch (Exception e) {
-	                	     log.info("The JSON file received is  :::  "+json);;
-	                     log.error("Bad Deserialisation for "+clazz.getTypeName());
+	                	     log.debug("The JSON file received is  :::  "+json);;
+	                     log.error("Bad Deserialisation for "+clazz.getTypeName()+":"+e.getLocalizedMessage());
 	                }
 	        }
 	        return item;
