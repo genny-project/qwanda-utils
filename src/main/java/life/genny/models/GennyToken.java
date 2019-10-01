@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -229,6 +230,16 @@ public class GennyToken implements Serializable {
 		ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
 
 		return utcZoned.toOffsetDateTime();
+	}
+	
+	@XmlTransient
+	@Transient
+	public Integer getSecondsUntilExpiry() {
+
+		OffsetDateTime expiry = getExpiryDateTimeInUTC();
+		LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+		Long diff = expiry.toEpochSecond() - now.toEpochSecond(ZoneOffset.UTC);
+		return diff.intValue();
 	}
 
 	// JWT Issue DateTime
