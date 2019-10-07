@@ -111,6 +111,9 @@ public class QwandaUtils {
 			// by the connection manager.
 
 			HttpEntity entity1 = response.getEntity();
+			if (entity1 == null) {
+				return ""; 
+			}
 			String responseString = EntityUtils.toString(entity1);
 			
 			if (StringUtils.isBlank(responseString)) {
