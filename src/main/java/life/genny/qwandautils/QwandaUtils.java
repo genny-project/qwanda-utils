@@ -617,10 +617,10 @@ public class QwandaUtils {
 	 * @return Deserialized BaseEntity model object with values for a BaseEntity code that is passed
 	 * @throws IOException
 	 */
-	public static BaseEntity getBaseEntityByCode(String baseEntAttributeCode, String token) throws  IOException {
+	public static <T extends BaseEntity> T  getBaseEntityByCode(String baseEntAttributeCode, String token) throws  IOException {
 
 		String attributeString = null;
-		BaseEntity be = null;
+		T be = null;
 		try {
 			attributeString = QwandaUtils
 					.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode, token);
@@ -644,10 +644,10 @@ public class QwandaUtils {
 	 * @return Deserialized BaseEntity model object with values for a BaseEntity code that is passed
 	 * @throws IOException
 	 */
-	public static BaseEntity getBaseEntityByCodeWithAttributes(String baseEntAttributeCode, String token) throws  IOException {
+	public static <T extends BaseEntity> T getBaseEntityByCodeWithAttributes(String baseEntAttributeCode, String token) throws  IOException {
 
 		String attributeString = null;
-		BaseEntity be = null;
+		T be = null;
 		try {
 
 			attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode+"/attributes", token);

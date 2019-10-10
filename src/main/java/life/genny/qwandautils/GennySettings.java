@@ -74,6 +74,8 @@ public class GennySettings {
     public static final String cacheServerName;
     public static final Boolean isCacheServer;
     public static final String KEYCLOAK_JSON = "keycloak.json";
+    
+    public static final Integer defaultPageSize  = System.getenv("DEFAULT_PAGE_SIZE")==null?20:(Integer.parseInt(System.getenv("DEFAULT_PAGE_SIZE")));
 
     static{
         Optional<String> cacheServerNameOptional = Optional.ofNullable(System.getenv("CACHE_SERVER_NAME"));
