@@ -120,7 +120,11 @@ public class GennyToken implements Serializable {
 		token = jwtToken;
 		this.realm = realm;
 		String normalisedUsername = QwandaUtils.getNormalisedUsername(username);
-		this.userCode = "PER_" + normalisedUsername.toUpperCase();
+		if (normalisedUsername.toUpperCase().startsWith("PER_")) {
+			this.userCode = normalisedUsername.toUpperCase();
+		} else {
+			this.userCode = "PER_" + normalisedUsername.toUpperCase();
+		}
 
 		this.code = code;
 		setupRoles();
