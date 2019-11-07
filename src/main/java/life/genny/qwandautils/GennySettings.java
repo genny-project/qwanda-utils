@@ -1,7 +1,8 @@
 package life.genny.qwandautils;
 
-import org.apache.commons.lang3.StringUtils;
 import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class GennySettings {
 
@@ -77,6 +78,16 @@ public class GennySettings {
     
     public static final Integer defaultPageSize  = System.getenv("DEFAULT_PAGE_SIZE")==null?20:(Integer.parseInt(System.getenv("DEFAULT_PAGE_SIZE")));
 
+    public static final String EMAIL_SMTP_HOST  = System.getenv("EMAIL_SMTP_HOST") != null ? System.getenv("EMAIL_SMTP_HOST") :  "127.0.0.1"; //e.g. smtp.gmail.com
+    public static final String EMAIL_SMTP_PASS  = System.getenv("EMAIL_SMTP_PASS") != null ? System.getenv("EMAIL_SMTP_PASS") :  "";
+    public static final String EMAIL_SMTP_PORT  = System.getenv("EMAIL_SMTP_PORT") != null ? System.getenv("EMAIL_SMTP_PORT") :  "587"; //e.g. 587
+    public static final String EMAIL_SMTP_STARTTLS  = System.getenv("EMAIL_SMTP_STARTTLS") != null ? System.getenv("EMAIL_SMTP_STARTTLS") :  "true"; //e.g. true/false
+    public static final String EMAIL_SMTP_USER  = System.getenv("EMAIL_SMTP_USER") != null ? System.getenv("EMAIL_SMTP_USER") :  "";
+    
+    public static final String TWILIO_ACCOUNT_SID  = System.getenv("TWILIO_ACCOUNT_SID") != null ? System.getenv("TWILIO_ACCOUNT_SID") :  "";
+    public static final String TWILIO_AUTH_TOKEN  = System.getenv("TWILIO_AUTH_TOKEN") != null ? System.getenv("TWILIO_AUTH_TOKEN") :  "";
+    public static final String TWILIO_SENDER_MOBILE  = System.getenv("TWILIO_SENDER_MOBILE") != null ? System.getenv("TWILIO_SENDER_MOBILE") :  "";
+    
     static{
         Optional<String> cacheServerNameOptional = Optional.ofNullable(System.getenv("CACHE_SERVER_NAME"));
         Optional<String> isCacheServerOptional = Optional.ofNullable(System.getenv("IS_CACHE_SERVER"));
