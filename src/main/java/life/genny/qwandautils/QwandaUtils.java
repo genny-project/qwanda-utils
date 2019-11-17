@@ -359,7 +359,7 @@ public class QwandaUtils {
 		if (rawUsername==null) {
 			return null;
 		}
-		return rawUsername.replaceAll("\\&", "_AND_").replaceAll("@", "_AT_").replaceAll("\\.", "")
+		return rawUsername.replaceAll("\\&", "_AND_").replaceAll("@", "_AT_").replaceAll("\\.", "_DOT_")
 				.replaceAll("\\+", "_PLUS_").toUpperCase();
 	}
 
