@@ -38,7 +38,7 @@ public class GennySettings {
 	
 	// 2^19-1 = 524287 2^23-1=8388607
 	public static final Integer zipMinimumThresholdBytes = System.getenv("ZIP_MIN_THRESHOLD_BYTES")==null?8388607:(Integer.parseInt(System.getenv("ZIP_MIN_THRESHOLD_BYTES")));
-	public final static String mainrealm = System.getenv("PROJECT_REALM") != null ? System.getenv("PROJECT_REALM") : "genny"; // UGLY
+	public final static String  mainrealm = System.getenv("PROJECT_REALM") != null ? System.getenv("PROJECT_REALM") : "genny"; // UGLY
 	public final static Boolean isRulesManager = "TRUE".equalsIgnoreCase(System.getenv("RULESMANAGER"));
 	public final static Boolean isDdtHost = "TRUE".equalsIgnoreCase(System.getenv("DDTHOST"));
 	public final static Boolean forceEventBusApi = "TRUE".equalsIgnoreCase(System.getenv("FORCE_EVENTBUS_USE_API"));
@@ -52,7 +52,7 @@ public class GennySettings {
 			: System.getenv("GITHUB_LAYOUTS_URL");
 	
 	public final static Boolean detectRuleChanges = "TRUE".equalsIgnoreCase(System.getenv("DETECT_RULE_CHANGES"));
-	public final static Boolean  framesOnDemand= "TRUE".equalsIgnoreCase(System.getenv("FRAMES_ON_DEMAND"));
+	public final static Boolean framesOnDemand= System.getenv("FRAMES_ON_DEMAND") !=null ? "TRUE".equalsIgnoreCase(System.getenv("FRAMES_ON_DEMAND")):true;
 	
 	public final static Boolean hideRuleStates = "TRUE".equalsIgnoreCase(System.getenv("HIDE_RULE_STATES"));
 	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + hostIP + ":"+cacheApiPort)
