@@ -43,8 +43,8 @@ public class GennySettings {
 	public final static String  mainrealm = System.getenv("PROJECT_REALM") != null ? System.getenv("PROJECT_REALM") : "genny"; // UGLY
 	public final static Boolean isRulesManager = "TRUE".equalsIgnoreCase(System.getenv("RULESMANAGER"));
 	public final static Boolean isDdtHost = "TRUE".equalsIgnoreCase(System.getenv("DDTHOST"));
-	public final static Boolean forceEventBusApi = "TRUE".equalsIgnoreCase(System.getenv("FORCE_EVENTBUS_USE_API"));
-	public final static Boolean forceCacheApi = "TRUE".equalsIgnoreCase(System.getenv("FORCE_CACHE_USE_API"));	
+	public final static Boolean forceEventBusApi = System.getenv("FORCE_EVENTBUS_USE_API")==null?true:"TRUE".equalsIgnoreCase(System.getenv("FORCE_EVENTBUS_USE_API"));
+	public final static Boolean forceCacheApi = System.getenv("FORCE_CACHE_USE_API")==null?true:"TRUE".equalsIgnoreCase(System.getenv("FORCE_CACHE_USE_API"));	
 	public final static Boolean disableLayoutLoading = "TRUE".equalsIgnoreCase(System.getenv("DISABLE_LAYOUT_LOADING"));
 	public final static Boolean enableSlackSending = "TRUE".equalsIgnoreCase(System.getenv("ENABLE_SLACK_SENDING"));
 	public final static Boolean loadDdtInStartup = "TRUE".equalsIgnoreCase(System.getenv("LOAD_DDT_IN_STARTUP"));
@@ -62,8 +62,6 @@ public class GennySettings {
 	public final static Boolean hideRuleStates = "TRUE".equalsIgnoreCase(System.getenv("HIDE_RULE_STATES"));
 	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + hostIP + ":"+cacheApiPort): projectUrl;
 	
-	public final static Boolean forceCacheUseApi = System.getenv("FORCE_CACHE_USE_API") !=null ? "TRUE".equalsIgnoreCase(System.getenv("FORCE_CACHE_USE_API")):true;
-	public final static Boolean forceEventBusUseApi = System.getenv("FORCE_EVENTBUS_USE_API") !=null ? "TRUE".equalsIgnoreCase(System.getenv("FORCE_EVENTBUS_USE_API")):true;
 	// This is public
 	public final static String gennyPublicPassword = System.getenv("PASSWORD") ==null ? "WelcomeToTheHub121!":System.getenv("PASSWORD");
 	public final static String gennyPublicUsername = System.getenv("USERNAME") ==null ? "user1":System.getenv("USERNAME");	
