@@ -8,12 +8,14 @@ public class GennySettings {
 	public static String defaultLocalIP = System.getenv("DEFAULT_LOCAL_IP") != null ? System.getenv("DEFAULT_LOCAL_IP") :"10.123.123.123";
 
 
+	
     //Constants 
     public final static String LOCALHOST = "localhost";
     public final static String DEFAULT_CACHE_SERVER_NAME = "bridge-service";
     public final static String GENNY_REALM = "jenny"; //deliberatly not genny
 
 	public static int ACCESS_TOKEN_EXPIRY_LIMIT_SECONDS = 60;
+	
 
 	public static String hostIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : System.getenv("MYIP");   // remember to set up this local IP on the host
 	public static String myIP = System.getenv("MYIP") != null ? System.getenv("MYIP") : System.getenv("HOSTIP");   // remember to set up this local IP on the host
@@ -24,9 +26,9 @@ public class GennySettings {
 	
 	public static int  timeoutInSecs = 30;  // used in api timeout
 
-	public static final String projectUrl = System.getenv("PROJECT_URL");
+	public static final String projectUrl = System.getenv("PROJECT_URL")!=null?System.getenv("PROJECT_URL"):"http://alyson7.genny.life";
 
-	public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL") != null ? System.getenv("REACT_APP_QWANDA_API_URL") : projectUrl;
+	public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL") != null ? System.getenv("REACT_APP_QWANDA_API_URL") : "http://alyson7.genny.life:8280";
 	public static final String vertxUrl = System.getenv("REACT_APP_VERTX_URL") != null ? System.getenv("REACT_APP_VERTX_URL") :  "http://"+hostIP+":"+apiPort;
 	public static final String bridgeServiceUrl = System.getenv("BRIDGE_SERVICE_API") != null ? System.getenv("BRIDGE_SERVICE_API") :  "http://alyson7.genny.life/api/service";
 	public static final String pontoonUrl = System.getenv("PONTOON_URL") != null ? System.getenv("PONTOON_URL") :  "http://"+hostIP+":"+pontoonPort;
@@ -58,10 +60,14 @@ public class GennySettings {
 	public final static Boolean framesOnDemand= System.getenv("FRAMES_ON_DEMAND") !=null ? "TRUE".equalsIgnoreCase(System.getenv("FRAMES_ON_DEMAND")):true;
 	
 	public final static Boolean hideRuleStates = "TRUE".equalsIgnoreCase(System.getenv("HIDE_RULE_STATES"));
-	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + hostIP + ":"+cacheApiPort)
-			: projectUrl;
-
-	public static final String username = System.getenv("USER") == null ? "GENNY" : System.getenv("USER");
+	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + hostIP + ":"+cacheApiPort): projectUrl;
+	
+	public final static Boolean forceCacheUseApi = System.getenv("FORCE_CACHE_USE_API") !=null ? "TRUE".equalsIgnoreCase(System.getenv("FORCE_CACHE_USE_API")):true;
+	public final static Boolean forceEventBusUseApi = System.getenv("FORCE_EVENTBUS_USE_API") !=null ? "TRUE".equalsIgnoreCase(System.getenv("FORCE_EVENTBUS_USE_API")):true;
+	// This is public
+	public final static String gennyPublicPassword = System.getenv("PASSWORD") ==null ? "WelcomeToTheHub121!":System.getenv("PASSWORD");
+	public final static String gennyPublicUsername = System.getenv("USERNAME") ==null ? "user1":System.getenv("USERNAME");	
+	public static final String username = System.getenv("USER") == null ? "GENNY" : System.getenv("USER"); 
 
 	public static final String defaultServiceKey = System.getenv("ENV_SECURITY_KEY") == null ?  "WubbaLubbaDubDub" : System.getenv("ENV_SECURITY_KEY");
 	public static final String defaultServiceEncryptedPassword = System.getenv("ENV_SERVICE_PASSWORD") == null ?  "vRO+tCumKcZ9XbPWDcAXpU7tcSltpNpktHcgzRkxj8o=" : System.getenv("ENV_SERVICE_PASSWORD");
