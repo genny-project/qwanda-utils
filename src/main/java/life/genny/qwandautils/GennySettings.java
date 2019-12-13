@@ -27,7 +27,7 @@ public class GennySettings {
 	public static int  timeoutInSecs = 30;  // used in api timeout
 
 	public static final String projectUrl = System.getenv("PROJECT_URL")!=null?System.getenv("PROJECT_URL"):"http://alyson7.genny.life";
-
+	public static final String mediaProxyUrl = System.getenv("MEDIA_PROXY_URL")!=null?System.getenv("MEDIA_PROXY_URL"):"http://alyson7.genny.life:9898/public";
 	public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL") != null ? System.getenv("REACT_APP_QWANDA_API_URL") : "http://alyson7.genny.life:8280";
 	public static final String vertxUrl = System.getenv("REACT_APP_VERTX_URL") != null ? System.getenv("REACT_APP_VERTX_URL") :  "http://"+hostIP+":"+apiPort;
 	public static final String bridgeServiceUrl = System.getenv("BRIDGE_SERVICE_API") != null ? System.getenv("BRIDGE_SERVICE_API") :  "http://alyson7.genny.life/api/service";
@@ -35,16 +35,19 @@ public class GennySettings {
 	public static final Boolean devMode = ("TRUE".equalsIgnoreCase(System.getenv("DEV_MODE"))||"TRUE".equalsIgnoreCase(System.getenv("GENNYDEV"))) ? true : false;
 	public static final Boolean miniKubeMode = "TRUE".equalsIgnoreCase(System.getenv("MINIKUBE_MODE"));
 	public static final Boolean zipMode = ("TRUE".equalsIgnoreCase(System.getenv("ZIP_MODE"))) ? true : false;
-
+	public static final Boolean gzipMode = ("TRUE".equalsIgnoreCase(System.getenv("MODE_GZIP"))) ? true : false;
+	public static final Boolean gzip64Mode = ("TRUE".equalsIgnoreCase(System.getenv("MODE_GZIP64"))) ? true : false;
 	public static final Boolean multiBridgeMode = ("TRUE".equalsIgnoreCase(System.getenv("MULTI_BRIDGE_MODE"))) ? true : false;
+	public static final Boolean bulkPull = ("TRUE".equalsIgnoreCase(System.getenv("BULKPULL"))) ? true : false;
 	
 	// 2^19-1 = 524287 2^23-1=8388607
 	public static final Integer zipMinimumThresholdBytes = System.getenv("ZIP_MIN_THRESHOLD_BYTES")==null?8388607:(Integer.parseInt(System.getenv("ZIP_MIN_THRESHOLD_BYTES")));
 	public final static String  mainrealm = System.getenv("PROJECT_REALM") != null ? System.getenv("PROJECT_REALM") : "genny"; // UGLY
 	public final static Boolean isRulesManager = "TRUE".equalsIgnoreCase(System.getenv("RULESMANAGER"));
 	public final static Boolean isDdtHost = "TRUE".equalsIgnoreCase(System.getenv("DDTHOST"));
-	public final static Boolean forceEventBusApi = System.getenv("FORCE_EVENTBUS_USE_API")==null?true:"TRUE".equalsIgnoreCase(System.getenv("FORCE_EVENTBUS_USE_API"));
-	public final static Boolean forceCacheApi = System.getenv("FORCE_CACHE_USE_API")==null?true:"TRUE".equalsIgnoreCase(System.getenv("FORCE_CACHE_USE_API"));	
+	public       static Boolean forceEventBusApi = System.getenv("FORCE_EVENTBUS_USE_API")==null?false:"TRUE".equalsIgnoreCase(System.getenv("FORCE_EVENTBUS_USE_API"));
+	public final static Boolean noCache = System.getenv("NO_CACHE")==null?false:"TRUE".equalsIgnoreCase(System.getenv("NO_CACHE"));
+	public       static Boolean forceCacheApi = System.getenv("FORCE_CACHE_USE_API")==null?false:"TRUE".equalsIgnoreCase(System.getenv("FORCE_CACHE_USE_API"));	
 	public final static Boolean disableLayoutLoading = "TRUE".equalsIgnoreCase(System.getenv("DISABLE_LAYOUT_LOADING"));
 	public final static Boolean enableSlackSending = "TRUE".equalsIgnoreCase(System.getenv("ENABLE_SLACK_SENDING"));
 	public final static Boolean loadDdtInStartup = "TRUE".equalsIgnoreCase(System.getenv("LOAD_DDT_IN_STARTUP"));
@@ -81,9 +84,20 @@ public class GennySettings {
     public static final String cacheServerName;
     public static final Boolean isCacheServer;
     public static final String KEYCLOAK_JSON = "keycloak.json";
-    
+    public static final String keycloakUrl = System.getenv("KEYCLOAKURL") != null ? System.getenv("KEYCLOAKURL") : "http://keycloak.genny.life";
     public static final Integer defaultPageSize  = System.getenv("DEFAULT_PAGE_SIZE")==null?20:(Integer.parseInt(System.getenv("DEFAULT_PAGE_SIZE")));
+    
+    public static final String emailSmtpHost = System.getenv("EMAIL_SMTP_HOST") != null ? System.getenv("EMAIL_SMTP_HOST") : "http://keycloak.genny.life";
+    public static final String emailSmtpUser = System.getenv("EMAIL_SMTP_USER") != null ? System.getenv("EMAIL_SMTP_USER") : "http://keycloak.genny.life";
+    public static final String emailSmtpPassword = System.getenv("EMAIL_SMTP_PASS") != null ? System.getenv("EMAIL_SMTP_PASS") : "http://keycloak.genny.life";
+    public static final String emailSmtpPort = System.getenv("EMAIL_SMTP_PORT") != null ? System.getenv("EMAIL_SMTP_PORT") : "http://keycloak.genny.life";
+    public static final String emailSmtpStartTls = System.getenv("EMAIL_SMTP_STARTTLS") != null ? System.getenv("EMAIL_SMTP_STARTTLS") : "http://keycloak.genny.life";
+    public static final String emailSmtpAuth = System.getenv("EMAIL_SMTP_AUTH") != null ? System.getenv("EMAIL_SMTP_HOST") : "http://keycloak.genny.life";   
 
+    public static final String twilioAccountSid = System.getenv("TWILIO_ACCOUNT_SID") != null ? System.getenv("TWILIO_ACCOUNT_SID") : "TWILIO_ACCOUNT_SID"; 
+    public static final String twilioAuthToken = System.getenv("TWILIO_AUTH_TOKEN") != null ? System.getenv("TWILIO_AUTH_TOKEN") : "TWILIO_AUTH_TOKEN";   
+    public static final String twilioSenderMobile = System.getenv("TWILIO_SENDER_MOBILE") != null ? System.getenv("TWILIO_SENDER_MOBILE") : "TWILIO_SENDER_MOBILE";  
+    
     static{
         Optional<String> cacheServerNameOptional = Optional.ofNullable(System.getenv("CACHE_SERVER_NAME"));
         Optional<String> isCacheServerOptional = Optional.ofNullable(System.getenv("IS_CACHE_SERVER"));
