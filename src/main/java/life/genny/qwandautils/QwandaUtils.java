@@ -134,7 +134,9 @@ public class QwandaUtils {
 		}
 
 		finally {
-			response.close();
+			if (response != null) {
+				response.close();
+			}
 			httpclient.close();
 			//IOUtils.closeQuietly(response);  removed commons-io
 			//IOUtils.closeQuietly(httpclient);
