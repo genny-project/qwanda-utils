@@ -27,10 +27,10 @@ public class GennySettings {
 	public static int  timeoutInSecs = 30;  // used in api timeout
 
 	public static final String projectUrl = System.getenv("PROJECT_URL")!=null?System.getenv("PROJECT_URL"):"http://alyson7.genny.life";
-	public static final String mediaProxyUrl = System.getenv("MEDIA_PROXY_URL")!=null?System.getenv("MEDIA_PROXY_URL"):"http://alyson7.genny.life:9898/public";
-	public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL") != null ? System.getenv("REACT_APP_QWANDA_API_URL") : "http://alyson7.genny.life:8280";
+	public static final String mediaProxyUrl = System.getenv("MEDIA_PROXY_URL")!=null?System.getenv("MEDIA_PROXY_URL"):(projectUrl+":9898/public");
+	public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL") != null ? System.getenv("REACT_APP_QWANDA_API_URL") : (projectUrl+":8280");
 	public static final String vertxUrl = System.getenv("REACT_APP_VERTX_URL") != null ? System.getenv("REACT_APP_VERTX_URL") :  "http://"+hostIP+":"+apiPort;
-	public static final String bridgeServiceUrl = System.getenv("BRIDGE_SERVICE_API") != null ? System.getenv("BRIDGE_SERVICE_API") :  "http://alyson7.genny.life/api/service";
+	public static final String bridgeServiceUrl = System.getenv("BRIDGE_SERVICE_API") != null ? System.getenv("BRIDGE_SERVICE_API") :  projectUrl+"/api/service";
 	public static final String pontoonUrl = System.getenv("PONTOON_URL") != null ? System.getenv("PONTOON_URL") :  "http://"+hostIP+":"+pontoonPort;
 	public static final Boolean devMode = ("TRUE".equalsIgnoreCase(System.getenv("DEV_MODE"))||"TRUE".equalsIgnoreCase(System.getenv("GENNYDEV"))) ? true : false;
 	public static final Boolean miniKubeMode = "TRUE".equalsIgnoreCase(System.getenv("MINIKUBE_MODE"));
