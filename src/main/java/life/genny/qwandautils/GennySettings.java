@@ -63,7 +63,7 @@ public class GennySettings {
 	public final static Boolean framesOnDemand= System.getenv("FRAMES_ON_DEMAND") !=null ? "TRUE".equalsIgnoreCase(System.getenv("FRAMES_ON_DEMAND")):true;
 	
 	public final static Boolean hideRuleStates = "TRUE".equalsIgnoreCase(System.getenv("HIDE_RULE_STATES"));
-	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + hostIP + ":"+cacheApiPort): projectUrl;
+	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + hostIP + ":"+cacheApiPort): System.getenv("DDT_URL");
 	
 	// This is public
 	public final static String gennyPublicPassword = System.getenv("PASSWORD") ==null ? "WelcomeToTheHub121!":System.getenv("PASSWORD");
