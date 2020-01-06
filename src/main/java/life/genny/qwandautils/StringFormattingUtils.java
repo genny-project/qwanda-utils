@@ -2,6 +2,7 @@ package life.genny.qwandautils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.json.simple.JSONArray;
 
@@ -75,7 +76,7 @@ public class StringFormattingUtils {
 	 */
 	public static List<String> splitCharacterSeperatedStringToList(String characterSeperatedString, String character) {
 		
-		List<String> splitListIgnoringSpaces = new ArrayList<>();
+		List<String> splitListIgnoringSpaces = new CopyOnWriteArrayList<>();
 		if (characterSeperatedString != null) {
 			if (characterSeperatedString.contains(character)) {
 				/*
@@ -101,7 +102,7 @@ public class StringFormattingUtils {
 	 * @return returns an ArrayList of Strings that was parsed using JsonUtils
 	 * 
 	 */
-	public static ArrayList<String> convertToStringArray(String stringifiedJSONArray) {
+	public static List<String> convertToStringArray(String stringifiedJSONArray) {
 		if(stringifiedJSONArray != null) {
 			JSONArray arr = JsonUtils.fromJson(stringifiedJSONArray, JSONArray.class);
 			if(arr.size() > 0) {

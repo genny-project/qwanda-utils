@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -197,7 +198,7 @@ public class QwandaUtils {
 		return apiPostEntity(postUrl, entityString, authToken, null);
 	}
 
-	public static String apiPost(final String postUrl, final ArrayList<BasicNameValuePair> nameValuePairs, final String authToken) throws IOException {
+	public static String apiPost(final String postUrl, final List<BasicNameValuePair> nameValuePairs, final String authToken) throws IOException {
 		return apiPostEntity(postUrl, new UrlEncodedFormEntity(nameValuePairs).toString(), authToken, null);
 	}
 
@@ -407,7 +408,7 @@ public class QwandaUtils {
 
 		postBaseEntity(qwandaUrl, token, person);
 
-		List<Answer> answers = new ArrayList<>();
+		List<Answer> answers = new CopyOnWriteArrayList<>();
 		
 		try {
 			
@@ -1419,7 +1420,7 @@ public class QwandaUtils {
 
 			if (be != null) {
 
-				List<BaseEntity> beList = new ArrayList<>();
+				List<BaseEntity> beList = new CopyOnWriteArrayList<>();
 
 				Set<EntityEntity> entityEntities = be.getLinks();
 
