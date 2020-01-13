@@ -362,8 +362,12 @@ public class QwandaUtils {
 		if (rawUsername==null) {
 			return null;
 		}
-		return rawUsername.replaceAll("\\&", "_AND_").replaceAll("@", "_AT_").replaceAll("\\.", "_DOT_")
+		String username = rawUsername.replaceAll("\\&", "_AND_").replaceAll("@", "_AT_").replaceAll("\\.", "_DOT_")
 				.replaceAll("\\+", "_PLUS_").toUpperCase();
+		// remove bad characters
+		username = username.replaceAll("[^a-zA-Z0-9]", "");
+		return username;
+
 	}
 
 	public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
@@ -799,7 +803,10 @@ public class QwandaUtils {
 			nameInitials = getInitials(author.split("\\s+"));
 		}
 
-		return prefix + "_" + nameInitials + uniqueID;
+		String ret = prefix + "_" + nameInitials + uniqueID;
+		ret = ret.toUpperCase();
+		
+		return ret;
 	}
 
 	public static String getInitials(String[] strarr) {
