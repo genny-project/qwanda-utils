@@ -803,6 +803,9 @@ public class QwandaUtils {
 			nameInitials = getInitials(author.split("\\s+"));
 		}
 
+		if (prefix.endsWith("_")) {
+			prefix = StringUtils.removeEnd(prefix, "_");
+		}
 		String ret = prefix + "_" + nameInitials + uniqueID;
 		ret = ret.toUpperCase();
 		
