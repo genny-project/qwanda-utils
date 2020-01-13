@@ -365,7 +365,7 @@ public class QwandaUtils {
 		String username = rawUsername.replaceAll("\\&", "_AND_").replaceAll("@", "_AT_").replaceAll("\\.", "_DOT_")
 				.replaceAll("\\+", "_PLUS_").toUpperCase();
 		// remove bad characters
-		username = username.replaceAll("[^a-zA-Z0-9]", "");
+		username = username.replaceAll("[^a-zA-Z0-9_]", "");
 		return username;
 
 	}

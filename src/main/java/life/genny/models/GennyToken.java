@@ -110,7 +110,10 @@ public class GennyToken implements Serializable {
 
 		userRoles = new HashSet<String>();
 		userRoles.add("user");
-		userRoles.add(role);
+		String[] roles = role.split(",:;");
+		for (String r : roles) {
+			userRoles.add(r);
+		}
 
 		adecodedTokenMap.put("realm", realm);
 
