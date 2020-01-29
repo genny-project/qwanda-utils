@@ -1,6 +1,7 @@
 package life.genny.models;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -115,7 +116,6 @@ public class GennyToken implements Serializable {
 			userRoles.add(r);
 		}
 
-		adecodedTokenMap.put("realm", realm);
 
 		String jwtToken = null;
 
