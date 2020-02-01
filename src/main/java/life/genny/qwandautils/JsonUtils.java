@@ -43,7 +43,17 @@ public class JsonUtils {
 		//    .disableHtmlEscaping()
 		    .setPrettyPrinting()
 			.create();
-	
+
+	static public Gson gsonFull = gsonBuilder.registerTypeAdapter(Money.class, new MoneyDeserializer())
+			.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer())
+			.registerTypeAdapter(LocalDate.class, new LocalDateConverter())
+		//	.excludeFieldsWithModifiers(Modifier.STATIC, Modifier.TRANSIENT, Modifier.VOLATILE)
+			.excludeFieldsWithoutExposeAnnotation()
+		//    .disableHtmlEscaping()
+			.serializeNulls()
+		    .setPrettyPrinting()
+			.create();
+
 	
 	public static <T> T fromJson(final String json, Class clazz)
 	{
@@ -84,7 +94,13 @@ public class JsonUtils {
 		String ret =  gson.toJson(obj);
 		return ret;
 	}
+
+	public static String toJsonWithNulls(Object obj)
+	{
 	
+		String ret =  gsonFull.toJson(obj);
+		return ret;
+	}
 	
 	public static org.json.simple.JSONObject jsonStringParser(String stringifiedJsonObject) {
 		
