@@ -56,7 +56,7 @@ public class GennySettings {
 	public final static String  githubLayoutsUrl = System.getenv("GITHUB_LAYOUTS_URL") == null ? ("http://github.com/genny-project/layouts.git")
 			: System.getenv("GITHUB_LAYOUTS_URL");
 	
-	public final static Boolean logWorkflows = System.getenv("LOG_WORKFLOWS") !=null ? "TRUE".equalsIgnoreCase(System.getenv("LOG_WORKFLOWS")):false;	
+	public final static Boolean logWorkflows = System.getenv("LOG_WORKFLOWS") !=null ? "TRUE".equalsIgnoreCase(System.getenv("LOG_WORKFLOWS")):true;	
 	public final static Boolean useSingleton = System.getenv("USE_SINGLETON") !=null ? "TRUE".equalsIgnoreCase(System.getenv("USE_SINGLETON")):true;
 	public final static Boolean useExecutor = System.getenv("USE_EXECUTOR") !=null ? "TRUE".equalsIgnoreCase(System.getenv("USE_EXECUTOR")):true;
 	public final static Boolean useJMS = System.getenv("USE_JMS") !=null ? "TRUE".equalsIgnoreCase(System.getenv("USE_JMS")):false;
