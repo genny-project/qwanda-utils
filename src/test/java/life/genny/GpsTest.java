@@ -1,5 +1,8 @@
 package life.genny;
 
+import java.lang.invoke.MethodHandles;
+
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import life.genny.qwanda.GPSLocation;
@@ -8,6 +11,12 @@ import life.genny.qwanda.GPSRouteStatus;
 import life.genny.qwandautils.GPSUtils;
 
 public class GpsTest {
+	/**
+	 * Stores logger object.
+	 */
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
 	@Test
 	public void getApiUrlTest()
 	{
@@ -16,9 +25,9 @@ public class GpsTest {
 		GPSLocation end = GPSUtils.getGPSLocation("121 Cardigan St, Carlton, VIC, 3053", googleApiKey);
 		if(origin != null && end != null) {
 		  GPSRoute route = GPSUtils.getRoute(origin, end, googleApiKey);
-	        System.out.println(route);
+	        log.info(route);
 	        GPSRouteStatus status = GPSUtils.fetchCurrentRouteStatusByPercentageDistance(route,50.0);
-	        System.out.println(status);
+	        log.info(status);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package life.genny;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.invoke.MethodHandles;
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -10,6 +11,7 @@ import java.util.UUID;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import com.google.common.base.Utf8;
@@ -22,6 +24,13 @@ import life.genny.qwandautils.GennySettings;
 import life.genny.qwandautils.SecurityUtils;
 
 public class SecurityUtilsTest {
+	
+	/**
+	 * Stores logger object.
+	 */
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
 	@Test
 	public void versionTest()
 	{
@@ -29,8 +38,8 @@ public class SecurityUtilsTest {
 		        String initVector = "PRJ_GENNY*******"; // 16 bytes IV
 
 		        String encrypted = SecurityUtils.encrypt(key, initVector, GennySettings.defaultServicePassword);
-		        System.out.println("["+encrypted+"]");;
-		        System.out.println(SecurityUtils.decrypt(key, initVector, encrypted
+		        log.info("["+encrypted+"]");;
+		        log.info(SecurityUtils.decrypt(key, initVector, encrypted
 		                ));
 		        
 
@@ -66,7 +75,7 @@ public class SecurityUtilsTest {
 
 		String jws = Jwts.builder().setId("ABCD").setSubject("Genny Project").setAudience("Test JWT").addClaims(claims).signWith(key).compact();
 	//	String jwt = SecurityUtils.createJwt("ABBCD", "Genny Project", "Test JWT", 100000, secret.getBytes(Utf8),claims);
-//		System.out.println("JwtTest = "+jwt);
+//		log.info("JwtTest = "+jwt);
 		
 		   //This line will throw an exception if it is not a signed JWS (as expected)
 		assert Jwts.parser().setSigningKey(key).parseClaimsJws(jws).getBody().getSubject().equals("Genny Project");
@@ -74,11 +83,11 @@ public class SecurityUtilsTest {
 //	    Claims decodedClaims = Jwts.parser()         
 //	       .setSigningKey(DatatypeConverter.parseBase64Binary(secret))
 //	       .parseClaimsJws(jwt).getBody();
-//	    System.out.println("ID: " + decodedClaims.getId());
-//	    System.out.println("Subject: " + decodedClaims.getSubject());
-//	    System.out.println("Issuer: " + decodedClaims.getIssuer());
-//	    System.out.println("Expiration: " + decodedClaims.getExpiration());
-//	    System.out.println("Username: "+ decodedClaims.get("preferred_username"));
-//	    System.out.println("realm: "+ decodedClaims.get("realm"));	    
+//	    log.info("ID: " + decodedClaims.getId());
+//	    log.info("Subject: " + decodedClaims.getSubject());
+//	    log.info("Issuer: " + decodedClaims.getIssuer());
+//	    log.info("Expiration: " + decodedClaims.getExpiration());
+//	    log.info("Username: "+ decodedClaims.get("preferred_username"));
+//	    log.info("realm: "+ decodedClaims.get("realm"));	    
 	}
 }

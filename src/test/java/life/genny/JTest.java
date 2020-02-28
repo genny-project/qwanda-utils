@@ -1,5 +1,9 @@
 package life.genny;
 
+import java.lang.invoke.MethodHandles;
+
+import org.apache.logging.log4j.Logger;
+
 //import java.lang.reflect.Type;
 //import java.time.LocalDateTime;
 //import java.time.ZonedDateTime;
@@ -16,6 +20,13 @@ package life.genny;
 //import life.genny.qwanda.Answer;
 
 public class JTest {
+	
+	/**
+	 * Stores logger object.
+	 */
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
 //	@Test
 //	public void testJ(){
 ////		Gson gson = new Gson();
@@ -31,18 +42,18 @@ public class JTest {
 //							// TODO Auto-generated method stub
 //							
 ////							ZonedDateTimefor = new DateTimeFormatter(null, null, null, null, null, null, null);
-//							System.out.println(json.getAsJsonPrimitive().getAsString() + " " + "************************" + ZonedDateTime.now());
+//							log.info(json.getAsJsonPrimitive().getAsString() + " " + "************************" + ZonedDateTime.now());
 ////							return ZonedDateTime.parse(json.getAsJsonPrimitive().getAsString()).toLocalDateTime();	
 //							return null;
 //						}
 //                    }).create();      
 //                    
-////                    System.out.println(json);
+////                    log.info(json);
 //                    String answerStr = "{\"created\":\"2017-03-02 10:11:12\",\"value\":\"Bob2\",\"attributeCode\":\"PRI_FIRSTNAME\",\"targetCode\":22,\"sourceCode\":20,\"expired\":false,\"refused\":false,\"weight\":0.5}";
 //                    Answer  answer = gson.fromJson(answerStr, Answer.class);
-//                    System.out.println(answer);
+//                    log.info(answer);
 //            } catch (Exception e) {
-//                    System.out.println("dsjfjdsklf");
+//                    log.info("dsjfjdsklf");
 //            }
 //	}
 	
@@ -62,11 +73,11 @@ public class JTest {
 //		
 //				try {
 //					String json = gson.toJson(msg);
-//					System.out.println(json);
+//					log.info(json);
 //					
 //					QDataAnswerMessage item = gson.fromJson(json, QDataAnswerMessage.class);
 //					
-//					System.out.println(item);
+//					log.info(item);
 //
 //	
 //            } catch (Exception e) {

@@ -3,8 +3,12 @@ package life.genny;
 import static java.lang.System.out;
 import java.io.File;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.logging.log4j.Logger;
+
 import life.genny.qwanda.attribute.Attribute;
 import life.genny.qwanda.attribute.AttributeLink;
 import life.genny.qwanda.attribute.EntityAttribute;
@@ -16,6 +20,13 @@ import life.genny.qwandautils.GennySheets;
 import life.genny.qwandautils.GennySheets2;
 
 public class GoogleUtilsTest {
+	
+	/**
+	 * Stores logger object.
+	 */
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
   GennySheets2 sheets2;
 
   // @Test
@@ -38,7 +49,7 @@ public class GoogleUtilsTest {
     // getEntityEntity();
     // getValidation();
     // getA();
-    System.out.println("sheets validations");
+    log.info("sheets validations");
     final Map<String, Validation> daa = sheets2.validationData();
     // sheets.validationData().entrySet().stream().forEach(out::println);
     final Map<String, DataType> dao = sheets2.dataTypesData(daa);
@@ -142,7 +153,7 @@ public class GoogleUtilsTest {
       // getEntityEntity();
       // getValidation();
       // getA();
-      System.out.println("sheets validations");
+      log.info("sheets validations");
 //      final Map<String, Validation> daa = sheets.validationData();
 //      // sheets.validationData().entrySet().stream().forEach(out::println);
 //      final Map<String, DataType> dao = sheets.dataTypesData(daa);

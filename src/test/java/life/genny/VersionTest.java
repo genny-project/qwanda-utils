@@ -1,35 +1,45 @@
 package life.genny;
 
+import java.lang.invoke.MethodHandles;
+
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import life.genny.qwanda.QwandaVersion;
 import life.genny.qwandautils.QwandaUtilsVersion;
 
 public class VersionTest {
+	
+	/**
+	 * Stores logger object.
+	 */
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
 	@Test
 	public void versionTest()
 	{
-		System.out.println("------------- qwanda-utils version ---------------------------\n");
+		log.info("------------- qwanda-utils version ---------------------------\n");
 		
-		System.out.println("Version:\t"+QwandaUtilsVersion.getVersion());
-		System.out.println("Build:  \t"+QwandaUtilsVersion.getBuildDate());
-		System.out.println("Commit: \t"+QwandaUtilsVersion.getCommitDate());
+		log.info("Version:\t"+QwandaUtilsVersion.getVersion());
+		log.info("Build:  \t"+QwandaUtilsVersion.getBuildDate());
+		log.info("Commit: \t"+QwandaUtilsVersion.getCommitDate());
 		
 		
-		System.out.println("----------------------------------------\n"+QwandaUtilsVersion.getJson());
+		log.info("----------------------------------------\n"+QwandaUtilsVersion.getJson());
 
 	}
 	
 	@Test
 	public void qwandaVersionTest()
 	{
-		System.out.println("------------- qwanda version ---------------------------\n");
-		System.out.println("Version:\t"+QwandaVersion.getVersion());
-		System.out.println("Build:  \t"+QwandaVersion.getBuildDate());
-		System.out.println("Commit: \t"+QwandaVersion.getCommitDate());
+		log.info("------------- qwanda version ---------------------------\n");
+		log.info("Version:\t"+QwandaVersion.getVersion());
+		log.info("Build:  \t"+QwandaVersion.getBuildDate());
+		log.info("Commit: \t"+QwandaVersion.getCommitDate());
 		
 		
-		System.out.println("----------------------------------------\n"+QwandaVersion.getJson());
+		log.info("----------------------------------------\n"+QwandaVersion.getJson());
 
 	}
 }

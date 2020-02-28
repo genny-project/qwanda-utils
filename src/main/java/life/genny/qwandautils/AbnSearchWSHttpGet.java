@@ -1,6 +1,7 @@
 package life.genny.qwandautils;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -9,12 +10,20 @@ import java.net.URLEncoder;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 
 import life.genny.models.AbnSearchResult;
 
 public class AbnSearchWSHttpGet
 {
+	
+	/**
+	 * Stores logger object.
+	 */
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
 	private static final String	UTF_8	= "UTF-8";
 
 	public static void main(String[] args)
@@ -27,9 +36,9 @@ public class AbnSearchWSHttpGet
 			AbnSearchResult result = searchByABN(guid, abn, false);
 
 			if (!result.isException())
-				System.out.println("ABN search for ABN [" + abn + "] returned business name [" + result.getOrganisationName() + "]");
+				log.info("ABN search for ABN [" + abn + "] returned business name [" + result.getOrganisationName() + "]");
 			else
-				System.out.println("ABN search for ABN [" + abn + "] returned exception [" + result.getExceptionDescription() + "]");
+				log.info("ABN search for ABN [" + abn + "] returned exception [" + result.getExceptionDescription() + "]");
 		}
 		catch (Exception e)
 		{

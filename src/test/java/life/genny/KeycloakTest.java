@@ -45,7 +45,7 @@ public class KeycloakTest {
   // "wildfly-swarm-keycloak-example", "curl", "056b73c1-7078-411d-80ec-87d41c55c3b4", "user1",
   // "password1");
   // String tokenString = accessToken.getToken();
-  // System.out.println(tokenString);
+  // log.info(tokenString);
   //
   // } catch (IOException e) {
   // // TODO Auto-generated catch block
@@ -71,7 +71,7 @@ public class KeycloakTest {
 
     KeycloakUtils.getJsonMap(token);
 
-    // System.out.println(jsonMap);
+    // log.info(jsonMap);
 
   }
 
@@ -84,7 +84,7 @@ public  List<LinkedHashMap>  fetchAllKeycloakUsers()
 		String secret = System.getenv("SECRET");
 		String username = System.getenv("USERNAME");
 		String password = System.getenv("PASSWORD");
-		System.out.println("Realm Users to be fetched from "+keycloakUrl+" realm="+realm);
+		log.info("Realm Users to be fetched from "+keycloakUrl+" realm="+realm);
 		String token = null;
 		try {
 			token = getToken(realm, keycloakUrl, secret,username, password).getToken();
@@ -92,7 +92,7 @@ public  List<LinkedHashMap>  fetchAllKeycloakUsers()
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		   // System.out.println(json);
+		   // log.info(json);
 	    final HttpClient client = new DefaultHttpClient();
 	    try {
 	      final HttpGet get =

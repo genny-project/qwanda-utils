@@ -3,7 +3,7 @@ package life.genny;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-
+import java.lang.invoke.MethodHandles;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
@@ -11,6 +11,7 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
@@ -19,6 +20,13 @@ import com.google.gson.Gson;
 import io.vertx.core.json.JsonObject;
 
 public class GzipTest {
+	
+	/**
+	 * Stores logger object.
+	 */
+	protected static final Logger log = org.apache.logging.log4j.LogManager
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
 
 	@Test
 	public void zipTest()
@@ -30,14 +38,14 @@ public class GzipTest {
 			String js = compressAndEncodeString(originalStr);
 			JsonObject json = new JsonObject();
 			json.put("zip",js);
-			System.out.println(json);
+			log.info(json);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		System.out.println("Original data = ["+originalStr+"]");
-		System.out.println("GZipped=["+ Hex.encodeHexString( zippedData )+"]");
+		log.info("Original data = ["+originalStr+"]");
+		log.info("GZipped=["+ Hex.encodeHexString( zippedData )+"]");
 		
 		
 		
@@ -81,7 +89,7 @@ public class GzipTest {
 	        def.close();
 	        compressed = out.toString("UTF-8");
 	    } catch(Exception e) {
-	       System.out.println( "could not compress data: " + e);
+	       log.info( "could not compress data: " + e);
 	    }
 	    return compressed;
 	}
