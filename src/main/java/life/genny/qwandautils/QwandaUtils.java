@@ -1497,5 +1497,27 @@ public class QwandaUtils {
 		return uniqueCode;
 	}
 	
+	public static QDataBaseEntityMessage findBaseEntityByAttributeCodeLikeValue(String realm, String token,
+			String attributeCode, String likeValue) {
+		SearchEntity searchBE = new SearchEntity("SBE_FIND_LIKE", "AttributeLInk")
+				.addSort("PRI_NAME", "Created", SearchEntity.Sort.ASC)
+				.addFilter(attributeCode, SearchEntity.StringFilter.LIKE, likeValue).addColumn("PRI_NAME", "Name")
+				.setPageStart(0).setPageSize(100);
 
+		searchBE.setRealm(realm);
+
+		String jsonSearchBE = JsonUtils.toJson(searchBE);
+		/* System.out.println(jsonSearchBE); */
+		String resultJson;
+		BaseEntity result = null;
+		try {
+			resultJson = QwandaUtils.apiPostEntity(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/search",
+					jsonSearchBE, token);
+			QDataBaseEntityMessage resultMsg = JsonUtils.fromJson(resultJson, QDataBaseEntityMessage.class);
+			return resultMsg;
+		} catch (Exception e) {
+
+		}
+		return null;
+	}
 }
