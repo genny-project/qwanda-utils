@@ -507,6 +507,7 @@ public class KeycloakUtils {
 }
 	
 	public static List<LinkedHashMap> fetchKeycloakUsers(final String token, final String realm, final String username) {
+		List<LinkedHashMap> results = new ArrayList<LinkedHashMap>();
 	    final HttpClient client = new DefaultHttpClient();
 	    String keycloakUrl = getKeycloakUrl();
 	    
@@ -523,7 +524,7 @@ public class KeycloakUtils {
 	        final HttpEntity entity = response.getEntity();
 	        final InputStream is = entity.getContent();
 	        try {
-	          return JsonSerialization.readValue(is, (new ArrayList<UserRepresentation>()).getClass());
+	          results = JsonSerialization.readValue(is, (new ArrayList<UserRepresentation>()).getClass());
 	        } finally {
 	          is.close();
 	        }
@@ -533,6 +534,7 @@ public class KeycloakUtils {
 	    } finally {
 	      client.getConnectionManager().shutdown();
 	    }
+	    return results;
 	  }
 
 	private static String encodeValue(String value) {
@@ -647,4 +649,43 @@ public class KeycloakUtils {
         return null;
     }
 
+    
+    public static String sendVerifyEmail(final String realm, final String username, final String servicetoken)
+    {
+    	
+    	String userId;
+		try {
+			userId = getKeycloakUserId(servicetoken, realm, username);
+			HttpClient httpClient = new DefaultHttpClient();
+
+			HttpPut putRequest = new HttpPut(getKeycloakUrl() + "/auth/admin/realms/" + realm + "/users/" + userId + "/send-verify-email");
+
+			log.info("https://keycloak.gada.io" + "/auth/admin/realms/" + "internmatch" + "/users/" + userId + "/send-verify-email");
+
+			putRequest.addHeader("Content-Type", "application/json");
+			putRequest.addHeader("Authorization", "Bearer " + servicetoken);
+
+			HttpResponse response = null;
+			try {
+				response = httpClient.execute(putRequest);
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			int statusCode = response.getStatusLine().getStatusCode();
+			if (statusCode == 201) {
+				return userId;
+			}
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+    	return null;
+
+    }
+    
 }
