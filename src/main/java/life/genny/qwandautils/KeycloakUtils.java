@@ -3,9 +3,12 @@ package life.genny.qwandautils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -506,9 +509,11 @@ public class KeycloakUtils {
 	public static List<LinkedHashMap> fetchKeycloakUsers(final String token, final String realm, final String username) {
 	    final HttpClient client = new DefaultHttpClient();
 	    String keycloakUrl = getKeycloakUrl();
+	    
 	    try {
+	    	String encodedUsername = encodeValue(username);
 	      final HttpGet get =
-	          new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm + "/users?username=" + username);
+	          new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm + "/users?username=" + encodedUsername);
 	      get.addHeader("Authorization", "Bearer " + token);
 	      try {
 	        final HttpResponse response = client.execute(get);
@@ -530,6 +535,13 @@ public class KeycloakUtils {
 	    }
 	  }
 
+	private static String encodeValue(String value) {
+        try {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex.getCause());
+        }
+    }
 	public static String getKeycloakUrl() {
 		String keycloakProto =
 				System.getenv("KEYCLOAK_PROTO") != null ? System.getenv("KEYCLOAK_PROTO") : "http://";
