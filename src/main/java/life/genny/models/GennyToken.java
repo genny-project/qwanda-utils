@@ -3,6 +3,8 @@ package life.genny.models;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -195,6 +197,20 @@ public class GennyToken implements Serializable {
 
 	public String getSessionCode() {
 		return getString("session_state");
+	}
+	
+	public String getKeycloakUrl() {
+		String fullUrl = getString("iss");
+		URI uri;
+		try {
+			uri = new URI(fullUrl);
+			 String domain = uri.getHost();
+			 return domain;
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "http://keycloak.genny.life";
 	}
 
 	public String getClientCode() {
