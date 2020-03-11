@@ -449,7 +449,11 @@ public class KeycloakUtils {
                 log.info("Keycloak User ID: " + keycloakUserId);
                 return keycloakUserId;
 			} else if (statusCode == 409) {
-				throw new IOException("Email is already taken. Please use a different email address.");
+				//throw new IOException("Email is already taken. Please use a different email address.");
+				log.warn("Email is already taken for "+newUsername);
+				// fetch existing email user
+				String userId = getKeycloakUserId(token, realm, newUsername);
+				return userId;
 			}
 			if (entity == null) {
 				throw new IOException("We could not create the new user. Please try again.");
