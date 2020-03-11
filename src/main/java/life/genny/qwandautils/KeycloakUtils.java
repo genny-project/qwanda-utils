@@ -454,6 +454,12 @@ public class KeycloakUtils {
 				// fetch existing email user
 				String userId = getKeycloakUserId(token, realm, newUsername);
 				return userId;
+			} else if (statusCode == 401) {
+				//throw new IOException("Account is already taken. Please use a different email address.");
+				log.warn("Account is already exists for "+newUsername);
+				// fetch existing email user
+				String userId = getKeycloakUserId(token, realm, newUsername);
+				return userId;
 			}
 			if (entity == null) {
 				throw new IOException("We could not create the new user. Please try again.");
