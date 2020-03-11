@@ -677,7 +677,8 @@ public class KeycloakUtils {
 			}
 
 			int statusCode = response.getStatusLine().getStatusCode();
-			if (statusCode == 201) {
+			log.info("sendVerifyMail statusCode is "+statusCode+" with userId="+userId);
+			if ((statusCode == 200)||(statusCode == 201)) {
 				return userId;
 			}
 		} catch (IOException e1) {
