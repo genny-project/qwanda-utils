@@ -660,7 +660,7 @@ public class KeycloakUtils {
 
 			HttpPut putRequest = new HttpPut(getKeycloakUrl() + "/auth/admin/realms/" + realm + "/users/" + userId + "/send-verify-email");
 
-			log.info("https://keycloak.gada.io" + "/auth/admin/realms/" + "internmatch" + "/users/" + userId + "/send-verify-email");
+			log.info(getKeycloakUrl() + "/auth/admin/realms/" + "internmatch" + "/users/" + userId + "/send-verify-email");
 
 			putRequest.addHeader("Content-Type", "application/json");
 			putRequest.addHeader("Authorization", "Bearer " + servicetoken);
