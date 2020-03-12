@@ -205,7 +205,9 @@ public class GennyToken implements Serializable {
 		try {
 			uri = new URI(fullUrl);
 			 String domain = uri.getHost();
-			 return domain;
+			 String proto = uri.getScheme();
+			 Integer port = uri.getPort();
+			 return proto+"://"+domain+":"+port;
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
