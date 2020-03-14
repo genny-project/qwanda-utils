@@ -1499,7 +1499,7 @@ public class QwandaUtils {
 	
 	public static QDataBaseEntityMessage findBaseEntityByAttributeCodeLikeValue(String realm, String token,
 			String attributeCode, String likeValue) {
-		SearchEntity searchBE = new SearchEntity("SBE_FIND_LIKE", "AttributeLInk")
+		SearchEntity searchBE = new SearchEntity("SBE_FIND_LIKE", "AttributeLink")
 				.addSort("PRI_NAME", "Created", SearchEntity.Sort.ASC)
 				.addFilter(attributeCode, SearchEntity.StringFilter.LIKE, likeValue).addColumn("PRI_NAME", "Name")
 				.setPageStart(0).setPageSize(100);
