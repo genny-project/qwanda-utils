@@ -659,6 +659,7 @@ public class KeycloakUtils {
     	String userId;
 		try {
 			userId = getKeycloakUserId(servicetoken, realm, username);
+			if (userId != null) {
 			HttpClient httpClient = new DefaultHttpClient();
 
 			HttpPut putRequest = new HttpPut(keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/send-verify-email");
@@ -683,6 +684,9 @@ public class KeycloakUtils {
 			log.info("sendVerifyMail statusCode is "+statusCode+" with userId="+userId);
 			if ((statusCode == 200)||(statusCode == 201)) {
 				return userId;
+			}
+			} else {
+				log.error("Could not retrieve userId from "+keycloakUrl+" for "+username);
 			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
