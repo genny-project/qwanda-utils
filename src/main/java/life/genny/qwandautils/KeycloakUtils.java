@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -652,6 +653,11 @@ public class KeycloakUtils {
         return null;
     }
 
+    public static String sendVerifyEmail(final String username, final String serviceToken)
+    {
+    	GennyToken gToken = new GennyToken(serviceToken);
+    	return sendVerifyEmail(gToken.getRealm(), username, serviceToken);
+    }
     
     public static String sendVerifyEmail(final String realm, final String username, final String servicetoken)
     {
@@ -696,4 +702,28 @@ public class KeycloakUtils {
 
     }
     
+	private void sendVerifyTestMail(String token, String emailusername, String firstname, String lastname) {
+		GennyToken gToken = new GennyToken(token);
+
+
+		String password = UUID.randomUUID().toString().substring(0, 8);
+		String userId;
+		try {
+			userId = KeycloakUtils.createUser(token, gToken.getRealm(), emailusername, firstname, lastname, emailusername, password,
+					"user", "user");
+		} catch (IOException e) {
+		}
+		userId = KeycloakUtils.sendVerifyEmail(gToken.getRealm(), emailusername, token);
+		System.out.println("UserId=" + userId);
+	}
+	
+	private void sendVerifyTestMail(String token, String username, String domain, String firstname, String lastname) {
+		GennyToken gToken = new GennyToken(token);
+		LocalDateTime now = LocalDateTime.now();
+		String mydatetime = new SimpleDateFormat("yyyyMMddHHmmss").format(now.toLocalDate());
+		// System.out.println(username+" serviceToken=" + token);
+		String emailusername = username + "+" + mydatetime + "@" + domain;
+
+		sendVerifyTestMail(token,emailusername, firstname, lastname);
+	}
 }
