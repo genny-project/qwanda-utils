@@ -284,4 +284,13 @@ public class GennyToken implements Serializable {
 		return (String) adecodedTokenMap.get("jti");
 	}
 
+	/**
+	 * @return the userRoles
+	 */
+	public Set<String> getUserRoles() {
+		return userRoles;
+	}
+
+	
+	
 }
