@@ -657,7 +657,7 @@ public class QwandaUtils {
 		T be = null;
 		try {
 
-			attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode+"/attributes", token);
+			attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode.toUpperCase()+"/attributes", token);
 			if(attributeString != null) {
 				be = JsonUtils.fromJson(attributeString, BaseEntity.class);
 			}
