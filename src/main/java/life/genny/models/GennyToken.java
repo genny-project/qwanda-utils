@@ -95,6 +95,7 @@ public class GennyToken implements Serializable {
 				LocalDateTime.now().plusSeconds(24 * 60 * 60)); // 1 day expiry
 	}
 
+	
 	public GennyToken(final String code, final String id, final String issuer, final String subject, final long ttl,
 			final String secret, final String realm, final String username, final String name, final String role,
 			final LocalDateTime expiryDateTime) {
@@ -147,6 +148,11 @@ public class GennyToken implements Serializable {
 				LocalDateTime.now().plusSeconds(24 * 60 * 60));
 	}
 
+	public GennyToken(final String uuid,final String code, final String realm, final String username, final String name,
+			final String role, LocalDateTime expiryDateTime) {
+		this(code, uuid, "Genny Project", "Test JWT", 100000, "IamASecret", realm, username, name, role,
+				expiryDateTime);
+	}
 	public GennyToken(final String code, final String realm, final String username, final String name,
 			final String role, LocalDateTime expiryDateTime) {
 		this(code, "ABBCD", "Genny Project", "Test JWT", 100000, "IamASecret", realm, username, name, role,
