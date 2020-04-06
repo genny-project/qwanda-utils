@@ -101,6 +101,12 @@ public class GennyToken implements Serializable {
 		adecodedTokenMap = new HashMap<String, Object>();
 		adecodedTokenMap.put("preferred_username", username);
 		adecodedTokenMap.put("name", name);
+		
+		String[] names = name.split(" ");
+		adecodedTokenMap.put("given_name", names[0].trim());
+		adecodedTokenMap.put("family_name", names[1].trim());
+		adecodedTokenMap.put("jti", UUID.randomUUID().toString().substring(0, 20));
+		adecodedTokenMap.put("sub", id);
 		adecodedTokenMap.put("realm", realm);
 		adecodedTokenMap.put("azp", realm);
 		adecodedTokenMap.put("aud", realm);
