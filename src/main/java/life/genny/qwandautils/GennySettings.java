@@ -39,6 +39,8 @@ public class GennySettings {
 	public static final Boolean gzip64Mode = ("TRUE".equalsIgnoreCase(System.getenv("MODE_GZIP64"))) ? true : false;
 	public static final Boolean multiBridgeMode = ("TRUE".equalsIgnoreCase(System.getenv("MULTI_BRIDGE_MODE"))) ? true : false;
 	public static final Boolean bulkPull = ("TRUE".equalsIgnoreCase(System.getenv("BULKPULL"))) ? true : false;
+	public static final Long pontoonMinimumThresholdBytes = System.getenv("PONTOON_MIN_THRESHOLD_BYTES")==null?10000L:(Integer.parseInt(System.getenv("PONTOON_MIN_THRESHOLD_BYTES")));	
+	public static final Integer pontoonTimeout = System.getenv("PONTOON_TIMEOUT")==null?43200:(Integer.parseInt(System.getenv("PONTOON_TIMEOUT")));  // 12 hours
 	
 	// 2^19-1 = 524287 2^23-1=8388607
 	public static final Integer zipMinimumThresholdBytes = System.getenv("ZIP_MIN_THRESHOLD_BYTES")==null?8388607:(Integer.parseInt(System.getenv("ZIP_MIN_THRESHOLD_BYTES")));
