@@ -405,7 +405,7 @@ public class KeycloakUtils {
 		log.info("CreateUserjson="+json);
 		
 		HttpClient httpClient = new DefaultHttpClient();
-		log.info("Keycloak token used is "+token);
+		//log.info("Keycloak token used is "+token);
 		try {
 			HttpPost post = new HttpPost(keycloakUrl + "/auth/admin/realms/" + realm + "/users");
 			// HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl +
