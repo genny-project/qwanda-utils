@@ -1,5 +1,6 @@
 package life.genny.models;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
@@ -11,6 +12,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +27,9 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -111,7 +116,7 @@ public class GennyToken implements Serializable {
 		adecodedTokenMap.put("realm", realm);
 		adecodedTokenMap.put("azp", realm);
 		adecodedTokenMap.put("aud", realm);
-		adecodedTokenMap.put("realm_access", "[user," + role + "]");
+	//	adecodedTokenMap.put("realm_access", "{ \"roles\": [\"user\",\"" + role + "\"] }");
 		adecodedTokenMap.put("exp", expiryDateTime.atZone(ZoneId.of("UTC")).toEpochSecond());
 		adecodedTokenMap.put("iat", LocalDateTime.now().atZone(ZoneId.of("UTC")).toEpochSecond());
 		adecodedTokenMap.put("auth_time", LocalDateTime.now().atZone(ZoneId.of("UTC")).toEpochSecond());
@@ -119,13 +124,34 @@ public class GennyToken implements Serializable {
 																								// as keycloak
 
 		userRoles = new HashSet<String>();
+//		  "realm_access": {
+//		    "roles": [
+//		      "test",
+//		      "dev",
+//		      "offline_access",
+//		      "admin",
+//		      "uma_authorization",
+//		      "user",
+//		      "supervisor"
+//		    ]
+//		  },
+		    
+
+
+		
+		ArrayJson rj = new ArrayJson();
 		userRoles.add("user");
+		rj.roles.add("user");
 		String[] roles = role.split(",:;");
 		for (String r : roles) {
 			userRoles.add(r);
+			rj.roles.add(r);
 		}
 
+		adecodedTokenMap.put("realm_access", rj);
 
+		
+		
 		String jwtToken = null;
 
 		jwtToken = SecurityUtils.createJwt(id, issuer, subject, ttl, secret, adecodedTokenMap);
