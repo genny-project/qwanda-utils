@@ -107,7 +107,11 @@ public class GennyToken implements Serializable {
 		adecodedTokenMap = new HashMap<String, Object>();
 		adecodedTokenMap.put("preferred_username", username);
 		adecodedTokenMap.put("name", name);
-		
+		if (username.contains("@")) {
+			adecodedTokenMap.put("email", username);
+		} else {
+			adecodedTokenMap.put("email", username+"@gmail.com");
+		}
 		String[] names = name.split(" ");
 		adecodedTokenMap.put("given_name", names[0].trim());
 		adecodedTokenMap.put("family_name", names[1].trim());
