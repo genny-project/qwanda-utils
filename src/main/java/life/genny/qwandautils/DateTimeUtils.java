@@ -31,7 +31,7 @@ public class DateTimeUtils {
 	
 	static public String getNiceDateStr(LocalDate dt)
 	{
-		return getNiceDateStr(dt,"EEEE, MMMM d");
+		return getNiceDateStr(dt,"EEE d-MMM-yyyy");
 	}
 	
 	static public String getNiceDateStr(LocalDate dt, String pattern)
