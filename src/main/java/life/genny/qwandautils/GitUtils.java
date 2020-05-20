@@ -465,6 +465,12 @@ public class GitUtils {
 				.useDelimiter("\\A");
 		return s.hasNext() ? s.next() : "";
 	}
+
+	public static List<BaseEntity> getRulesBaseEntitys(String gitUrl, String branch, String realm, String string,
+			boolean b) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 
 }

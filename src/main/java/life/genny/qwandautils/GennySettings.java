@@ -69,6 +69,13 @@ public class GennySettings {
 	
 	public final static Boolean hideRuleStates = "TRUE".equalsIgnoreCase(System.getenv("HIDE_RULE_STATES"));
 	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + hostIP + ":"+cacheApiPort): System.getenv("DDT_URL");
+
+	public final static String  gitProjectUrls = System.getenv("GIT_PROJECT_URLS") == null ? ("https://github.com/genny-project/prj_genny.git")
+			: System.getenv("GIT_PROJECT_URLS"); // comma separated urls, in order of loading with subsequent overwriting
+
+	public final static String gitPassword = System.getenv("GIT_PASSWORD") ==null ? "":System.getenv("GIT_PASSWORD");
+	public final static String gitUsername = System.getenv("GIT_USERNAME") ==null ? "git":System.getenv("GIT_USERNAME");	
+
 	
 	// This is public
 	public final static String gennyPublicPassword = System.getenv("PASSWORD") ==null ? "WelcomeToTheHub121!":System.getenv("PASSWORD");
