@@ -66,6 +66,8 @@ public class GennySettings {
 	public final static Boolean detectRuleChanges = System.getenv("DETECT_RULE_CHANGES") !=null ?"TRUE".equalsIgnoreCase(System.getenv("DETECT_RULE_CHANGES")):false;
 	public final static Boolean persistRules = System.getenv("PERSIST_RULES") !=null ?"TRUE".equalsIgnoreCase(System.getenv("PERSIST_RULES")):false;
 	public final static Boolean framesOnDemand= System.getenv("FRAMES_ON_DEMAND") !=null ? "TRUE".equalsIgnoreCase(System.getenv("FRAMES_ON_DEMAND")):true;
+	public static final Boolean useApiRules = ("TRUE".equalsIgnoreCase(System.getenv("USE_API_RULES"))) ? true : false;
+
 	
 	public final static Boolean hideRuleStates = "TRUE".equalsIgnoreCase(System.getenv("HIDE_RULE_STATES"));
 	public static final String ddtUrl = System.getenv("DDT_URL") == null ? ("http://" + hostIP + ":"+cacheApiPort): System.getenv("DDT_URL");
