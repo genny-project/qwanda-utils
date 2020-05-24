@@ -77,6 +77,7 @@ public class GennySettings {
 
 	public final static String gitPassword = System.getenv("GIT_PASSWORD") ==null ? "":System.getenv("GIT_PASSWORD");
 	public final static String gitUsername = System.getenv("GIT_USERNAME") ==null ? "git":System.getenv("GIT_USERNAME");	
+	public final static String gitRulesBranch = System.getenv("GIT_RULES_BRANCH") ==null ? "v3.1.0":System.getenv("GIT_RULES_BRANCH");	
 
 	
 	// This is public
