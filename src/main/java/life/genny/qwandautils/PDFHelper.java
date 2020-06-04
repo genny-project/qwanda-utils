@@ -74,8 +74,8 @@ public class PDFHelper {
 				
 		String path = getHtmlStringToPdfInByte(content);
 		log.info("path ::"+path);
-		
-	if(path != null) {
+
+		if(path != null) {
 		    
 			downloadablePdfUrl = PDF_GEN_SERVICE_API_URL + path;
 			log.info("download url ::"+downloadablePdfUrl);
@@ -94,8 +94,8 @@ public class PDFHelper {
 		String resp = null;
 		String path = null;
 		try {
-		
-		/* Camelot htmlToPdfConverter service */ 
+
+			/* Camelot htmlToPdfConverter service */ 
 			resp = QwandaUtils.apiPostEntity(PDF_GEN_SERVICE_API_URL + "/raw", gson.toJson(postObj), null);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -109,5 +109,5 @@ public class PDFHelper {
 		
 		return path;
 	}
-}
 
+}
