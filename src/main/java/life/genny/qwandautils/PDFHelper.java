@@ -17,26 +17,34 @@ public class PDFHelper {
 
 	final public static String PDF_GEN_SERVICE_API_URL = System.getenv("PDF_GEN_SERVICE_API_URL") == null ? "http://localhost:7331"
 			: System.getenv("PDF_GEN_SERVICE_API_URL");
+
+	public static String getJournalPDFHeader(String headerURL) throws IOException {
+//		String headerURL = "https://raw.githubusercontent.com/genny-project/layouts/2020-05-25-journal-report-update/internmatch-new/document_templates/journal-header-template.html";
+		return QwandaUtils.apiGet(headerURL, null);
+	}
 	
 	public static String getDownloadablePdfLinkForHtml(String htmlUrl, List<HashMap<String, Object>> contextMapList){
 		
 		String content = null;
 		String downloadablePdfUrl = null;
-		
+		String finalContent = "";
+		String headerContent = "";
+		String headerURL = "https://raw.githubusercontent.com/genny-project/layouts/2020-05-25-journal-report-update/internmatch-new/document_templates/journal-header-template.html";
+
 		try {
 			/* Get content from link in String format */
-			content = QwandaUtils.apiGet(htmlUrl, null);			
+			content = QwandaUtils.apiGet(htmlUrl, null);
+			headerContent = QwandaUtils.apiGet(headerURL, null);
+			finalContent += headerContent;
 			/* If merge is required, use MergeUtils for merge with context map */
 			for(HashMap<String, Object> contextMap : contextMapList) {
-				
-				content = MergeUtil.merge(content, contextMap);
+				finalContent += MergeUtil.merge(content, contextMap);
 			}
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 				
-		String path = getHtmlStringToPdfInByte(content);
+		String path = getHtmlStringToPdfInByte(finalContent);
 		log.info("path ::"+path);
 
 		if(path != null) {
@@ -66,8 +74,8 @@ public class PDFHelper {
 				
 		String path = getHtmlStringToPdfInByte(content);
 		log.info("path ::"+path);
-
-		if(path != null) {
+		
+	if(path != null) {
 		    
 			downloadablePdfUrl = PDF_GEN_SERVICE_API_URL + path;
 			log.info("download url ::"+downloadablePdfUrl);
@@ -86,8 +94,8 @@ public class PDFHelper {
 		String resp = null;
 		String path = null;
 		try {
-
-			/* Camelot htmlToPdfConverter service */ 
+		
+		/* Camelot htmlToPdfConverter service */ 
 			resp = QwandaUtils.apiPostEntity(PDF_GEN_SERVICE_API_URL + "/raw", gson.toJson(postObj), null);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -101,5 +109,5 @@ public class PDFHelper {
 		
 		return path;
 	}
-
 }
+
