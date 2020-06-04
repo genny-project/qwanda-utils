@@ -3,6 +3,7 @@ package life.genny.qwandautils;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
@@ -16,6 +17,37 @@ public class PDFHelper {
 
 	final public static String PDF_GEN_SERVICE_API_URL = System.getenv("PDF_GEN_SERVICE_API_URL") == null ? "http://localhost:7331"
 			: System.getenv("PDF_GEN_SERVICE_API_URL");
+	
+	public static String getDownloadablePdfLinkForHtml(String htmlUrl, List<HashMap<String, Object>> contextMapList){
+		
+		String content = null;
+		String downloadablePdfUrl = null;
+		
+		try {
+			/* Get content from link in String format */
+			content = QwandaUtils.apiGet(htmlUrl, null);			
+			/* If merge is required, use MergeUtils for merge with context map */
+			for(HashMap<String, Object> contextMap : contextMapList) {
+				
+				content = MergeUtil.merge(content, contextMap);
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+				
+		String path = getHtmlStringToPdfInByte(content);
+		log.info("path ::"+path);
+
+		if(path != null) {
+		    
+			downloadablePdfUrl = PDF_GEN_SERVICE_API_URL + path;
+			log.info("download url ::"+downloadablePdfUrl);
+			return downloadablePdfUrl;
+		}
+		
+		return downloadablePdfUrl;
+	}
 	
 	public static String getDownloadablePdfLinkForHtml(String htmlUrl, HashMap<String, Object> contextMap){
 		
