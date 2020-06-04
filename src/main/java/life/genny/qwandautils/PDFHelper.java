@@ -22,21 +22,21 @@ public class PDFHelper {
 		
 		String content = null;
 		String downloadablePdfUrl = null;
-		
+		String finalContent = "";
+
 		try {
 			/* Get content from link in String format */
-			content = QwandaUtils.apiGet(htmlUrl, null);			
+			content = QwandaUtils.apiGet(htmlUrl, null);
 			/* If merge is required, use MergeUtils for merge with context map */
 			for(HashMap<String, Object> contextMap : contextMapList) {
-				
-				content = MergeUtil.merge(content, contextMap);
+				finalContent += MergeUtil.merge(content, contextMap);
 			}
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 				
-		String path = getHtmlStringToPdfInByte(content);
+		String path = getHtmlStringToPdfInByte(finalContent);
 		log.info("path ::"+path);
 
 		if(path != null) {
