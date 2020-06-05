@@ -23,22 +23,25 @@ public class PDFHelper {
 		return QwandaUtils.apiGet(headerURL, null);
 	}
 	
-	public static String getDownloadablePdfLinkForHtml(String htmlUrl, List<HashMap<String, Object>> contextMapList){
+	public static String getDownloadablePdfLinkForHtml(String htmlHeaderUrl, String htmlRowUrl, HashMap<String, Object> contextMap, List<HashMap<String, Object>> contextMapList){
 		
 		String content = null;
 		String downloadablePdfUrl = null;
 		String finalContent = "";
 		String headerContent = "";
-		String headerURL = "https://raw.githubusercontent.com/genny-project/layouts/2020-05-25-journal-report-update/internmatch-new/document_templates/journal-header-template.html";
 
 		try {
 			/* Get content from link in String format */
-			content = QwandaUtils.apiGet(htmlUrl, null);
-			headerContent = QwandaUtils.apiGet(headerURL, null);
+			content = QwandaUtils.apiGet(htmlRowUrl, null);
+			
+			// Merge the header
+			headerContent = QwandaUtils.apiGet(htmlHeaderUrl, null);
+			headerContent = MergeUtil.merge(headerContent, contextMap);
+			
 			finalContent += headerContent;
 			/* If merge is required, use MergeUtils for merge with context map */
-			for(HashMap<String, Object> contextMap : contextMapList) {
-				finalContent += MergeUtil.merge(content, contextMap);
+			for(HashMap<String, Object> ctxMap : contextMapList) {
+				finalContent += MergeUtil.merge(content, ctxMap);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
