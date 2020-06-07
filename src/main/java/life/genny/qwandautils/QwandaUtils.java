@@ -68,9 +68,6 @@ import life.genny.qwanda.message.QDataBaseEntityMessage;
 public class QwandaUtils {
 
 
-
-
-
 	public static final String ANSI_RESET = "\u001B[0m";
 	public static final String ANSI_BLUE = "\u001B[34m";
 	public static final String ANSI_RED = "\u001B[31m";
@@ -155,7 +152,7 @@ public class QwandaUtils {
 
 	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken, final Consumer<String> callback)
 			throws IOException {
-
+		String responseString = null;
 		if (StringUtils.isBlank(postUrl)) {
 			log.error("Blank url in apiPostEntity");
 		}
@@ -175,12 +172,14 @@ public class QwandaUtils {
 
 			response = httpclient.execute(post);
 			HttpEntity entity = response.getEntity();
-			String responseString = EntityUtils.toString(entity);
+			responseString = EntityUtils.toString(entity);
 			if(callback != null) {
 				callback.accept(responseString);
 			}
 			return responseString;
-		} 
+		} catch (Exception e) {
+			log.error(e.getMessage());
+		}
 		finally {
 			if (response != null) {
 			response.close();
@@ -191,7 +190,7 @@ public class QwandaUtils {
 		//	IOUtils.closeQuietly(response);
 		//	IOUtils.closeQuietly(httpclient);
 		}
-
+		return responseString;
 	}
 
 	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken) throws IOException {
