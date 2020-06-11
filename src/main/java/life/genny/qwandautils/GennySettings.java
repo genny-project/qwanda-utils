@@ -68,6 +68,7 @@ public class GennySettings {
 	public final static Boolean framesOnDemand= System.getenv("FRAMES_ON_DEMAND") !=null ? "TRUE".equalsIgnoreCase(System.getenv("FRAMES_ON_DEMAND")):true;
 	public static final Boolean useApiRules = ("TRUE".equalsIgnoreCase(System.getenv("USE_API_RULES"))) ? true : false;
 	public static final Boolean useConcurrencyMsgs = ("TRUE".equalsIgnoreCase(System.getenv("USE_CONCURRENCY_MSGS"))) ? true : false;
+	public static final Boolean searchAlt = ("TRUE".equalsIgnoreCase(System.getenv("SEARCH_ALT"))) ? true : false;
 
 	
 	public final static Boolean hideRuleStates = "TRUE".equalsIgnoreCase(System.getenv("HIDE_RULE_STATES"));
