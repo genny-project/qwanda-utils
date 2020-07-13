@@ -68,7 +68,7 @@ public class GennySettings {
 	public final static Boolean framesOnDemand= System.getenv("FRAMES_ON_DEMAND") !=null ? "TRUE".equalsIgnoreCase(System.getenv("FRAMES_ON_DEMAND")):true;
 	public static final Boolean useApiRules = ("TRUE".equalsIgnoreCase(System.getenv("USE_API_RULES"))) ? true : false;
 	public static final Boolean useConcurrencyMsgs = ("TRUE".equalsIgnoreCase(System.getenv("USE_CONCURRENCY_MSGS"))) ? true : false;
-	public static final Boolean searchAlt = ("TRUE".equalsIgnoreCase(System.getenv("SEARCH_ALT"))) ? true : false;
+	public static final Boolean searchAlt = ("FALSE".equalsIgnoreCase(System.getenv("SEARCH_ALT"))) ? false : true;
 	public static final Boolean useEventQueue = ("FALSE".equalsIgnoreCase(System.getenv("USE_EVENT_QUEUE"))) ? false : true;  // default to use
 
 	
