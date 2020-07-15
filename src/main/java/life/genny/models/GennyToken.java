@@ -60,6 +60,7 @@ public class GennyToken implements Serializable {
 			// Getting decoded token in Hash Map from QwandaUtils
 			adecodedTokenMap = KeycloakUtils.getJsonMap(token);
 			if (adecodedTokenMap == null) {
+				
 				log.error("Token is not able to be decoded in GennyToken ..");
 			} else {
 
@@ -67,7 +68,9 @@ public class GennyToken implements Serializable {
 
 				String realm = (adecodedTokenMap.get("azp").toString());
 				if (realm == null) {
-					realm = (adecodedTokenMap.get("aud").toString()); // handle non Keycloak 6+
+					String[] issArray = adecodedTokenMap.get("iss").toString().split("/");
+					realm = issArray[issArray.length-1];
+					//realm = (adecodedTokenMap.get("aud").toString()); // handle non Keycloak 6+
 				}
 
 				// Adding realm name to the decoded token
