@@ -67,7 +67,7 @@ public class GennyToken implements Serializable {
 				// Extracting realm name from iss value
 
 				String realm = (adecodedTokenMap.get("azp").toString());
-				if ((realm == null)&&(realm.equals("alyson"))) {
+				if ((realm.equals("alyson"))) {
 					String[] issArray = adecodedTokenMap.get("iss").toString().split("/");
 					realm = issArray[issArray.length-1];
 					//realm = (adecodedTokenMap.get("aud").toString()); // handle non Keycloak 6+
