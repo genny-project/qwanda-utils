@@ -66,7 +66,7 @@ public class GennyToken implements Serializable {
 
 				// Extracting realm name from iss value
 
-				String realm = (adecodedTokenMap.get("azp").toString());
+				String realm = (adecodedTokenMap.get("azp").toString()); // clientid
 				if ((realm.equals("alyson"))) {
 					String[] issArray = adecodedTokenMap.get("iss").toString().split("/");
 					realm = issArray[issArray.length-1];
@@ -79,8 +79,8 @@ public class GennyToken implements Serializable {
 				this.realm = realm;
 				String username = (String) adecodedTokenMap.get("preferred_username");
 				String normalisedUsername = QwandaUtils.getNormalisedUsername(username);
+				//this.userCode = "PER_" + this.getUuid().toUpperCase(); //normalisedUsername.toUpperCase();
 				this.userCode = "PER_" + normalisedUsername.toUpperCase();
-
 				setupRoles();
 			}
 
@@ -329,6 +329,43 @@ public class GennyToken implements Serializable {
 		return (String) adecodedTokenMap.get("jti");
 	}
 
+	@XmlTransient
+	@Transient
+	public String getUuid() {
+		String uuid =  null;
+		
+		try {
+			uuid = (String) adecodedTokenMap.get("sub");
+		} catch (Exception e) {
+			log.info("Not a valid user");
+		}
+		
+		return uuid;
+	}
+
+	@XmlTransient
+	@Transient
+	public String getEmailUserCode() {
+		String username = (String) adecodedTokenMap.get("preferred_username");
+		String normalisedUsername = QwandaUtils.getNormalisedUsername(username);
+		return "PER_" + normalisedUsername.toUpperCase();
+
+	}	
+
+	@XmlTransient
+	@Transient
+	public Boolean checkUserCode(String userCode) {
+		if (getUserCode().equals(userCode)) {
+			return true;
+		}
+		if (getEmailUserCode().equals(userCode)) {
+			return true;
+		}
+		return false;
+
+	}	
+	
+	
 	/**
 	 * @return the userRoles
 	 */
