@@ -176,7 +176,9 @@ public class KeycloakUtils {
 			}
 
 			formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_ID, clientId));
-			formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_SECRET, secret));
+			if (secret != null) {
+				formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_SECRET, secret));
+			}
 			UrlEncodedFormEntity form = new UrlEncodedFormEntity(formParams, "UTF-8");
 
 			
