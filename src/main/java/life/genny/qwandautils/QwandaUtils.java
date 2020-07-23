@@ -206,7 +206,7 @@ public class QwandaUtils {
 
 			HttpPost post = new HttpPost(postUrl);
 
-			String jsonString = String.format("{\"id\":0,\"content\":%s,\"sourceCode\":%s,\"tags\":[{\"name\":\"%s\",\"value\":0}, {\"name\":\"sys\",\"value\":0}],\"targetCode\":%s}").format(content, sourceCode, tag, targetCode);
+			String jsonString = String.format("{\"id\":0,\"content\":\""+content+"\",\"sourceCode\":\""+sourceCode+"\",\"tags\":[{\"name\":\""+sourceCode+"\",\"value\":0}, {\"name\":\"sys\",\"value\":0}],\"targetCode\":\""+targetCode+"\"}");
 			
 			StringEntity noteContent = new StringEntity(jsonString, "UTF-8");
 
