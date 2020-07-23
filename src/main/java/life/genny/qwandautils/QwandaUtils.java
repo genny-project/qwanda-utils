@@ -192,9 +192,67 @@ public class QwandaUtils {
 		}
 		return responseString;
 	}
+	
+	
+	public static String apiPostNote(final String postUrl, final String sourceCode, final String tag, final String targetCode, final String content, final String authToken, final Consumer<String> callback)
+			throws IOException {
+		String responseString = null;
+		if (StringUtils.isBlank(postUrl)) {
+			log.error("Blank url in apiPostNote");
+		}
+		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+		CloseableHttpResponse response = null;
+		try {
+
+			HttpPost post = new HttpPost(postUrl);
+
+			String jsonString = String.format("{\"id\":0,\"content\":%s,\"sourceCode\":%s,\"tags\":[{\"name\":\""+tag+"\",\"value\":0}, {\"name\":\"sys\",\"value\":0}],\"targetCode\":%s}").format(content, sourceCode, targetCode);
+			
+			StringEntity noteContent = new StringEntity(jsonString, "UTF-8");
+
+			post.setEntity(noteContent);
+			post.setHeader("Content-Type", "application/json; charset=UTF-8");
+			if (authToken != null) {
+				post.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+			}
+
+			response = httpclient.execute(post);
+			HttpEntity entity = response.getEntity();
+			responseString = EntityUtils.toString(entity);
+			if(callback != null) {
+				callback.accept(responseString);
+			}
+			return responseString;
+		} catch (Exception e) {
+			log.error(e.getMessage());
+		}
+		finally {
+			if (response != null) {
+			response.close();
+			} else {
+				log.error("postApi response was null");
+			}
+			httpclient.close();
+		//	IOUtils.closeQuietly(response);
+		//	IOUtils.closeQuietly(httpclient);
+		}
+		return responseString;
+	}
 
 	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken) throws IOException {
 		return apiPostEntity(postUrl, entityString, authToken, null);
+	}
+	
+	/*
+	sourceCode: ‘PER_USER1’,
+    content: noteContent,
+    tags: [tag],
+    created: new Date(),
+    targetCode: ‘PER_USER1’,
+    */
+	
+	public static String apiPostNote(final String postUrl, final String sourceCode, final String tag, final String targetCode, final String content, final String authToken) throws IOException {
+		return apiPostNote(postUrl, sourceCode, tag, targetCode, content, authToken, null);
 	}
 
 	public static String apiPost(final String postUrl, final List<BasicNameValuePair> nameValuePairs, final String authToken) throws IOException {
