@@ -401,6 +401,146 @@ public class KeycloakUtils {
 				newFirstname, newLastname, newEmail, password,newRealmRoles, newGroupRoles);
 	}
 
+	
+	// This is the one called from rules to create a keycloak user
+	public static String createDummyUser(String token, String realm)
+			throws IOException {
+		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
+		
+		String randomCode = UUID.randomUUID().toString().substring(0, 18);
+		String json = "{ " +"\"username\" : \"" + randomCode + "\"," + "\"email\" : \"" + randomCode + "@gmail.com\" , "
+				+ "\"enabled\" : true, " + "\"emailVerified\" : true, " + "\"firstName\" : \"" + randomCode + "\", "
+				+ "\"lastName\" : \"" + randomCode + "\", " + "\"groups\" : [" + " \"users\" " + "],"
+				+ "\"realmRoles\" : [" + "\"user\" " + "]" + "}";
+
+		log.info("CreateUserjsonDummy="+json);
+		
+		HttpClient httpClient = new DefaultHttpClient();
+		//log.info("Keycloak token used is "+token);
+		try {
+			HttpPost post = new HttpPost(keycloakUrl + "/auth/admin/realms/" + realm + "/users");
+			// HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl +
+			// "/auth/admin/realms/"+realm+"/users"));
+
+			post.addHeader("Content-Type", "application/json");
+			post.addHeader("Authorization", "Bearer " + token);
+
+			StringEntity postingString = new StringEntity(json);
+			post.setEntity(postingString);
+
+			HttpResponse response = httpClient.execute(post);
+
+			int statusCode = response.getStatusLine().getStatusCode();
+			log.info("StatusCode: " + statusCode);
+
+			HttpEntity entity = response.getEntity();
+			String content = null;
+			if (statusCode == 201) {
+				Header[] headers = response.getHeaders("Location");
+				String locationUrl = headers[0].getValue();
+				content = locationUrl.replaceFirst(".*/(\\w+)", "$1");
+				String keycloakUserId = getKeycloakUserId(token, realm, randomCode);
+                log.info("Keycloak User ID: " + keycloakUserId);
+                return keycloakUserId;
+			} else if (statusCode == 204) {
+				Header[] headers = response.getHeaders("Location");
+				String locationUrl = headers[0].getValue();
+				content = locationUrl.replaceFirst(".*/(\\w+)", "$1");
+				String keycloakUserId = getKeycloakUserId(token, realm, randomCode);
+                log.info("Keycloak User ID: " + keycloakUserId);
+                return keycloakUserId;
+			} else if (statusCode == 409) {
+				//throw new IOException("Email is already taken. Please use a different email address.");
+				log.warn("Email is already taken for "+randomCode);
+				// fetch existing email user
+				String userId = getKeycloakUserId(token, realm, randomCode);
+				return userId;
+			} else if (statusCode == 401) {
+				//throw new IOException("Account is already taken. Please use a different email address.");
+				log.warn("Unauthorized token used to create "+randomCode);
+				// fetch existing email user
+				String userId = getKeycloakUserId(token, realm, randomCode);
+				return userId;
+			}
+			if (entity == null) {
+				throw new IOException("We could not create the new user. Please try again.");
+			} else {
+				String keycloakUserId = getKeycloakUserId(token, realm, randomCode);
+	              log.info("Keycloak User ID: " + keycloakUserId);
+	              return keycloakUserId;
+			}
+		}
+
+		finally {
+			httpClient.getConnectionManager().shutdown();
+		}
+	}
+	
+	
+	// This is the one called from rules to create a keycloak user
+	public static String updateUser(String keycloakUUID,String token, String realm, String newUsername,
+			String newFirstname, String newLastname, String newEmail, String password,String newRealmRoles, String newGroupRoles)
+			throws IOException {
+		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
+		keycloakUUID = keycloakUUID.toLowerCase();
+	
+		String json = "{ " +  "\"username\" : \"" + newUsername + "\"," + "\"email\" : \"" + newEmail + "\" , "
+				+ "\"enabled\" : true, " + "\"emailVerified\" : true, " + "\"firstName\" : \"" + newFirstname + "\", "
+				+ "\"lastName\" : \"" + newLastname + "\", " + "\"groups\" : [" + " \"" + newGroupRoles + "\" " + "],"
+				+ "\"realmRoles\" : [" + "\"" + newRealmRoles + "\" " + "]" + "}";
+
+		log.info("CreateUserjson="+json);
+		
+		HttpClient httpClient = new DefaultHttpClient();
+		//log.info("Keycloak token used is "+token);
+		try {
+			HttpPut post = new HttpPut(keycloakUrl + "/auth/admin/realms/" + realm + "/users/"+keycloakUUID);
+			// HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl +
+			// "/auth/admin/realms/"+realm+"/users"));
+
+			post.addHeader("Content-Type", "application/json");
+			post.addHeader("Authorization", "Bearer " + token);
+
+			StringEntity postingString = new StringEntity(json);
+			post.setEntity(postingString);
+
+			HttpResponse response = httpClient.execute(post);
+
+			int statusCode = response.getStatusLine().getStatusCode();
+			log.info("StatusCode: " + statusCode);
+
+			HttpEntity entity = response.getEntity();
+			String content = null;
+			if (statusCode == 201) {
+					KeycloakUtils.setPassword(token,  realm, keycloakUUID, password);
+               return keycloakUUID;
+			} else if (statusCode == 204) {
+				KeycloakUtils.setPassword(token,  realm, keycloakUUID, password);
+                return keycloakUUID;
+			} else if (statusCode == 409) {
+				//throw new IOException("Email is already taken. Please use a different email address.");
+				log.warn("Email is already taken for "+newUsername);
+				// fetch existing email user
+				return keycloakUUID;
+			} else if (statusCode == 401) {
+				//throw new IOException("Account is already taken. Please use a different email address.");
+				log.warn("Unauthorized token used to create "+newUsername);
+				// fetch existing email user
+				return keycloakUUID;
+			}
+			if (entity == null) {
+				throw new IOException("We could not create the new user. Please try again.");
+			} else {
+	              log.info("Keycloak User ID: " + keycloakUUID);
+	              return keycloakUUID;
+			}
+		}
+
+		finally {
+			httpClient.getConnectionManager().shutdown();
+		}
+	}
+	
 	// This is the one called from rules to create a keycloak user
 	public static String createUser(String keycloakUUID,String token, String realm, String newUsername,
 			String newFirstname, String newLastname, String newEmail, String password,String newRealmRoles, String newGroupRoles)
