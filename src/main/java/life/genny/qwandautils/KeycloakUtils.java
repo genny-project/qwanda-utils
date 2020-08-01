@@ -393,13 +393,25 @@ public class KeycloakUtils {
 				newFirstname,newLastname, newEmail, password,newRealmRoles, newGroupRoles);
 	}
 
-
+	// This is the one called from rules to create a keycloak user
 	public static String createUser(String token, String realm, String newUsername,
+			String newFirstname, String newLastname, String newEmail, String password,String newRealmRoles, String newGroupRoles)
+			throws IOException {
+		return createUser(null,token, realm, newUsername,
+				newFirstname, newLastname, newEmail, password,newRealmRoles, newGroupRoles);
+	}
+
+	// This is the one called from rules to create a keycloak user
+	public static String createUser(String keycloakUUID,String token, String realm, String newUsername,
 			String newFirstname, String newLastname, String newEmail, String password,String newRealmRoles, String newGroupRoles)
 			throws IOException {
 		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
 		
-		String json = "{ " + "\"username\" : \"" + newUsername + "\"," + "\"email\" : \"" + newEmail + "\" , "
+		String idJson = "";
+		if (!StringUtils.isBlank(keycloakUUID)) {
+			idJson = "\"id\" : \""+keycloakUUID.trim().toLowerCase() + "\",";
+		}
+		String json = "{ " + idJson+ "\"username\" : \"" + newUsername + "\"," + "\"email\" : \"" + newEmail + "\" , "
 				+ "\"enabled\" : true, " + "\"emailVerified\" : true, " + "\"firstName\" : \"" + newFirstname + "\", "
 				+ "\"lastName\" : \"" + newLastname + "\", " + "\"groups\" : [" + " \"" + newGroupRoles + "\" " + "],"
 				+ "\"realmRoles\" : [" + "\"" + newRealmRoles + "\" " + "]" + "}";
