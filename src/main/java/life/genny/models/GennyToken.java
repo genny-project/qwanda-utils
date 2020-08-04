@@ -77,8 +77,9 @@ public class GennyToken implements Serializable {
 				adecodedTokenMap.put("realm", realm);
 				this.token = token;
 				this.realm = realm;
+				String uuid = adecodedTokenMap.get("sub").toString();
 				String username = (String) adecodedTokenMap.get("preferred_username");
-				String normalisedUsername = QwandaUtils.getNormalisedUsername(username);
+				String normalisedUsername = QwandaUtils.getNormalisedUsername(uuid);
 				//this.userCode = "PER_" + this.getUuid().toUpperCase(); //normalisedUsername.toUpperCase();
 				this.userCode = "PER_" + normalisedUsername.toUpperCase();
 				setupRoles();
@@ -164,11 +165,15 @@ public class GennyToken implements Serializable {
 		jwtToken = SecurityUtils.createJwt(id, issuer, subject, ttl, secret, adecodedTokenMap);
 		token = jwtToken;
 		this.realm = realm;
-		String normalisedUsername = QwandaUtils.getNormalisedUsername(username);
+		if ("service".equals(username)) {
+			this.userCode = "PER_SERVICE";
+		} else {
+		String normalisedUsername = QwandaUtils.getNormalisedUsername(id);
 		if (normalisedUsername.toUpperCase().startsWith("PER_")) {
 			this.userCode = normalisedUsername.toUpperCase();
 		} else {
-			this.userCode = "PER_" + normalisedUsername.toUpperCase();
+			this.userCode = "PER_" + id.toUpperCase();
+		}
 		}
 
 		this.code = code;
@@ -242,6 +247,11 @@ public class GennyToken implements Serializable {
 
 	public String getSessionCode() {
 		return getString("session_state");
+	}
+	
+	
+	public String getUsername() {
+		return getString("preferred_username");
 	}
 	
 	public String getKeycloakUrl() {

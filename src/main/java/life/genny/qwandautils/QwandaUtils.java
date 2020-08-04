@@ -460,7 +460,7 @@ public class QwandaUtils {
 			final String keycloakId, HashMap<String, String> attributes, Link[] links) throws IOException {
 
 		String uname = getNormalisedUsername(username);
-		String code = "PER_" + uname.toUpperCase();
+		String code = "PER_" + keycloakId.toUpperCase();
 		log.info("Creating User:"+username);
         log.info("Project realm: "+realm);
 
@@ -552,7 +552,8 @@ public class QwandaUtils {
 		String username = decodedToken.getString("preferred_username");
 
 		String uname = getNormalisedUsername(username);
-		String code = "PER_" + uname.toUpperCase();
+		String keycloakUuid = decodedToken.getString("sub");
+		String code = "PER_" + keycloakUuid.toUpperCase();
 
 		log.info("username ::" + username);
 		log.info("uname::" + uname);
