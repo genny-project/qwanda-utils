@@ -282,6 +282,10 @@ public class GennyToken implements Serializable {
 		return userCode;
 	}
 
+	public String setUserCode(String userCode) {
+		return this.userCode = userCode;
+	}
+
 	public String getUserUUID() {
 		return userUUID;
 	}
