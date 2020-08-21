@@ -95,6 +95,7 @@ public class MergeUtil {
 				/* we split the text to merge into 2 components: BE.PRI... becomes [BE, PRI...] */
 				String[] entityArr = mergeText.split("\\.");
 				String keyCode = entityArr[0];
+				System.out.println(keyCode);
 				
 				if((entityArr.length == 0))
 					return DEFAULT;
@@ -108,8 +109,10 @@ public class MergeUtil {
 						BaseEntity be = (BaseEntity)value;
 
 						String attributeCode = entityArr[1];
+						System.out.println(attributeCode);
 						
 						Object attributeValue = be.getValue(attributeCode, null);
+						System.out.println(attributeValue);
 						
 						if(attributeValue instanceof org.javamoney.moneta.Money) {
 							log.info("price attributes 1");
