@@ -82,7 +82,7 @@ public class GennyToken implements Serializable {
 				String username = (String) adecodedTokenMap.get("preferred_username");
 				String normalisedUsername = QwandaUtils.getNormalisedUsername(username);
 				this.userUUID = "PER_" + this.getUuid().toUpperCase(); //normalisedUsername.toUpperCase();
-				this.userCode = "PER_" + normalisedUsername.toUpperCase(); //normalisedUsername.toUpperCase();
+				this.userCode = userUUID; //"PER_" + normalisedUsername.toUpperCase(); //normalisedUsername.toUpperCase();
 				setupRoles();
 			}
 
@@ -280,6 +280,7 @@ public class GennyToken implements Serializable {
 	 */
 	public String getUserCode() {
 		return userCode;
+		//return "PER_"+this.userUUID.toUpperCase();
 	}
 
 	public String setUserCode(String userCode) {
