@@ -100,6 +100,9 @@ public class GennyToken implements Serializable {
 
 		this(token);
 		this.code = code;
+		if ("PER_SERVICE".equals(code)) {
+			this.userCode = code;
+		}
 	}
 
 	public GennyToken(final String code, final String id, final String issuer, final String subject, final long ttl,
