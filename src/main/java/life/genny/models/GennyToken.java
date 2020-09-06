@@ -82,7 +82,11 @@ public class GennyToken implements Serializable {
 				String username = (String) adecodedTokenMap.get("preferred_username");
 				String normalisedUsername = QwandaUtils.getNormalisedUsername(username);
 				this.userUUID = "PER_" + this.getUuid().toUpperCase(); //normalisedUsername.toUpperCase();
-				this.userCode = userUUID; //"PER_" + normalisedUsername.toUpperCase(); //normalisedUsername.toUpperCase();
+				if ("service".equals(username)) {
+					this.userCode = "PER_SERVICE";
+				} else {
+					this.userCode = userUUID; //"PER_" + normalisedUsername.toUpperCase(); //normalisedUsername.toUpperCase();
+				}
 				setupRoles();
 			}
 
@@ -169,12 +173,12 @@ public class GennyToken implements Serializable {
 		if ("service".equals(username)) {
 			this.userCode = "PER_SERVICE";
 		} else {
-		String normalisedUsername = QwandaUtils.getNormalisedUsername(id);
-		if (normalisedUsername.toUpperCase().startsWith("PER_")) {
-			this.userCode = normalisedUsername.toUpperCase();
-		} else {
+//		String normalisedUsername = QwandaUtils.getNormalisedUsername(id);
+//		if (normalisedUsername.toUpperCase().startsWith("PER_")) {
+//			this.userCode = normalisedUsername.toUpperCase();
+//		} else {
 			this.userCode = "PER_" + id.toUpperCase();
-		}
+//		}
 		}
 
 		this.code = code;
