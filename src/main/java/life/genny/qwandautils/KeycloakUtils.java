@@ -39,6 +39,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
@@ -62,6 +63,7 @@ import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.message.QDataRegisterMessage;
 import life.genny.qwandautils.KeycloakService;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 
 public class KeycloakUtils {
@@ -879,5 +881,55 @@ public class KeycloakUtils {
 		String emailusername = username + "+" + mydatetime + "@" + domain;
 
 		sendVerifyTestMail(token,emailusername, firstname, lastname);
+	}
+
+	public static String getKeycloakUUIDByUserCode(String code,  HashMap<String, String> userCodeUUIDMapping) {
+		String keycloakUUID = null;
+		if (userCodeUUIDMapping.containsKey(code)) {
+			keycloakUUID = userCodeUUIDMapping.get(code);
+			log.info(String.format("DEBUG:Find user baseentity code:%s, update to keycloak uuid:%s",
+					code , keycloakUUID));
+		} else {
+			keycloakUUID = code;
+			log.error(String.format("DEBUG:Can not find user baseentity code:%s, set keycloak uuid:%s",
+					code , keycloakUUID));
+		}
+		return keycloakUUID;
+	}
+
+	public static HashMap<String, String> getUsersByRealm(String keycloakUrl, String realm) {
+	    HashMap<String, String>  userCodeUUIDMapping = new HashMap<>();
+		List<LinkedHashMap> results = new ArrayList<>();
+
+		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+			String accessToken = getAccessToken(keycloakUrl, "master", "admin-cli", null,
+					"admin", System.getenv("KEYCLOAK_PASSWORD"));
+			HttpGet get = new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm + "/users?first=0&max=20000");
+			get.addHeader("Authorization", "Bearer " + accessToken);
+			HttpResponse response = client.execute(get);
+			if (response.getStatusLine().getStatusCode() != 200) {
+					throw new IOException("Get keycloak user response code:" + response.getStatusLine().getStatusCode());
+			}
+			HttpEntity entity = response.getEntity();
+			InputStream is = entity.getContent();
+			results = JsonSerialization.readValue(is, (new ArrayList<UserRepresentation>()).getClass());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		for (LinkedHashMap userMap : results) {
+			String username = (String) userMap.get("username");
+			String email = (String) userMap.get("email");
+			String code = QwandaUtils.getNormalisedUsername("PER_" + username);
+			String id = (String) userMap.get("id");
+			String uuid = "PER_" + id.toUpperCase();
+			if (userCodeUUIDMapping.containsKey(code)) {
+			    log.error(String.format("Duplicate user in keycloak, user code:%s, user name:%s, email:%s.",
+						code, username, email));
+			} else {
+				userCodeUUIDMapping.put(code, uuid);
+			}
+		}
+		return userCodeUUIDMapping;
 	}
 }
