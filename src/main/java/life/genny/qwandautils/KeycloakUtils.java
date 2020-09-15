@@ -887,11 +887,11 @@ public class KeycloakUtils {
 		String keycloakUUID = null;
 		if (userCodeUUIDMapping.containsKey(code)) {
 			keycloakUUID = userCodeUUIDMapping.get(code);
-			log.info(String.format("DEBUG:BaseEntityAttribute:Find user baseentity code:%s, update to keycloak uuid:%s",
+			log.info(String.format("DEBUG:Find user baseentity code:%s, update to keycloak uuid:%s",
 					code , keycloakUUID));
 		} else {
 			keycloakUUID = code;
-			log.error(String.format("DEBUG:BaseEntityAttribute:Can not find user baseentity code:%s, set keycloak uuid:%s",
+			log.error(String.format("DEBUG:Can not find user baseentity code:%s, set keycloak uuid:%s",
 					code , keycloakUUID));
 		}
 		return keycloakUUID;
