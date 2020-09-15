@@ -894,8 +894,6 @@ public class KeycloakUtils {
 			log.error(String.format("DEBUG:BaseEntityAttribute:Can not find user baseentity code:%s, set keycloak uuid:%s",
 					code , keycloakUUID));
 		}
-		log.info(String.format("DEBUG:BaseEntityAttribute:Found user baseentity code:%s, update to keycloak uuid:%s",
-				code , keycloakUUID));
 		return keycloakUUID;
 	}
 
