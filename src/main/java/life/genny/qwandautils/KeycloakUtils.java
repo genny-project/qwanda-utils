@@ -897,13 +897,12 @@ public class KeycloakUtils {
 		return keycloakUUID;
 	}
 
-	public static HashMap<String, String> getUsersByRealm(String keycloakUrl, String realm) {
+	public static HashMap<String, String> getUsersByRealm(String keycloakUrl, String realm, String servicePassword) {
 	    HashMap<String, String>  userCodeUUIDMapping = new HashMap<>();
 		List<LinkedHashMap> results = new ArrayList<>();
 
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-			String accessToken = getAccessToken(keycloakUrl, "master", "admin-cli", null,
-					"admin", System.getenv("KEYCLOAK_PASSWORD"));
+			String accessToken = getAccessToken(keycloakUrl, realm, "admin-cli", null, "service", servicePassword);
 			HttpGet get = new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm + "/users?first=0&max=20000");
 			get.addHeader("Authorization", "Bearer " + accessToken);
 			HttpResponse response = client.execute(get);
