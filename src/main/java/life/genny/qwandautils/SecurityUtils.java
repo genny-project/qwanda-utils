@@ -30,7 +30,7 @@ public class SecurityUtils {
 
 	public static String encrypt(String key, String initVector, String value) {
 		try {
-			value = value.substring(0,16);
+			value = value.substring(0,value.length()>16?16:value.length());
 			IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
 			SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
 
