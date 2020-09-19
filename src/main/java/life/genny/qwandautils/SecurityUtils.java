@@ -29,8 +29,9 @@ public class SecurityUtils {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	public static String encrypt(String key, String initVector, String value) {
+		value = value.substring(0,value.length()>16?16:value.length());
 		try {
-			value = value.substring(0,value.length()>16?16:value.length());
+			
 			IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
 			SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
 
@@ -38,11 +39,11 @@ public class SecurityUtils {
 			cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
 
 			byte[] encrypted = cipher.doFinal(value.getBytes());
-			log.info("encrypted string: " + Base64.encodeBase64String(encrypted));
+			log.info(value+" encrypted string: " + Base64.encodeBase64String(encrypted));
 
 			return Base64.encodeBase64String(encrypted);
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			log.error("Error encrypting :["+value+"]");
 		}
 
 		return null;
