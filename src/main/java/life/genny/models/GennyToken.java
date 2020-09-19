@@ -400,6 +400,9 @@ public class GennyToken implements Serializable {
 		return userRoles;
 	}
 
-	
+	public String getRealmUserCode()
+	{
+		return getRealm() + "+" + getUserCode();
+	}
 	
 }
