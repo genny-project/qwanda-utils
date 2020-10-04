@@ -12,6 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 
 import io.jsonwebtoken.JwtBuilder;
@@ -37,7 +38,6 @@ public class SecurityUtils {
 
 			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 			cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
-
 			byte[] encrypted = cipher.doFinal(value.getBytes());
 			log.info(value+" encrypted string: " + Base64.encodeBase64String(encrypted));
 
