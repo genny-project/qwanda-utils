@@ -21,8 +21,12 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -1577,5 +1581,18 @@ public class QwandaUtils {
 
 		}
 		return null;
+	}
+	
+	public static boolean isValidAbnFormat(final String abn) {
+	    if(NumberUtils.isDigits(abn) && abn.length() != 11) {
+	        return false;
+	    }
+	    final int[] weights = {10, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19};
+	    //split abn number string by digits to get int array
+	    int [] abnDigits =  Stream.of(abn.split("\\B")).mapToInt(Integer::parseInt).toArray();
+	    //reduce by applying weight[index] * abnDigits[index] (NOTE: substract 1 for the first digit in abn number)
+	    int sum = IntStream.range( 0, weights.length )
+	            .reduce(0, (total, idx) -> total + weights[idx] * (idx == 0 ? abnDigits[idx] - 1 : abnDigits[idx]));
+	    return (sum % 89 == 0);
 	}
 }
