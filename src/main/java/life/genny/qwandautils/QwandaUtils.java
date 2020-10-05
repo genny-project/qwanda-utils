@@ -21,6 +21,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -1595,4 +1597,43 @@ public class QwandaUtils {
 	            .reduce(0, (total, idx) -> total + weights[idx] * (idx == 0 ? abnDigits[idx] - 1 : abnDigits[idx]));
 	    return (sum % 89 == 0);
 	}
+	
+	public static Boolean checkPhone(String phonenum)
+	{
+		return checkregex(phonenum,"^(\\d{2}){0,1}((0{0,1}[2|3|7|8]{1}[ \\-]*(\\d{4}\\d{4}))|(\\d{2}){0,1}(1[ \\-]{0,1}(300|800|900|902)[ \\-]{0,1}((\\d{6})|(\\d{3}\\d{3})))|(13[ \\-]{0,1}([\\d \\-]{4})|((\\d{0,2})0{0,1}4{1}[\\d \\-]{8,10})))$");
+	}
+	
+	public static Boolean checkregex(String input, String regex)
+	{
+		  
+
+	      // Create a Pattern object
+	      Pattern r = Pattern.compile(regex);
+
+	      // Now create matcher object.
+	      Matcher m = r.matcher(input);
+	      if (m.find( )) {
+	    	  return true;
+	      }
+	      return false;
+	}
+	
+	public static String normalisePhone(String phonenumber) {
+		if (phonenumber != null) {
+			phonenumber = StringUtils.deleteWhitespace(phonenumber);
+			/* remove all non digits */
+			phonenumber = phonenumber.replaceAll("[^\\d]", "");
+			if (!phonenumber.startsWith("+")) {
+				if (phonenumber.startsWith("0")) {
+					phonenumber = "61" + phonenumber.substring(1); /* remove the 0 and assume Australian */
+				} else if (phonenumber.startsWith("610")) {
+					phonenumber = "61" + phonenumber.substring(3); /* remove the 0 and assume Australian */
+				}
+			}
+
+		}
+
+		return phonenumber;
+	}
+
 }
