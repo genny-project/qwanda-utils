@@ -307,8 +307,10 @@ public class QwandaUtils {
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpDeleteWithBody request = new HttpDeleteWithBody(deleteUrl);
 		request.setHeader("Content-Type", "application/json; charset=UTF-8");
-		StringEntity deleteEntity = new StringEntity(entityString, "UTF-8");
-        request.setEntity(deleteEntity);
+		if (!StringUtils.isBlank(entityString)) { 
+			StringEntity deleteEntity = new StringEntity(entityString, "UTF-8");
+			request.setEntity(deleteEntity);
+		}
 		if (authToken != null) {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 		}
