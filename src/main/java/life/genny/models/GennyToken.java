@@ -282,6 +282,10 @@ public class GennyToken implements Serializable {
 		return getString("aud");
 	}
 
+	public String getEmail() {
+		return getString("email");
+	}
+	
 	/**
 	 * @return the userCode
 	 */
