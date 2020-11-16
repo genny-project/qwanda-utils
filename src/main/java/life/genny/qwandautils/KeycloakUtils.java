@@ -931,4 +931,72 @@ public class KeycloakUtils {
 		}
 		return userCodeUUIDMapping;
 	}
+	
+	public static String getImpersonatedToken(String keycloakUrl, String realm, String clientId,String secret, String requested_subject, String exchangedToken) throws IOException {
+
+		HttpClient httpClient = new DefaultHttpClient();
+
+		try {
+
+			URI uri = new URI(keycloakUrl+"/auth/realms/"+realm+"/protocol/openid-connect/token");
+			HttpPost post = new HttpPost(uri);
+
+			post.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+			List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+			
+			log.info("===================== Generating new token (KeycloakUtils) =====================");
+
+			/* if we have a refresh token */
+
+			/* if we don't have a refresh token, we generate a new token using username and password */
+				formParams.add(new BasicNameValuePair("requested_subject", requested_subject));
+				formParams.add(new BasicNameValuePair("subject_token", exchangedToken));
+				log.info("using username");
+				formParams.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, "urn:ietf:params:oauth:grant-type:token-exchange"));
+				if (secret != null) {
+					formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_SECRET, secret));
+				}
+			formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_ID, clientId));
+			UrlEncodedFormEntity form = new UrlEncodedFormEntity(formParams, "UTF-8");
+
+			
+			
+			post.setEntity(form);
+
+			HttpResponse response = httpClient.execute(post);
+
+			int statusCode = response.getStatusLine().getStatusCode();
+			HttpEntity entity = response.getEntity();
+			String content = null;
+			if (statusCode != 200) {
+				content = getContent(entity);
+				throw new IOException("" + statusCode);
+			}
+			if (entity == null) {
+				throw new IOException("Null Entity");
+			} else {
+				content = getContent(entity);
+			}
+			
+			try {
+				
+				return content;
+			}
+			catch(Exception e) {
+				
+			}
+			
+		} catch (URISyntaxException e) {
+
+			httpClient.getConnectionManager().shutdown();
+			return null;
+		} finally {
+			httpClient.getConnectionManager().shutdown();
+		}
+		
+		return null;
+	}
+	
+	
 }
