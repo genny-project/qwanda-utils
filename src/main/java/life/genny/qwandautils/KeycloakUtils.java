@@ -480,6 +480,16 @@ public class KeycloakUtils {
 	
 	
 	// This is the one called from rules to create a keycloak user
+	public static String getUserToken(String keycloakUrl,String keycloakUUID, String serviceToken, String realm)
+			throws IOException {
+		keycloakUUID = keycloakUUID.toLowerCase();
+		
+
+		return KeycloakUtils.getImpersonatedToken(keycloakUrl, realm, keycloakUUID, serviceToken);
+		
+	}
+	
+	// This is the one called from rules to create a keycloak user
 	public static String updateUser(String keycloakUUID,String token, String realm, String newUsername,
 			String newFirstname, String newLastname, String newEmail, String password,String newRealmRoles, String newGroupRoles)
 			throws IOException {
@@ -934,55 +944,60 @@ public class KeycloakUtils {
 	
 	public static String getImpersonatedToken(String keycloakUrl, String realm, String uuid, String exchangedToken) throws IOException {
 
-		HttpClient httpClient = new DefaultHttpClient();
+      	HttpClient httpClient = new DefaultHttpClient();
 
-		try {
+    		try {
+    			ArrayList<NameValuePair> postParameters;											
 
-			HttpPut post = new HttpPut(keycloakUrl + "/auth/admin/realms/" + realm + "/users/"+uuid+"/impersonation");
-
-			post.addHeader("Content-Type", "application/json");
-			post.addHeader("Authorization", "Bearer " + exchangedToken);
+       			HttpPost post = new HttpPost(keycloakUrl + "/auth/admin/realms/" + realm + "/users/"+uuid+"/impersonation");
 
 
-			HttpResponse response = httpClient.execute(post);
+       			post.addHeader("Content-Type", "application/json");
+    			post.addHeader("Authorization", "Bearer " + exchangedToken);
 
-			int statusCode = response.getStatusLine().getStatusCode();
-			log.info("StatusCode: " + statusCode);
+    			
+    			HttpResponse response = httpClient.execute(post);
 
-			HttpEntity entity = response.getEntity();
-			
-			String content = null;
-			if (statusCode != 200) {
-				content = getContent(entity);
-				throw new IOException("" + statusCode);
-			}
-			if (entity == null) {
-				throw new IOException("Null Entity");
-			} else {
-				content = getContent(entity);
-				
-   				Header[] cookies = response.getHeaders("Set-Cookie");
-				if (cookies.length>0) {
-					String token = cookies[0].getValue();
-					token = token.substring("KEYCLOAK_IDENTITY=".length());
-					log.info(token);
-					return token;
-				}
-			}
-			
-			try {
-				
-				return content;
-			}
-			catch(Exception e) {
-				
-			}
-			
-		} finally {
-			httpClient.getConnectionManager().shutdown();
-		}
-		
-		return null;
+    			int statusCode = response.getStatusLine().getStatusCode();
+    			log.info("StatusCode: " + statusCode);
+
+    			HttpEntity entity = response.getEntity();
+    			
+    			String content = null;
+    			if (statusCode != 200) {
+    				content = getContent(entity);
+    				throw new IOException("" + statusCode);
+    			}
+    			if (entity == null) {
+    				throw new IOException("Null Entity");
+    			} else {
+    				content = getContent(entity);
+    				Header[] cookies = response.getHeaders("Set-Cookie");
+    				if (cookies.length>0) {
+    					for (Header cookie : cookies) {
+    						String value = cookie.getValue();
+    						if (value.startsWith("KEYCLOAK_IDENTITY=")) {
+    							if (!value.startsWith("KEYCLOAK_IDENTITY=;")) {
+    								String token = cookie.getValue();
+    						
+    								token = token.substring("KEYCLOAK_IDENTITY=".length());
+    								log.info(token);
+    								return token;
+    							}
+    						}
+    					}
+    				}
+
+    			}
+    			
+//    				
+//    				System.out.println(content);
+    		} catch (Exception ee) {
+    		
+    		} finally {
+    			httpClient.getConnectionManager().shutdown();
+    		}
+    		return null;
 	}
 	
 	
