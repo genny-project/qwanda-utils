@@ -982,7 +982,9 @@ public class KeycloakUtils {
     						
     								token = token.substring("KEYCLOAK_IDENTITY=".length());
     								log.info(token);
-    								return token;
+    								JsonObject jsonToken = new JsonObject(token);
+    								String rawToken = jsonToken.getString("userTokenStr");
+    								return rawToken;
     							}
     						}
     					}
