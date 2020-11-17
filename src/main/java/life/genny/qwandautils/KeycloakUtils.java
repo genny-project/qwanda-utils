@@ -984,6 +984,7 @@ public class KeycloakUtils {
     								log.info(token);
     								JsonObject jsonToken = new JsonObject(token);
     								String rawToken = jsonToken.getString("userTokenStr");
+    								log.info("RAWTOKEN="+rawToken);
     								return rawToken;
     							}
     						}
