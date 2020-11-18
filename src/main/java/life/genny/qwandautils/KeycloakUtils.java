@@ -982,8 +982,9 @@ public class KeycloakUtils {
     						
     								token = token.substring("KEYCLOAK_IDENTITY=".length());
     								log.info(token);
-    								JsonObject jsonToken = new JsonObject(token);
-    								String rawToken = jsonToken.getString("userTokenStr");
+    								//JsonObject jsonToken = new JsonObject(token);
+    								String[] splitStr = token.split(";");//jsonToken.getString("userTokenStr");
+    								String rawToken = splitStr[0];
     								log.info("RAWTOKEN="+rawToken);
     								return rawToken;
     							}
