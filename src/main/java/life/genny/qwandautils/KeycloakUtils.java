@@ -959,7 +959,7 @@ public class KeycloakUtils {
     			HttpResponse response = httpClient.execute(post);
 
     			int statusCode = response.getStatusLine().getStatusCode();
-    			log.info("StatusCode: " + statusCode);
+    			log.info("KeycloakUtils: StatusCode: " + statusCode);
 
     			HttpEntity entity = response.getEntity();
     			
@@ -973,9 +973,12 @@ public class KeycloakUtils {
     			} else {
     				content = getContent(entity);
     				Header[] cookies = response.getHeaders("Set-Cookie");
+    				log.info("KeycloakUtils: getImpersonationToken before cookies");
     				if (cookies.length>0) {
+    					log.info("KeycloakUtils: getImpersonationToken cookies > 0");
     					for (Header cookie : cookies) {
     						String value = cookie.getValue();
+    						log.info("KeycloakUtils: getImpersonationToken cookie="+value);
     						if (value.startsWith("KEYCLOAK_IDENTITY=")) {
     							if (!value.startsWith("KEYCLOAK_IDENTITY=;")) {
     								String token = cookie.getValue();
