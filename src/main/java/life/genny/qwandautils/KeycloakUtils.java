@@ -1058,7 +1058,9 @@ public class KeycloakUtils {
     				} else {
     					content = getContent(entity);
     					log.info("IMPERSONATION2 content="+content);
-    					return content;
+    					JsonObject jsonToken = new JsonObject(content);
+    					String token = jsonToken.getString("access_token");
+    					return token;
 //    					Header[] cookies = response.getHeaders("Set-Cookie");
 //    					if (cookies.length > 0) {
 //    						for (Header cookie : cookies) {
