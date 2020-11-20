@@ -1026,7 +1026,10 @@ public class KeycloakUtils {
         			 postParameters = new ArrayList<NameValuePair>();
         			    postParameters.add(new BasicNameValuePair("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange"));
         			    postParameters.add(new BasicNameValuePair("client_id", clientId));
-        			    postParameters.add(new BasicNameValuePair("client_secret", secret));
+        			    if (secret != null) {
+        			    	postParameters.add(new BasicNameValuePair("client_secret", secret));
+        			    }
+        			    	postParameters.add(new BasicNameValuePair("client_auth_method","client-secret"));
         			    postParameters.add(new BasicNameValuePair("audience", "target-client"));
         			    postParameters.add(new BasicNameValuePair("requested_subject", username));
         			    postParameters.add(new BasicNameValuePair("requested_token_type", "urn:ietf:params:oauth:token-type:access_token"));
@@ -1047,7 +1050,7 @@ public class KeycloakUtils {
     				String content = null;
     				if (statusCode != 200) {
     					content = getContent(entity);
-    					throw new IOException("" + statusCode);
+    					throw new IOException("" + statusCode+" "+content);
     				}
     				if (entity == null) {
     					throw new IOException("Null Entity");
@@ -1075,7 +1078,7 @@ public class KeycloakUtils {
 //        				
 //        				System.out.println(content);
     			} catch (Exception ee) {
-
+    				System.out.println(ee.getMessage());
     			} finally {
     				httpClient.getConnectionManager().shutdown();
     			}
