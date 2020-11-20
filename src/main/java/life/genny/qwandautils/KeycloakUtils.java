@@ -1,12 +1,16 @@
 package life.genny.qwandautils;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -1007,5 +1011,109 @@ public class KeycloakUtils {
     		return null;
 	}
 	
+	public static String getImpersonatedToken(String keycloakUrl, String realm, String clientId, String secret, String username, String exchangedToken) throws IOException {
+
+      	HttpClient httpClient = new DefaultHttpClient();
+
+    		try {
+    			ArrayList<NameValuePair> postParameters;											
+
+
+
+    			try {
+//    				// this needs -Dkeycloak.profile.feature.token_exchange=enabled
+        			HttpPost post = new HttpPost(keycloakUrl + "/auth/realms/" + realm + "/protocol/openid-connect/token");
+        			 postParameters = new ArrayList<NameValuePair>();
+        			    postParameters.add(new BasicNameValuePair("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange"));
+        			    postParameters.add(new BasicNameValuePair("client_id", clientId));
+        			    postParameters.add(new BasicNameValuePair("client_secret", secret));
+        			    postParameters.add(new BasicNameValuePair("audience", "target-client"));
+        			    postParameters.add(new BasicNameValuePair("requested_subject", username));
+        			    postParameters.add(new BasicNameValuePair("requested_token_type", "urn:ietf:params:oauth:token-type:access_token"));
+        			    post.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
+     
+        			
+
+    				post.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    				post.addHeader("Authorization", "Bearer " + exchangedToken);
+
+    				HttpResponse response = httpClient.execute(post);
+
+    				int statusCode = response.getStatusLine().getStatusCode();
+    				log.info("StatusCode: " + statusCode);
+
+    				HttpEntity entity = response.getEntity();
+
+    				String content = null;
+    				if (statusCode != 200) {
+    					content = getContent(entity);
+    					throw new IOException("" + statusCode);
+    				}
+    				if (entity == null) {
+    					throw new IOException("Null Entity");
+    				} else {
+    					content = getContent(entity);
+    					log.info("IMPERSONATION2 content="+content);
+    					return content;
+//    					Header[] cookies = response.getHeaders("Set-Cookie");
+//    					if (cookies.length > 0) {
+//    						for (Header cookie : cookies) {
+//    							String value = cookie.getValue();
+//    							if (value.startsWith("KEYCLOAK_IDENTITY=")) {
+//    								if (!value.startsWith("KEYCLOAK_IDENTITY=;")) {
+//    									String token = cookie.getValue();
+//
+//    									token = token.substring("KEYCLOAK_IDENTITY=".length());
+//    									log.info(token);
+//    									// return token;
+//    								}
+//    							}
+//    						}
+//    					}
+    				}
+
+//        				
+//        				System.out.println(content);
+    			} catch (Exception ee) {
+
+    			} finally {
+    				httpClient.getConnectionManager().shutdown();
+    			}
+//    				
+//    				System.out.println(content);
+    		} catch (Exception ee) {
+    		
+    		} finally {
+    			httpClient.getConnectionManager().shutdown();
+    		}
+    		return null;
+	}
 	
+	public static String sendGET(String url, String token) throws IOException {
+		URL obj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+		con.setRequestMethod("GET");
+		con.addRequestProperty("Content-Type", "application/json");
+		con.addRequestProperty("Authorization", "Bearer " + token);
+
+		// con.setRequestProperty("User-Agent", USER_AGENT);
+		int responseCode = con.getResponseCode();
+		System.out.println("GET Response Code :: " + responseCode);
+		if (responseCode == HttpURLConnection.HTTP_OK) { // success
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+
+			// print result
+			return response.toString();
+		} else {
+			return null;
+		}
+
+	}
 }
