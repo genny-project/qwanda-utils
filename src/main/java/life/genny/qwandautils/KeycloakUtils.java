@@ -1023,16 +1023,17 @@ public class KeycloakUtils {
     			try {
 //    				// this needs -Dkeycloak.profile.feature.token_exchange=enabled
         			HttpPost post = new HttpPost(keycloakUrl + "/auth/realms/" + realm + "/protocol/openid-connect/token");
-        			 postParameters = new ArrayList<NameValuePair>();
+        			 postParameters = new ArrayList<NameValuePair>(); //         urn:ietf:params:oauth:grant-type:token-exchange
         			    postParameters.add(new BasicNameValuePair("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange"));
         			    postParameters.add(new BasicNameValuePair("client_id", clientId));
         			    if (secret != null) {
         			    	postParameters.add(new BasicNameValuePair("client_secret", secret));
         			    }
-        			    	postParameters.add(new BasicNameValuePair("client_auth_method","client-secret"));
-        			    postParameters.add(new BasicNameValuePair("audience", "target-client"));
+        			    postParameters.add(new BasicNameValuePair("subject_token", exchangedToken));
+        			 //   	postParameters.add(new BasicNameValuePair("client_auth_method","client-secret"));
+        			 //   postParameters.add(new BasicNameValuePair("audience", "target-client"));
         			    postParameters.add(new BasicNameValuePair("requested_subject", username));
-        			    postParameters.add(new BasicNameValuePair("requested_token_type", "urn:ietf:params:oauth:token-type:access_token"));
+        			 //   postParameters.add(new BasicNameValuePair("requested_token_type", "urn:ietf:params:oauth:token-type:access_token"));
         			    post.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
      
         			

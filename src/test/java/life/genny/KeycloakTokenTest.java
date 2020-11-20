@@ -15,13 +15,13 @@ public class KeycloakTokenTest {
 		String clientId = "internmatch";
 		
 		String secret = System.getenv("CLIENT_SECRET");
-		//secret = null;
+		String master_admin_secret = "9e6dedaf-46f1-4f79-8a76-4bd2a942fb2f";
 		String uuid = "5a666e64-021f-48ce-8111-be3d66901f9c";
 		String servicePassword = System.getenv("SERVICE_PASSWORD");
 		String adminPassword = System.getenv("KEYCLOAK_PASSWORD");
 		String realm = "internmatch";
 		try {
-			String accessToken = KeycloakUtils.getAccessToken(keycloakUrl, "internmatch", "internmatch", secret,
+			String accessToken = KeycloakUtils.getAccessToken(keycloakUrl, "internmatch", "internmatch",secret,
 					"service", servicePassword);
 
 //    	String userTokenStr = KeycloakUtils.getUserToken(keycloakUrl,uuid, serviceTokenStr, "internmatch");
@@ -41,9 +41,9 @@ public class KeycloakTokenTest {
 			String exchangedToken =accessToken;
 			
 			
-			String userToken = KeycloakUtils.getImpersonatedToken(keycloakUrl,
-					realm,uuid, accessToken);
-			System.out.println("IMPERSONATE 1 "+userToken);
+			String userToken =null;//KeycloakUtils.getImpersonatedToken(keycloakUrl,
+					//realm,uuid, accessToken);
+		//	System.out.println("IMPERSONATE 1 "+userToken);
 			userToken = KeycloakUtils.getImpersonatedToken(keycloakUrl,
 			realm,clientId,secret, uuid, accessToken);
 
