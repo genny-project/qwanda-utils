@@ -64,6 +64,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.json.JsonObject;
 import life.genny.models.GennyToken;
 import life.genny.qwanda.attribute.AttributeLink;
+import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.Group;
 import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.exception.BadDataException;
@@ -953,69 +954,83 @@ public class KeycloakUtils {
 		return userCodeUUIDMapping;
 	}
 	
-	public static String getImpersonatedToken(String keycloakUrl, String realm, String uuid, String exchangedToken) throws IOException {
+	public static String getImpersonatedToken(String keycloakUrl, String realm, BaseEntity project, String uuid, String exchangedToken) throws IOException {
 
-      	HttpClient httpClient = new DefaultHttpClient();
-
-    		try {
-    			ArrayList<NameValuePair> postParameters;											
-
-       			HttpPost post = new HttpPost(keycloakUrl + "/auth/admin/realms/" + realm + "/users/"+uuid+"/impersonation");
-
-
-       			post.addHeader("Content-Type", "application/json");
-    			post.addHeader("Authorization", "Bearer " + exchangedToken);
-
-    			
-    			HttpResponse response = httpClient.execute(post);
-
-    			int statusCode = response.getStatusLine().getStatusCode();
-    			log.info("KeycloakUtils: StatusCode: " + statusCode);
-
-    			HttpEntity entity = response.getEntity();
-    			
-    			String content = null;
-    			if (statusCode != 200) {
-    				content = getContent(entity);
-    				throw new IOException("" + statusCode);
-    			}
-    			if (entity == null) {
-    				throw new IOException("Null Entity");
-    			} else {
-    				content = getContent(entity);
-    				Header[] cookies = response.getHeaders("Set-Cookie");
-    				log.info("KeycloakUtils: getImpersonationToken before cookies");
-    				if (cookies.length>0) {
-    					log.info("KeycloakUtils: getImpersonationToken cookies > 0");
-    					for (Header cookie : cookies) {
-    						String value = cookie.getValue();
-    						log.info("KeycloakUtils: getImpersonationToken cookie="+value);
-    						if (value.startsWith("KEYCLOAK_IDENTITY=")) {
-    							if (!value.startsWith("KEYCLOAK_IDENTITY=;")) {
-    								String token = cookie.getValue();
-    						
-    								token = token.substring("KEYCLOAK_IDENTITY=".length());
-    								log.info(token);
-    								//JsonObject jsonToken = new JsonObject(token);
-    								String[] splitStr = token.split(";");//jsonToken.getString("userTokenStr");
-    								String rawToken = splitStr[0];
-    								log.info("RAWTOKEN="+rawToken);
-    								return rawToken;
-    							}
-    						}
-    					}
-    				}
-
-    			}
-    			
-//    				
-//    				System.out.println(content);
-    		} catch (Exception ee) {
-    		
-    		} finally {
-    			httpClient.getConnectionManager().shutdown();
-    		}
-    		return null;
+		String keycloakJson = project.getValueAsString("ENV_KEYCLOAK_JSON");
+		JsonObject json = JsonUtils.fromJson(keycloakJson, JsonObject.class);
+		JsonObject credentials = json.getJsonObject("credentials");
+		String secret = credentials.getString("secret");
+		
+		return  getImpersonatedToken(keycloakUrl, realm, realm, secret, uuid, exchangedToken);
+		
+//      	HttpClient httpClient = 
+//      			
+//      			
+//      			
+//      			
+//      			
+//      			
+//      			new DefaultHttpClient();
+//
+//    		try {
+//    			ArrayList<NameValuePair> postParameters;											
+//
+//       			HttpPost post = new HttpPost(keycloakUrl + "/auth/admin/realms/" + realm + "/users/"+uuid+"/impersonation");
+//
+//
+//       			post.addHeader("Content-Type", "application/json");
+//    			post.addHeader("Authorization", "Bearer " + exchangedToken);
+//
+//    			
+//    			HttpResponse response = httpClient.execute(post);
+//
+//    			int statusCode = response.getStatusLine().getStatusCode();
+//    			log.info("KeycloakUtils: StatusCode: " + statusCode);
+//
+//    			HttpEntity entity = response.getEntity();
+//    			
+//    			String content = null;
+//    			if (statusCode != 200) {
+//    				content = getContent(entity);
+//    				throw new IOException("" + statusCode);
+//    			}
+//    			if (entity == null) {
+//    				throw new IOException("Null Entity");
+//    			} else {
+//    				content = getContent(entity);
+//    				Header[] cookies = response.getHeaders("Set-Cookie");
+//    				log.info("KeycloakUtils: getImpersonationToken before cookies");
+//    				if (cookies.length>0) {
+//    					log.info("KeycloakUtils: getImpersonationToken cookies > 0");
+//    					for (Header cookie : cookies) {
+//    						String value = cookie.getValue();
+//    						log.info("KeycloakUtils: getImpersonationToken cookie="+value);
+//    						if (value.startsWith("KEYCLOAK_IDENTITY=")) {
+//    							if (!value.startsWith("KEYCLOAK_IDENTITY=;")) {
+//    								String token = cookie.getValue();
+//    						
+//    								token = token.substring("KEYCLOAK_IDENTITY=".length());
+//    								log.info(token);
+//    								//JsonObject jsonToken = new JsonObject(token);
+//    								String[] splitStr = token.split(";");//jsonToken.getString("userTokenStr");
+//    								String rawToken = splitStr[0];
+//    								log.info("RAWTOKEN="+rawToken);
+//    								return rawToken;
+//    							}
+//    						}
+//    					}
+//    				}
+//
+//    			}
+//    			
+////    				
+////    				System.out.println(content);
+//    		} catch (Exception ee) {
+//    		
+//    		} finally {
+//    			httpClient.getConnectionManager().shutdown();
+//    		}
+//    		return null;
 	}
 	
 	public static String getImpersonatedToken(String keycloakUrl, String realm, String clientId, String secret, String username, String exchangedToken) throws IOException {
