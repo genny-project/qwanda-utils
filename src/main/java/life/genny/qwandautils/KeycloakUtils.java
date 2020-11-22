@@ -28,6 +28,7 @@ import java.util.UUID;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +39,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -68,6 +70,7 @@ import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.message.QDataRegisterMessage;
 import life.genny.qwandautils.KeycloakService;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 
 
 public class KeycloakUtils {
@@ -414,10 +417,14 @@ public class KeycloakUtils {
 		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
 		
 		String randomCode = UUID.randomUUID().toString().substring(0, 18);
+		String randomPassword = UUID.randomUUID().toString().substring(0, 18);
 		String json = "{ " +"\"username\" : \"" + randomCode + "\"," + "\"email\" : \"" + randomCode + "@gmail.com\" , "
 				+ "\"enabled\" : true, " + "\"emailVerified\" : true, " + "\"firstName\" : \"" + randomCode + "\", "
 				+ "\"lastName\" : \"" + randomCode + "\", " + "\"groups\" : [" + " \"users\" " + "],"
-				+ "\"realmRoles\" : [" + "\"user\" " + "]" + "}";
+				+ "\"realmRoles\" : [\"user\"],\"credentials\": [{"
+			    +  "\"type\":\"password\","
+			    +  "\"value\":\""+randomPassword+"\","
+			    + "\"temporary\":true }]}";
 
 		log.info("CreateUserjsonDummy="+json);
 		
@@ -1094,6 +1101,28 @@ public class KeycloakUtils {
     		}
     		return null;
 	}
+	
+	
+	public static String executeActions(String keycloakUrl, String realm, String clientId, String secret, Integer lifespan, String uuid, String redirectUrl, List<String> actions, String exchangedToken) throws IOException {
+
+		CloseableHttpClient httpclient = HttpClients.createDefault();
+		String urlResetPassword = keycloakUrl+"/auth/admin/realms/"+realm+"/users/"+uuid+"/execute-actions-email";
+		HttpPut putRequest = new HttpPut(urlResetPassword);
+		putRequest.addHeader("Authorization", "bearer "+exchangedToken);
+		putRequest.addHeader("content-type", MediaType.APPLICATION_JSON);
+		putRequest.setHeader("Accept", MediaType.APPLICATION_JSON);
+		String actionsArray = "[";
+		for (String action : actions) {
+			actionsArray += "\""+action+"\",";
+		}
+		actionsArray = actionsArray.substring(0,actionsArray.length()-1);
+		actionsArray += "]";
+		StringEntity jSonEntity = new StringEntity(actionsArray);
+		putRequest.setEntity(jSonEntity);
+		CloseableHttpResponse response2 = httpclient.execute(putRequest);
+		return "OK";
+	}
+	
 	
 	public static String sendGET(String url, String token) throws IOException {
 		URL obj = new URL(url);
