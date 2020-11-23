@@ -61,18 +61,24 @@ public class GennyToken implements Serializable {
 			// Getting decoded token in Hash Map from QwandaUtils
 			adecodedTokenMap = KeycloakUtils.getJsonMap(token);
 			if (adecodedTokenMap == null) {
-				
+
 				log.error("Token is not able to be decoded in GennyToken ..");
 			} else {
 
 				// Extracting realm name from iss value
 
-				String realm = (adecodedTokenMap.get("azp").toString()); // clientid
-				if ((realm.equals("alyson"))) {
+				String realm = null;
+				if (adecodedTokenMap.get("iss") != null) {
 					String[] issArray = adecodedTokenMap.get("iss").toString().split("/");
-					realm = issArray[issArray.length-1];
-					//realm = (adecodedTokenMap.get("aud").toString()); // handle non Keycloak 6+
+					realm = issArray[issArray.length - 1];
+				} else if (adecodedTokenMap.get("azp") != null) {
+					realm = (adecodedTokenMap.get("azp").toString()); // clientid
 				}
+//				if ((realm.equals("alyson"))) {
+//					String[] issArray = adecodedTokenMap.get("iss").toString().split("/");
+//					realm = issArray[issArray.length-1];
+//					//realm = (adecodedTokenMap.get("aud").toString()); // handle non Keycloak 6+
+//				}
 
 				// Adding realm name to the decoded token
 				adecodedTokenMap.put("realm", realm);
@@ -81,11 +87,12 @@ public class GennyToken implements Serializable {
 				String uuid = adecodedTokenMap.get("sub").toString();
 				String username = (String) adecodedTokenMap.get("preferred_username");
 				String normalisedUsername = QwandaUtils.getNormalisedUsername(username);
-				this.userUUID = "PER_" + this.getUuid().toUpperCase(); //normalisedUsername.toUpperCase();
+				this.userUUID = "PER_" + this.getUuid().toUpperCase(); // normalisedUsername.toUpperCase();
 				if ("service".equals(username)) {
 					this.userCode = "PER_SERVICE";
 				} else {
-					this.userCode = userUUID; //"PER_" + normalisedUsername.toUpperCase(); //normalisedUsername.toUpperCase();
+					this.userCode = userUUID; // "PER_" + normalisedUsername.toUpperCase();
+												// //normalisedUsername.toUpperCase();
 				}
 				setupRoles();
 			}
@@ -112,7 +119,6 @@ public class GennyToken implements Serializable {
 				LocalDateTime.now().plusSeconds(24 * 60 * 60)); // 1 day expiry
 	}
 
-	
 	public GennyToken(final String code, final String id, final String issuer, final String subject, final long ttl,
 			final String secret, final String realm, final String username, final String name, final String role,
 			final LocalDateTime expiryDateTime) {
@@ -122,7 +128,7 @@ public class GennyToken implements Serializable {
 		if (username.contains("@")) {
 			adecodedTokenMap.put("email", username);
 		} else {
-			adecodedTokenMap.put("email", username+"@gmail.com");
+			adecodedTokenMap.put("email", username + "@gmail.com");
 		}
 		String[] names = name.split(" ");
 		adecodedTokenMap.put("given_name", names[0].trim());
@@ -132,7 +138,8 @@ public class GennyToken implements Serializable {
 		adecodedTokenMap.put("realm", realm);
 		adecodedTokenMap.put("azp", realm);
 		adecodedTokenMap.put("aud", realm);
-	//	adecodedTokenMap.put("realm_access", "{ \"roles\": [\"user\",\"" + role + "\"] }");
+		// adecodedTokenMap.put("realm_access", "{ \"roles\": [\"user\",\"" + role +
+		// "\"] }");
 		adecodedTokenMap.put("exp", expiryDateTime.atZone(ZoneId.of("UTC")).toEpochSecond());
 		adecodedTokenMap.put("iat", LocalDateTime.now().atZone(ZoneId.of("UTC")).toEpochSecond());
 		adecodedTokenMap.put("auth_time", LocalDateTime.now().atZone(ZoneId.of("UTC")).toEpochSecond());
@@ -151,10 +158,7 @@ public class GennyToken implements Serializable {
 //		      "supervisor"
 //		    ]
 //		  },
-		    
 
-
-		
 		ArrayJson rj = new ArrayJson();
 		userRoles.add("user");
 		rj.roles.add("user");
@@ -166,8 +170,6 @@ public class GennyToken implements Serializable {
 
 		adecodedTokenMap.put("realm_access", rj);
 
-		
-		
 		String jwtToken = null;
 
 		jwtToken = SecurityUtils.createJwt(id, issuer, subject, ttl, secret, adecodedTokenMap);
@@ -194,11 +196,12 @@ public class GennyToken implements Serializable {
 				LocalDateTime.now().plusSeconds(24 * 60 * 60));
 	}
 
-	public GennyToken(final String uuid,final String code, final String realm, final String username, final String name,
-			final String role, LocalDateTime expiryDateTime) {
+	public GennyToken(final String uuid, final String code, final String realm, final String username,
+			final String name, final String role, LocalDateTime expiryDateTime) {
 		this(code, uuid, "Genny Project", "Test JWT", 100000, "IamASecret", realm, username, name, role,
 				expiryDateTime);
 	}
+
 	public GennyToken(final String code, final String realm, final String username, final String name,
 			final String role, LocalDateTime expiryDateTime) {
 		this(code, "ABBCD", "Genny Project", "Test JWT", 100000, "IamASecret", realm, username, name, role,
@@ -218,16 +221,21 @@ public class GennyToken implements Serializable {
 	}
 
 	private void setupRoles() {
-		String realm_accessStr = adecodedTokenMap.get("realm_access").toString();
-		Pattern p = Pattern.compile("(?<=\\[)([^\\]]+)(?=\\])");
-		Matcher m = p.matcher(realm_accessStr);
+		String realm_accessStr = "";
+		if (adecodedTokenMap.get("realm_access") == null) {
+			userRoles.add("user");
+		} else {
+			realm_accessStr = adecodedTokenMap.get("realm_access").toString();
+			Pattern p = Pattern.compile("(?<=\\[)([^\\]]+)(?=\\])");
+			Matcher m = p.matcher(realm_accessStr);
 
-		if (m.find()) {
-			String[] roles = m.group(1).split(",");
-			for (String role : roles) {
-				userRoles.add((String) role.trim());
+			if (m.find()) {
+				String[] roles = m.group(1).split(",");
+				for (String role : roles) {
+					userRoles.add((String) role.trim());
+				}
+				;
 			}
-			;
 		}
 
 	}
@@ -256,21 +264,20 @@ public class GennyToken implements Serializable {
 	public String getSessionCode() {
 		return getString("session_state");
 	}
-	
-	
+
 	public String getUsername() {
 		return getString("preferred_username");
 	}
-	
+
 	public String getKeycloakUrl() {
 		String fullUrl = getString("iss");
 		URI uri;
 		try {
 			uri = new URI(fullUrl);
-			 String domain = uri.getHost();
-			 String proto = uri.getScheme();
-			 Integer port = uri.getPort();
-			 return proto+"://"+domain+":"+port;
+			String domain = uri.getHost();
+			String proto = uri.getScheme();
+			Integer port = uri.getPort();
+			return proto + "://" + domain + ":" + port;
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -285,13 +292,13 @@ public class GennyToken implements Serializable {
 	public String getEmail() {
 		return getString("email");
 	}
-	
+
 	/**
 	 * @return the userCode
 	 */
 	public String getUserCode() {
 		return userCode;
-		//return "PER_"+this.userUUID.toUpperCase();
+		// return "PER_"+this.userUUID.toUpperCase();
 	}
 
 	public String setUserCode(String userCode) {
@@ -332,7 +339,7 @@ public class GennyToken implements Serializable {
 
 		return utcZoned.toOffsetDateTime();
 	}
-	
+
 	@XmlTransient
 	@Transient
 	public Integer getSecondsUntilExpiry() {
@@ -363,14 +370,14 @@ public class GennyToken implements Serializable {
 	@XmlTransient
 	@Transient
 	public String getUuid() {
-		String uuid =  null;
-		
+		String uuid = null;
+
 		try {
 			uuid = (String) adecodedTokenMap.get("sub");
 		} catch (Exception e) {
 			log.info("Not a valid user");
 		}
-		
+
 		return uuid;
 	}
 
@@ -381,7 +388,7 @@ public class GennyToken implements Serializable {
 		String normalisedUsername = QwandaUtils.getNormalisedUsername(username);
 		return "PER_" + normalisedUsername.toUpperCase();
 
-	}	
+	}
 
 	@XmlTransient
 	@Transient
@@ -394,9 +401,8 @@ public class GennyToken implements Serializable {
 		}
 		return false;
 
-	}	
-	
-	
+	}
+
 	/**
 	 * @return the userRoles
 	 */
@@ -404,9 +410,8 @@ public class GennyToken implements Serializable {
 		return userRoles;
 	}
 
-	public String getRealmUserCode()
-	{
+	public String getRealmUserCode() {
 		return getRealm() + "+" + getUserCode();
 	}
-	
+
 }
