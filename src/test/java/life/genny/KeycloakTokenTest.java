@@ -7,6 +7,26 @@ import life.genny.qwandautils.KeycloakUtils;
 
 public class KeycloakTokenTest {
 
+	@Test
+	public void JsonKeycloakTest()
+	{
+		String keycloakJson = "{"+
+			  "\"realm\": \"internmatch\","+
+			  "\"auth-server-url\": \"https://keycloak.gada.io/auth\","+
+			  "\"ssl-required\": \"external\","+
+			  "\"resource\": \"internmatch\","+
+			  "\"credentials\": {"+
+			    "\"secret\": \"dc7d0960-2e1d-4a78-9eef-77472066dbd3\""+ 
+			  "},"+
+			  "\"policy-enforcer\": {}"+
+			"}";
+		
+		JsonObject json = new JsonObject(keycloakJson);
+		JsonObject credentials = json.getJsonObject("credentials");
+		String secret = credentials.getString("secret");
+		System.out.println(secret);
+		
+	}
 	
 	@Test
 	public void keycloakTokenTest()

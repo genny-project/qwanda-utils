@@ -957,7 +957,7 @@ public class KeycloakUtils {
 	public static String getImpersonatedToken(String keycloakUrl, String realm, BaseEntity project, String uuid, String exchangedToken) throws IOException {
 
 		String keycloakJson = project.getValueAsString("ENV_KEYCLOAK_JSON");
-		JsonObject json = JsonUtils.fromJson(keycloakJson, JsonObject.class);
+		JsonObject json = new JsonObject(keycloakJson);
 		JsonObject credentials = json.getJsonObject("credentials");
 		String secret = credentials.getString("secret");
 		
