@@ -1638,4 +1638,17 @@ public class QwandaUtils {
 		return phonenumber;
 	}
 
+	public static void updateAskTarget(Ask ask, String targetCode) {
+		if (targetCode != null) {
+			ask.setTargetCode(targetCode);
+		} else {
+			System.out.println("targetCode given is null, cannot set!");
+		}
+
+		if ((ask.getChildAsks() != null) && (ask.getChildAsks().length > 0)) {
+			for (Ask childAsk : ask.getChildAsks()) {
+				updateAskTarget(childAsk, targetCode);
+			}
+		}
+	}
 }
