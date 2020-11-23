@@ -492,14 +492,14 @@ public class KeycloakUtils {
 	
 	
 	// This is the one called from rules to create a keycloak user
-	public static String getUserToken(String keycloakUrl,String keycloakUUID, String serviceToken, String realm)
-			throws IOException {
-		keycloakUUID = keycloakUUID.toLowerCase();
-		
-
-		return KeycloakUtils.getImpersonatedToken(keycloakUrl, realm, keycloakUUID, serviceToken);
-		
-	}
+//	public static String getUserToken(String keycloakUrl,String keycloakUUID, String serviceToken, String realm)
+//			throws IOException {
+//		keycloakUUID = keycloakUUID.toLowerCase();
+//		
+//
+//		return KeycloakUtils.getImpersonatedToken(keycloakUrl, realm, keycloakUUID, serviceToken);
+//		
+//	}
 	
 	// This is the one called from rules to create a keycloak user
 	public static String updateUser(String keycloakUUID,String token, String realm, String newUsername,
