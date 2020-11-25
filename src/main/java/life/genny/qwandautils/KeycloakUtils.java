@@ -737,10 +737,16 @@ public class KeycloakUtils {
 //						return keycloakURL;
 //	}
 
+	
 	public static int setPassword(String token,String realm, String userId, String password)
 			throws IOException {
+		return setPassword(token,realm,userId,password,false);
+	}	
+	
+	public static int setPassword(String token,String realm, String userId, String password, Boolean askUserToResetPassword)
+			throws IOException {
 		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
-		String json = "{\"type\": \"password\", " + "\"temporary\": false," + "\"value\": \"" + password + "\"" + "}";
+		String json = "{\"type\": \"password\", " + "\"temporary\": "+(askUserToResetPassword?"true":"false")+",\"value\": \"" + password + "\"" + "}";
 
 		HttpClient httpClient = new DefaultHttpClient();
 
