@@ -536,10 +536,10 @@ public class KeycloakUtils {
 			HttpEntity entity = response.getEntity();
 			String content = null;
 			if (statusCode == 201) {
-					KeycloakUtils.setPassword(token,  realm, keycloakUUID, password);
+					KeycloakUtils.setPassword(token,  realm, keycloakUUID, password, true);
                return keycloakUUID;
 			} else if (statusCode == 204) {
-				KeycloakUtils.setPassword(token,  realm, keycloakUUID, password);
+				KeycloakUtils.setPassword(token,  realm, keycloakUUID, password, true);
                 return keycloakUUID;
 			} else if (statusCode == 409) {
 				//throw new IOException("Email is already taken. Please use a different email address.");
@@ -607,7 +607,7 @@ public class KeycloakUtils {
 				String locationUrl = headers[0].getValue();
 				content = locationUrl.replaceFirst(".*/(\\w+)", "$1");
 				if(content.length() > 0) {
-					KeycloakUtils.setPassword(token,  realm, content, password);
+					KeycloakUtils.setPassword(token,  realm, content, password, true);
 				}
 				String keycloakUserId = getKeycloakUserId(token, realm, newUsername);
                 log.info("Keycloak User ID: " + keycloakUserId);
