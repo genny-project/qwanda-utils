@@ -86,27 +86,31 @@ public class KeycloakTokenTest {
 			List<String> actions = new ArrayList<>();
 			actions.add("UPDATE_PASSWORD");
 			actions.add("VERIFY_EMAIL");
+			actions.add("UPDATE_PROFILE");
+			//actions.add("CONFIGURE_TOTP");
+			actions.add("terms_and_conditions");
 			
-			CloseableHttpClient httpclient = HttpClients.createDefault();
-			String urlResetPassword = keycloakUrl+"/auth/admin/realms/"+realm+"/users/"+uuid2+"/execute-actions-email?redirect_uri=https://internmatch-dev.gada.io&client_id=alyson&lifespan=600";
-			HttpPut putRequest = new HttpPut(urlResetPassword);
-			putRequest.addHeader("Authorization", "bearer "+exchangedToken);
-			putRequest.addHeader("content-type", MediaType.APPLICATION_JSON);
-			putRequest.setHeader("Accept", MediaType.APPLICATION_JSON);
-			String actionsArray = "[";
-			for (String action : actions) {
-				actionsArray += "\""+action+"\",";
-			}
-			actionsArray = actionsArray.substring(0,actionsArray.length()-1);
-			actionsArray += "]";
-			StringEntity jSonEntity = new StringEntity(actionsArray);
-			putRequest.setEntity(jSonEntity);
-			CloseableHttpResponse response2 = httpclient.execute(putRequest);
+//			CloseableHttpClient httpclient = HttpClients.createDefault();
+//			String urlResetPassword = keycloakUrl+"/auth/admin/realms/"+realm+"/users/"+uuid2+"/execute-actions-email?redirect_uri=https://internmatch-dev.gada.io&client_id=alyson&lifespan=600";
+//			HttpPut putRequest = new HttpPut(urlResetPassword);
+//			putRequest.addHeader("Authorization", "bearer "+exchangedToken);
+//			putRequest.addHeader("content-type", MediaType.APPLICATION_JSON);
+//			putRequest.setHeader("Accept", MediaType.APPLICATION_JSON);
+//			String actionsArray = "[";
+//			for (String action : actions) {
+//				actionsArray += "\""+action+"\",";
+//			}
+//			actionsArray = actionsArray.substring(0,actionsArray.length()-1);
+//			actionsArray += "]";
+//			StringEntity jSonEntity = new StringEntity(actionsArray);
+//			putRequest.setEntity(jSonEntity);
+//			CloseableHttpResponse response2 = httpclient.execute(putRequest);
 			
 //			KeycloakUtils.executeActions(keycloakUrl,realm, clientId, secret, 600, uuid, "https://internmatch-dev.gada.io", actions, exchangedToken);
 //			KeycloakUtils.executeActions(keycloakUrl,realm, clientId, secret, 600, uuid2, "https://internmatch-dev.gada.io", actions, exchangedToken);
 //
-//			KeycloakUtils.executeActions(keycloakUrl,realm, clientId, secret, 600, uuid3, "https://internmatch-dev.gada.io", actions, exchangedToken);
+			KeycloakUtils.executeActions(keycloakUrl,realm, clientId, null, 600, uuid3, "https://internmatch-dev.gada.io/home/UVVFX0ZBS0VfUEFSRU5U/UVVFX0ZJTklTSF9JTlRFUk4=", actions, exchangedToken);
+		//	KeycloakUtils.executeActions(keycloakUrl,realm, clientId, secret, 600, uuid3, "https://internmatch-dev.gada.io/home/UVVFX0ZBS0VfUEFSRU5U/UVVFX0ZJTklTSF9JTlRFUk4=", actions, exchangedToken);
 
 
 		System.out.println("Keylcoak Token text");
