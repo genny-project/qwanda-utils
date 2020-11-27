@@ -1124,10 +1124,10 @@ public class KeycloakUtils {
 	}
 	
 	
-	public static String executeActions(String keycloakUrl, String realm, String clientId, String secret, Integer lifespan, String uuid, String redirectUrl, List<String> actions, String exchangedToken) throws IOException {
+	public static String executeActions(String keycloakUrl, String realm, String clientId, String secret, Integer lifespan, String uuid, String redirectUrl,List<String> actions, String exchangedToken) throws IOException {
 
 		CloseableHttpClient httpclient = HttpClients.createDefault();
-		String urlResetPassword = keycloakUrl+"/auth/admin/realms/"+realm+"/users/"+uuid+"/execute-actions-email";
+		String urlResetPassword = keycloakUrl+"/auth/admin/realms/"+realm+"/users/"+uuid+"/execute-actions-email?redirect_uri="+redirectUrl+"&client_id="+clientId+"&lifespan="+lifespan;
 		HttpPut putRequest = new HttpPut(urlResetPassword);
 		putRequest.addHeader("Authorization", "bearer "+exchangedToken);
 		putRequest.addHeader("content-type", MediaType.APPLICATION_JSON);
