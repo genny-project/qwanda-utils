@@ -418,7 +418,7 @@ public class KeycloakUtils {
 		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
 		
 		String randomCode = UUID.randomUUID().toString().substring(0, 18);
-		String randomPassword = UUID.randomUUID().toString().substring(0, 18);
+		String randomPassword = "password1"; //UUID.randomUUID().toString().substring(0, 18);
 		String json = "{ " +"\"username\" : \"" + randomCode + "\"," + "\"email\" : \"" + randomCode + "@gmail.com\" , "
 				+ "\"enabled\" : true, " + "\"emailVerified\" : true, " + "\"firstName\" : \"" + randomCode + "\", "
 				+ "\"lastName\" : \"" + randomCode + "\", " + "\"groups\" : [" + " \"users\" " + "],"
@@ -427,6 +427,12 @@ public class KeycloakUtils {
 			    +  "\"value\":\""+randomPassword+"\","
 			    + "\"temporary\":true }]}";
 
+//		String json = "{ " +"\"username\" : \"" + randomCode + "\"," + "\"email\" : \"" + randomCode + "@gmail.com\" , "
+//				+ "\"enabled\" : true, " + "\"emailVerified\" : true, " + "\"firstName\" : \"" + randomCode + "\", "
+//				+ "\"lastName\" : \"" + randomCode + "\", " + "\"groups\" : [" + " \"users\" " + "],"
+//				+ "\"realmRoles\" : [\"user\"]}";
+		
+		
 		log.info("CreateUserjsonDummy="+json);
 		
 		HttpClient httpClient = new DefaultHttpClient();
@@ -539,7 +545,7 @@ public class KeycloakUtils {
 					KeycloakUtils.setPassword(token,  realm, keycloakUUID, password, false);
                return keycloakUUID;
 			} else if (statusCode == 204) {
-				KeycloakUtils.setPassword(token,  realm, keycloakUUID, password, true);
+				KeycloakUtils.setPassword(token,  realm, keycloakUUID, password, false);
                 return keycloakUUID;
 			} else if (statusCode == 409) {
 				//throw new IOException("Email is already taken. Please use a different email address.");
