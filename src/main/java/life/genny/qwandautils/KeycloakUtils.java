@@ -536,7 +536,7 @@ public class KeycloakUtils {
 			HttpEntity entity = response.getEntity();
 			String content = null;
 			if (statusCode == 201) {
-					KeycloakUtils.setPassword(token,  realm, keycloakUUID, password, true);
+					KeycloakUtils.setPassword(token,  realm, keycloakUUID, password, false);
                return keycloakUUID;
 			} else if (statusCode == 204) {
 				KeycloakUtils.setPassword(token,  realm, keycloakUUID, password, true);
@@ -607,7 +607,7 @@ public class KeycloakUtils {
 				String locationUrl = headers[0].getValue();
 				content = locationUrl.replaceFirst(".*/(\\w+)", "$1");
 				if(content.length() > 0) {
-					KeycloakUtils.setPassword(token,  realm, content, password, true);
+					KeycloakUtils.setPassword(token,  realm, content, password, false);
 				}
 				String keycloakUserId = getKeycloakUserId(token, realm, newUsername);
                 log.info("Keycloak User ID: " + keycloakUserId);
