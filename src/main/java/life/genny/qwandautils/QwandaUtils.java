@@ -1603,9 +1603,9 @@ public class QwandaUtils {
 	public static Boolean checkPhone(String phonenum)
 	{
 		if (phonenum.startsWith("61")) {
-			return checkregex(phonenum,"^\\d{11}");
+			return checkregex(phonenum,"^\\d{11}$");
 		} else {
-		return checkregex(phonenum,"^\\d{11,12}");
+		return checkregex(phonenum,"^\\d{11,12}$");
 		}
 		//return checkregex(phonenum,"^(\\d{2}){0,1}((0{0,1}[2|3|7|8]{1}[ \\-]*(\\d{4}\\d{4}))|(\\d{2}){0,1}(1[ \\-]{0,1}(300|800|900|902)[ \\-]{0,1}((\\d{6})|(\\d{3}\\d{3})))|(13[ \\-]{0,1}([\\d \\-]{4})|((\\d{0,2})0{0,1}4{1}[\\d \\-]{8,10})))$");
 	}
