@@ -60,7 +60,6 @@ public class MergeUtil {
 			while (match.find()) {	
 				
 				Object mergedtext = wordMerge(templateEntityMap, match.group(1));
-				log.info("merged text ::"+mergedtext);
 				if(mergedtext != null) {
 					mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, mergedtext.toString());
 				} else {
@@ -72,7 +71,6 @@ public class MergeUtil {
 			while(matchVariables.find()) {
 				
 				Object mergedText = templateEntityMap.get(matchVariables.group(1));
-				log.info("merge text ::"+mergedText);
 				if(mergedText != null) {
 					mergeStr = mergeStr.replace(VARIABLE_REGEX_START + matchVariables.group(1) + VARIABLE_REGEX_END, mergedText.toString());
 				} else {
