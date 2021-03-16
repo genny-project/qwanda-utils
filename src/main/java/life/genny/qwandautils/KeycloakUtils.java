@@ -211,12 +211,11 @@ public class KeycloakUtils {
 			}
 			
 			try {
-				
 				JsonObject obj = new JsonObject(content);
 				return obj;
 			}
 			catch(Exception e) {
-				
+				e.printStackTrace();
 			}
 			
 		} catch (URISyntaxException e) {
