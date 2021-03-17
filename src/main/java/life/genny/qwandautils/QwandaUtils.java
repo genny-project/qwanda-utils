@@ -1,10 +1,16 @@
 package life.genny.qwandautils;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
@@ -25,6 +31,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -91,60 +99,63 @@ public class QwandaUtils {
 
 	//	log.debug("GET:" + getUrl + ":");
 
+		
+		return sendGET(getUrl,authToken);
+		
 
-		RequestConfig config = RequestConfig.custom()
-				.setConnectTimeout(timeout * 1000)
-				.setConnectionRequestTimeout(timeout * 1000)
-				.setSocketTimeout(timeout * 1000).build();
-		CloseableHttpClient httpclient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-		HttpGet request = new HttpGet(getUrl);
-		if (authToken != null) {
-			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
-		}
-
-		CloseableHttpResponse response =null;
-		try {
-			response = httpclient.execute(request);
-			// The underlying HTTP connection is still held by the response object
-			// to allow the response content to be streamed directly from the network
-			// socket.
-			// In order to ensure correct deallocation of system resources
-			// the user MUST call CloseableHttpResponse#close() from a finally clause.
-			// Please note that if response content is not fully consumed the underlying
-			// connection cannot be safely re-used and will be shut down and discarded
-			// by the connection manager.
-
-			HttpEntity entity1 = response.getEntity();
-			if (entity1 == null) {
-				return ""; 
-			}
-			String responseString = EntityUtils.toString(entity1);
-			
-			if (StringUtils.isBlank(responseString)) {
-				return "";
-			}
-
-			EntityUtils.consume(entity1);
-
-			return responseString;
-		}
-		catch (java.net.SocketTimeoutException e) {
-			log.error("API Get call timeout - "+timeout+" secs to "+getUrl);
-			return null;
-		}
-		catch (Exception e) {
-			log.error("API Get exception -for  "+getUrl+" :");
-			return "";
-		}
-
-		finally {
-			if (response != null) {
-				response.close();
-			}
-			httpclient.close();
-			//IOUtils.closeQuietly(response);  removed commons-io
-			//IOUtils.closeQuietly(httpclient);
-		}
+//		RequestConfig config = RequestConfig.custom()
+//				.setConnectTimeout(timeout * 1000)
+//				.setConnectionRequestTimeout(timeout * 1000)
+//				.setSocketTimeout(timeout * 1000).build();
+//		CloseableHttpClient httpclient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+//		HttpGet request = new HttpGet(getUrl);
+//		if (authToken != null) {
+//			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+//		}
+//
+//		CloseableHttpResponse response =null;
+//		try {
+//			response = httpclient.execute(request);
+//			// The underlying HTTP connection is still held by the response object
+//			// to allow the response content to be streamed directly from the network
+//			// socket.
+//			// In order to ensure correct deallocation of system resources
+//			// the user MUST call CloseableHttpResponse#close() from a finally clause.
+//			// Please note that if response content is not fully consumed the underlying
+//			// connection cannot be safely re-used and will be shut down and discarded
+//			// by the connection manager.
+//
+//			HttpEntity entity1 = response.getEntity();
+//			if (entity1 == null) {
+//				return ""; 
+//			}
+//			String responseString = EntityUtils.toString(entity1);
+//			
+//			if (StringUtils.isBlank(responseString)) {
+//				return "";
+//			}
+//
+//			EntityUtils.consume(entity1);
+//
+//			return responseString;
+//		}
+//		catch (java.net.SocketTimeoutException e) {
+//			log.error("API Get call timeout - "+timeout+" secs to "+getUrl);
+//			return null;
+//		}
+//		catch (Exception e) {
+//			log.error("API Get exception -for  "+getUrl+" :");
+//			return "";
+//		}
+//
+//		finally {
+//			if (response != null) {
+//				response.close();
+//			}
+//			httpclient.close();
+//			//IOUtils.closeQuietly(response);  removed commons-io
+//			//IOUtils.closeQuietly(httpclient);
+//		}
 
 	}
 	
@@ -1656,4 +1667,134 @@ public class QwandaUtils {
 			}
 		}
 	}
+	
+	static public String sendGET(String url) throws IOException {
+		return sendGET(url,null);
+	}
+
+	
+	static public String sendGET(String url, String authToken) throws IOException {
+		URL obj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+		con.setRequestMethod("GET");
+		con.addRequestProperty("Content-Type", "application/json");
+		
+		if (authToken != null) {
+			con.addRequestProperty("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+		}
+
+
+		// con.setRequestProperty("NestUser-Agent", USER_AGENT);
+		int responseCode = con.getResponseCode();
+		// System.out.println("GET Response Code :: " + responseCode);
+		if (responseCode == HttpURLConnection.HTTP_OK) { // success
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+
+			// print result
+			return response.toString();
+		} else {
+			return null;
+		}
+
+	}
+	
+	static public String sendPOST(String url, String authToken) throws IOException {
+		URL obj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+		con.setRequestMethod("POST");
+		con.addRequestProperty("Content-Type", "application/json");
+		
+		if (authToken != null) {
+			con.addRequestProperty("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+		}
+
+
+		// con.setRequestProperty("NestUser-Agent", USER_AGENT);
+		int responseCode = con.getResponseCode();
+		// System.out.println("GET Response Code :: " + responseCode);
+		if (responseCode == HttpURLConnection.HTTP_OK) { // success
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+
+			// print result
+			return response.toString();
+		} else {
+			return null;
+		}
+
+	}
+	
+	private static String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException{
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+        for(Map.Entry<String, String> entry : params.entrySet()){
+            if (first)
+                first = false;
+            else
+                result.append("&");
+
+            result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+            result.append("=");
+            result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+        }
+
+        return result.toString();
+    }
+	
+	public static String  performPostCall(String requestURL,
+            HashMap<String, String> postDataParams) {
+
+        URL url;
+        String response = "";
+        try {
+            url = new URL(requestURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+
+
+            OutputStream os = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(
+                    new OutputStreamWriter(os, "UTF-8"));
+            writer.write(getPostDataString(postDataParams));
+
+            writer.flush();
+            writer.close();
+            os.close();
+            int responseCode=conn.getResponseCode();
+
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+                String line;
+                BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                while ((line=br.readLine()) != null) {
+                    response+=line;
+                }
+            }
+            else {
+                response="";
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return response;
+    }
 }

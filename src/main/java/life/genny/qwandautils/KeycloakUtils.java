@@ -133,101 +133,62 @@ public class KeycloakUtils {
 
 	public static JsonObject getToken(String keycloakUrl, String realm, String clientId, String secret, String username, String password, String refreshToken) throws IOException {
 
-		HttpClient httpClient = new DefaultHttpClient();
+		HashMap<String, String> postDataParams = new HashMap<>();
+		postDataParams.put("Content-Type", "application/x-www-form-urlencoded");
+		/* if we have a refresh token */
+		if(refreshToken != null) {
 
-		try {
+			/* we decode it */
+			JSONObject decodedServiceToken = KeycloakUtils.getDecodedToken(refreshToken);
 
-			URI uri = new URI(keycloakUrl+"/auth/realms/"+realm+"/protocol/openid-connect/token");
-			HttpPost post = new HttpPost(uri);
+			/* we get the expiry timestamp */
+			long expiryTime = decodedServiceToken.getLong("exp");
 
-			post.addHeader("Content-Type", "application/x-www-form-urlencoded");
+			/* we get the current time */
+			long nowTime = LocalDateTime.now().atZone(TimeZone.getDefault().toZoneId()).toEpochSecond();
 
-			List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-			
-			log.info("===================== Generating new token (KeycloakUtils) =====================");
+			/* we calculate the differencr */ 
+			long duration = expiryTime - nowTime;
 
-			/* if we have a refresh token */
-			if(refreshToken != null) {
+			/* if the difference is negative it means the expiry time is less than the nowTime 
+				if the difference < 180000, it means the token will expire in 3 hours
+			*/
+			if(duration <= GennySettings.ACCESS_TOKEN_EXPIRY_LIMIT_SECONDS) {
 
-				/* we decode it */
-				JSONObject decodedServiceToken = KeycloakUtils.getDecodedToken(refreshToken);
-
-				/* we get the expiry timestamp */
-				long expiryTime = decodedServiceToken.getLong("exp");
-
-				/* we get the current time */
-				long nowTime = LocalDateTime.now().atZone(TimeZone.getDefault().toZoneId()).toEpochSecond();
-
-				/* we calculate the differencr */ 
-				long duration = expiryTime - nowTime;
-
-				/* if the difference is negative it means the expiry time is less than the nowTime 
-					if the difference < 180000, it means the token will expire in 3 hours
-				*/
-				if(duration <= GennySettings.ACCESS_TOKEN_EXPIRY_LIMIT_SECONDS) {
-
-					/* if the refresh token is about to expire, we must re-generate a new one */
-					refreshToken = null;
-				}
+				/* if the refresh token is about to expire, we must re-generate a new one */
+				refreshToken = null;
 			}
-
-			/* if we don't have a refresh token, we generate a new token using username and password */
-			if(refreshToken == null) {
-				formParams.add(new BasicNameValuePair("username", username));
-				formParams.add(new BasicNameValuePair("password", password));
-				log.info("using username");
-				formParams.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, "password"));
-			}
-			else {
-				formParams.add(new BasicNameValuePair("refresh_token", refreshToken));
-				formParams.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, "refresh_token"));
-				log.info("using refresh token");
-				log.info(refreshToken);
-			}
-
-			formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_ID, clientId));
-			if (secret != null) {
-				formParams.add(new BasicNameValuePair(OAuth2Constants.CLIENT_SECRET, secret));
-			}
-			UrlEncodedFormEntity form = new UrlEncodedFormEntity(formParams, "UTF-8");
-
-			
-			
-			post.setEntity(form);
-
-			HttpResponse response = httpClient.execute(post);
-
-			int statusCode = response.getStatusLine().getStatusCode();
-			HttpEntity entity = response.getEntity();
-			String content = null;
-			if (statusCode != 200) {
-				content = getContent(entity);
-				throw new IOException("" + statusCode);
-			}
-			if (entity == null) {
-				throw new IOException("Null Entity");
-			} else {
-				content = getContent(entity);
-			}
-			
-			try {
-				
-				JsonObject obj = new JsonObject(content);
-				return obj;
-			}
-			catch(Exception e) {
-				
-			}
-			
-		} catch (URISyntaxException e) {
-
-			httpClient.getConnectionManager().shutdown();
-			return null;
-		} finally {
-			httpClient.getConnectionManager().shutdown();
 		}
+		/* if we don't have a refresh token, we generate a new token using username and password */
+		if(refreshToken == null) {
+			postDataParams.put("username", username);
+			postDataParams.put("password", password);
+			log.info("using username");
+			postDataParams.put(OAuth2Constants.GRANT_TYPE, "password");
+		}
+		else {
+			postDataParams.put("refresh_token", refreshToken);
+			postDataParams.put(OAuth2Constants.GRANT_TYPE, "refresh_token");
+			log.info("using refresh token");
+			log.info(refreshToken);
+		}
+
+		postDataParams.put(OAuth2Constants.CLIENT_ID, clientId);
+		if (secret != null) {
+			postDataParams.put(OAuth2Constants.CLIENT_SECRET, secret);
+		}
+
 		
-		return null;
+		String requestURL = keycloakUrl+"/auth/realms/"+realm+"/protocol/openid-connect/token";
+		
+		String str = QwandaUtils.performPostCall(requestURL,
+	            postDataParams);
+		
+		
+		JsonObject json = new JsonObject(str);
+		return json;
+		
+
 	}
 
 	public static JsonObject getToken(String keycloakUrl, String realm, String clientId, String secret,
