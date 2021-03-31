@@ -713,40 +713,70 @@ public class KeycloakUtils {
 	public static int setPassword(String token,String realm, String userId, String password, Boolean askUserToResetPassword)
 			throws IOException {
 		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
+		keycloakUrl = keycloakUrl.replaceAll(":-1", ""); // get rid of weird -1
 		String json = "{\"type\": \"password\", " + "\"temporary\": "+(askUserToResetPassword?"true":"false")+",\"value\": \"" + password + "\"" + "}";
 
-		HttpClient httpClient = new DefaultHttpClient();
+		
+		String url = keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password";
+		
+		URL obj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+		con.setRequestMethod("PUT");
+		con.addRequestProperty("Content-Type", "application/json");
+		con.addRequestProperty("Authorization", "Bearer " + token);
 
-		try {
-			HttpPut put = new HttpPut(
-					keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password");
+		// con.setRequestProperty("User-Agent", USER_AGENT);
+		int responseCode = con.getResponseCode();
+		System.out.println("GET Response Code :: " + responseCode);
+		if (responseCode == HttpURLConnection.HTTP_OK) { // success
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
 
-			put.addHeader("Content-Type", "application/json");
-			put.addHeader("Authorization", "Bearer " + token);
-
-			StringEntity postingString = new StringEntity(json);
-			put.setEntity(postingString);
-
-			HttpResponse response = httpClient.execute(put);
-
-			int statusCode = response.getStatusLine().getStatusCode();
-
-			HttpEntity entity = response.getEntity();
-			String content = null;
-			if (statusCode != 204) {
-				content = getContent(entity);
-				throw new IOException("" + statusCode);
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
 			}
-			if (statusCode == 403) {
-				throw new IOException("403 Forbidden");
-			}
+			in.close();
 
-			return statusCode;
+			// print result
+			return responseCode;
+		} else {
+			return responseCode;
 		}
-
-		finally {
-			httpClient.getConnectionManager().shutdown();
-		}
+		
+		
+//		HttpClient httpClient = new DefaultHttpClient();
+//
+//		try {
+//			HttpPut put = new HttpPut(
+//					keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password");
+//
+//			put.addHeader("Content-Type", "application/json");
+//			put.addHeader("Authorization", "Bearer " + token);
+//
+//			StringEntity postingString = new StringEntity(json);
+//			put.setEntity(postingString);
+//
+//			HttpResponse response = httpClient.execute(put);
+//
+//			int statusCode = response.getStatusLine().getStatusCode();
+//
+//			HttpEntity entity = response.getEntity();
+//			String content = null;
+//			if (statusCode != 204) {
+//				content = getContent(entity);
+//				throw new IOException("" + statusCode);
+//			}
+//			if (statusCode == 403) {
+//				throw new IOException("403 Forbidden");
+//			}
+//
+//			return statusCode;
+//		}
+//
+//		finally {
+//			httpClient.getConnectionManager().shutdown();
+//		}
 	}
 	
 	public String createEncryptedPassword(String key, final String customercode, final String password) {
@@ -1117,6 +1147,34 @@ public class KeycloakUtils {
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 		con.setRequestMethod("GET");
 		con.addRequestProperty("Content-Type", "application/json");
+		con.addRequestProperty("Authorization", "Bearer " + token);
+
+		// con.setRequestProperty("User-Agent", USER_AGENT);
+		int responseCode = con.getResponseCode();
+		System.out.println("GET Response Code :: " + responseCode);
+		if (responseCode == HttpURLConnection.HTTP_OK) { // success
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+
+			// print result
+			return response.toString();
+		} else {
+			return null;
+		}
+
+	}
+	
+	public static String sendDELETE(String url, String token) throws IOException {
+		URL obj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+		con.setRequestMethod("DELETE");
+		//con.addRequestProperty("Content-Type", "application/json");
 		con.addRequestProperty("Authorization", "Bearer " + token);
 
 		// con.setRequestProperty("User-Agent", USER_AGENT);
