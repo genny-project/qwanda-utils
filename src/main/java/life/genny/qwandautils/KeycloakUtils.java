@@ -382,7 +382,8 @@ public class KeycloakUtils {
 		String randomPassword = "password1"; //UUID.randomUUID().toString().substring(0, 18);
 		String json = "{ " +"\"username\" : \"" + randomCode + "\"," + "\"email\" : \"" + randomCode + "@gmail.com\" , "
 				+ "\"enabled\" : true, " + "\"emailVerified\" : true, " + "\"firstName\" : \"" + randomCode + "\", "
-				+ "\"lastName\" : \"" + randomCode + "\", " + "\"groups\" : [" + " \"users\" " + "],"
+				+ "\"lastName\" : \"" + randomCode + "\", " + "\"groups\" : [" + " \"users\" " + "], "
+				+ "\"requiredActions\" : [\"TERMS_AND_CONDITIONS\"], "
 				+ "\"realmRoles\" : [\"user\"],\"credentials\": [{"
 			    +  "\"type\":\"password\","
 			    +  "\"value\":\""+randomPassword+"\","
