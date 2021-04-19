@@ -383,7 +383,7 @@ public class KeycloakUtils {
 		String json = "{ " +"\"username\" : \"" + randomCode + "\"," + "\"email\" : \"" + randomCode + "@gmail.com\" , "
 				+ "\"enabled\" : true, " + "\"emailVerified\" : true, " + "\"firstName\" : \"" + randomCode + "\", "
 				+ "\"lastName\" : \"" + randomCode + "\", " + "\"groups\" : [" + " \"users\" " + "], "
-				+ "\"requiredActions\" : [\"TERMS_AND_CONDITIONS\"], "
+				+ "\"requiredActions\" : [\"terms_and_conditions\"], "
 				+ "\"realmRoles\" : [\"user\"],\"credentials\": [{"
 			    +  "\"type\":\"password\","
 			    +  "\"value\":\""+randomPassword+"\","
