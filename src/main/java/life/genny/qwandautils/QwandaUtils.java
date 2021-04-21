@@ -167,7 +167,7 @@ public class QwandaUtils {
 	
 
 
-	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken, final Consumer<String> callback)
+	public static String apiPostEntity2(final String postUrl, final String entityString, final String authToken, final Consumer<String> callback)
 			throws IOException {
 		String responseString = null;
 		if (StringUtils.isBlank(postUrl)) {
@@ -1797,4 +1797,64 @@ public class QwandaUtils {
 
         return response;
     }
+	
+	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken, final Consumer<String> callback)
+			throws IOException {
+		String responseString = null;
+		if (StringUtils.isBlank(postUrl)) {
+			log.error("Blank url in apiPostEntity");
+		}
+		
+
+        URL url;
+        String response = "";
+        try {
+            url = new URL(postUrl);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            
+    		conn.addRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    		
+    		if (authToken != null) {
+    			conn.addRequestProperty("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+    		}
+
+			StringEntity postEntity = new StringEntity(entityString, "UTF-8");
+//			getPostDataString(postDataParams)
+    		
+            OutputStream os = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(
+                    new OutputStreamWriter(os, "UTF-8"));
+            //getPostDataString(postDataParams)
+            writer.write(postEntity.toString());
+
+            writer.flush();
+            writer.close();
+            os.close();
+            int responseCode=conn.getResponseCode();
+
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+                String line;
+                BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                while ((line=br.readLine()) != null) {
+                    response+=line;
+                }
+            }
+            else {
+                response="";
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return response;
+
+	}
+	
 }
