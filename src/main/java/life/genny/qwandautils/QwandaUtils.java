@@ -167,7 +167,7 @@ public class QwandaUtils {
 	
 
 
-	public static String apiPostEntity2(final String postUrl, final String entityString, final String authToken, final Consumer<String> callback)
+	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken, final Consumer<String> callback)
 			throws IOException {
 		String responseString = null;
 		if (StringUtils.isBlank(postUrl)) {
@@ -1798,7 +1798,7 @@ public class QwandaUtils {
         return response;
     }
 	
-	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken, final Consumer<String> callback)
+	public static String apiPostEntity2(final String postUrl, final String entityString, final String authToken, final Consumer<String> callback)
 			throws IOException {
 		String responseString = null;
 		if (StringUtils.isBlank(postUrl)) {
