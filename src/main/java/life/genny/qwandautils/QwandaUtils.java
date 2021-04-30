@@ -10,9 +10,15 @@ import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublisher;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -24,8 +30,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -94,6 +106,15 @@ public class QwandaUtils {
 
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+	
+    // custom executor
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+    private static final HttpClient httpClient = HttpClient.newBuilder()
+            .executor(executorService)
+            .version(HttpClient.Version.HTTP_2)
+            .connectTimeout(Duration.ofSeconds(20))
+            .build();
 	
 	public static String apiGet(String getUrl, final String authToken, final int timeout) throws ClientProtocolException, IOException {
 
@@ -1673,35 +1694,63 @@ public class QwandaUtils {
 	}
 
 	
-	static public String sendGET(String url, String authToken) throws IOException {
-		URL obj = new URL(url);
-		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-		con.setRequestMethod("GET");
-		con.addRequestProperty("Content-Type", "application/json");
+	static public String sendGET(String url, String authToken) throws IOException
+	{
 		
-		if (authToken != null) {
-			con.addRequestProperty("Authorization", "Bearer " + authToken); // Authorization": `Bearer
-		}
+		 HttpRequest request = HttpRequest.newBuilder()
+	                .GET()
+	                .uri(URI.create(url))
+	                .setHeader("Content-Type", "application/json")
+	                .setHeader("Authorization", "Bearer " + authToken)
+	                .build();
 
+	        CompletableFuture<java.net.http.HttpResponse<String>> response =
+	                httpClient.sendAsync(request, java.net.http.HttpResponse.BodyHandlers.ofString());
 
-		// con.setRequestProperty("NestUser-Agent", USER_AGENT);
-		int responseCode = con.getResponseCode();
-		// System.out.println("GET Response Code :: " + responseCode);
-		if (responseCode == HttpURLConnection.HTTP_OK) { // success
-			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-			String inputLine;
-			StringBuffer response = new StringBuffer();
-
-			while ((inputLine = in.readLine()) != null) {
-				response.append(inputLine);
+	        String result = null;
+	        
+	        try {
+				result = response.thenApply(java.net.http.HttpResponse::body).get(5, TimeUnit.SECONDS);
+			} catch (InterruptedException | ExecutionException | TimeoutException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			in.close();
 
-			// print result
-			return response.toString();
-		} else {
-			return null;
-		}
+	        System.out.println(result);
+
+	        return result;
+//		
+//		
+//		
+//		
+//		URL obj = new URL(url);
+//		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+//		con.setRequestMethod("GET");
+//		con.addRequestProperty("Content-Type", "application/json");
+//		
+//		if (authToken != null) {
+//			con.addRequestProperty("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+//		}
+//
+//
+//		// con.setRequestProperty("NestUser-Agent", USER_AGENT);
+//		int responseCode = con.getResponseCode();
+//		// System.out.println("GET Response Code :: " + responseCode);
+//		if (responseCode == HttpURLConnection.HTTP_OK) { // success
+//			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+//			String inputLine;
+//			StringBuffer response = new StringBuffer();
+//
+//			while ((inputLine = in.readLine()) != null) {
+//				response.append(inputLine);
+//			}
+//			in.close();
+//
+//			// print result
+//			return response.toString();
+//		} else {
+//			return null;
+//		}
 
 	}
 	
@@ -1805,55 +1854,81 @@ public class QwandaUtils {
 			log.error("Blank url in apiPostEntity");
 		}
 		
+		BodyPublisher requestBody = BodyPublishers
+				.ofString(entityString);
+		
+		 HttpRequest request = HttpRequest.newBuilder()
+	                .POST(requestBody)
+	                .uri(URI.create(postUrl))
+	                .setHeader("Content-Type", "application/json")
+	                .setHeader("Authorization", "Bearer " + authToken)
+	                .build();
 
-        URL url;
-        String response = "";
-        try {
-            url = new URL(postUrl);
+	        CompletableFuture<java.net.http.HttpResponse<String>> response =
+	                httpClient.sendAsync(request, java.net.http.HttpResponse.BodyHandlers.ofString());
 
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(15000);
-            conn.setConnectTimeout(15000);
-            conn.setRequestMethod("POST");
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-            
-    		conn.addRequestProperty("Content-Type", "application/json; charset=UTF-8");
-    		
-    		if (authToken != null) {
-    			conn.addRequestProperty("Authorization", "Bearer " + authToken); // Authorization": `Bearer
-    		}
+	        String result = null;
+	        
+	        try {
+				result = response.thenApply(java.net.http.HttpResponse::body).get(15, TimeUnit.SECONDS);
+			} catch (InterruptedException | ExecutionException | TimeoutException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
-			StringEntity postEntity = new StringEntity(entityString, "UTF-8");
-//			getPostDataString(postDataParams)
-    		
-            OutputStream os = conn.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(
-                    new OutputStreamWriter(os, "UTF-8"));
-            //getPostDataString(postDataParams)
-            writer.write(postEntity.toString());
+	        System.out.println(result);
 
-            writer.flush();
-            writer.close();
-            os.close();
-            int responseCode=conn.getResponseCode();
+	        return result;
+		
 
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
-                String line;
-                BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                while ((line=br.readLine()) != null) {
-                    response+=line;
-                }
-            }
-            else {
-                response="";
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return response;
+//        URL url;
+//        String response = "";
+//        try {
+//            url = new URL(postUrl);
+//
+//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//            conn.setReadTimeout(15000);
+//            conn.setConnectTimeout(15000);
+//            conn.setRequestMethod("POST");
+//            conn.setDoInput(true);
+//            conn.setDoOutput(true);
+//            
+//    		conn.addRequestProperty("Content-Type", "application/json; charset=UTF-8");
+//    		
+//    		if (authToken != null) {
+//    			conn.addRequestProperty("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+//    		}
+//
+//			StringEntity postEntity = new StringEntity(entityString, "UTF-8");
+////			getPostDataString(postDataParams)
+//    		
+//            OutputStream os = conn.getOutputStream();
+//            BufferedWriter writer = new BufferedWriter(
+//                    new OutputStreamWriter(os, "UTF-8"));
+//            //getPostDataString(postDataParams)
+//            writer.write(postEntity.toString());
+//
+//            writer.flush();
+//            writer.close();
+//            os.close();
+//            int responseCode=conn.getResponseCode();
+//
+//            if (responseCode == HttpsURLConnection.HTTP_OK) {
+//                String line;
+//                BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
+//                while ((line=br.readLine()) != null) {
+//                    response+=line;
+//                }
+//            }
+//            else {
+//                response="";
+//
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        return response;
 
 	}
 	
