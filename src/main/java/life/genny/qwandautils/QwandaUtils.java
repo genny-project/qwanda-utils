@@ -1710,7 +1710,7 @@ public class QwandaUtils {
 	        String result = null;
 	        
 	        try {
-				result = response.thenApply(java.net.http.HttpResponse::body).get(5, TimeUnit.SECONDS);
+				result = response.thenApply(java.net.http.HttpResponse::body).get(20, TimeUnit.SECONDS);
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
