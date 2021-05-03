@@ -90,9 +90,7 @@ import life.genny.qwanda.message.QDataAskMessage;
 import life.genny.qwanda.message.QDataAttributeMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
 
-
 public class QwandaUtils {
-
 
 	public static final String ANSI_RESET = "\u001B[0m";
 	public static final String ANSI_BLUE = "\u001B[34m";
@@ -106,23 +104,19 @@ public class QwandaUtils {
 
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
-	
-    // custom executor
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
-    private static final HttpClient httpClient = HttpClient.newBuilder()
-            .executor(executorService)
-            .version(HttpClient.Version.HTTP_2)
-            .connectTimeout(Duration.ofSeconds(20))
-            .build();
-	
-	public static String apiGet(String getUrl, final String authToken, final int timeout) throws ClientProtocolException, IOException {
+	// custom executor
+	private static final ExecutorService executorService = Executors.newFixedThreadPool(20);
 
-	//	log.debug("GET:" + getUrl + ":");
+	private static HttpClient httpClient = HttpClient.newBuilder().executor(executorService)
+			.version(HttpClient.Version.HTTP_2).connectTimeout(Duration.ofSeconds(20)).build();
 
-		
-		return sendGET(getUrl,authToken);
-		
+	public static String apiGet(String getUrl, final String authToken, final int timeout)
+			throws ClientProtocolException, IOException {
+
+		// log.debug("GET:" + getUrl + ":");
+
+		return sendGET(getUrl, authToken);
 
 //		RequestConfig config = RequestConfig.custom()
 //				.setConnectTimeout(timeout * 1000)
@@ -179,17 +173,14 @@ public class QwandaUtils {
 //		}
 
 	}
-	
-	
+
 	public static String apiGet(String getUrl, final String authToken) throws ClientProtocolException, IOException {
 
 		return apiGet(getUrl, authToken, GennySettings.timeoutInSecs);
 	}
-	
 
-
-	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken, final Consumer<String> callback)
-			throws IOException {
+	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken,
+			final Consumer<String> callback) throws IOException {
 		String responseString = null;
 		if (StringUtils.isBlank(postUrl)) {
 			log.error("Blank url in apiPostEntity");
@@ -211,28 +202,27 @@ public class QwandaUtils {
 			response = httpclient.execute(post);
 			HttpEntity entity = response.getEntity();
 			responseString = EntityUtils.toString(entity);
-			if(callback != null) {
+			if (callback != null) {
 				callback.accept(responseString);
 			}
 			return responseString;
 		} catch (Exception e) {
 			log.error(e.getMessage());
-		}
-		finally {
+		} finally {
 			if (response != null) {
-			response.close();
+				response.close();
 			} else {
 				log.error("postApi response was null");
 			}
 			httpclient.close();
-		//	IOUtils.closeQuietly(response);
-		//	IOUtils.closeQuietly(httpclient);
+			// IOUtils.closeQuietly(response);
+			// IOUtils.closeQuietly(httpclient);
 		}
 		return responseString;
 	}
-	
-	
-	public static String apiPostNote(final String postUrl, final String sourceCode, final String tag, final String targetCode, final String content, final String authToken, final Consumer<String> callback)
+
+	public static String apiPostNote(final String postUrl, final String sourceCode, final String tag,
+			final String targetCode, final String content, final String authToken, final Consumer<String> callback)
 			throws IOException {
 		String responseString = null;
 		if (StringUtils.isBlank(postUrl)) {
@@ -244,8 +234,10 @@ public class QwandaUtils {
 
 			HttpPost post = new HttpPost(postUrl);
 
-			String jsonString = String.format("{\"id\":0,\"content\":\""+content+"\",\"sourceCode\":\""+sourceCode+"\",\"tags\":[{\"name\":\""+sourceCode+"\",\"value\":0}, {\"name\":\"sys\",\"value\":0}],\"targetCode\":\""+targetCode+"\"}");
-			
+			String jsonString = String.format("{\"id\":0,\"content\":\"" + content + "\",\"sourceCode\":\"" + sourceCode
+					+ "\",\"tags\":[{\"name\":\"" + sourceCode
+					+ "\",\"value\":0}, {\"name\":\"sys\",\"value\":0}],\"targetCode\":\"" + targetCode + "\"}");
+
 			StringEntity noteContent = new StringEntity(jsonString, "UTF-8");
 
 			post.setEntity(noteContent);
@@ -257,48 +249,46 @@ public class QwandaUtils {
 			response = httpclient.execute(post);
 			HttpEntity entity = response.getEntity();
 			responseString = EntityUtils.toString(entity);
-			if(callback != null) {
+			if (callback != null) {
 				callback.accept(responseString);
 			}
 			return responseString;
 		} catch (Exception e) {
 			log.error(e.getMessage());
-		}
-		finally {
+		} finally {
 			if (response != null) {
-			response.close();
+				response.close();
 			} else {
 				log.error("postApi response was null");
 			}
 			httpclient.close();
-		//	IOUtils.closeQuietly(response);
-		//	IOUtils.closeQuietly(httpclient);
+			// IOUtils.closeQuietly(response);
+			// IOUtils.closeQuietly(httpclient);
 		}
 		return responseString;
 	}
 
-	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken) throws IOException {
+	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken)
+			throws IOException {
 		return apiPostEntity(postUrl, entityString, authToken, null);
 	}
-	
+
 	/*
-	sourceCode: ‘PER_USER1’,
-    content: noteContent,
-    tags: [tag],
-    created: new Date(),
-    targetCode: ‘PER_USER1’,
-    */
-	
-	public static String apiPostNote(final String postUrl, final String sourceCode, final String tag, final String targetCode, final String content, final String authToken) throws IOException {
+	 * sourceCode: ‘PER_USER1’, content: noteContent, tags: [tag], created: new
+	 * Date(), targetCode: ‘PER_USER1’,
+	 */
+
+	public static String apiPostNote(final String postUrl, final String sourceCode, final String tag,
+			final String targetCode, final String content, final String authToken) throws IOException {
 		return apiPostNote(postUrl, sourceCode, tag, targetCode, content, authToken, null);
 	}
 
-	public static String apiPost(final String postUrl, final List<BasicNameValuePair> nameValuePairs, final String authToken) throws IOException {
+	public static String apiPost(final String postUrl, final List<BasicNameValuePair> nameValuePairs,
+			final String authToken) throws IOException {
 		return apiPostEntity(postUrl, new UrlEncodedFormEntity(nameValuePairs).toString(), authToken, null);
 	}
 
-	public static String apiDelete(final String deleteUrl, final String authToken)
-			throws IOException {
+	public static String apiDelete(final String deleteUrl, final String authToken) throws IOException {
 
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpDeleteWithBody request = new HttpDeleteWithBody(deleteUrl);
@@ -307,7 +297,6 @@ public class QwandaUtils {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 		}
 		request.setHeader("Content-Type", "application/json; charset=UTF-8");
-
 
 		CloseableHttpResponse response = httpclient.execute(request);
 		// The underlying HTTP connection is still held by the response object
@@ -328,8 +317,8 @@ public class QwandaUtils {
 		} finally {
 			response.close();
 			httpclient.close();
-			//IOUtils.closeQuietly(response);
-			//IOUtils.closeQuietly(httpclient);
+			// IOUtils.closeQuietly(response);
+			// IOUtils.closeQuietly(httpclient);
 		}
 	}
 
@@ -339,7 +328,7 @@ public class QwandaUtils {
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpDeleteWithBody request = new HttpDeleteWithBody(deleteUrl);
 		request.setHeader("Content-Type", "application/json; charset=UTF-8");
-		if (!StringUtils.isBlank(entityString)) { 
+		if (!StringUtils.isBlank(entityString)) {
 			StringEntity deleteEntity = new StringEntity(entityString, "UTF-8");
 			request.setEntity(deleteEntity);
 		}
@@ -347,7 +336,6 @@ public class QwandaUtils {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 		}
 		request.setHeader("Content-Type", "application/json; charset=UTF-8");
-
 
 		request.setHeader("Content-Type", "application/json; charset=UTF-8");
 
@@ -370,10 +358,11 @@ public class QwandaUtils {
 		} finally {
 			response.close();
 			httpclient.close();
-		//	IOUtils.closeQuietly(response);
-		//	IOUtils.closeQuietly(httpclient);
+			// IOUtils.closeQuietly(response);
+			// IOUtils.closeQuietly(httpclient);
 		}
 	}
+
 	public static String apiPutEntity(final String postUrl, final String entityString, final String authToken)
 			throws IOException {
 		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
@@ -397,8 +386,8 @@ public class QwandaUtils {
 		} finally {
 			response.close();
 			httpclient.close();
-			//IOUtils.closeQuietly(response);
-			//IOUtils.closeQuietly(httpclient);
+			// IOUtils.closeQuietly(response);
+			// IOUtils.closeQuietly(httpclient);
 		}
 
 	}
@@ -421,10 +410,10 @@ public class QwandaUtils {
 			throws IOException {
 
 		String jsonBE = JsonUtils.toJson(be);
-		
+
 		String retStr = QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/baseentitys", jsonBE, token);
 		if (retStr.equals("<html><head><title>Error</title></head><body>Internal Server Error</body></html>")) {
-			log.error("Internal Server Error trying to post ["+be.getCode()+"]");
+			log.error("Internal Server Error trying to post [" + be.getCode() + "]");
 			return null;
 		}
 		try {
@@ -432,7 +421,8 @@ public class QwandaUtils {
 			be.setId(ret);
 			return ret;
 		} catch (NumberFormatException e) {
-			//log.error("Error in posting BaseEntity ["+be.getCode()+"] ["+retStr+"] , json sent is ["+jsonBE+"]+ the GennySettings.qwandaServiceUrl='"+qwandaUrl+"'");
+			// log.error("Error in posting BaseEntity ["+be.getCode()+"] ["+retStr+"] , json
+			// sent is ["+jsonBE+"]+ the GennySettings.qwandaServiceUrl='"+qwandaUrl+"'");
 			return -1L;
 		}
 	}
@@ -456,7 +446,7 @@ public class QwandaUtils {
 	}
 
 	public static String getNormalisedUsername(final String rawUsername) {
-		if (rawUsername==null) {
+		if (rawUsername == null) {
 			return null;
 		}
 		String username = rawUsername.replaceAll("\\&", "_AND_").replaceAll("@", "_AT_").replaceAll("\\.", "_DOT_")
@@ -473,26 +463,28 @@ public class QwandaUtils {
 		return createUser(qwandaUrl, token, username, firstname, lastname, email, "genny", firstname + " " + lastname,
 				null, null);
 	}
-	
+
 	public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
 			final String firstname, final String lastname, final String email, String keycloakId) throws IOException {
 
 		return createUser(qwandaUrl, token, username, firstname, lastname, email, "genny", firstname + " " + lastname,
 				null, null);
 	}
-	
+
 	public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
 			final String firstname, final String lastname, final String email, final String realm, final String name,
 			final String keycloakId) throws IOException {
-		
-		return QwandaUtils.createUser(qwandaUrl, token, username, firstname, lastname, email, realm, name, keycloakId, null);
+
+		return QwandaUtils.createUser(qwandaUrl, token, username, firstname, lastname, email, realm, name, keycloakId,
+				null);
 	}
-	
+
 	public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
 			final String firstname, final String lastname, final String email, final String realm, final String name,
 			final String keycloakId, HashMap<String, String> attributes) throws IOException {
-		
-		return QwandaUtils.createUser(qwandaUrl, token, username, firstname, lastname, email, realm, name, keycloakId, attributes, null);
+
+		return QwandaUtils.createUser(qwandaUrl, token, username, firstname, lastname, email, realm, name, keycloakId,
+				attributes, null);
 	}
 
 	public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
@@ -501,8 +493,8 @@ public class QwandaUtils {
 
 		String uname = getNormalisedUsername(username);
 		String code = "PER_" + keycloakId.toUpperCase();
-		log.info("Creating User:"+username);
-        log.info("Project realm: "+realm);
+		log.info("Creating User:" + username);
+		log.info("Project realm: " + realm);
 
 		Person person = new Person(code, firstname + " " + lastname);
 		person.setRealm(realm);
@@ -510,9 +502,9 @@ public class QwandaUtils {
 		postBaseEntity(qwandaUrl, token, person);
 
 		List<Answer> answers = new CopyOnWriteArrayList<>();
-		
+
 		try {
-			
+
 			Answer usernameAnswer = new Answer(code, code, "PRI_USERNAME", username);
 			answers.add(usernameAnswer);
 			Answer lastnameAnswer = new Answer(code, code, "PRI_LASTNAME", lastname);
@@ -528,31 +520,31 @@ public class QwandaUtils {
 			log.info("keycloakId value: " + keycloakId);
 			Answer keycloakIdAnswer = new Answer(code, code, "PRI_KEYCLOAK_UUID", keycloakId);
 			answers.add(keycloakIdAnswer);
-			
+
 			person.addAnswer(usernameAnswer);
-			person.addAnswer(lastnameAnswer);	
-			person.addAnswer(firstnameAnswer);	
-			person.addAnswer(emailAnswer);	
+			person.addAnswer(lastnameAnswer);
+			person.addAnswer(firstnameAnswer);
+			person.addAnswer(emailAnswer);
 			person.addAnswer(realmAnswer);
 			person.addAnswer(nameAnswer);
 			person.addAnswer(keycloakIdAnswer);
+		} catch (Exception e) {
 		}
-		catch(Exception e) {}
-		
-		if(attributes != null) {
-			
+
+		if (attributes != null) {
+
 			/* we loop through the attributes */
-			for(String attributeCode: attributes.keySet()) {
-				
+			for (String attributeCode : attributes.keySet()) {
+
 				String value = attributes.get(attributeCode);
-				
+
 				/* we create an answer */
 				Answer baseEntityAnswer = new Answer(code, code, attributeCode, value);
 				answers.add(baseEntityAnswer);
 				try {
 					person.addAnswer(baseEntityAnswer);
-				} 
-				catch (BadDataException e) {}
+				} catch (BadDataException e) {
+				}
 			}
 		}
 
@@ -565,18 +557,18 @@ public class QwandaUtils {
 
 		postLink(qwandaUrl, token, new Link("GRP_USERS", code, "LNK_CORE"));
 		postLink(qwandaUrl, token, new Link("GRP_PEOPLE", code, "LNK_CORE"));
-		
-		if(links != null) {
-			for(Link link: links) {
-				
-				if(link.getSourceCode() == null) {
+
+		if (links != null) {
+			for (Link link : links) {
+
+				if (link.getSourceCode() == null) {
 					link.setSourceCode(code);
 				}
-				
-				if(link.getTargetCode() == null) {
+
+				if (link.getTargetCode() == null) {
 					link.setTargetCode(code);
 				}
-				
+
 				postLink(qwandaUrl, token, link);
 			}
 		}
@@ -604,8 +596,7 @@ public class QwandaUtils {
 
 		String attributeString = QwandaUtils.apiGet(qwandaUrl + "/qwanda/baseentitys/" + code, userToken);
 
-		if (attributeString == null || attributeString.contains("Error")
-				|| attributeString.contains("Unauthorized")) {
+		if (attributeString == null || attributeString.contains("Error") || attributeString.contains("Unauthorized")) {
 			log.info("baseentity not found");
 			tokenExists = false;
 		} else {
@@ -616,14 +607,13 @@ public class QwandaUtils {
 		 * else { String attributeVal = MergeUtil.getAttrValue(code,
 		 * "PRI_KEYCLOAK_UUID", userToken);
 		 *
-		 * log.info("pri_keycloak_UUID for the code::"+attributeVal);
-		 * if(attributeVal == null){ tokenExists = false;
-		 * log.info("baseentity found and UUID is null"); }else
-		 * if(tokenSub.equals(attributeVal)) {
-		 * log.info("baseentity found and UUID matched"); tokenExists = true;
-		 * } else if(!tokenSub.equals(attributeVal)) {
-		 * log.info("baseentity code found but keycloak UUID not matched");
-		 * tokenExists = false; } }
+		 * log.info("pri_keycloak_UUID for the code::"+attributeVal); if(attributeVal ==
+		 * null){ tokenExists = false; log.info("baseentity found and UUID is null");
+		 * }else if(tokenSub.equals(attributeVal)) {
+		 * log.info("baseentity found and UUID matched"); tokenExists = true; } else
+		 * if(!tokenSub.equals(attributeVal)) {
+		 * log.info("baseentity code found but keycloak UUID not matched"); tokenExists
+		 * = false; } }
 		 */
 
 		return tokenExists;
@@ -651,14 +641,14 @@ public class QwandaUtils {
 			String attributeString = null;
 			String key = sourceBaseEntityCode + ":" + questionCode + ":" + targetBaseEntityCode
 					+ userToken.substring(0, 8); // get first 8 chars
-			//	if (askMap.containsKey(key)) {
-			//		attributeString = askMap.get(key);
-			//	} else {
-			attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
-					+ "/asks3/" + questionCode + "/" + targetBaseEntityCode, userToken);
-			//		askMap.put(key, attributeString);
-			//	}
-			log.debug("Attribute String="+attributeString);
+			// if (askMap.containsKey(key)) {
+			// attributeString = askMap.get(key);
+			// } else {
+			attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/"
+					+ sourceBaseEntityCode + "/asks3/" + questionCode + "/" + targetBaseEntityCode, userToken);
+			// askMap.put(key, attributeString);
+			// }
+			log.debug("Attribute String=" + attributeString);
 			QDataAskMessage askMsgs = JsonUtils.fromJson(attributeString, QDataAskMessage.class);
 			BaseEntity be = MergeUtil.getBaseEntityForAttr(targetBaseEntityCode, userToken);
 
@@ -666,15 +656,15 @@ public class QwandaUtils {
 				for (Ask parentAsk : askMsgs.getItems()) {
 					for (Ask childAsk : parentAsk.getChildAsks()) {
 						// log.info("parent ask code ::"+parentAsk.getAttributeCode());
-						if( childAsk.getChildAsks() != null) {
+						if (childAsk.getChildAsks() != null) {
 							for (Ask basicChildAsk : childAsk.getChildAsks()) {
-								if ( !isAsksMandatoryFilled(be,basicChildAsk ) ) {
+								if (!isAsksMandatoryFilled(be, basicChildAsk)) {
 									return false;
 								}
 
 							}
-						}else {
-							if ( !isAsksMandatoryFilled(be, childAsk) ) {
+						} else {
+							if (!isAsksMandatoryFilled(be, childAsk)) {
 								return false;
 							}
 						}
@@ -682,8 +672,8 @@ public class QwandaUtils {
 
 				}
 			} else {
-				log.error("AskMsg is NULL! "+GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" + sourceBaseEntityCode
-						+ "/asks3/" + questionCode + "/" + targetBaseEntityCode);
+				log.error("AskMsg is NULL! " + GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/"
+						+ sourceBaseEntityCode + "/asks3/" + questionCode + "/" + targetBaseEntityCode);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -697,13 +687,12 @@ public class QwandaUtils {
 			 * Optional<EntityAttribute> attributeVal =
 			 * be.findEntityAttribute(basicChildAsk.getAttributeCode()); if
 			 * (attributeVal.isPresent()) { if (attributeVal.get() == null) {
-			 * log.info("This attribute value of "+basicChildAsk.getAttributeCode(
-			 * ) +" is not filled and is null"); return false; } } else { return false; }
+			 * log.info("This attribute value of "+basicChildAsk.getAttributeCode( )
+			 * +" is not filled and is null"); return false; } } else { return false; }
 			 */
 			// log.info("child ask attribute code
 			// ::"+basicChildAsk.getAttributeCode());
-			Object attributeVal = MergeUtil.getBaseEntityAttrObjectValue(be,
-					asks.getAttributeCode());
+			Object attributeVal = MergeUtil.getBaseEntityAttrObjectValue(be, asks.getAttributeCode());
 			if (attributeVal != null) {
 			}
 
@@ -719,25 +708,26 @@ public class QwandaUtils {
 	 *
 	 * @param baseEntAttributeCode
 	 * @param token
-	 * @return Deserialized BaseEntity model object with values for a BaseEntity code that is passed
+	 * @return Deserialized BaseEntity model object with values for a BaseEntity
+	 *         code that is passed
 	 * @throws IOException
 	 */
-	public static <T extends BaseEntity> T  getBaseEntityByCode(String baseEntAttributeCode, String token) throws  IOException {
+	public static <T extends BaseEntity> T getBaseEntityByCode(String baseEntAttributeCode, String token)
+			throws IOException {
 
 		String attributeString = null;
 		T be = null;
 		try {
 			attributeString = QwandaUtils
-					.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode, token);
+					.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" + baseEntAttributeCode, token);
 			be = JsonUtils.fromJson(attributeString, BaseEntity.class);
 			if (be == null) {
-				throw new IOException("Cannot find BE "+baseEntAttributeCode);
+				throw new IOException("Cannot find BE " + baseEntAttributeCode);
 			}
 
-		} catch (IOException e)  {
-			throw new IOException("Cannot connect to QwandaURL "+GennySettings.qwandaServiceUrl);
+		} catch (IOException e) {
+			throw new IOException("Cannot connect to QwandaURL " + GennySettings.qwandaServiceUrl);
 		}
-
 
 		return be;
 	}
@@ -746,27 +736,28 @@ public class QwandaUtils {
 	 *
 	 * @param baseEntAttributeCode
 	 * @param token
-	 * @return Deserialized BaseEntity model object with values for a BaseEntity code that is passed
+	 * @return Deserialized BaseEntity model object with values for a BaseEntity
+	 *         code that is passed
 	 * @throws IOException
 	 */
-	public static <T extends BaseEntity> T getBaseEntityByCodeWithAttributes(String baseEntAttributeCode, String token) throws  IOException {
+	public static <T extends BaseEntity> T getBaseEntityByCodeWithAttributes(String baseEntAttributeCode, String token)
+			throws IOException {
 
 		String attributeString = null;
 		T be = null;
 		try {
 
-			attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" +baseEntAttributeCode.toUpperCase()+"/attributes", token);
-			if(attributeString != null) {
+			attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/"
+					+ baseEntAttributeCode.toUpperCase() + "/attributes", token);
+			if (attributeString != null) {
 				be = JsonUtils.fromJson(attributeString, BaseEntity.class);
-			}
-			else {
-				throw new IOException("Cannot find BE "+baseEntAttributeCode);
+			} else {
+				throw new IOException("Cannot find BE " + baseEntAttributeCode);
 			}
 
-		} catch (IOException e)  {
-			throw new IOException("Cannot connect to QwandaURL "+GennySettings.qwandaServiceUrl);
+		} catch (IOException e) {
+			throw new IOException("Cannot connect to QwandaURL " + GennySettings.qwandaServiceUrl);
 		}
-
 
 		return be;
 	}
@@ -778,11 +769,11 @@ public class QwandaUtils {
 	 */
 	public static String getBaseEntityCodeForUserName(String username, String userToken) {
 
-
 		String baseEntityCode = null;
 		try {
-			String attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl
-					+ "/qwanda/baseentitys/GRP_PEOPLE/linkcodes/LNK_CORE/attributes?PRI_USERNAME=" + username,
+			String attributeString = QwandaUtils.apiGet(
+					GennySettings.qwandaServiceUrl
+							+ "/qwanda/baseentitys/GRP_PEOPLE/linkcodes/LNK_CORE/attributes?PRI_USERNAME=" + username,
 					userToken);
 			log.info("attribute string::" + attributeString);
 
@@ -812,7 +803,8 @@ public class QwandaUtils {
 		String attributeString;
 		QBaseMSGMessageTemplate template = null;
 		try {
-			attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/templates/" + templateCode, token);
+			attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/templates/" + templateCode,
+					token);
 			template = JsonUtils.fromJson(attributeString, QBaseMSGMessageTemplate.class);
 			log.info("template sms:" + template.getSms_template());
 
@@ -834,8 +826,8 @@ public class QwandaUtils {
 		List linkList = null;
 
 		try {
-			String attributeString = QwandaUtils.apiGet(
-					GennySettings.qwandaServiceUrl + "/qwanda/entityentitys/" + groupCode + "/linkcodes/LNK_BEG/children", token);
+			String attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/entityentitys/"
+					+ groupCode + "/linkcodes/LNK_BEG/children", token);
 			if (attributeString != null) {
 				linkList = JsonUtils.fromJson(attributeString, List.class);
 			}
@@ -887,17 +879,17 @@ public class QwandaUtils {
 		return entityTemplateContextMap;
 
 	}
-	
+
 	public static String getUniqueId(String prefix) {
 		return QwandaUtils.getUniqueId(prefix, null);
 	}
-	
+
 	public static String getUniqueId(String prefix, String author) {
-		
+
 		String uniqueID = UUID.randomUUID().toString().replaceAll("-", "");
 
 		String nameInitials = "";
-		if(author != null) {
+		if (author != null) {
 			nameInitials = getInitials(author.split("\\s+"));
 		}
 
@@ -906,7 +898,7 @@ public class QwandaUtils {
 		}
 		String ret = prefix + "_" + nameInitials + uniqueID;
 		ret = ret.toUpperCase();
-		
+
 		return ret;
 	}
 
@@ -927,9 +919,8 @@ public class QwandaUtils {
 		QDataBaseEntityMessage dataBEMessage = null;
 
 		try {
-			String attributeString = QwandaUtils.apiGet(
-					GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" + groupCode + "/linkcodes/" + linkCode + "/attributes",
-					token);
+			String attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/"
+					+ groupCode + "/linkcodes/" + linkCode + "/attributes", token);
 			dataBEMessage = JsonUtils.fromJson(attributeString, QDataBaseEntityMessage.class);
 
 		} catch (IOException e) {
@@ -1006,7 +997,7 @@ public class QwandaUtils {
 			Long id = Long.parseLong(idStr);
 			beg.setId(id);
 		} catch (Exception e) {
-			log.warn("Baseentity code "+entityCode+" not found");
+			log.warn("Baseentity code " + entityCode + " not found");
 		}
 
 		return beg;
@@ -1056,12 +1047,11 @@ public class QwandaUtils {
 	 *
 	 * @param groupCode
 	 * @param attributeCode
-	 * @param sourceOrTarget
-	 *            (The input code could be either the sourceCode or the targetCode
-	 *            of a groupLink)
+	 * @param sourceOrTarget (The input code could be either the sourceCode or the
+	 *                       targetCode of a groupLink)
 	 * @param linkValue
-	 * @param isSource
-	 *            (Determines if the input rule requires a sourceCode/targetCode)
+	 * @param isSource       (Determines if the input rule requires a
+	 *                       sourceCode/targetCode)
 	 * @param token
 	 * @return sourceCode/targetCode if the link values match the input given
 	 */
@@ -1077,12 +1067,12 @@ public class QwandaUtils {
 
 				Set<EntityEntity> eeSet = be.getLinks();
 
-				for(EntityEntity ee : eeSet) {
+				for (EntityEntity ee : eeSet) {
 					Link finalLink = ee.getLink();
 
 					if (isSource) {
-						if (finalLink != null && finalLink.getAttributeCode() != null && finalLink.getTargetCode() != null
-								&& finalLink.getLinkValue() != null) {
+						if (finalLink != null && finalLink.getAttributeCode() != null
+								&& finalLink.getTargetCode() != null && finalLink.getLinkValue() != null) {
 							String linkAttributeCode = finalLink.getAttributeCode();
 							String linkTargetCode = finalLink.getTargetCode();
 							String linkLinkValue = finalLink.getLinkValue();
@@ -1094,8 +1084,8 @@ public class QwandaUtils {
 							}
 						}
 					} else { // When the rule wants targetCode
-						if (finalLink != null && finalLink.getAttributeCode() != null && finalLink.getTargetCode() != null
-								&& finalLink.getLinkValue() != null) {
+						if (finalLink != null && finalLink.getAttributeCode() != null
+								&& finalLink.getTargetCode() != null && finalLink.getLinkValue() != null) {
 							String linkAttributeCode = finalLink.getAttributeCode();
 							String linkSourceCode = finalLink.getSourceCode();
 							String linkLinkValue = finalLink.getLinkValue();
@@ -1110,42 +1100,33 @@ public class QwandaUtils {
 
 				}
 
-				/*for (EntityEntity entityEntity : be.getLinks()) {
-
-
-
-					Link link = entityEntity.getLink();
-
-					// When the rule want the sourceCode
-					if (isSource) {
-						if (link != null && link.getAttributeCode() != null && link.getTargetCode() != null
-								&& link.getLinkValue() != null) {
-							String linkAttributeCode = link.getAttributeCode();
-							String linkTargetCode = link.getTargetCode();
-							String linkLinkValue = link.getLinkValue();
-
-							if (attributeCode.equals(linkAttributeCode) && sourceOrTarget.equals(linkTargetCode)
-									&& linkValue.equals(linkLinkValue)) {
-								code = link.getSourceCode();
-								return code;
-							}
-						}
-					} else { // When the rule wants targetCode
-						if (link != null && link.getAttributeCode() != null && link.getTargetCode() != null
-								&& link.getLinkValue() != null) {
-							String linkAttributeCode = link.getAttributeCode();
-							String linkSourceCode = link.getSourceCode();
-							String linkLinkValue = link.getLinkValue();
-
-							if (attributeCode.equals(linkAttributeCode) && sourceOrTarget.equals(linkSourceCode)
-									&& linkValue.equals(linkLinkValue)) {
-								code = link.getTargetCode();
-								return code;
-							}
-						}
-					}
-
-				}*/
+				/*
+				 * for (EntityEntity entityEntity : be.getLinks()) {
+				 * 
+				 * 
+				 * 
+				 * Link link = entityEntity.getLink();
+				 * 
+				 * // When the rule want the sourceCode if (isSource) { if (link != null &&
+				 * link.getAttributeCode() != null && link.getTargetCode() != null &&
+				 * link.getLinkValue() != null) { String linkAttributeCode =
+				 * link.getAttributeCode(); String linkTargetCode = link.getTargetCode(); String
+				 * linkLinkValue = link.getLinkValue();
+				 * 
+				 * if (attributeCode.equals(linkAttributeCode) &&
+				 * sourceOrTarget.equals(linkTargetCode) && linkValue.equals(linkLinkValue)) {
+				 * code = link.getSourceCode(); return code; } } } else { // When the rule wants
+				 * targetCode if (link != null && link.getAttributeCode() != null &&
+				 * link.getTargetCode() != null && link.getLinkValue() != null) { String
+				 * linkAttributeCode = link.getAttributeCode(); String linkSourceCode =
+				 * link.getSourceCode(); String linkLinkValue = link.getLinkValue();
+				 * 
+				 * if (attributeCode.equals(linkAttributeCode) &&
+				 * sourceOrTarget.equals(linkSourceCode) && linkValue.equals(linkLinkValue)) {
+				 * code = link.getTargetCode(); return code; } } }
+				 * 
+				 * }
+				 */
 			}
 
 		}
@@ -1156,8 +1137,7 @@ public class QwandaUtils {
 	/**
 	 *
 	 * @param groupCode
-	 * @param linkCode
-	 *            (which is the attributeCode in the Link model)
+	 * @param linkCode   (which is the attributeCode in the Link model)
 	 * @param targetCode
 	 * @param linkValue
 	 * @param token
@@ -1180,8 +1160,8 @@ public class QwandaUtils {
 				Link link = JsonUtils.fromJson(item.toString(), Link.class);
 				if (link.getAttributeCode().equals(linkCode) && link.getTargetCode().equals(targetCode)
 						&& link.getLinkValue().equals(linkValue)) {
-          isExists = true;
-        }
+					isExists = true;
+				}
 				return isExists;
 			});
 		}
@@ -1287,7 +1267,8 @@ public class QwandaUtils {
 				.setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();
 		CloseableHttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
 
-		final HttpPost post = new HttpPost("http://" + GennySettings.hostIP + ":" + GennySettings.apiPort + "/" + key + "/" + uuJson);
+		final HttpPost post = new HttpPost(
+				"http://" + GennySettings.hostIP + ":" + GennySettings.apiPort + "/" + key + "/" + uuJson);
 		post.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 
 		final StringEntity input = new StringEntity(json); // Do this to test out
@@ -1316,7 +1297,8 @@ public class QwandaUtils {
 		RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 1000)
 				.setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();
 		CloseableHttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-		HttpGet request = new HttpGet("http://" + GennySettings.hostIP + ":" + GennySettings.apiPort + "/" + key); // GET Request
+		HttpGet request = new HttpGet("http://" + GennySettings.hostIP + ":" + GennySettings.apiPort + "/" + key); // GET
+																													// Request
 
 		if (authToken != null) {
 			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
@@ -1348,7 +1330,7 @@ public class QwandaUtils {
 			return null;
 		}
 	}
-	
+
 	/*
 	 * Checks if all the mandatory fields are completed
 	 */
@@ -1395,15 +1377,15 @@ public class QwandaUtils {
 		return getUserCodeFromUserName(username);
 
 	}
-	
+
 	public static String getUserCodeFromUserName(String username) {
-	  String uname = QwandaUtils.getNormalisedUsername(username);
-	  if(uname != null) {
-	    return "PER_" + uname.toUpperCase();
-	  } else {
-	    return null;
-	  }
-      
+		String uname = QwandaUtils.getNormalisedUsername(username);
+		if (uname != null) {
+			return "PER_" + uname.toUpperCase();
+		} else {
+			return null;
+		}
+
 	}
 
 	/**
@@ -1473,7 +1455,7 @@ public class QwandaUtils {
 	public static String getZonedCurrentLocalDateTime() {
 
 		LocalDateTime ldt = LocalDateTime.now();
-		ZonedDateTime zdt = ldt.atZone(ZoneOffset.UTC);  //Using UTC Time
+		ZonedDateTime zdt = ldt.atZone(ZoneOffset.UTC); // Using UTC Time
 		String iso8601DateString = zdt.toString(); // zdt.toString(); MUST USE UMT!!!!
 
 		log.info("datetime ::" + iso8601DateString);
@@ -1483,33 +1465,34 @@ public class QwandaUtils {
 	}
 
 	/*
-	 * Sends the current UTC datetime of the server TimeZone
-	 * It is same as in the Rulesservice, can be removed from here later 
+	 * Sends the current UTC datetime of the server TimeZone It is same as in the
+	 * Rulesservice, can be removed from here later
 	 */
 	public static String getCurrentUTCDateTime() {
 
-		ZonedDateTime now = ZonedDateTime.now( ZoneOffset.UTC );
+		ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
 		String dateTimeString = now.toString();
 		log.info("UTC datetime is ::" + dateTimeString);
 
 		return dateTimeString;
 	}
 
-	public static QDataBaseEntityMessage fetchResults(final BaseEntity searchBE, final String token) throws IOException
-	{
+	public static QDataBaseEntityMessage fetchResults(final BaseEntity searchBE, final String token)
+			throws IOException {
 		QDataBaseEntityMessage results = null;
 		SearchEntity se = new SearchEntity(searchBE);
-		log.info("se="+se.getCode());
-		//	if (searchBE.getCode().startsWith("SBE_")) {
+		log.info("se=" + se.getCode());
+		// if (searchBE.getCode().startsWith("SBE_")) {
 
 		String jsonSearchBE = JsonUtils.toJson(searchBE);
-		String result = QwandaUtils.apiPostEntity(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/search", jsonSearchBE,
-				token);
+		String result = QwandaUtils.apiPostEntity(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/search",
+				jsonSearchBE, token);
 
 		results = JsonUtils.fromJson(result, QDataBaseEntityMessage.class);
-		//		} else {
-		//			throw new IllegalArgumentException("Must only send SearchBaseEntities - "+searchBE.getCode());
-		//		}
+		// } else {
+		// throw new IllegalArgumentException("Must only send SearchBaseEntities -
+		// "+searchBE.getCode());
+		// }
 		return results;
 
 	}
@@ -1542,14 +1525,15 @@ public class QwandaUtils {
 						String targetCode = link.getTargetCode();
 						if (targetCode != null) {
 
-							BaseEntity targetBe = QwandaUtils.getBaseEntityByCodeWithAttributes(targetCode, token);;
-							if(targetBe != null) {
+							BaseEntity targetBe = QwandaUtils.getBaseEntityByCodeWithAttributes(targetCode, token);
+							;
+							if (targetBe != null) {
 								beList.add(targetBe);
 							}
 
 							// recursion
 							List<BaseEntity> kids = QwandaUtils.getBaseEntityWithChildren(targetCode, level, token);
-							if(kids != null) {
+							if (kids != null) {
 								beList.addAll(kids);
 							}
 						}
@@ -1566,35 +1550,29 @@ public class QwandaUtils {
 		return null;
 	}
 
-
 	private static Attribute getAttribute(String attributeCode, String token) {
 
 		try {
 
 			String response = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/attributes/", token);
 			QDataAttributeMessage attributeMessage = JsonUtils.fromJson(response, QDataAttributeMessage.class);
-			for(Attribute attribute: attributeMessage.getItems()) {
-				if(attribute.getCode().equals(attributeCode)) {
+			for (Attribute attribute : attributeMessage.getItems()) {
+				if (attribute.getCode().equals(attributeCode)) {
 					return attribute;
 				}
 			}
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 
 		}
 
 		return null;
 	}
 
-
-	
-
-
 	public static String getUniqueCode(int numberOfDigitsForUniqueCode) {
 		String uniqueCode = UUID.randomUUID().toString().substring(0, numberOfDigitsForUniqueCode).toUpperCase();
 		return uniqueCode;
 	}
-	
+
 	public static QDataBaseEntityMessage findBaseEntityByAttributeCodeLikeValue(String realm, String token,
 			String attributeCode, String likeValue) {
 		SearchEntity searchBE = new SearchEntity("SBE_FIND_LIKE", "AttributeLink")
@@ -1618,45 +1596,46 @@ public class QwandaUtils {
 		}
 		return null;
 	}
-	
+
 	public static boolean isValidAbnFormat(final String abn) {
-	    if(NumberUtils.isDigits(abn) && abn.length() != 11) {
-	        return false;
-	    }
-	    final int[] weights = {10, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19};
-	    //split abn number string by digits to get int array
-	    int [] abnDigits =  Stream.of(abn.split("\\B")).mapToInt(Integer::parseInt).toArray();
-	    //reduce by applying weight[index] * abnDigits[index] (NOTE: substract 1 for the first digit in abn number)
-	    int sum = IntStream.range( 0, weights.length )
-	            .reduce(0, (total, idx) -> total + weights[idx] * (idx == 0 ? abnDigits[idx] - 1 : abnDigits[idx]));
-	    return (sum % 89 == 0);
-	}
-	
-	public static Boolean checkPhone(String phonenum)
-	{
-		if (phonenum.startsWith("61")) {
-			return checkregex(phonenum,"^\\d{11}$");
-		} else {
-		return checkregex(phonenum,"^\\d{10,11,12,13}$");  // this needs to be more country specific
+		if (NumberUtils.isDigits(abn) && abn.length() != 11) {
+			return false;
 		}
-		//return checkregex(phonenum,"^(\\d{2}){0,1}((0{0,1}[2|3|7|8]{1}[ \\-]*(\\d{4}\\d{4}))|(\\d{2}){0,1}(1[ \\-]{0,1}(300|800|900|902)[ \\-]{0,1}((\\d{6})|(\\d{3}\\d{3})))|(13[ \\-]{0,1}([\\d \\-]{4})|((\\d{0,2})0{0,1}4{1}[\\d \\-]{8,10})))$");
+		final int[] weights = { 10, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19 };
+		// split abn number string by digits to get int array
+		int[] abnDigits = Stream.of(abn.split("\\B")).mapToInt(Integer::parseInt).toArray();
+		// reduce by applying weight[index] * abnDigits[index] (NOTE: substract 1 for
+		// the first digit in abn number)
+		int sum = IntStream.range(0, weights.length).reduce(0,
+				(total, idx) -> total + weights[idx] * (idx == 0 ? abnDigits[idx] - 1 : abnDigits[idx]));
+		return (sum % 89 == 0);
 	}
-	
-	public static Boolean checkregex(String input, String regex)
-	{
-		  
 
-	      // Create a Pattern object
-	      Pattern r = Pattern.compile(regex);
-
-	      // Now create matcher object.
-	      Matcher m = r.matcher(input);
-	      if (m.find( )) {
-	    	  return true;
-	      }
-	      return false;
+	public static Boolean checkPhone(String phonenum) {
+		if (phonenum.startsWith("61")) {
+			return checkregex(phonenum, "^\\d{11}$");
+		} else {
+			return checkregex(phonenum, "^\\d{10,11,12,13}$"); // this needs to be more country specific
+		}
+		// return checkregex(phonenum,"^(\\d{2}){0,1}((0{0,1}[2|3|7|8]{1}[
+		// \\-]*(\\d{4}\\d{4}))|(\\d{2}){0,1}(1[ \\-]{0,1}(300|800|900|902)[
+		// \\-]{0,1}((\\d{6})|(\\d{3}\\d{3})))|(13[ \\-]{0,1}([\\d
+		// \\-]{4})|((\\d{0,2})0{0,1}4{1}[\\d \\-]{8,10})))$");
 	}
-	
+
+	public static Boolean checkregex(String input, String regex) {
+
+		// Create a Pattern object
+		Pattern r = Pattern.compile(regex);
+
+		// Now create matcher object.
+		Matcher m = r.matcher(input);
+		if (m.find()) {
+			return true;
+		}
+		return false;
+	}
+
 	public static String normalisePhone(String phonenumber) {
 		if (phonenumber != null) {
 			phonenumber = StringUtils.deleteWhitespace(phonenumber);
@@ -1688,37 +1667,45 @@ public class QwandaUtils {
 			}
 		}
 	}
-	
+
 	static public String sendGET(String url) throws IOException {
-		return sendGET(url,null);
+		return sendGET(url, null);
 	}
 
-	
-	static public String sendGET(String url, String authToken) throws IOException
-	{
-		
-		 HttpRequest request = HttpRequest.newBuilder()
-	                .GET()
-	                .uri(URI.create(url))
-	                .setHeader("Content-Type", "application/json")
-	                .setHeader("Authorization", "Bearer " + authToken)
-	                .build();
+	static public String sendGET(String url, String authToken) throws IOException {
 
-	        CompletableFuture<java.net.http.HttpResponse<String>> response =
-	                httpClient.sendAsync(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+		HttpRequest request = HttpRequest.newBuilder().GET().uri(URI.create(url))
+				.setHeader("Content-Type", "application/json").setHeader("Authorization", "Bearer " + authToken)
+				.build();
 
-	        String result = null;
-	        
-	        try {
+		String result = null;
+		Boolean done = false;
+		int count = 5;
+		while ((!done) && (count > 0)) {
+
+			CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
+					java.net.http.HttpResponse.BodyHandlers.ofString());
+
+			
+
+			try {
 				result = response.thenApply(java.net.http.HttpResponse::body).get(20, TimeUnit.SECONDS);
+				done = true;
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				// TODO Auto-generated catch block
 				log.error(e.getLocalizedMessage());
+				httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
+						.connectTimeout(Duration.ofSeconds(20)).build();
+				if (count <= 0) {
+					done = true;
+				}
+				
 			}
-
+			count--;
+		}
 //	        System.out.println(result);
 
-	        return result;
+		return result;
 //		
 //		
 //		
@@ -1753,17 +1740,16 @@ public class QwandaUtils {
 //		}
 
 	}
-	
+
 	static public String sendPOST(String url, String authToken) throws IOException {
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 		con.setRequestMethod("POST");
 		con.addRequestProperty("Content-Type", "application/json");
-		
+
 		if (authToken != null) {
 			con.addRequestProperty("Authorization", "Bearer " + authToken); // Authorization": `Bearer
 		}
-
 
 		// con.setRequestProperty("NestUser-Agent", USER_AGENT);
 		int responseCode = con.getResponseCode();
@@ -1785,100 +1771,101 @@ public class QwandaUtils {
 		}
 
 	}
-	
-	private static String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException{
-        StringBuilder result = new StringBuilder();
-        boolean first = true;
-        for(Map.Entry<String, String> entry : params.entrySet()){
-            if (first)
-                first = false;
-            else
-                result.append("&");
 
-            result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-            result.append("=");
-            result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
-        }
+	private static String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
+		StringBuilder result = new StringBuilder();
+		boolean first = true;
+		for (Map.Entry<String, String> entry : params.entrySet()) {
+			if (first)
+				first = false;
+			else
+				result.append("&");
 
-        return result.toString();
-    }
-	
-	public static String  performPostCall(String requestURL,
-            HashMap<String, String> postDataParams) {
+			result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+			result.append("=");
+			result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+		}
 
-        URL url;
-        String response = "";
-        try {
-            url = new URL(requestURL);
+		return result.toString();
+	}
 
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(15000);
-            conn.setConnectTimeout(15000);
-            conn.setRequestMethod("POST");
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
+	public static String performPostCall(String requestURL, HashMap<String, String> postDataParams) {
 
+		URL url;
+		String response = "";
+		try {
+			url = new URL(requestURL);
 
-            OutputStream os = conn.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(
-                    new OutputStreamWriter(os, "UTF-8"));
-            writer.write(getPostDataString(postDataParams));
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setReadTimeout(15000);
+			conn.setConnectTimeout(15000);
+			conn.setRequestMethod("POST");
+			conn.setDoInput(true);
+			conn.setDoOutput(true);
 
-            writer.flush();
-            writer.close();
-            os.close();
-            int responseCode=conn.getResponseCode();
+			OutputStream os = conn.getOutputStream();
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+			writer.write(getPostDataString(postDataParams));
 
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
-                String line;
-                BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                while ((line=br.readLine()) != null) {
-                    response+=line;
-                }
-            }
-            else {
-                response="";
+			writer.flush();
+			writer.close();
+			os.close();
+			int responseCode = conn.getResponseCode();
 
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+			if (responseCode == HttpsURLConnection.HTTP_OK) {
+				String line;
+				BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+				while ((line = br.readLine()) != null) {
+					response += line;
+				}
+			} else {
+				response = "";
 
-        return response;
-    }
-	
-	public static String apiPostEntity2(final String postUrl, final String entityString, final String authToken, final Consumer<String> callback)
-			throws IOException {
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return response;
+	}
+
+	public static String apiPostEntity2(final String postUrl, final String entityString, final String authToken,
+			final Consumer<String> callback) throws IOException {
 		if (StringUtils.isBlank(postUrl)) {
 			log.error("Blank url in apiPostEntity");
 		}
-		
-		BodyPublisher requestBody = BodyPublishers
-				.ofString(entityString);
-		
-		 HttpRequest request = HttpRequest.newBuilder()
-	                .POST(requestBody)
-	                .uri(URI.create(postUrl))
-	                .setHeader("Content-Type", "application/json")
-	                .setHeader("Authorization", "Bearer " + authToken)
-	                .build();
 
-	        CompletableFuture<java.net.http.HttpResponse<String>> response =
-	                httpClient.sendAsync(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+		BodyPublisher requestBody = BodyPublishers.ofString(entityString);
 
-	        String result = null;
-	        
-	        try {
+		HttpRequest request = HttpRequest.newBuilder().POST(requestBody).uri(URI.create(postUrl))
+				.setHeader("Content-Type", "application/json").setHeader("Authorization", "Bearer " + authToken)
+				.build();
+
+		String result = null;
+		Boolean done = false;
+		int count = 5;
+		while ((!done) && (count > 0)) {
+			CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
+					java.net.http.HttpResponse.BodyHandlers.ofString());
+
+			try {
 				result = response.thenApply(java.net.http.HttpResponse::body).get(15, TimeUnit.SECONDS);
+				done = true;
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				// TODO Auto-generated catch block
 				log.error(e.getLocalizedMessage());
+				// try renewing the httpclient
+				httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
+						.connectTimeout(Duration.ofSeconds(20)).build();
+				if (count <= 0) {
+					done = true;
+				}
 			}
-
+			count--;
+		}
 //	        System.out.println(result);
 
-	        return result;
-		
+		return result;
 
 //        URL url;
 //        String response = "";
@@ -1930,5 +1917,5 @@ public class QwandaUtils {
 //        return response;
 
 	}
-	
+
 }
