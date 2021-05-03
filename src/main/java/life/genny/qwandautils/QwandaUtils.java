@@ -1713,7 +1713,7 @@ public class QwandaUtils {
 				result = response.thenApply(java.net.http.HttpResponse::body).get(20, TimeUnit.SECONDS);
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error(e.getLocalizedMessage());
 			}
 
 //	        System.out.println(result);
@@ -1849,7 +1849,6 @@ public class QwandaUtils {
 	
 	public static String apiPostEntity2(final String postUrl, final String entityString, final String authToken, final Consumer<String> callback)
 			throws IOException {
-		String responseString = null;
 		if (StringUtils.isBlank(postUrl)) {
 			log.error("Blank url in apiPostEntity");
 		}
@@ -1873,7 +1872,7 @@ public class QwandaUtils {
 				result = response.thenApply(java.net.http.HttpResponse::body).get(15, TimeUnit.SECONDS);
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error(e.getLocalizedMessage());
 			}
 
 //	        System.out.println(result);
