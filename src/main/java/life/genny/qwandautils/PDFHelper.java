@@ -33,11 +33,11 @@ public class PDFHelper {
 		log.info("htmlRowUrl :::"+htmlRowUrl);
 		try {
 			/* Get content from link in String format */
-			content = QwandaUtils.apiGet(htmlRowUrl, null);
+			content = QwandaUtils.sendGET(htmlRowUrl);
 			
 		  log.info("content :::"+content);
 			// Merge the header
-			headerContent = QwandaUtils.apiGet(htmlHeaderUrl, null);
+			headerContent = QwandaUtils.sendGET(htmlHeaderUrl);
 		  log.info("headerContent :::"+headerContent);
 			headerContent = MergeUtil.merge(headerContent, contextMap);
 			
@@ -71,7 +71,7 @@ public class PDFHelper {
 		
 		try {
 			/* Get content from link in String format */
-			content = QwandaUtils.apiGet(htmlUrl, null);			
+			content = QwandaUtils.sendGET(htmlUrl);			
 			/* If merge is required, use MergeUtils for merge with context map */
 		  log.info("content :::"+content);
 			content = MergeUtil.merge(content, contextMap);
