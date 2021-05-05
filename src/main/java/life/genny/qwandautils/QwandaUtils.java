@@ -181,44 +181,45 @@ public class QwandaUtils {
 
 	public static String apiPostEntity(final String postUrl, final String entityString, final String authToken,
 			final Consumer<String> callback) throws IOException {
-		String responseString = null;
-		if (StringUtils.isBlank(postUrl)) {
-			log.error("Blank url in apiPostEntity");
-		}
-		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
-		CloseableHttpResponse response = null;
-		try {
-
-			HttpPost post = new HttpPost(postUrl);
-
-			StringEntity postEntity = new StringEntity(entityString, "UTF-8");
-
-			post.setEntity(postEntity);
-			post.setHeader("Content-Type", "application/json; charset=UTF-8");
-			if (authToken != null) {
-				post.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
-			}
-
-			response = httpclient.execute(post);
-			HttpEntity entity = response.getEntity();
-			responseString = EntityUtils.toString(entity);
-			if (callback != null) {
-				callback.accept(responseString);
-			}
-			return responseString;
-		} catch (Exception e) {
-			log.error(e.getMessage());
-		} finally {
-			if (response != null) {
-				response.close();
-			} else {
-				log.error("postApi response was null");
-			}
-			httpclient.close();
-			// IOUtils.closeQuietly(response);
-			// IOUtils.closeQuietly(httpclient);
-		}
-		return responseString;
+		return apiPostEntity2(postUrl,entityString,authToken,null);
+//		String responseString = null;
+//		if (StringUtils.isBlank(postUrl)) {
+//			log.error("Blank url in apiPostEntity");
+//		}
+//		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+//		CloseableHttpResponse response = null;
+//		try {
+//
+//			HttpPost post = new HttpPost(postUrl);
+//
+//			StringEntity postEntity = new StringEntity(entityString, "UTF-8");
+//
+//			post.setEntity(postEntity);
+//			post.setHeader("Content-Type", "application/json; charset=UTF-8");
+//			if (authToken != null) {
+//				post.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+//			}
+//
+//			response = httpclient.execute(post);
+//			HttpEntity entity = response.getEntity();
+//			responseString = EntityUtils.toString(entity);
+//			if (callback != null) {
+//				callback.accept(responseString);
+//			}
+//			return responseString;
+//		} catch (Exception e) {
+//			log.error(e.getMessage());
+//		} finally {
+//			if (response != null) {
+//				response.close();
+//			} else {
+//				log.error("postApi response was null");
+//			}
+//			httpclient.close();
+//			// IOUtils.closeQuietly(response);
+//			// IOUtils.closeQuietly(httpclient);
+//		}
+//		return responseString;
 	}
 
 	public static String apiPostNote(final String postUrl, final String sourceCode, final String tag,
