@@ -30,12 +30,15 @@ public class PDFHelper {
 		String finalContent = "";
 		String headerContent = "";
 
+		log.info("htmlRowUrl :::"+htmlRowUrl);
 		try {
 			/* Get content from link in String format */
 			content = QwandaUtils.apiGet(htmlRowUrl, null);
 			
+		  log.info("content :::"+content);
 			// Merge the header
 			headerContent = QwandaUtils.apiGet(htmlHeaderUrl, null);
+		  log.info("headerContent :::"+headerContent);
 			headerContent = MergeUtil.merge(headerContent, contextMap);
 			
 			finalContent += headerContent;
@@ -69,8 +72,10 @@ public class PDFHelper {
 			/* Get content from link in String format */
 			content = QwandaUtils.apiGet(htmlUrl, null);			
 			/* If merge is required, use MergeUtils for merge with context map */
+		  log.info("content :::"+content);
 			content = MergeUtil.merge(content, contextMap);
 
+		  log.info("content after merge :::"+content);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -91,6 +96,7 @@ public class PDFHelper {
 	/* Converts HTML String into PDF and return a downloadable link */
 	public static String getHtmlStringToPdfInByte(String htmlString) {
 
+		log.info("htmlString::"+htmlString);
 		JSONObject postObj = new JSONObject();
 		postObj.put("html", htmlString);
 		Gson gson = new Gson();
@@ -100,6 +106,7 @@ public class PDFHelper {
 
 			/* Camelot htmlToPdfConverter service */ 
 			resp = QwandaUtils.apiPostEntity(PDF_GEN_SERVICE_API_URL + "/raw", gson.toJson(postObj), null);
+		  log.info("resp::"+resp);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
