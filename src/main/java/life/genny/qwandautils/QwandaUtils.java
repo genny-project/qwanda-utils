@@ -1675,9 +1675,19 @@ public class QwandaUtils {
 
 	static public String sendGET(String url, String authToken) throws IOException {
 
-		HttpRequest request = HttpRequest.newBuilder().GET().uri(URI.create(url))
-				.setHeader("Content-Type", "application/json").setHeader("Authorization", "Bearer " + authToken)
-				.build();
+		HttpRequest request = Optional.ofNullable(authToken)
+			.map(token ->
+					HttpRequest.newBuilder()
+					.GET()
+					.uri(URI.create(url))
+					.setHeader("Content-Type", "application/json")
+					.setHeader("Authorization", "Bearer " + token)
+					.build())
+			.orElse(
+					HttpRequest.newBuilder()
+					.GET()
+					.uri(URI.create(url))
+					.build());
 
 		String result = null;
 		Boolean done = false;
