@@ -65,8 +65,18 @@ public class PDFHelper {
 	
 	public static String getDownloadablePdfLinkForHtml(String htmlUrl, HashMap<String, Object> contextMap){
 		
+		try {
+			String r = QwandaUtils.sendGET("https://raw.githubusercontent.com/genny-project/layouts/master/internmatch-new/document_templates/HostCompanyServicesAgreement2020.html");
+			log.info("r :::::" + r);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}			
+		htmlUrl = htmlUrl.trim();
+		htmlUrl = htmlUrl.strip();
+		
 		String content = null;
 		String downloadablePdfUrl = null;
+
 		log.info("htmlUrl :::"+htmlUrl);
 		
 		try {
