@@ -30,15 +30,12 @@ public class PDFHelper {
 		String finalContent = "";
 		String headerContent = "";
 
-		log.info("htmlRowUrl :::"+htmlRowUrl);
 		try {
 			/* Get content from link in String format */
-			content = QwandaUtils.sendGET(htmlRowUrl);
+			content = QwandaUtils.apiGet(htmlRowUrl, null);
 			
-		  log.info("content :::"+content);
 			// Merge the header
-			headerContent = QwandaUtils.sendGET(htmlHeaderUrl);
-		  log.info("headerContent :::"+headerContent);
+			headerContent = QwandaUtils.apiGet(htmlHeaderUrl, null);
 			headerContent = MergeUtil.merge(headerContent, contextMap);
 			
 			finalContent += headerContent;
@@ -65,28 +62,15 @@ public class PDFHelper {
 	
 	public static String getDownloadablePdfLinkForHtml(String htmlUrl, HashMap<String, Object> contextMap){
 		
-		try {
-			String r = QwandaUtils.sendGET("https://raw.githubusercontent.com/genny-project/layouts/master/internmatch-new/document_templates/HostCompanyServicesAgreement2020.html");
-			log.info("r :::::" + r);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}			
-		htmlUrl = htmlUrl.trim();
-		htmlUrl = htmlUrl.strip();
-		
 		String content = null;
 		String downloadablePdfUrl = null;
-
-		log.info("htmlUrl :::"+htmlUrl);
 		
 		try {
 			/* Get content from link in String format */
-			content = QwandaUtils.sendGET(htmlUrl);			
+			content = QwandaUtils.apiGet(htmlUrl, null);			
 			/* If merge is required, use MergeUtils for merge with context map */
-		  log.info("content :::"+content);
 			content = MergeUtil.merge(content, contextMap);
 
-		  log.info("content after merge :::"+content);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -107,7 +91,6 @@ public class PDFHelper {
 	/* Converts HTML String into PDF and return a downloadable link */
 	public static String getHtmlStringToPdfInByte(String htmlString) {
 
-		log.info("htmlString::"+htmlString);
 		JSONObject postObj = new JSONObject();
 		postObj.put("html", htmlString);
 		Gson gson = new Gson();
@@ -117,7 +100,6 @@ public class PDFHelper {
 
 			/* Camelot htmlToPdfConverter service */ 
 			resp = QwandaUtils.apiPostEntity(PDF_GEN_SERVICE_API_URL + "/raw", gson.toJson(postObj), null);
-		  log.info("resp::"+resp);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
