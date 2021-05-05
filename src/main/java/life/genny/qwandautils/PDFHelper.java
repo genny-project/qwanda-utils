@@ -67,6 +67,7 @@ public class PDFHelper {
 		
 		String content = null;
 		String downloadablePdfUrl = null;
+		log.info("htmlUrl :::"+htmlUrl);
 		
 		try {
 			/* Get content from link in String format */
