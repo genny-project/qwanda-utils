@@ -1675,20 +1675,27 @@ public class QwandaUtils {
 
 	static public String sendGET(String url, String authToken) throws IOException {
 
-		HttpRequest request = Optional.ofNullable(authToken)
+		HttpRequest.Builder requestBuilder = Optional.ofNullable(authToken)
 			.map(token ->
 					HttpRequest.newBuilder()
 					.GET()
 					.uri(URI.create(url))
 					.setHeader("Content-Type", "application/json")
 					.setHeader("Authorization", "Bearer " + token)
-					.build())
+					)
 			.orElse(
 					HttpRequest.newBuilder()
 					.GET()
 					.uri(URI.create(url))
-					.build());
+					);
 
+				
+		if (url.contains("genny.life")) { // Hack for local server not having http2
+			requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
+		}
+
+		HttpRequest request = requestBuilder.build();
+		
 		String result = null;
 		Boolean done = false;
 		int count = 5;
@@ -1848,9 +1855,15 @@ public class QwandaUtils {
 
 		BodyPublisher requestBody = BodyPublishers.ofString(entityString);
 
-		HttpRequest request = HttpRequest.newBuilder().POST(requestBody).uri(URI.create(postUrl))
-				.setHeader("Content-Type", "application/json").setHeader("Authorization", "Bearer " + authToken)
-				.build();
+		HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().POST(requestBody).uri(URI.create(postUrl))
+				.setHeader("Content-Type", "application/json")
+				.setHeader("Authorization", "Bearer " + authToken);
+		
+		if (postUrl.contains("genny.life")) { // Hack for local server not having http2
+			requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
+		}
+		
+		HttpRequest request = requestBuilder.build();
 
 		String result = null;
 		Boolean done = false;
