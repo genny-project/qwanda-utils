@@ -504,10 +504,14 @@ public class KeycloakUtils {
 			HttpEntity entity = response.getEntity();
 			String content = null;
 			if (statusCode == 201) {
+				if (password != null) {
 					KeycloakUtils.setPassword(token,  realm, keycloakUUID, password, false);
+				}
                return keycloakUUID;
 			} else if (statusCode == 204) {
-				KeycloakUtils.setPassword(token,  realm, keycloakUUID, password, false);
+				if (password != null) {
+					KeycloakUtils.setPassword(token,  realm, keycloakUUID, password, false);
+				}
                 return keycloakUUID;
 			} else if (statusCode == 409) {
 				//throw new IOException("Email is already taken. Please use a different email address.");
@@ -715,69 +719,47 @@ public class KeycloakUtils {
 			throws IOException {
 		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
 		keycloakUrl = keycloakUrl.replaceAll(":-1", ""); // get rid of weird -1
-		String json = "{\"type\": \"password\", " + "\"temporary\": "+(askUserToResetPassword?"true":"false")+",\"value\": \"" + password + "\"" + "}";
+		String json = "{\"type\": \"password\", " + "\"temporary\": \""+(askUserToResetPassword?"true":"false")+"\",\"value\": \"" + password + "\"" + "}";
 
-		
-		String url = keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password";
-		
-		URL obj = new URL(url);
-		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-		con.setRequestMethod("PUT");
-		con.addRequestProperty("Content-Type", "application/json");
-		con.addRequestProperty("Authorization", "Bearer " + token);
+		int responseCode = 0;
+		userId = userId.toLowerCase();
 
-		// con.setRequestProperty("User-Agent", USER_AGENT);
-		int responseCode = con.getResponseCode();
-		System.out.println("GET Response Code :: " + responseCode);
-		if (responseCode == HttpURLConnection.HTTP_OK) { // success
-			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-			String inputLine;
-			StringBuffer response = new StringBuffer();
+		try {
+			if (userId != null) {
+				HttpClient httpClient = new DefaultHttpClient();
 
-			while ((inputLine = in.readLine()) != null) {
-				response.append(inputLine);
+				String requestURL = keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password";
+				HttpPut putRequest = new HttpPut(requestURL);
+
+				log.info(requestURL);
+
+				putRequest.addHeader("Content-Type", "application/json");
+				putRequest.addHeader("Authorization", "Bearer " + token);
+
+				putRequest.setEntity(new StringEntity(json));
+
+				HttpResponse response = null;
+				try {
+					response = httpClient.execute(putRequest);
+				} catch (ClientProtocolException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				int statusCode = response.getStatusLine().getStatusCode();
+				log.info("reset-password statusCode is "+statusCode+" with userId="+userId);
+				return statusCode;
+			} else {
+				log.error("userId is null! Not contacting keycloak server...");
 			}
-			in.close();
-
-			// print result
-			return responseCode;
-		} else {
-			return responseCode;
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
-		
-		
-//		HttpClient httpClient = new DefaultHttpClient();
-//
-//		try {
-//			HttpPut put = new HttpPut(
-//					keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password");
-//
-//			put.addHeader("Content-Type", "application/json");
-//			put.addHeader("Authorization", "Bearer " + token);
-//
-//			StringEntity postingString = new StringEntity(json);
-//			put.setEntity(postingString);
-//
-//			HttpResponse response = httpClient.execute(put);
-//
-//			int statusCode = response.getStatusLine().getStatusCode();
-//
-//			HttpEntity entity = response.getEntity();
-//			String content = null;
-//			if (statusCode != 204) {
-//				content = getContent(entity);
-//				throw new IOException("" + statusCode);
-//			}
-//			if (statusCode == 403) {
-//				throw new IOException("403 Forbidden");
-//			}
-//
-//			return statusCode;
-//		}
-//
-//		finally {
-//			httpClient.getConnectionManager().shutdown();
-//		}
+    	return responseCode;
 	}
 	
 	public String createEncryptedPassword(String key, final String customercode, final String password) {
