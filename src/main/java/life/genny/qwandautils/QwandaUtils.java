@@ -222,7 +222,7 @@ public class QwandaUtils {
 //		return responseString;
 	}
 
-	public static String apiPostNote(final String postUrl, final String sourceCode, final String tag,
+	public static String apiPostNote(final String postUrl, final String sourceCode, final String tag, final String userName, final String userImage,
 			final String targetCode, final String content, final String authToken, final Consumer<String> callback)
 			throws IOException {
 		String responseString = null;
@@ -235,10 +235,15 @@ public class QwandaUtils {
 
 			HttpPost post = new HttpPost(postUrl);
 
-			String jsonString = String.format("{\"id\":0,\"content\":\"" + content + "\",\"sourceCode\":\"" + sourceCode
-					+ "\",\"tags\":[{\"name\":\"" + sourceCode
-					+ "\",\"value\":0}, {\"name\":\"" + tag + "\",\"value\":0}],\"targetCode\":\"" + targetCode + "\"}");
-
+			/*String jsonString = String.format("{\"id\":0,\"content\":\"" + content + "\",\"sourceCode\":\"" + sourceCode + "\",\"targetCode\":\"" + targetCode + "\"tags\":[{\"name\":\"" + sourceCode + "\",\"value\":0}, {\"name\":\"" + tag + "\",\"value\":0}],\"targetCode\":\"" + targetCode + "\"}");*/
+			
+			String jsonString = String.format("{\"id\":0,\"content\":\"" + content + 
+					"\",\"sourceCode\":\"" + sourceCode + 
+					"\",\"targetCode\":\"" + targetCode +
+					"\",\"userName\":\"" + userName +
+					"\",\"userImage\":\"" + userImage +
+					"\",\"tags\":[{\"name\":\"" + sourceCode + "\",\"value\":0}, {\"name\":\"" + tag + "\",\"value\":0}]\"}");
+			
 			StringEntity noteContent = new StringEntity(jsonString, "UTF-8");
 
 			post.setEntity(noteContent);
