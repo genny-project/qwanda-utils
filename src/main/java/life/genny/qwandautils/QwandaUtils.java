@@ -244,6 +244,8 @@ public class QwandaUtils {
 					"\",\"userImage\":\"" + userImage +
 					"\",\"tags\":[{\"name\":\"" + sourceCode + "\",\"value\":0}, {\"name\":\"" + tag + "\",\"value\":0}]\"}");
 			
+			log.info("jsonString = " + jsonString);
+			
 			StringEntity noteContent = new StringEntity(jsonString, "UTF-8");
 
 			post.setEntity(noteContent);
