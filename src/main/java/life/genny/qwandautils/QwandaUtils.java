@@ -237,7 +237,7 @@ public class QwandaUtils {
 
 			String jsonString = String.format("{\"id\":0,\"content\":\"" + content + "\",\"sourceCode\":\"" + sourceCode
 					+ "\",\"tags\":[{\"name\":\"" + sourceCode
-					+ "\",\"value\":0}, {\"name\":\"sys\",\"value\":0}],\"targetCode\":\"" + targetCode + "\"}");
+					+ "\",\"value\":0}, {\"name\":\"" + tag + "\",\"value\":0}],\"targetCode\":\"" + targetCode + "\"}");
 
 			StringEntity noteContent = new StringEntity(jsonString, "UTF-8");
 
