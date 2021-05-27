@@ -298,7 +298,7 @@ public class QwandaUtils {
 	public static String apiPostNote(final String postUrl, final String sourceCode, final String targetCode, final String tag,
 			 final String content, final String authToken) throws IOException {
 		String userName = "System";
-		String userImage = "";
+		String userImage = "abc";
 		log.error("HMMMMM 302");
 		return apiPostNote(postUrl, sourceCode, targetCode, tag, userName, userImage, content, authToken, null);
 	}
