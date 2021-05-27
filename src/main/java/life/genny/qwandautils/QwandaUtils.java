@@ -243,7 +243,7 @@ public class QwandaUtils {
 					"\",\"targetCode\":\"" + targetCode +
 					"\",\"userName\":\"" + userName +
 					"\",\"userImage\":\"" + userImage +
-					"\",\"tags\":[{\"name\":\"" + sourceCode + "\",\"value\":0}, {\"name\":\"" + tag + "\",\"value\":0}]\"}");
+					"\",\"tags\":[{\"name\":\"" + sourceCode + "\",\"value\":0}, {\"name\":\"" + tag + "\",\"value\":0}]}");
 			
 			log.info("jsonString = " + jsonString);
 			
