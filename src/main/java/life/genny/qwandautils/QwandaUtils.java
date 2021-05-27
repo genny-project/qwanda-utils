@@ -234,6 +234,7 @@ public class QwandaUtils {
 		try {
 
 			HttpPost post = new HttpPost(postUrl);
+			log.error("HMMMMM 237");
 
 			/*String jsonString = String.format("{\"id\":0,\"content\":\"" + content + "\",\"sourceCode\":\"" + sourceCode + "\",\"targetCode\":\"" + targetCode + "\"tags\":[{\"name\":\"" + sourceCode + "\",\"value\":0}, {\"name\":\"" + tag + "\",\"value\":0}],\"targetCode\":\"" + targetCode + "\"}");*/
 			
@@ -288,13 +289,17 @@ public class QwandaUtils {
 
 	public static String apiPostNote(final String postUrl, final String sourceCode, final String targetCode, final String tag,
 			final String userName, final String userImage, final String content, final String authToken) throws IOException {
-		return apiPostNote(postUrl, sourceCode, targetCode, tag, userName, userImage, content, authToken, null);
+		String user = "System";
+		String image = "";
+		log.error("HMMMMM 290");
+		return apiPostNote(postUrl, sourceCode, targetCode, tag, user, image, content, authToken, null);
 	}
 	
 	public static String apiPostNote(final String postUrl, final String sourceCode, final String targetCode, final String tag,
 			 final String content, final String authToken) throws IOException {
 		String userName = "System";
 		String userImage = "";
+		log.error("HMMMMM 302");
 		return apiPostNote(postUrl, sourceCode, targetCode, tag, userName, userImage, content, authToken, null);
 	}
 
