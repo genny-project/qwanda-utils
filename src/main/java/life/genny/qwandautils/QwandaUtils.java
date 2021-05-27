@@ -288,6 +288,13 @@ public class QwandaUtils {
 			final String userName, final String userImage, final String content, final String authToken) throws IOException {
 		return apiPostNote(postUrl, sourceCode, targetCode, tag, userName, userImage, content, authToken, null);
 	}
+	
+	public static String apiPostNote(final String postUrl, final String sourceCode, final String targetCode, final String tag,
+			 final String content, final String authToken) throws IOException {
+		String userName = "System";
+		String userImage = "";
+		return apiPostNote(postUrl, sourceCode, targetCode, tag, userName, userImage, content, authToken, null);
+	}
 
 	public static String apiPost(final String postUrl, final List<BasicNameValuePair> nameValuePairs,
 			final String authToken) throws IOException {
