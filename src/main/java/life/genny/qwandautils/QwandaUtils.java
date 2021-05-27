@@ -222,8 +222,8 @@ public class QwandaUtils {
 //		return responseString;
 	}
 
-	public static String apiPostNote(final String postUrl, final String sourceCode, final String tag, final String userName, final String userImage,
-			final String targetCode, final String content, final String authToken, final Consumer<String> callback)
+	public static String apiPostNote(final String postUrl, final String sourceCode, final String targetCode, final String tag, 
+			final String userName, final String userImage, final String content, final String authToken, final Consumer<String> callback)
 			throws IOException {
 		String responseString = null;
 		if (StringUtils.isBlank(postUrl)) {
@@ -284,9 +284,9 @@ public class QwandaUtils {
 	 * Date(), targetCode: ‘PER_USER1’,
 	 */
 
-	public static String apiPostNote(final String postUrl, final String sourceCode, final String tag,
-			final String targetCode, final String content, final String authToken) throws IOException {
-		return apiPostNote(postUrl, sourceCode, tag, targetCode, content, authToken, null);
+	public static String apiPostNote(final String postUrl, final String sourceCode, final String targetCode, final String tag,
+			final String userName, final String userImage, final String content, final String authToken) throws IOException {
+		return apiPostNote(postUrl, sourceCode, targetCode, tag, userName, userImage, content, authToken, null);
 	}
 
 	public static String apiPost(final String postUrl, final List<BasicNameValuePair> nameValuePairs,
