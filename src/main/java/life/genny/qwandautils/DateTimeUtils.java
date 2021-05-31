@@ -28,6 +28,18 @@ public class DateTimeUtils {
 	    LocalDateTime dt  = LocalDateTime.ofInstant(i, zoneOffset);
 	    return dt;
 	}
+
+	static public String getNiceDateTimeStr(LocalDateTime dt)
+	{
+		return getNiceDateTimeStr(dt,"yyyyMMddHHmmss");
+	}
+	
+	static public String getNiceDateTimeStr(LocalDateTime dt, String pattern)
+	{
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+		String formattedString = dt.format(formatter);
+		return formattedString;
+	}
 	
 	static public String getNiceDateStr(LocalDate dt)
 	{
