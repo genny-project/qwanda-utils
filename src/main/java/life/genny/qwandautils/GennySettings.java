@@ -117,8 +117,9 @@ public class GennySettings {
 
     public static final String twilioAccountSid = System.getenv("TWILIO_ACCOUNT_SID") != null ? System.getenv("TWILIO_ACCOUNT_SID") : "TWILIO_ACCOUNT_SID"; 
     public static final String twilioAuthToken = System.getenv("TWILIO_AUTH_TOKEN") != null ? System.getenv("TWILIO_AUTH_TOKEN") : "TWILIO_AUTH_TOKEN";   
-    public static final String twilioSenderMobile = System.getenv("TWILIO_SENDER_MOBILE") != null ? System.getenv("TWILIO_SENDER_MOBILE") : "TWILIO_SENDER_MOBILE";  
-    
+    public static final String twilioSenderMobile = System.getenv("TWILIO_SENDER_MOBILE") != null ? System.getenv("TWILIO_SENDER_MOBILE") : "TWILIO_SENDER_MOBILE";
+	public static final Boolean CleanupTaskAndBeAttrForm = System.getenv("CLEANUP_TASK_AND_BEATTRFORM") !=null ? "TRUE".equalsIgnoreCase(System.getenv("CLEANUP_TASK_AND_BEATTRFORM")):true;
+
     static{
         Optional<String> cacheServerNameOptional = Optional.ofNullable(System.getenv("CACHE_SERVER_NAME"));
         Optional<String> isCacheServerOptional = Optional.ofNullable(System.getenv("IS_CACHE_SERVER"));
