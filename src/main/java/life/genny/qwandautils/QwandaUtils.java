@@ -1892,14 +1892,14 @@ public class QwandaUtils {
 					java.net.http.HttpResponse.BodyHandlers.ofString());
 
 			try {
-				result = response.thenApply(java.net.http.HttpResponse::body).get(15, TimeUnit.SECONDS);
+				result = response.thenApply(java.net.http.HttpResponse::body).get(3, TimeUnit.SECONDS);
 				done = true;
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				// TODO Auto-generated catch block
 				log.error("Exception occurred when post to URL: "+ postUrl + ",Body:" + entityString + ",Exception details:"  + e.getMessage() );
 				// try renewing the httpclient
 				httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
-						.connectTimeout(Duration.ofSeconds(20)).build();
+						.connectTimeout(Duration.ofSeconds(3)).build();
 				if (count <= 0) {
 					done = true;
 				}
