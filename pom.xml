@@ -74,13 +74,13 @@
 		</repository>
 		<snapshotRepository>
 			<id>nexus-snapshots</id>
-			<url>http://nexus.outcome-hub.com/repository/snapshots/</url>
+			<url>https://nexus.outcome-hub.com/repository/snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
 	<repositories>
 		<repository>
 			<id>JBoss repository</id>
-			<url>http://repository.jboss.org/nexus/content/groups/public/</url>
+			<url>https://repository.jboss.org/nexus/content/groups/public/</url>
 			<name>Repository for JBoss</name>
 		</repository>
 		<repository>
