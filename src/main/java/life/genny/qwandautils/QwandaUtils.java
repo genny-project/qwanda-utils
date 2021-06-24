@@ -1708,7 +1708,6 @@ public class QwandaUtils {
 					.uri(URI.create(url))
 					);
 
-				
 		if (url.contains("genny.life")) { // Hack for local server not having http2
 			requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
 		}
@@ -1730,7 +1729,7 @@ public class QwandaUtils {
 				done = true;
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				// TODO Auto-generated catch block
-				log.error(e.getLocalizedMessage());
+				log.error("Count:" + count + ", Exception occurred when post to URL: "+ url + ",Body is authToken:" + authToken + ", Exception details:"  + e.getMessage() );
 				httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
 						.connectTimeout(Duration.ofSeconds(20)).build();
 				if (count <= 0) {
@@ -1896,7 +1895,7 @@ public class QwandaUtils {
 				done = true;
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				// TODO Auto-generated catch block
-				log.error("Exception occurred when post to URL: "+ postUrl + ",Body:" + entityString + ",Exception details:"  + e.getMessage() );
+				log.error("Count:" + count + ", Exception occurred when post to URL: "+ postUrl + ",Body is entityString:" + entityString + ", Exception details:"  + e.getMessage() );
 				// try renewing the httpclient
 				httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
 						.connectTimeout(Duration.ofSeconds(3)).build();
