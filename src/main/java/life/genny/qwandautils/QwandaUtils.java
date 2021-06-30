@@ -1867,6 +1867,9 @@ public class QwandaUtils {
 
 	public static String apiPostEntity2(final String postUrl, final String entityString, final String authToken,
 			final Consumer<String> callback) throws IOException {
+		
+		Integer httpTimeout = 7;  // 7 secnds
+		
 		if (StringUtils.isBlank(postUrl)) {
 			log.error("Blank url in apiPostEntity");
 		}
@@ -1891,14 +1894,14 @@ public class QwandaUtils {
 					java.net.http.HttpResponse.BodyHandlers.ofString());
 
 			try {
-				result = response.thenApply(java.net.http.HttpResponse::body).get(3, TimeUnit.SECONDS);
+				result = response.thenApply(java.net.http.HttpResponse::body).get(httpTimeout, TimeUnit.SECONDS);
 				done = true;
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				// TODO Auto-generated catch block
 				log.error("Count:" + count + ", Exception occurred when post to URL: "+ postUrl + ",Body is entityString:" + entityString + ", Exception details:"  + e.getMessage() );
 				// try renewing the httpclient
 				httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
-						.connectTimeout(Duration.ofSeconds(3)).build();
+						.connectTimeout(Duration.ofSeconds(httpTimeout)).build();
 				if (count <= 0) {
 					done = true;
 				}
