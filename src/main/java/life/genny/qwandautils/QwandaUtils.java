@@ -1729,7 +1729,7 @@ public class QwandaUtils {
 				done = true;
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				// TODO Auto-generated catch block
-				log.error("Count:" + count + ", Exception occurred when post to URL: "+ url + ",Body is authToken:" + authToken + ", Exception details:"  + e.getMessage() );
+				log.error("Count:" + count + ", Exception occurred when post to URL: "+ url + ",Body is authToken:" + authToken + ", Exception details:"  + e.getCause());
 				httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
 						.connectTimeout(Duration.ofSeconds(20)).build();
 				if (count <= 0) {
@@ -1898,7 +1898,7 @@ public class QwandaUtils {
 				done = true;
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				// TODO Auto-generated catch block
-				log.error("Count:" + count + ", Exception occurred when post to URL: "+ postUrl + ",Body is entityString:" + entityString + ", Exception details:"  + e.getMessage() );
+				log.error("Count:" + count + ", Exception occurred when post to URL: "+ postUrl + ",Body is entityString:" + entityString + ", Exception details:"  + e.getCause() );
 				// try renewing the httpclient
 				httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
 						.connectTimeout(Duration.ofSeconds(httpTimeout)).build();
