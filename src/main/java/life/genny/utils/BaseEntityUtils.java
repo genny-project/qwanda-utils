@@ -2059,7 +2059,7 @@ public class BaseEntityUtils implements Serializable {
         try {
             String resultJsonStr = null;
 
-            if (true /* GennySettings.forceCacheApi */) {// TODO - Work out search25
+            if (false /* GennySettings.forceCacheApi */) {// TODO - Work out search25
                 Tuple2<String, List<String>> emailhqlTuple = getHql(searchBE);
                 String emailhql = emailhqlTuple._1;
 
