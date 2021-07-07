@@ -2085,681 +2085,683 @@ public class BaseEntityUtils implements Serializable {
 					String code = result.getString(i);
 					BaseEntity be = getBaseEntityByCode(code);
 //					System.out.println("code:" + code + ",index:" + (i+1) + "/" + size);
-					be.setIndex(i);
-					results.add(be);
-				}
-
-			} catch (Exception e1) {
-				log.error("Bad Json -> " + resultJsonStr);
-			}
-
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-		return results;
-	}
-
-	public Tuple2<String, List<String>> getHql(SearchEntity searchBE)
-
-	{
-		List<String> attributeFilter = new ArrayList<String>();
-		List<String> assocAttributeFilter = new ArrayList<String>();
-
-		List<Tuple3> sortFilters = new ArrayList<Tuple3>();
-		List<String> beFilters = new ArrayList<String>();
-		// List<List<Tuple2>> attributeFilters = new ArrayList<ArrayList<Tuple2>>();
-		HashMap<String, ArrayList<String>> attributeFilters = new HashMap<String, ArrayList<String>>();
-
-		String stakeholderCode = null;
-		String sourceStakeholderCode = null;
-		String linkCode = null;
-		String linkValue = null;
-		String sourceCode = null;
-		String targetCode = null;
-
-		String wildcardValue = null;
-		Integer pageStart = searchBE.getPageStart(0);
-		Integer pageSize = searchBE.getPageSize(GennySettings.defaultPageSize);
-
-		for (EntityAttribute ea : searchBE.getBaseEntityAttributes()) {
-
-			String attributeCode = removePrefixFromCode(ea.getAttributeCode(), "OR");
-			attributeCode = removePrefixFromCode(attributeCode, "AND");
-
-			if (attributeCode.equals("PRI_CODE")) {
-				beFilters.add(ea.getAsString());
-
-			} else if (attributeCode.startsWith("SRT_")) {
-
-				String sortCode = null;
-				String standardSortString = null;
-				String customSortString = null;
-				if (attributeCode.startsWith("SRT_PRI_CREATED")) {
-					standardSortString = ".created " + ea.getValueString();
-				} else if (attributeCode.startsWith("SRT_PRI_UPDATED")) {
-					standardSortString = ".updated " + ea.getValueString();
-				} else if (attributeCode.startsWith("SRT_PRI_CODE")) {
-					standardSortString = ".baseEntityCode " + ea.getValueString();
-				} else if (attributeCode.startsWith("SRT_PRI_NAME")) {
-					standardSortString = ".pk.baseEntity.name " + ea.getValueString();
-				}
-
-				else {
-					sortCode = (attributeCode.substring("SRT_".length()));
-					Attribute attr = RulesUtils.getAttribute(sortCode, this.token);
-					String dtt = attr.getDataType().getClassName();
-					Object sortValue = ea.getValue();
-					if (dtt.equals("Text")) {
-						customSortString = ".valueString " + sortValue.toString();
-					} else if (dtt.equals("java.lang.String") || dtt.equals("String")) {
-						customSortString = ".valueString " + sortValue.toString();
-					} else if (dtt.equals("java.lang.Boolean") || dtt.equals("Boolean")) {
-						customSortString = ".valueBoolean " + sortValue.toString();
-					} else if (dtt.equals("java.lang.Double") || dtt.equals("Double")) {
-						customSortString = ".valueDouble " + sortValue.toString();
-					} else if (dtt.equals("java.lang.Integer") || dtt.equals("Integer")) {
-						customSortString = ".valueInteger " + sortValue.toString();
-					} else if (dtt.equals("java.lang.Long") || dtt.equals("Long")) {
-						customSortString = ".valueLong " + sortValue.toString();
-					} else if (dtt.equals("java.time.LocalDateTime") || dtt.equals("LocalDateTime")) {
-						customSortString = ".valueDateTime " + sortValue.toString();
-					} else if (dtt.equals("java.time.LocalDate") || dtt.equals("LocalDate")) {
-						customSortString = ".valueDate " + sortValue.toString();
-					} else if (dtt.equals("java.time.LocalTime") || dtt.equals("LocalTime")) {
-						customSortString = ".valueTime " + sortValue.toString();
-					}
-				}
-
-				Integer index = null;
-				for (Tuple3<String, String, Double> sort : sortFilters) {
-					if (ea.getWeight() <= sort._3) {
-						index = sortFilters.indexOf(sort);
-						break;
-					}
-				}
-
-				// Order Sorts by weight
-				if (index == null) {
-					if (standardSortString != null) {
-						sortFilters.add(Tuple.of("", standardSortString, ea.getWeight()));
-					}
-					if (customSortString != null) {
-						sortFilters.add(Tuple.of(sortCode, customSortString, ea.getWeight()));
-					}
-				} else {
-					if (standardSortString != null) {
-						sortFilters.add(index, Tuple.of("", standardSortString, ea.getWeight()));
-					}
-					if (customSortString != null) {
-						sortFilters.add(index, Tuple.of(sortCode, customSortString, ea.getWeight()));
-					}
-				}
-
-			} else if (attributeCode.startsWith("SCH_STAKEHOLDER_CODE")) {
-				stakeholderCode = ea.getValue();
-			} else if (attributeCode.startsWith("SCH_SOURCE_STAKEHOLDER_CODE")) {
-				sourceStakeholderCode = ea.getValue();
-			} else if (attributeCode.startsWith("SCH_LINK_CODE")) {
-				linkCode = ea.getValue();
-			} else if (attributeCode.startsWith("SCH_LINK_VALUE")) {
-				linkValue = ea.getValue();
-			} else if (attributeCode.startsWith("SCH_SOURCE_CODE")) {
-				sourceCode = ea.getValue();
-			} else if (attributeCode.startsWith("SCH_TARGET_CODE")) {
-				targetCode = ea.getValue();
-			} else if ((attributeCode.startsWith("COL__")) || (attributeCode.startsWith("CAL_"))) {
-				String[] splitCode = attributeCode.substring("COL__".length()).split("__");
-				assocAttributeFilter.add(splitCode[0]);
-				// assocAttributeFilter.add(splitCode[1]);
-
-			} else if ((attributeCode.startsWith("COL_")) || (attributeCode.startsWith("CAL_"))) {
-				// add latittude and longitude to attributeFilter list if the current ea is
-				// PRI_ADDRESS_FULL
-				if (attributeCode.equals("COL_PRI_ADDRESS_FULL")) {
-					attributeFilter.add("PRI_ADDRESS_LATITUDE");
-					attributeFilter.add("PRI_ADDRESS_LONGITUDE");
-				}
-				attributeFilter.add(attributeCode.substring("COL_".length()));
-			} else if (attributeCode.startsWith("SCH_WILDCARD")) {
-				if (ea.getValueString() != null) {
-					if (!StringUtils.isBlank(ea.getValueString())) {
-						wildcardValue = ea.getValueString();
-						wildcardValue = wildcardValue.replaceAll(("[^A-Za-z0-9 ]"), "");
-					}
-				}
-			} else if ((attributeCode.startsWith("PRI_") || attributeCode.startsWith("LNK_"))
-					&& (!attributeCode.equals("PRI_CODE")) && (!attributeCode.equals("PRI_TOTAL_RESULTS"))
-					&& (!attributeCode.equals("PRI_INDEX"))) {
-				String condition = SearchEntity.convertFromSaveable(ea.getAttributeName());
-				if (condition == null) {
-					log.error("SQL condition is NULL, " + "EntityAttribute baseEntityCode is:" + ea.getBaseEntityCode()
-							+ ", attributeCode is: " + attributeCode + ", ea.getAttributeCode() is: "
-							+ ea.getAttributeCode());
-				}
-				// String aName = ea.getAttributeName();
-
-				if (!((ea.getValueString() != null) && (ea.getValueString().equals("%"))
-						&& (ea.getAttributeName().equals("LIKE")))) {
-					// Only add a filter if it is not a wildcard
-					if (ea.getAttributeCode().startsWith("AND_")) {
-						attributeCode = ea.getAttributeCode();
-					}
-					ArrayList<String> valueList = new ArrayList<String>();
-					for (String key : attributeFilters.keySet()) {
-						if (key.equals(attributeCode)) {
-							valueList = attributeFilters.get(key);
-						}
-					}
-					valueList.add(getAttributeValue(ea, condition));
-					attributeFilters.put(attributeCode, valueList);
-					// attributeFilters.add(Tuple.of(ea.getAttributeCode(), getAttributeValue(ea,
-					// condition)));
-				}
-			}
-		}
-
-		String hql = "select distinct ea.baseEntityCode from EntityAttribute ea";
-
-		int c = 0;
-		for (String key : attributeFilters.keySet()) {
-			hql += " left outer join EntityAttribute e" + c + " on e" + c + ".baseEntityCode=ea.baseEntityCode";
-			hql += " and e" + c + ".attributeCode = '" + removePrefixFromCode(key, "AND") + "'";
-			c += 1;
-		}
-
-		if (wildcardValue != null) {
-			hql += " left outer join EntityAttribute ew on ew.baseEntityCode=ea.baseEntityCode";
-		}
-
-		for (int i = 0; i < sortFilters.size(); i++) {
-			Tuple3<String, String, Double> sort = sortFilters.get(i);
-			if (!sort._1.isEmpty()) {
-				hql += " left outer join EntityAttribute ez" + i + " on ez" + i + ".baseEntityCode=ea.baseEntityCode";
-				hql += " and ea.baseEntityCode=ez" + i + ".baseEntityCode and ez" + i + ".attributeCode='"
-						+ sort._1.toString() + "'";
-			}
-		}
-
-		if (sourceCode != null || targetCode != null || linkCode != null || linkValue != null) {
-			hql += " inner join EntityEntity ee";
-			hql += " on (";
-
-			if (sourceCode != null && targetCode == null) {
-				targetCode = "ea.baseEntityCode";
-				sourceCode = "'" + sourceCode + "'";
-			} else if (targetCode != null && sourceCode == null) {
-				sourceCode = "ea.baseEntityCode";
-				targetCode = "'" + targetCode + "'";
-			} else if (sourceCode != null && targetCode != null) {
-				sourceCode = "'" + sourceCode + "'";
-				targetCode = "'" + targetCode + "'";
-			}
-
-			hql += (sourceCode != null
-					? " ee.link.sourceCode " + (sourceCode.contains("%") ? "like " : "= ") + sourceCode
-					: "");
-			hql += (targetCode != null
-					? " and ee.link.targetCode " + (targetCode.contains("%") ? "like " : "= ") + targetCode
-					: "");
-
-			hql += (linkCode != null
-					? " and ee.link.attributeCode " + (linkCode.contains("%") ? "like " : "= ") + "'" + linkCode + "'"
-					: "");
-			hql += (linkValue != null
-					? " and ee.link.linkValue " + (linkValue.contains("%") ? "like " : "= ") + "'" + linkValue + "'"
-					: "");
-
-			hql = hql.replace("on ( and", "on (");
-			hql += " )";
-		}
-
-		if (beFilters.size() > 0 || searchBE.getCode().startsWith("SBE_SEARCHBAR") || attributeFilters.size() > 0
-				|| wildcardValue != null || sortFilters.size() > 0) {
-			hql += " where";
-		}
-
-		if (beFilters.size() > 0) {
-			hql += " (";
-			for (int i = 0; i < beFilters.size(); i++) {
-				if (i > 0) {
-					hql += " or";
-				}
-				hql += " ea.baseEntityCode like '" + beFilters.get(i) + "'";
-			}
-			hql += " )";
-		}
-
-		if (searchBE.getCode().startsWith("SBE_SEARCHBAR")) {
-			// search across people and companies
-			hql += " and (ea.baseEntityCode like 'PER_%' or ea.baseEntityCode like 'CPY_%')";
-		}
-
-		if (attributeFilters.size() > 0) {
-			int i = 0;
-			for (String key : attributeFilters.keySet()) {
-				hql += " and";
-				ArrayList<String> valueList = attributeFilters.get(key);
-				if (valueList.size() > 1) {
-					hql += " (";
-				}
-				for (String value : valueList) {
-					if (valueList.size() > 1) {
-						hql += " or";
-					}
-					hql += (!StringUtils.isBlank(value)) ? (" e" + i + value) : "";
-				}
-				if (valueList.size() > 1) {
-					hql += " )";
-				}
-				i += 1;
-			}
-		}
-		hql = hql.replace("( or", "(");
-
-		if (wildcardValue != null) {
-			hql += " and ew.valueString like '%" + wildcardValue + "%'";
-		}
-
-		if (sortFilters.size() > 0) {
-			// sort the sorts
-			List<Tuple3> sortedFilters = sortFilters.stream()
-					.sorted((o1, o2) -> ((Double) (o1._3)).compareTo((Double) (o2._3))).collect(Collectors.toList());
-			String orderBy = " order by";
-			for (int i = 0; i < sortedFilters.size(); i++) {
-				Tuple3<String, String, Double> sort = sortedFilters.get(i);
-				if (i > 0) {
-					orderBy += ",";
-				}
-				if (sort._1.isEmpty()) {
-					orderBy += " ea" + sort._2.toString();
-				} else {
-					orderBy += " ez" + i + sort._2.toString() + " nulls last";
-				}
-			}
-			hql += orderBy;
-		}
-
-		hql = hql.replace("where and", "where");
-		attributeFilter.addAll(assocAttributeFilter);
-		return Tuple.of(hql, attributeFilter);
-	}
-
-	/**
-	 * Quick tool to remove any prefix strings from attribute codes, even if the
-	 * prefix occurs multiple times.
-	 *
-	 * @param code   The attribute code
-	 * @param prefix The prefix to remove
-	 * @return formatted The formatted code
-	 */
-	public String removePrefixFromCode(String code, String prefix) {
-
-		String formatted = code;
-		while (formatted.startsWith(prefix + "_")) {
-			formatted = formatted.substring(prefix.length() + 1);
-		}
-		return formatted;
-	}
-
-	public String getAttributeValue(EntityAttribute ea, String condition) {
-
-		if (ea.getValueString() != null) {
-			String val = ea.getValueString();
-			if (ea.getValueString().contains(":")) {
-				String[] split = ea.getValueString().split(":");
-				if (StringUtils.isBlank(split[0])) {
-					condition = "LIKE";
-					val = "%" + split[1] + "%";
-				} else {
-					condition = split[0];
-					val = split[1];
-				}
-			}
-			return ".valueString " + condition + " '" + val + "'";
-		} else if (ea.getValueBoolean() != null) {
-
-			return ".valueBoolean = " + (ea.getValueBoolean() ? "true" : "false");
-		} else if (ea.getValueDouble() != null) {
-			return ".valueDouble = " + condition + " " + ea.getValueDouble() + "";
-		} else if (ea.getValueInteger() != null) {
-			return ".valueInteger " + condition + " " + ea.getValueInteger() + "";
-		} else if (ea.getValueDate() != null) {
-			return ".valueDate " + condition + " '" + ea.getValueDate() + "'";
-		} else if (ea.getValueDateTime() != null) {
-			return ".valueDateTime " + condition + " '" + ea.getValueDateTime() + "'";
-		}
-		return null;
-	}
-
-	public List<BaseEntity> getRoles() {
-		List<BaseEntity> roles = new ArrayList<BaseEntity>();
-		BaseEntity be = this.getBaseEntityByCode(this.getGennyToken().getUserCode());
-		if ((be != null) && (be.getCode().startsWith("PER_"))) {
-			for (EntityAttribute ea : be.getBaseEntityAttributes()) {
-				if (ea.getAttributeCode().startsWith("PRI_IS_")) {
-					String roleCode = "ROL_" + ea.getAttributeCode().substring("PRI_IS_".length());
-					BaseEntity role = this.getBaseEntityByCode(roleCode);
-					if (role != null) {
-						roles.add(role);
-					}
-				}
-			}
-		}
-
-		return roles;
-	}
-
-	public String getEmailFromOldCode(String oldCode) {
-		String ret = null;
-		if (oldCode.contains("_AT_")) {
-
-			if ("PER_JIUNWEI_DOT_LU_AT_CQUMAIL_DOT_COM".equals(oldCode)) {
-				oldCode = "PER_JIUN_DASH_WEI_DOT_LU_AT_CQUMAIL_DOT_COM"; // addd dash
-			}
-
-			oldCode = oldCode.substring(4);
-			// convert to email
-			oldCode = oldCode.replaceAll("_PLUS_", "+");
-			oldCode = oldCode.replaceAll("_DOT_", ".");
-			oldCode = oldCode.replaceAll("_AT_", "@");
-			oldCode = oldCode.replaceAll("_DASH_", "-");
-			ret = oldCode.toLowerCase();
-		}
-		return ret;
-	}
-
-	public BaseEntity getPersonFromEmail(String email) {
-		BaseEntity person = null;
-
-		SearchEntity searchBE = new SearchEntity("SBE_TEST", "email")
-				.addSort("PRI_NAME", "Created", SearchEntity.Sort.ASC)
-				.addFilter("PRI_CODE", SearchEntity.StringFilter.LIKE, "PER_%")
-				.addFilter("PRI_EMAIL", SearchEntity.StringFilter.LIKE, email).addColumn("PRI_CODE", "Name")
-				.addColumn("PRI_EMAIL", "Email");
-
-		searchBE.setRealm(realm);
-		searchBE.setPageStart(0);
-		searchBE.setPageSize(100000);
-		Tuple2<String, List<String>> emailhqlTuple = getHql(searchBE);
-		String emailhql = emailhqlTuple._1;
-
-		emailhql = Base64.getUrlEncoder().encodeToString(emailhql.getBytes());
-		try {
-			String resultJsonStr = QwandaUtils.apiGet(
-					GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/search24/" + emailhql + "/"
-							+ searchBE.getPageStart(0) + "/" + searchBE.getPageSize(GennySettings.defaultPageSize),
-					serviceToken.getToken(), 120);
-
-			JsonObject resultJson = null;
-			resultJson = new JsonObject(resultJsonStr);
-			io.vertx.core.json.JsonArray result2 = resultJson.getJsonArray("codes");
-			String internCode = result2.getString(0);
-			if (internCode.contains("_AT_")) {
-				person = getBaseEntityByCode(internCode);
-			}
-
-		} catch (Exception e) {
-
-		}
-		return person;
-	}
-
-	public JsonObject writeMsg(BaseEntity be) {
-		return writeMsg(be, new String[0]);
-	}
-
-	public JsonObject writeMsg(BaseEntity be, String... rxList) {
-		QDataBaseEntityMessage msg = new QDataBaseEntityMessage(be);
-		msg.setToken(this.gennyToken.getToken());
-		msg.setReplace(true);
-		if ((rxList != null) && (rxList.length > 0)) {
-			msg.setRecipientCodeArray(rxList);
-			return VertxUtils.writeMsg("project", msg);
-		} else {
-			return VertxUtils.writeMsg("webdata", msg);
-		}
-	}
-
-	public void processVideoAttribute(EntityAttribute ea) {
-		String value = ea.getValueString();
-		if (value != null && !value.startsWith("http")) {
-
-			log.info("My Interview");
-			BaseEntity project = this.getBaseEntityByCode("PRJ_" + this.getGennyToken().getRealm().toUpperCase());
-			String apiKey = project.getValueAsString("ENV_API_KEY_MY_INTERVIEW");
-			String secretToken = project.getValueAsString("ENV_SECRET_MY_INTERVIEW");
-			long unixTimestamp = Instant.now().getEpochSecond();
-			String apiSecret = apiKey + secretToken + unixTimestamp;
-			String hashed = BCrypt.hashpw(apiSecret, BCrypt.gensalt(10));
-			String videoId = ea.getValueString();
-			String url = "https://api.myinterview.com/2.21.2/getVideo?apiKey=" + apiKey + "&hashTimestamp="
-					+ unixTimestamp + "&hash=" + hashed + "&video=" + videoId;
-			String url2 = "https://embed.myinterview.com/player.v3.html?apiKey=" + apiKey + "&hashTimestamp="
-					+ unixTimestamp + "&hash=" + hashed + "&video=" + videoId + "&autoplay=1&fs=0";
-
-			log.info("MyInterview Hash is " + url);
-			log.info("MyInterview Hash2 is " + url2);
-			ea.setValue(url2);
-
-		}
-	}
-
-	public String getValueSaveAnswer(String beSource, String beTarget, String beValue, String getAttribute,
-			String setAttribute, String value) {
-		try {
-			BaseEntity beValueBE = this.getBaseEntityByCode(beValue);
-
-			value = beValueBE.getValue(getAttribute, null);
-			System.out.println(value + ": " + value);
-			if (value != null) {
-				saveAnswer(new Answer(beSource, beTarget, setAttribute, value));
-			}
-		} catch (Exception e) {
-		}
-		return value;
-	}
-
-	public void quantumCopy(BaseEntity sourceBE, String sourceAtt, Boolean saveLink, Boolean strip, String userToken,
-			String targetBE, String targetAtt) {
-		try {
-
-			List<Answer> answers = new ArrayList<>();
-
-			String value = sourceBE.getValue(sourceAtt, null);
-			System.out.println("value = " + value);
-			if (value != null) {
-				if (saveLink) {
-					answers.add(new Answer(userToken, targetBE, sourceAtt, value));
-					this.saveAnswers(answers);
-				}
-				if (strip) {
-					value = value.replace("\"", "").replace("[", "").replace("]", "");
-
-					BaseEntity valueBE = this.getBaseEntityByCode(value);
-					System.out.println("valueBE = " + valueBE);
-
-					if (valueBE != null) {
-						String name = valueBE.getValue("PRI_NAME", null);
-						System.out.println("name = " + name);
-
-						if (name != null) {
-							answers.add(new Answer(userToken, targetBE, targetAtt, name));
-							this.saveAnswers(answers);
-						} else {
-							System.out.println("ERROR: Null String - name");
-						}
-					} else {
-						System.out.println("ERROR: Null BaseEnity - valueBE");
-					}
-				}
-
-			} else {
-				System.out.println("ERROR: Null String - value");
-			}
-
-		} catch (Exception e) {
-		}
-	}
-
-	public void quantumLink(String sourceCode, String targetCode, String focusCode, String attribute) {
-		try {
-
-			BaseEntity targetBe = getBaseEntityByCode(targetCode);
-			System.out.println(targetBe);
-			Optional<String> optLnkApplication = targetBe.getValue(attribute);
-
-			List<Answer> answers = new ArrayList<>();
-
-			if (optLnkApplication.isPresent()) {
-				System.out.println("Multiple links detected");
-
-				String lnkApp = optLnkApplication.get();
-				System.out.println(attribute + "  before::  " + lnkApp);
-				if (lnkApp != null) {
-					/* convert to list */
-					Gson gson = new Gson();
-					List<String> appList = gson.fromJson(lnkApp, List.class);
-
-					/* add the new BE code to list */
-					appList.add(focusCode);
-
-					/* convert to string */
-					String results = gson.toJson(appList);
-					System.out.println(attribute + "  after::  " + results);
-
-					/* save the answer to target */
-					answers.add(new Answer(sourceCode, targetCode, attribute, results));
-					this.saveAnswers(answers);
-				}
-			} else {
-				/* if no: the intern has not been applied to other applications */
-				/* save the answer to internBe */
-				System.out.println("No similar links detected");
-
-				String results = "[\"" + focusCode + "\"]";
-				System.out.println(attribute + "  ::  " + results);
-
-				answers.add(new Answer(sourceCode, targetCode, attribute, results));
-				this.saveAnswers(answers);
-
-			}
-		} catch (Exception e) {
-		}
-	}
-
-	public void removeQuantumLinkElement(String sourceCode, String targetCode, String focusCode, String attribute) {
-		try {
-
-			BaseEntity targetBe = this.getBaseEntityByCode(targetCode);
-			System.out.println(targetBe);
-			Optional<String> optLnkApplication = targetBe.getValue(attribute);
-
-			if (optLnkApplication.isPresent()) {
-				System.out.println("Multiple links detected");
-
-				String lnkApp = optLnkApplication.get();
-				System.out.println(attribute + "  before::  " + lnkApp);
-				if (lnkApp != null) {
-					/* convert to list */
-					Gson gson = new Gson();
-					List<String> appList = gson.fromJson(lnkApp, List.class);
-
-					/* add the new BE code to list */
-					appList.remove(focusCode);
-
-					/* convert to string */
-					String results = gson.toJson(appList);
-					System.out.println(attribute + "  after::  " + results);
-
-					/* save the answer to target */
-					this.saveAnswer(new Answer(sourceCode, targetCode, attribute, results));
-				}
-			} else {
-				/* if no: the intern has not been applied to other applications */
-				/* save the answer to internBe */
-				System.out.println("No similar links detected");
-			}
-		} catch (Exception e) {
-		}
-	}
-
-	public String quantumStrip(BaseEntity sourceBe, String attribute, String logString) {
-
-		String linkedCode = sourceBe.getValue(attribute, null);
-		if (linkedCode != null) {
-			linkedCode = linkedCode.replace("\"", "").replace("[", "").replace("]", "");
-			System.out.println(logString + " = " + linkedCode);
-		}
-		return linkedCode;
-	}
-
-	public BaseEntity quantumBe(String linkedCode, String logString) {
-
-		BaseEntity assocBe = null;
-
-		if (linkedCode != null) {
-			assocBe = this.getBaseEntityByCode(linkedCode);
-			System.out.println(logString + " = " + assocBe);
-
-		}
-		return assocBe;
-	}
-
-	public String whoAreYou(String targetCode) { // TODO, ths is only internmatch??
-
-		String attribute = null;
-
-		BaseEntity targetBe = this.getBaseEntityByCode(targetCode);
-		System.out.println("targetBe: " + targetBe);
-
-		Boolean isI = targetBe.getValue("PRI_IS_INTERN", false);
-		Boolean isIS = targetBe.getValue("PRI_IS_INTERNSHIP", false);
-		Boolean isEPR = targetBe.getValue("PRI_IS_EDU_PRO_REP", false);
-		Boolean isEP = targetBe.getValue("PRI_IS_EDU_PROVIDER", false);
-		Boolean isHCR = targetBe.getValue("PRI_IS_HOST_CPY_REP", false);
-		Boolean isHC = targetBe.getValue("PRI_IS_HOST_CPY", false);
-		Boolean isA = targetBe.getValue("PRI_IS_AGENT", false);
-		Boolean isAG = targetBe.getValue("PRI_IS_AGENCY", false);
-
-		System.out.println("===== Which type of user =====");
-		System.out.println("Intern:" + isI);
-		System.out.println("Internship:" + isIS);
-		System.out.println("EPR:" + isEPR);
-		System.out.println("EP:" + isEP);
-		System.out.println("HCR:" + isHCR);
-		System.out.println("HC:" + isHC);
-		System.out.println("Agent:" + isA);
-		System.out.println("Agency:" + isAG);
-		System.out.println("==============================");
-
-		if (isI) {
-			attribute = "PRI_IS_INTERN";
-		}
-		if (isIS) {
-			attribute = "PRI_IS_INTERNSHIP";
-		}
-		if (isEPR) {
-			attribute = "PRI_IS_EDU_PRO_REP";
-		}
-		if (isEP) {
-			attribute = "PRI_IS_EDU_PROVIDER";
-		}
-		if (isHCR) {
-			attribute = "PRI_IS_HOST_CPY_REP";
-		}
-		if (isHC) {
-			attribute = "PRI_IS_HOST_CPY";
-		}
-		if (isA) {
-			attribute = "PRI_IS_AGENT";
-		}
-		if (isAG) {
-			attribute = "PRI_IS_AGENCY";
-		}
-		System.out.println("Who are you? " + attribute);
-
-		return attribute;
-	}
+
+                    be.setIndex(i);
+                    results.add(be);
+                }
+
+            } catch (Exception e1) {
+                log.error("Bad Json -> " + resultJsonStr);
+            }
+
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+        return results;
+    }
+
+    public Tuple2<String, List<String>> getHql(SearchEntity searchBE)
+
+    {
+        List<String> attributeFilter = new ArrayList<String>();
+        List<String> assocAttributeFilter = new ArrayList<String>();
+
+        List<Tuple3> sortFilters = new ArrayList<Tuple3>();
+        List<String> beFilters = new ArrayList<String>();
+        // List<List<Tuple2>> attributeFilters = new ArrayList<ArrayList<Tuple2>>();
+        HashMap<String, ArrayList<String>> attributeFilters = new HashMap<String, ArrayList<String>>();
+
+        String stakeholderCode = null;
+        String sourceStakeholderCode = null;
+        String linkCode = null;
+        String linkValue = null;
+        String sourceCode = null;
+        String targetCode = null;
+
+        String wildcardValue = null;
+        Integer pageStart = searchBE.getPageStart(0);
+        Integer pageSize = searchBE.getPageSize(GennySettings.defaultPageSize);
+
+        for (EntityAttribute ea : searchBE.getBaseEntityAttributes()) {
+
+            String attributeCode = removePrefixFromCode(ea.getAttributeCode(), "OR");
+            attributeCode = removePrefixFromCode(attributeCode, "AND");
+
+            if (attributeCode.equals("PRI_CODE")) {
+                beFilters.add(ea.getAsString());
+
+            } else if (attributeCode.startsWith("SRT_")) {
+
+                String sortCode = null;
+                String standardSortString = null;
+                String customSortString = null;
+                if (attributeCode.startsWith("SRT_PRI_CREATED")) {
+                    standardSortString = ".created " + ea.getValueString();
+                } else if (attributeCode.startsWith("SRT_PRI_UPDATED")) {
+                    standardSortString = ".updated " + ea.getValueString();
+                } else if (attributeCode.startsWith("SRT_PRI_CODE")) {
+                    standardSortString = ".baseEntityCode " + ea.getValueString();
+                } else if (attributeCode.startsWith("SRT_PRI_NAME")) {
+                    standardSortString = ".pk.baseEntity.name " + ea.getValueString();
+                }
+
+                else {
+                    sortCode = (attributeCode.substring("SRT_".length()));
+                    Attribute attr = RulesUtils.getAttribute(sortCode, this.token);
+                    String dtt = attr.getDataType().getClassName();
+                    Object sortValue = ea.getValue();
+                    if (dtt.equals("Text")) {
+                        customSortString = ".valueString " + sortValue.toString();
+                    } else if (dtt.equals("java.lang.String") || dtt.equals("String")) {
+                        customSortString = ".valueString " + sortValue.toString();
+                    } else if (dtt.equals("java.lang.Boolean") || dtt.equals("Boolean")) {
+                        customSortString = ".valueBoolean " + sortValue.toString();
+                    } else if (dtt.equals("java.lang.Double") || dtt.equals("Double")) {
+                        customSortString = ".valueDouble " + sortValue.toString();
+                    } else if (dtt.equals("java.lang.Integer") || dtt.equals("Integer")) {
+                        customSortString = ".valueInteger " + sortValue.toString();
+                    } else if (dtt.equals("java.lang.Long") || dtt.equals("Long")) {
+                        customSortString = ".valueLong " + sortValue.toString();
+                    } else if (dtt.equals("java.time.LocalDateTime") || dtt.equals("LocalDateTime")) {
+                        customSortString = ".valueDateTime " + sortValue.toString();
+                    } else if (dtt.equals("java.time.LocalDate") || dtt.equals("LocalDate")) {
+                        customSortString = ".valueDate " + sortValue.toString();
+                    } else if (dtt.equals("java.time.LocalTime") || dtt.equals("LocalTime")) {
+                        customSortString = ".valueTime " + sortValue.toString();
+                    }
+                }
+
+                Integer index = null;
+                for (Tuple3<String, String, Double> sort : sortFilters) {
+                    if (ea.getWeight() <= sort._3) {
+                        index = sortFilters.indexOf(sort);
+                        break;
+                    }
+                }
+
+                // Order Sorts by weight
+                if (index == null) {
+                    if (standardSortString != null) {
+                        sortFilters.add(Tuple.of("", standardSortString, ea.getWeight()));
+                    }
+                    if (customSortString != null) {
+                        sortFilters.add(Tuple.of(sortCode, customSortString, ea.getWeight()));
+                    }
+                } else {
+                    if (standardSortString != null) {
+                        sortFilters.add(index, Tuple.of("", standardSortString, ea.getWeight()));
+                    }
+                    if (customSortString != null) {
+                        sortFilters.add(index, Tuple.of(sortCode, customSortString, ea.getWeight()));
+                    }
+                }
+
+            } else if (attributeCode.startsWith("SCH_STAKEHOLDER_CODE")) {
+                stakeholderCode = ea.getValue();
+            } else if (attributeCode.startsWith("SCH_SOURCE_STAKEHOLDER_CODE")) {
+                sourceStakeholderCode = ea.getValue();
+            } else if (attributeCode.startsWith("SCH_LINK_CODE")) {
+                linkCode = ea.getValue();
+            } else if (attributeCode.startsWith("SCH_LINK_VALUE")) {
+                linkValue = ea.getValue();
+            } else if (attributeCode.startsWith("SCH_SOURCE_CODE")) {
+                sourceCode = ea.getValue();
+            } else if (attributeCode.startsWith("SCH_TARGET_CODE")) {
+                targetCode = ea.getValue();
+            } else if ((attributeCode.startsWith("COL__")) || (attributeCode.startsWith("CAL_"))) {
+                String[] splitCode = attributeCode.substring("COL__".length()).split("__");
+                assocAttributeFilter.add(splitCode[0]);
+                // assocAttributeFilter.add(splitCode[1]);
+
+            } else if ((attributeCode.startsWith("COL_")) || (attributeCode.startsWith("CAL_"))) {
+                // add latittude and longitude to attributeFilter list if the current ea is
+                // PRI_ADDRESS_FULL
+                if (attributeCode.equals("COL_PRI_ADDRESS_FULL")) {
+                    attributeFilter.add("PRI_ADDRESS_LATITUDE");
+                    attributeFilter.add("PRI_ADDRESS_LONGITUDE");
+                }
+                attributeFilter.add(attributeCode.substring("COL_".length()));
+            } else if (attributeCode.startsWith("SCH_WILDCARD")) {
+                if (ea.getValueString() != null) {
+                    if (!StringUtils.isBlank(ea.getValueString())) {
+                        wildcardValue = ea.getValueString();
+                        wildcardValue = wildcardValue.replaceAll(("[^A-Za-z0-9 ]"), "");
+                    }
+                }
+            } else if ((attributeCode.startsWith("PRI_") || attributeCode.startsWith("LNK_"))
+                    && (!attributeCode.equals("PRI_CODE")) && (!attributeCode.equals("PRI_TOTAL_RESULTS"))
+                    && (!attributeCode.equals("PRI_INDEX"))) {
+                String condition = SearchEntity.convertFromSaveable(ea.getAttributeName());
+                if (condition == null) {
+                    log.error("SQL condition is NULL, " + "EntityAttribute baseEntityCode is:" + ea.getBaseEntityCode()
+                            + ", attributeCode is: " + attributeCode + ", ea.getAttributeCode() is: "
+                            + ea.getAttributeCode());
+                }
+                // String aName = ea.getAttributeName();
+
+                if (!((ea.getValueString() != null) && (ea.getValueString().equals("%"))
+                        && (ea.getAttributeName().equals("LIKE")))) {
+                    // Only add a filter if it is not a wildcard
+                    if (ea.getAttributeCode().startsWith("AND_")) {
+                        attributeCode = ea.getAttributeCode();
+                    }
+                    ArrayList<String> valueList = new ArrayList<String>();
+                    for (String key : attributeFilters.keySet()) {
+                        if (key.equals(attributeCode)) {
+                            valueList = attributeFilters.get(key);
+                        }
+                    }
+                    valueList.add(getAttributeValue(ea, condition));
+                    attributeFilters.put(attributeCode, valueList);
+                    // attributeFilters.add(Tuple.of(ea.getAttributeCode(), getAttributeValue(ea,
+                    // condition)));
+                }
+            }
+        }
+
+        String hql = "select distinct ea.baseEntityCode from EntityAttribute ea";
+
+        int c = 0;
+        for (String key : attributeFilters.keySet()) {
+            hql += " left outer join EntityAttribute e" + c + " on e" + c + ".baseEntityCode=ea.baseEntityCode";
+            hql += " and e" + c + ".attributeCode = '" + removePrefixFromCode(key, "AND") + "'";
+            c += 1;
+        }
+
+        if (wildcardValue != null) {
+            hql += " left outer join EntityAttribute ew on ew.baseEntityCode=ea.baseEntityCode";
+        }
+
+        for (int i = 0; i < sortFilters.size(); i++) {
+            Tuple3<String, String, Double> sort = sortFilters.get(i);
+            if (!sort._1.isEmpty()) {
+                hql += " left outer join EntityAttribute ez" + i + " on ez" + i + ".baseEntityCode=ea.baseEntityCode";
+                hql += " and ea.baseEntityCode=ez" + i + ".baseEntityCode and ez" + i + ".attributeCode='"
+                        + sort._1.toString() + "'";
+            }
+        }
+
+        if (sourceCode != null || targetCode != null || linkCode != null || linkValue != null) {
+            hql += " inner join EntityEntity ee";
+            hql += " on (";
+
+            if (sourceCode != null && targetCode == null) {
+                targetCode = "ea.baseEntityCode";
+                sourceCode = "'" + sourceCode + "'";
+            } else if (targetCode != null && sourceCode == null) {
+                sourceCode = "ea.baseEntityCode";
+                targetCode = "'" + targetCode + "'";
+            } else if (sourceCode != null && targetCode != null) {
+                sourceCode = "'" + sourceCode + "'";
+                targetCode = "'" + targetCode + "'";
+            }
+
+            hql += (sourceCode != null
+                    ? " ee.link.sourceCode " + (sourceCode.contains("%") ? "like " : "= ") + sourceCode
+                    : "");
+            hql += (targetCode != null
+                    ? " and ee.link.targetCode " + (targetCode.contains("%") ? "like " : "= ") + targetCode
+                    : "");
+
+            hql += (linkCode != null
+                    ? " and ee.link.attributeCode " + (linkCode.contains("%") ? "like " : "= ") + "'" + linkCode + "'"
+                    : "");
+            hql += (linkValue != null
+                    ? " and ee.link.linkValue " + (linkValue.contains("%") ? "like " : "= ") + "'" + linkValue + "'"
+                    : "");
+
+            hql = hql.replace("on ( and", "on (");
+            hql += " )";
+        }
+
+        if (beFilters.size() > 0 || searchBE.getCode().startsWith("SBE_SEARCHBAR") || attributeFilters.size() > 0
+                || wildcardValue != null || sortFilters.size() > 0) {
+            hql += " where";
+        }
+
+        if (beFilters.size() > 0) {
+            hql += " (";
+            for (int i = 0; i < beFilters.size(); i++) {
+                if (i > 0) {
+                    hql += " or";
+                }
+                hql += " ea.baseEntityCode like '" + beFilters.get(i) + "'";
+            }
+            hql += " )";
+        }
+
+        if (searchBE.getCode().startsWith("SBE_SEARCHBAR")) {
+            // search across people and companies
+            hql += " and (ea.baseEntityCode like 'PER_%' or ea.baseEntityCode like 'CPY_%')";
+        }
+
+        if (attributeFilters.size() > 0) {
+            int i = 0;
+            for (String key : attributeFilters.keySet()) {
+                hql += " and";
+                ArrayList<String> valueList = attributeFilters.get(key);
+                if (valueList.size() > 1) {
+                    hql += " (";
+                }
+                for (String value : valueList) {
+                    if (valueList.size() > 1) {
+                        hql += " or";
+                    }
+                    hql += (!StringUtils.isBlank(value)) ? (" e" + i + value) : "";
+                }
+                if (valueList.size() > 1) {
+                    hql += " )";
+                }
+                i += 1;
+            }
+        }
+        hql = hql.replace("( or", "(");
+
+        if (wildcardValue != null) {
+            hql += " and ew.valueString like '%" + wildcardValue + "%'";
+        }
+
+        if (sortFilters.size() > 0) {
+            // sort the sorts
+            List<Tuple3> sortedFilters = sortFilters.stream()
+                    .sorted((o1, o2) -> ((Double) (o1._3)).compareTo((Double) (o2._3))).collect(Collectors.toList());
+            String orderBy = " order by";
+            for (int i = 0; i < sortedFilters.size(); i++) {
+                Tuple3<String, String, Double> sort = sortedFilters.get(i);
+                if (i > 0) {
+                    orderBy += ",";
+                }
+                if (sort._1.isEmpty()) {
+                    orderBy += " ea" + sort._2.toString();
+                } else {
+                    orderBy += " ez" + i + sort._2.toString() + " nulls last";
+                }
+            }
+            hql += orderBy;
+        }
+
+        hql = hql.replace("where and", "where");
+        attributeFilter.addAll(assocAttributeFilter);
+        return Tuple.of(hql, attributeFilter);
+    }
+
+    /**
+     * Quick tool to remove any prefix strings from attribute codes, even if the
+     * prefix occurs multiple times.
+     *
+     * @param code   The attribute code
+     * @param prefix The prefix to remove
+     * @return formatted The formatted code
+     */
+    public String removePrefixFromCode(String code, String prefix) {
+
+        String formatted = code;
+        while (formatted.startsWith(prefix + "_")) {
+            formatted = formatted.substring(prefix.length() + 1);
+        }
+        return formatted;
+    }
+
+    public String getAttributeValue(EntityAttribute ea, String condition) {
+
+        if (ea.getValueString() != null) {
+            String val = ea.getValueString();
+            if (ea.getValueString().contains(":")) {
+                String[] split = ea.getValueString().split(":");
+                if (StringUtils.isBlank(split[0])) {
+                    condition = "LIKE";
+                    val = "%" + split[1] + "%";
+                } else {
+                    condition = split[0];
+                    val = split[1];
+                }
+            }
+            return ".valueString " + condition + " '" + val + "'";
+        } else if (ea.getValueBoolean() != null) {
+
+            return ".valueBoolean = " + (ea.getValueBoolean() ? "true" : "false");
+        } else if (ea.getValueDouble() != null) {
+            return ".valueDouble = " + condition + " " + ea.getValueDouble() + "";
+        } else if (ea.getValueInteger() != null) {
+            return ".valueInteger " + condition + " " + ea.getValueInteger() + "";
+        } else if (ea.getValueDate() != null) {
+            return ".valueDate " + condition + " '" + ea.getValueDate() + "'";
+        } else if (ea.getValueDateTime() != null) {
+            return ".valueDateTime " + condition + " '" + ea.getValueDateTime() + "'";
+        }
+        return null;
+    }
+
+    public List<BaseEntity> getRoles() {
+        List<BaseEntity> roles = new ArrayList<BaseEntity>();
+        BaseEntity be = this.getBaseEntityByCode(this.getGennyToken().getUserCode());
+        if ((be != null) && (be.getCode().startsWith("PER_"))) {
+            for (EntityAttribute ea : be.getBaseEntityAttributes()) {
+                if (ea.getAttributeCode().startsWith("PRI_IS_")) {
+                    String roleCode = "ROL_" + ea.getAttributeCode().substring("PRI_IS_".length());
+                    BaseEntity role = this.getBaseEntityByCode(roleCode);
+                    if (role != null) {
+                        roles.add(role);
+                    }
+                }
+            }
+        }
+
+        return roles;
+    }
+
+    public String getEmailFromOldCode(String oldCode) {
+        String ret = null;
+        if (oldCode.contains("_AT_")) {
+
+            if ("PER_JIUNWEI_DOT_LU_AT_CQUMAIL_DOT_COM".equals(oldCode)) {
+                oldCode = "PER_JIUN_DASH_WEI_DOT_LU_AT_CQUMAIL_DOT_COM"; // addd dash
+            }
+
+            oldCode = oldCode.substring(4);
+            // convert to email
+            oldCode = oldCode.replaceAll("_PLUS_", "+");
+            oldCode = oldCode.replaceAll("_DOT_", ".");
+            oldCode = oldCode.replaceAll("_AT_", "@");
+            oldCode = oldCode.replaceAll("_DASH_", "-");
+            ret = oldCode.toLowerCase();
+        }
+        return ret;
+    }
+
+    public BaseEntity getPersonFromEmail(String email) {
+        BaseEntity person = null;
+
+        SearchEntity searchBE = new SearchEntity("SBE_TEST", "email")
+                .addSort("PRI_NAME", "Created", SearchEntity.Sort.ASC)
+                .addFilter("PRI_CODE", SearchEntity.StringFilter.LIKE, "PER_%")
+                .addFilter("PRI_EMAIL", SearchEntity.StringFilter.LIKE, email).addColumn("PRI_CODE", "Name")
+                .addColumn("PRI_EMAIL", "Email");
+
+        searchBE.setRealm(realm);
+        searchBE.setPageStart(0);
+        searchBE.setPageSize(100000);
+        Tuple2<String, List<String>> emailhqlTuple = getHql(searchBE);
+        String emailhql = emailhqlTuple._1;
+
+        emailhql = Base64.getUrlEncoder().encodeToString(emailhql.getBytes());
+        try {
+            String resultJsonStr = QwandaUtils.apiGet(
+                    GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/search24/" + emailhql + "/"
+                            + searchBE.getPageStart(0) + "/" + searchBE.getPageSize(GennySettings.defaultPageSize),
+                    serviceToken.getToken(), 120);
+
+            JsonObject resultJson = null;
+            resultJson = new JsonObject(resultJsonStr);
+            io.vertx.core.json.JsonArray result2 = resultJson.getJsonArray("codes");
+            String internCode = result2.getString(0);
+            if (internCode.contains("_AT_")) {
+                person = getBaseEntityByCode(internCode);
+            }
+
+        } catch (Exception e) {
+
+        }
+        return person;
+    }
+
+    public JsonObject writeMsg(BaseEntity be) {
+        return writeMsg(be, new String[0]);
+    }
+
+    public JsonObject writeMsg(BaseEntity be, String... rxList) {
+        QDataBaseEntityMessage msg = new QDataBaseEntityMessage(be);
+        msg.setToken(this.gennyToken.getToken());
+        msg.setReplace(true);
+        if ((rxList != null) && (rxList.length > 0)) {
+            msg.setRecipientCodeArray(rxList);
+            return VertxUtils.writeMsg("project", msg);
+        } else {
+            return VertxUtils.writeMsg("webdata", msg);
+        }
+    }
+
+    public void processVideoAttribute(EntityAttribute ea) {
+        String value = ea.getValueString();
+        if (value != null && !value.startsWith("http")) {
+
+            log.info("My Interview");
+            BaseEntity project = this.getBaseEntityByCode("PRJ_" + this.getGennyToken().getRealm().toUpperCase());
+            String apiKey = project.getValueAsString("ENV_API_KEY_MY_INTERVIEW");
+            String secretToken = project.getValueAsString("ENV_SECRET_MY_INTERVIEW");
+            long unixTimestamp = Instant.now().getEpochSecond();
+            String apiSecret = apiKey + secretToken + unixTimestamp;
+            String hashed = BCrypt.hashpw(apiSecret, BCrypt.gensalt(10));
+            String videoId = ea.getValueString();
+            String url = "https://api.myinterview.com/2.21.2/getVideo?apiKey=" + apiKey + "&hashTimestamp="
+                    + unixTimestamp + "&hash=" + hashed + "&video=" + videoId;
+            String url2 = "https://embed.myinterview.com/player.v3.html?apiKey=" + apiKey + "&hashTimestamp="
+                    + unixTimestamp + "&hash=" + hashed + "&video=" + videoId + "&autoplay=1&fs=0";
+
+            log.info("MyInterview Hash is " + url);
+            log.info("MyInterview Hash2 is " + url2);
+            ea.setValue(url2);
+
+        }
+    }
+
+    public String getValueSaveAnswer(String beSource, String beTarget, String beValue, String getAttribute,
+                                     String setAttribute, String value) {
+        try {
+            BaseEntity beValueBE = this.getBaseEntityByCode(beValue);
+
+            value = beValueBE.getValue(getAttribute, null);
+            System.out.println(value + ": " + value);
+            if (value != null) {
+                saveAnswer(new Answer(beSource, beTarget, setAttribute, value));
+            }
+        } catch (Exception e) {
+        }
+        return value;
+    }
+
+    public void quantumCopy(BaseEntity sourceBE, String sourceAtt, Boolean saveLink, Boolean strip, String userToken,
+                            String targetBE, String targetAtt) {
+        try {
+
+            List<Answer> answers = new ArrayList<>();
+
+            String value = sourceBE.getValue(sourceAtt, null);
+            System.out.println("value = " + value);
+            if (value != null) {
+                if (saveLink) {
+                    answers.add(new Answer(userToken, targetBE, sourceAtt, value));
+                    this.saveAnswers(answers);
+                }
+                if (strip) {
+                    value = value.replace("\"", "").replace("[", "").replace("]", "");
+
+                    BaseEntity valueBE = this.getBaseEntityByCode(value);
+                    System.out.println("valueBE = " + valueBE);
+
+                    if (valueBE != null) {
+                        String name = valueBE.getValue("PRI_NAME", null);
+                        System.out.println("name = " + name);
+
+                        if (name != null) {
+                            answers.add(new Answer(userToken, targetBE, targetAtt, name));
+                            this.saveAnswers(answers);
+                        } else {
+                            System.out.println("ERROR: Null String - name");
+                        }
+                    } else {
+                        System.out.println("ERROR: Null BaseEnity - valueBE");
+                    }
+                }
+
+            } else {
+                System.out.println("ERROR: Null String - value");
+            }
+
+        } catch (Exception e) {
+        }
+    }
+
+    public void quantumLink(String sourceCode, String targetCode, String focusCode, String attribute) {
+        try {
+
+            BaseEntity targetBe = getBaseEntityByCode(targetCode);
+            System.out.println(targetBe);
+            Optional<String> optLnkApplication = targetBe.getValue(attribute);
+
+            List<Answer> answers = new ArrayList<>();
+
+            if (optLnkApplication.isPresent()) {
+                System.out.println("Multiple links detected");
+
+                String lnkApp = optLnkApplication.get();
+                System.out.println(attribute + "  before::  " + lnkApp);
+                if (lnkApp != null) {
+                    /* convert to list */
+                    Gson gson = new Gson();
+                    List<String> appList = gson.fromJson(lnkApp, List.class);
+
+                    /* add the new BE code to list */
+                    appList.add(focusCode);
+
+                    /* convert to string */
+                    String results = gson.toJson(appList);
+                    System.out.println(attribute + "  after::  " + results);
+
+                    /* save the answer to target */
+                    answers.add(new Answer(sourceCode, targetCode, attribute, results));
+                    this.saveAnswers(answers);
+                }
+            } else {
+                /* if no: the intern has not been applied to other applications */
+                /* save the answer to internBe */
+                System.out.println("No similar links detected");
+
+                String results = "[\"" + focusCode + "\"]";
+                System.out.println(attribute + "  ::  " + results);
+
+                answers.add(new Answer(sourceCode, targetCode, attribute, results));
+                this.saveAnswers(answers);
+
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    public void removeQuantumLinkElement(String sourceCode, String targetCode, String focusCode, String attribute) {
+        try {
+
+            BaseEntity targetBe = this.getBaseEntityByCode(targetCode);
+            System.out.println(targetBe);
+            Optional<String> optLnkApplication = targetBe.getValue(attribute);
+
+            if (optLnkApplication.isPresent()) {
+                System.out.println("Multiple links detected");
+
+                String lnkApp = optLnkApplication.get();
+                System.out.println(attribute + "  before::  " + lnkApp);
+                if (lnkApp != null) {
+                    /* convert to list */
+                    Gson gson = new Gson();
+                    List<String> appList = gson.fromJson(lnkApp, List.class);
+
+                    /* add the new BE code to list */
+                    appList.remove(focusCode);
+
+                    /* convert to string */
+                    String results = gson.toJson(appList);
+                    System.out.println(attribute + "  after::  " + results);
+
+                    /* save the answer to target */
+                    this.saveAnswer(new Answer(sourceCode, targetCode, attribute, results));
+                }
+            } else {
+                /* if no: the intern has not been applied to other applications */
+                /* save the answer to internBe */
+                System.out.println("No similar links detected");
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    public String quantumStrip(BaseEntity sourceBe, String attribute, String logString) {
+
+        String linkedCode = sourceBe.getValue(attribute, null);
+        if (linkedCode != null) {
+            linkedCode = linkedCode.replace("\"", "").replace("[", "").replace("]", "");
+            System.out.println(logString + " = " + linkedCode);
+        }
+        return linkedCode;
+    }
+
+    public BaseEntity quantumBe(String linkedCode, String logString) {
+
+        BaseEntity assocBe = null;
+
+        if (linkedCode != null) {
+            assocBe = this.getBaseEntityByCode(linkedCode);
+            System.out.println(logString + " = " + assocBe);
+
+        }
+        return assocBe;
+    }
+
+    public String whoAreYou(String targetCode) { // TODO, ths is only internmatch??
+
+        String attribute = null;
+
+        BaseEntity targetBe = this.getBaseEntityByCode(targetCode);
+        System.out.println("targetBe: " + targetBe);
+
+        Boolean isI = targetBe.getValue("PRI_IS_INTERN", false);
+        Boolean isIS = targetBe.getValue("PRI_IS_INTERNSHIP", false);
+        Boolean isEPR = targetBe.getValue("PRI_IS_EDU_PRO_REP", false);
+        Boolean isEP = targetBe.getValue("PRI_IS_EDU_PROVIDER", false);
+        Boolean isHCR = targetBe.getValue("PRI_IS_HOST_CPY_REP", false);
+        Boolean isHC = targetBe.getValue("PRI_IS_HOST_CPY", false);
+        Boolean isA = targetBe.getValue("PRI_IS_AGENT", false);
+        Boolean isAG = targetBe.getValue("PRI_IS_AGENCY", false);
+
+        System.out.println("===== Which type of user =====");
+        System.out.println("Intern:" + isI);
+        System.out.println("Internship:" + isIS);
+        System.out.println("EPR:" + isEPR);
+        System.out.println("EP:" + isEP);
+        System.out.println("HCR:" + isHCR);
+        System.out.println("HC:" + isHC);
+        System.out.println("Agent:" + isA);
+        System.out.println("Agency:" + isAG);
+        System.out.println("==============================");
+
+        if (isI) {
+            attribute = "PRI_IS_INTERN";
+        }
+        if (isIS) {
+            attribute = "PRI_IS_INTERNSHIP";
+        }
+        if (isEPR) {
+            attribute = "PRI_IS_EDU_PRO_REP";
+        }
+        if (isEP) {
+            attribute = "PRI_IS_EDU_PROVIDER";
+        }
+        if (isHCR) {
+            attribute = "PRI_IS_HOST_CPY_REP";
+        }
+        if (isHC) {
+            attribute = "PRI_IS_HOST_CPY";
+        }
+        if (isA) {
+            attribute = "PRI_IS_AGENT";
+        }
+        if (isAG) {
+            attribute = "PRI_IS_AGENCY";
+        }
+        System.out.println("Who are you? " + attribute);
+
+        return attribute;
+    }
+
 
 	public BaseEntity getDEF(final BaseEntity be) {
 		Set<EntityAttribute> newMerge = new HashSet<>();
