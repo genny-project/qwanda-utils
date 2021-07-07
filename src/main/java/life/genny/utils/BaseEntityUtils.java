@@ -2826,8 +2826,7 @@ public class BaseEntityUtils implements Serializable {
                 if (topDog.isPresent()) {
                     String topCode = topDog.get().getAttributeCode().substring("PRI_IS_".length());
                     BaseEntity defTopDog = RulesUtils.defs.get(be.getRealm()).get("DEF_" + topCode);
-                    String topDogName = defTopDog.getName();
-                    mergedBe = new BaseEntity(mergedCode, topDogName); // So this combination DEF inherits top dogs name
+                    mergedBe = new BaseEntity(mergedCode, mergedCode); // So this combination DEF inherits top dogs name
                     // now copy all the combined DEF eas.
                     for (EntityAttribute isea : isAs) {
                         BaseEntity defEa = RulesUtils.defs.get(be.getRealm())
