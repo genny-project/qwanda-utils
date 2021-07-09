@@ -2859,4 +2859,30 @@ public class BaseEntityUtils implements Serializable {
 		}
 
 	}
+	
+	public Boolean hasDefDropdown(final String attributeCode, final BaseEntity target) throws Exception {
+		BaseEntity defBe = this.getDEF(target);
+
+		return hasDropdown(attributeCode, defBe);
+	}
+	
+	public Boolean hasDropdown(final String attributeCode, final BaseEntity defBe) throws Exception {
+		if (defBe.getCode().startsWith("DEF_")) {
+			throw new Exception("Cannot determine if dropdown exists , Not a DEF!");
+		}
+
+		// Check if attribute code exists as a SER
+		Optional<EntityAttribute> searchAtt = defBe.findEntityAttribute("SER_" + attributeCode); // SER_
+		if (searchAtt.isPresent()) {
+			// temporary enable check
+			String serValue = searchAtt.get().getValueString();
+			JsonObject serJson = new JsonObject(serValue);
+			if (serJson.containsKey("enabled")) {
+				Boolean isEnabled = serJson.getBoolean("enabled");
+				return isEnabled;
+			}
+		}
+		return false;
+
+	}
 }
