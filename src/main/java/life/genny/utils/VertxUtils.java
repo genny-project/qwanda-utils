@@ -1058,11 +1058,27 @@ public class VertxUtils {
 
     }
 
-	static public void sendCmdMsg(BaseEntityUtils beUtils, String code) 
+	static public void sendCmdMsg(BaseEntityUtils beUtils, String msgType, String code, List<String> targetCodes) 
+	{
+		sendCmdMsg(beUtils, msgType, code, null, targetCodes);
+	}
+
+	static public void sendCmdMsg(BaseEntityUtils beUtils, String msgType, String code, String message) 
+	{
+		sendCmdMsg(beUtils, msgType, code, message, null);
+	}
+
+	static public void sendCmdMsg(BaseEntityUtils beUtils, String msgType, String code, String message, List<String> targetCodes) 
 	{
 		QCmdMessage msg = new QCmdMessage(code, code);
 		msg.setToken(beUtils.getGennyToken().getToken());
 		msg.setSend(true);  		
+		if (code != null) {
+			msg.setMessage(message);
+		}
+		if (targetCodes != null) {
+			msg.setTargetCodes(targetCodes);
+		}
 		VertxUtils.writeMsg("webcmds",msg);
 	}
 
