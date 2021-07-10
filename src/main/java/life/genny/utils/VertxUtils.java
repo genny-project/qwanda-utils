@@ -11,6 +11,7 @@ import life.genny.eventbus.EventBusInterface;
 import life.genny.eventbus.EventBusMock;
 import life.genny.models.GennyToken;
 import life.genny.qwanda.Answer;
+import life.genny.qwanda.Ask;
 import life.genny.qwanda.datatype.DataType;
 import life.genny.qwanda.attribute.Attribute;
 import life.genny.qwanda.attribute.EntityAttribute;
@@ -1056,4 +1057,36 @@ public class VertxUtils {
         }
 
     }
+
+	static public void sendCmdMsg(BaseEntityUtils beUtils, String code) 
+	{
+		QCmdMessage msg = new QCmdMessage(code, code);
+		msg.setToken(beUtils.getGennyToken().getToken());
+		msg.setSend(true);  		
+		VertxUtils.writeMsg("webcmds",msg);
+	}
+
+	static public void sendAskMsg(BaseEntityUtils beUtils, Ask ask) 
+	{
+		QDataAskMessage msg = new QDataAskMessage(ask);
+		msg.setToken(beUtils.getGennyToken().getToken());
+		msg.setReplace(true);
+		VertxUtils.writeMsg("webcmds", JsonUtils.toJson(msg));
+	}
+
+	static public void sendBaseEntityMsg(BaseEntityUtils beUtils, BaseEntity be) 
+	{
+		QDataBaseEntityMessage msg = new QDataBaseEntityMessage(be);
+		msg.setToken(beUtils.getGennyToken().getToken());
+		msg.setReplace(true);
+		VertxUtils.writeMsg("webcmds", JsonUtils.toJson(msg));
+	}
+
+	static public void sendBaseEntityMsg(BaseEntityUtils beUtils, BaseEntity[] beArray) 
+	{
+		QDataBaseEntityMessage msg = new QDataBaseEntityMessage(beArray);
+		msg.setToken(beUtils.getGennyToken().getToken());
+		msg.setReplace(true);
+		VertxUtils.writeMsg("webcmds", JsonUtils.toJson(msg));
+	}
 }
