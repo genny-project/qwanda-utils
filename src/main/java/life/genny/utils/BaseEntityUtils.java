@@ -2869,6 +2869,7 @@ public class BaseEntityUtils implements Serializable {
 	
 	public Boolean hasDropdown(final String attributeCode, final BaseEntity defBe) throws Exception {
 		if (!defBe.getCode().startsWith("DEF_")) {
+			log.error("Cannot determine if dropdown exists , Not a DEF! "+defBe.getCode());
 			throw new Exception("Cannot determine if dropdown exists , Not a DEF!");
 		}
 
