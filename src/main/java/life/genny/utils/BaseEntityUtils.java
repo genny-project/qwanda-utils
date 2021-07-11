@@ -2878,11 +2878,16 @@ public class BaseEntityUtils implements Serializable {
 		if (searchAtt.isPresent()) {
 			// temporary enable check
 			String serValue = searchAtt.get().getValueString();
+			log.info("Attribute exists in "+defBe.getCode()+" for SER_" + attributeCode+" --> "+serValue);
 			JsonObject serJson = new JsonObject(serValue);
 			if (serJson.containsKey("enabled")) {
 				Boolean isEnabled = serJson.getBoolean("enabled");
 				return isEnabled;
+			} else {
+				log.info("Attribute exists in "+defBe.getCode()+" for SER_" + attributeCode+" --> but NOT enabled!");
 			}
+		} else {
+			log.info("No attribute exists in "+defBe.getCode()+" for SER_" + attributeCode);
 		}
 		return false;
 
