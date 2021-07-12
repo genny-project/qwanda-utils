@@ -537,6 +537,64 @@ public class KeycloakUtils {
 		}
 	}
 	
+	public static int updateUserEmail(String keycloakUUID,String token, String realm,String newEmail)
+			throws IOException {
+		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
+		keycloakUUID = keycloakUUID.toLowerCase();
+	
+		String json = "{ \"email\" : \"" + newEmail + "\" , "
+				+ "\"enabled\" : true, " + "\"emailVerified\" : true}";
+
+		log.info("UpdateUserEmailjson="+json);
+		
+		HttpClient httpClient = new DefaultHttpClient();
+		//log.info("Keycloak token used is "+token);
+		try {
+			HttpPut post = new HttpPut(keycloakUrl + "/auth/admin/realms/" + realm + "/users/"+keycloakUUID);
+			// HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl +
+			// "/auth/admin/realms/"+realm+"/users"));
+
+			post.addHeader("Content-Type", "application/json");
+			post.addHeader("Authorization", "Bearer " + token);
+
+			StringEntity postingString = new StringEntity(json);
+			post.setEntity(postingString);
+
+			HttpResponse response = httpClient.execute(post);
+
+			int statusCode = response.getStatusLine().getStatusCode();
+			log.info("StatusCode: " + statusCode);
+
+			HttpEntity entity = response.getEntity();
+			String content = null;
+			if (statusCode == 201) {
+               return statusCode;
+			} else if (statusCode == 204) {
+                return statusCode;
+			} else if (statusCode == 409) {
+				//throw new IOException("Email is already taken. Please use a different email address.");
+				log.warn("Email is already taken for "+keycloakUUID);
+				// fetch existing email user
+				return statusCode;
+			} else if (statusCode == 401) {
+				//throw new IOException("Account is already taken. Please use a different email address.");
+				log.warn("Unauthorized token used to create "+keycloakUUID);
+				// fetch existing email user
+				return statusCode;
+			}
+			if (entity == null) {
+				throw new IOException("We could not update the user EMail. Please try again.");
+			} else {
+	              log.info("Keycloak User ID: " + keycloakUUID);
+	              return 200;
+			}
+		}
+
+		finally {
+			httpClient.getConnectionManager().shutdown();
+		}
+	}
+	
 	// This is the one called from rules to create a keycloak user
 	public static String createUser(String keycloakUUID,String token, String realm, String newUsername,
 			String newFirstname, String newLastname, String newEmail, String password,String newRealmRoles, String newGroupRoles)
