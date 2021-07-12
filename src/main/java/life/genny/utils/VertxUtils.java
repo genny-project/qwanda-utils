@@ -1058,6 +1058,11 @@ public class VertxUtils {
 
     }
 
+	static public void sendCmdMsg(BaseEntityUtils beUtils, String msgType, String code) 
+	{
+		sendCmdMsg(beUtils, msgType, code, null, null);
+	}
+
 	static public void sendCmdMsg(BaseEntityUtils beUtils, String msgType, String code, List<String> targetCodes) 
 	{
 		sendCmdMsg(beUtils, msgType, code, null, targetCodes);
