@@ -963,13 +963,35 @@ public class KeycloakUtils {
 		return keycloakUUID;
 	}
 
+	public static Integer getKeycloakUserCount(String keycloakUrl, String realm, String servicePassword) {
+		Integer count = -1;
+		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+			String accessToken = getAccessToken(keycloakUrl, realm, "admin-cli", null, "service", servicePassword);
+			HttpGet getUserCount = new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm + "/users/count");
+			getUserCount.addHeader("Authorization", "Bearer " + accessToken);
+			HttpResponse response = client.execute(getUserCount);
+			if (response.getStatusLine().getStatusCode() != 200) {
+				throw new IOException("Get keycloak user response code:" + response.getStatusLine().getStatusCode());
+			}
+			HttpEntity entity = response.getEntity();
+			InputStream is = entity.getContent();
+			count = JsonSerialization.readValue(is, Integer.class);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return count;
+	}
+
 	public static HashMap<String, String> getUsersByRealm(String keycloakUrl, String realm, String servicePassword) {
 	    HashMap<String, String>  userCodeUUIDMapping = new HashMap<>();
 		List<LinkedHashMap> results = new ArrayList<>();
 
+		Integer count = getKeycloakUserCount(keycloakUrl, realm, servicePassword);
+
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 			String accessToken = getAccessToken(keycloakUrl, realm, "admin-cli", null, "service", servicePassword);
-			HttpGet get = new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm + "/users?first=0&max=20000");
+
+			HttpGet get = new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm + "/users?first=0&max=" + count);
 			get.addHeader("Authorization", "Bearer " + accessToken);
 			HttpResponse response = client.execute(get);
 			if (response.getStatusLine().getStatusCode() != 200) {
@@ -995,6 +1017,7 @@ public class KeycloakUtils {
 				userCodeUUIDMapping.put(code, uuid);
 			}
 		}
+		log.info("Get " + results.size() + " keycloak users");
 		return userCodeUUIDMapping;
 	}
 	
