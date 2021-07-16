@@ -987,6 +987,7 @@ public class KeycloakUtils {
 		List<LinkedHashMap> results = new ArrayList<>();
 
 		Integer count = getKeycloakUserCount(keycloakUrl, realm, servicePassword);
+		log.info("Total keycloak user:" + count);
 
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 			String accessToken = getAccessToken(keycloakUrl, realm, "admin-cli", null, "service", servicePassword);
