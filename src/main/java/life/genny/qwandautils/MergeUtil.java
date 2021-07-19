@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -127,10 +128,23 @@ public class MergeUtil {
 							/* 1st component -> BaseEntity code ; 2nd component -> attribute code ; 3rd component -> (date-Format) */
 							if(entityArr != null && entityArr.length > 2) {
 								/* the date merge field has a format-merge-string */
-								log.info("This date attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
+								log.info("This datetime attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
 								Matcher matchVariables = DATEFORMAT_PATTERN_VARIABLE.matcher(entityArr[2]);
 								if(matchVariables.find()) {
 									return getFormattedDateString((LocalDateTime) attributeValue, matchVariables.group(1));
+								}					
+							} else {
+								log.info("This datetime attribute code ::"+attributeCode+ " needs no formatting");
+								/* if date needs no formatting, we directly return the string value for the attributeValue */
+								return getBaseEntityAttrValueAsString(be, attributeCode);
+							}
+						} else if(attributeValue instanceof java.time.LocalDate) {
+							if(entityArr != null && entityArr.length > 2) {
+								/* the date merge field has a format-merge-string */
+								log.info("This date attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
+								Matcher matchVariables = DATEFORMAT_PATTERN_VARIABLE.matcher(entityArr[2]);
+								if(matchVariables.find()) {
+									return getFormattedDateString((LocalDate) attributeValue, matchVariables.group(1));
 								}					
 							} else {
 								log.info("This date attribute code ::"+attributeCode+ " needs no formatting");
@@ -273,6 +287,14 @@ public class MergeUtil {
 	}
 	
 	public static String getFormattedDateString(LocalDateTime dateToBeFormatted, String format) {
+		if(dateToBeFormatted != null && format != null) {
+			DateTimeFormatter dateformat = DateTimeFormatter.ofPattern(format);
+			return dateToBeFormatted.format(dateformat);
+		}
+		return null;
+	}
+
+	public static String getFormattedDateString(LocalDate dateToBeFormatted, String format) {
 		if(dateToBeFormatted != null && format != null) {
 			DateTimeFormatter dateformat = DateTimeFormatter.ofPattern(format);
 			return dateToBeFormatted.format(dateformat);
