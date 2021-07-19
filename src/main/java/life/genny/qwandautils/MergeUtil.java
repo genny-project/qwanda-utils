@@ -102,65 +102,69 @@ public class MergeUtil {
 				if(entitymap.containsKey(keyCode)) {
 					
 					Object value = entitymap.get(keyCode);
-					
-					if(value.getClass().equals(BaseEntity.class)) {
-						
-						BaseEntity be = (BaseEntity)value;
 
-						String attributeCode = entityArr[1];
-						System.out.println(attributeCode);
+					if (value == null) {
+						System.out.println("value is NULL for key " + keyCode);
+					} else {
 						
-						Object attributeValue = be.getValue(attributeCode, null);
-						System.out.println(attributeValue);
-						
-						if(attributeValue instanceof org.javamoney.moneta.Money) {
-							log.info("price attributes 1");
-							DecimalFormat df = new DecimalFormat("#.00"); 
-							Money money = (Money) attributeValue; 
+						if(value.getClass().equals(BaseEntity.class)) {
 							
-							if(attributeValue != null) {
-								return df.format(money.getNumber()) + " " + money.getCurrency();
-							} else {
-								return DEFAULT;
-							}
-						}else if(attributeValue instanceof java.time.LocalDateTime) {
-							/* If the date-related mergeString needs to formatter to a particultar format -> we split the date-time related merge text to merge into 3 components: BE.PRI.TimeDateformat... becomes [BE, PRI...] */
-							/* 1st component -> BaseEntity code ; 2nd component -> attribute code ; 3rd component -> (date-Format) */
-							if(entityArr != null && entityArr.length > 2) {
-								/* the date merge field has a format-merge-string */
-								log.info("This datetime attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
-								Matcher matchVariables = DATEFORMAT_PATTERN_VARIABLE.matcher(entityArr[2]);
-								if(matchVariables.find()) {
-									return getFormattedDateString((LocalDateTime) attributeValue, matchVariables.group(1));
-								}					
-							} else {
-								log.info("This datetime attribute code ::"+attributeCode+ " needs no formatting");
-								/* if date needs no formatting, we directly return the string value for the attributeValue */
+							BaseEntity be = (BaseEntity)value;
+
+							String attributeCode = entityArr[1];
+							System.out.println(attributeCode);
+							
+							Object attributeValue = be.getValue(attributeCode, null);
+							System.out.println(attributeValue);
+							
+							if(attributeValue instanceof org.javamoney.moneta.Money) {
+								log.info("price attributes 1");
+								DecimalFormat df = new DecimalFormat("#.00"); 
+								Money money = (Money) attributeValue; 
+								
+								if(attributeValue != null) {
+									return df.format(money.getNumber()) + " " + money.getCurrency();
+								} else {
+									return DEFAULT;
+								}
+							}else if(attributeValue instanceof java.time.LocalDateTime) {
+								/* If the date-related mergeString needs to formatter to a particultar format -> we split the date-time related merge text to merge into 3 components: BE.PRI.TimeDateformat... becomes [BE, PRI...] */
+								/* 1st component -> BaseEntity code ; 2nd component -> attribute code ; 3rd component -> (date-Format) */
+								if(entityArr != null && entityArr.length > 2) {
+									/* the date merge field has a format-merge-string */
+									log.info("This datetime attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
+									Matcher matchVariables = DATEFORMAT_PATTERN_VARIABLE.matcher(entityArr[2]);
+									if(matchVariables.find()) {
+										return getFormattedDateString((LocalDateTime) attributeValue, matchVariables.group(1));
+									}					
+								} else {
+									log.info("This datetime attribute code ::"+attributeCode+ " needs no formatting");
+									/* if date needs no formatting, we directly return the string value for the attributeValue */
+									return getBaseEntityAttrValueAsString(be, attributeCode);
+								}
+							} else if(attributeValue instanceof java.time.LocalDate) {
+								if(entityArr != null && entityArr.length > 2) {
+									/* the date merge field has a format-merge-string */
+									log.info("This date attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
+									Matcher matchVariables = DATEFORMAT_PATTERN_VARIABLE.matcher(entityArr[2]);
+									if(matchVariables.find()) {
+										return getFormattedDateString((LocalDate) attributeValue, matchVariables.group(1));
+									}					
+								} else {
+									log.info("This date attribute code ::"+attributeCode+ " needs no formatting");
+									/* if date needs no formatting, we directly return the string value for the attributeValue */
+									return getBaseEntityAttrValueAsString(be, attributeCode);
+								}
+							} else if(attributeValue instanceof java.lang.String){
 								return getBaseEntityAttrValueAsString(be, attributeCode);
 							}
-						} else if(attributeValue instanceof java.time.LocalDate) {
-							if(entityArr != null && entityArr.length > 2) {
-								/* the date merge field has a format-merge-string */
-								log.info("This date attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
-								Matcher matchVariables = DATEFORMAT_PATTERN_VARIABLE.matcher(entityArr[2]);
-								if(matchVariables.find()) {
-									return getFormattedDateString((LocalDate) attributeValue, matchVariables.group(1));
-								}					
-							} else {
-								log.info("This date attribute code ::"+attributeCode+ " needs no formatting");
-								/* if date needs no formatting, we directly return the string value for the attributeValue */
+							else {
 								return getBaseEntityAttrValueAsString(be, attributeCode);
 							}
-						} else if(attributeValue instanceof java.lang.String){
-							return getBaseEntityAttrValueAsString(be, attributeCode);
+							
+						} else if (value.getClass().equals(String.class)) {
+							return (String)value;
 						}
-						else {
-							return getBaseEntityAttrValueAsString(be, attributeCode);
-						}
-						
-					}
-					else if (value.getClass().equals(String.class)) {
-						return (String)value;
 					}
 				}
 
