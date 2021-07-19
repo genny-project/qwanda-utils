@@ -16,6 +16,7 @@ import org.javamoney.moneta.Money;
 import life.genny.qwanda.Link;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
+import life.genny.utils.BaseEntityUtils;
 
 public class MergeUtil {
 	
@@ -46,12 +47,12 @@ public class MergeUtil {
     /* ((DATEFORMAT)) pattern */
     /* this is for date-format pattern merging */
     public static final String DATEFORMAT_VARIABLE_REGEX_START = "((";
-    public static final String DATEFORMATVARIABLE_REGEX_END = "))";
-    public static final Pattern DATEFORMAT_PATTERN_VARIABLE = Pattern.compile(Pattern.quote(DATEFORMAT_VARIABLE_REGEX_START) + "(.*)" + Pattern.quote(DATEFORMATVARIABLE_REGEX_END));  
+    public static final String DATEFORMAT_VARIABLE_REGEX_END = "))";
+    public static final Pattern DATEFORMAT_PATTERN_VARIABLE = Pattern.compile(Pattern.quote(DATEFORMAT_VARIABLE_REGEX_START) + "(.*)" + Pattern.quote(DATEFORMAT_VARIABLE_REGEX_END));  
     
     
-	public static String merge(String mergeStr, Map<String, Object> templateEntityMap) { 
-		
+	public static String merge(BaseEntityUtils beUtils, String mergeStr, Map<String, Object> templateEntityMap) { 
+				
 		/* matching [OBJECT.ATTRIBUTE] patterns */
 		Matcher match = PATTEN_MATCHER.matcher(mergeStr);
 		Matcher matchVariables = PATTERN_VARIABLE.matcher(mergeStr);
@@ -60,8 +61,10 @@ public class MergeUtil {
 			
 			while (match.find()) {	
 				
-				Object mergedtext = wordMerge(templateEntityMap, match.group(1));
+				String mrg = match.group(1);
+				Object mergedtext = wordMerge(beUtils, templateEntityMap, mrg);
 				if(mergedtext != null) {
+					log.info("Item = " + mrg + " : Value = " + mergedtext.toString());
 					mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, mergedtext.toString());
 				} else {
 					mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, "");
@@ -85,7 +88,7 @@ public class MergeUtil {
 	}
 	
 	@SuppressWarnings("unused")
-	private static String wordMerge(Map<String, Object> entitymap, String mergeText) {
+	private static String wordMerge(BaseEntityUtils beUtils, Map<String, Object> entitymap, String mergeText) {
 		
 		if(mergeText != null && !mergeText.isEmpty()) {
 			
@@ -107,13 +110,27 @@ public class MergeUtil {
 						
 						BaseEntity be = (BaseEntity)value;
 
-						String attributeCode = entityArr[1];
-						System.out.println(attributeCode);
-						
-						Object attributeValue = be.getValue(attributeCode, null);
-						System.out.println(attributeValue);
-						
-						if(attributeValue instanceof org.javamoney.moneta.Money) {
+						String attributeCode = null;
+						Object attributeValue = null;
+
+						// Iterate items in the attribute list
+						for (int i = 1; i < entityArr.length; i++) {
+							attributeCode = entityArr[i];
+							if (i == (entityArr.length-1)) {
+								// If this is the last item, then take the value
+								attributeValue = be.getValue(attributeCode, null);
+							} else {
+								// If not the last, then try to grab the associated BE
+								be = beUtils.getBaseEntityFromLNKAttr(be, attributeCode);
+								if (be == null) {
+									log.error("Could not find value for attribute " + attributeCode + " in be " + entityArr[0]);
+									return "";
+								}
+							}
+						}
+
+						if (attributeValue instanceof org.javamoney.moneta.Money) {
+
 							log.info("price attributes 1");
 							DecimalFormat df = new DecimalFormat("#.00"); 
 							Money money = (Money) attributeValue; 
@@ -123,38 +140,47 @@ public class MergeUtil {
 							} else {
 								return DEFAULT;
 							}
-						}else if(attributeValue instanceof java.time.LocalDateTime) {
-							/* If the date-related mergeString needs to formatter to a particultar format -> we split the date-time related merge text to merge into 3 components: BE.PRI.TimeDateformat... becomes [BE, PRI...] */
-							/* 1st component -> BaseEntity code ; 2nd component -> attribute code ; 3rd component -> (date-Format) */
-							if(entityArr != null && entityArr.length > 2) {
-								/* the date merge field has a format-merge-string */
-								log.info("This datetime attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
-								Matcher matchVariables = DATEFORMAT_PATTERN_VARIABLE.matcher(entityArr[2]);
-								if(matchVariables.find()) {
-									return getFormattedDateString((LocalDateTime) attributeValue, matchVariables.group(1));
+
+						} else if (attributeValue instanceof java.time.LocalDateTime) {
+							// Handle DateTimes
+
+							if (attributeCode != null && attributeCode.contains(DATEFORMAT_VARIABLE_REGEX_START) && attributeCode.contains(DATEFORMAT_VARIABLE_REGEX_END)) {
+
+								log.info("This DATETIME attribute code ::" + attributeCode + " needs to be formatted");
+
+								Matcher matchVariables = DATEFORMAT_PATTERN_VARIABLE.matcher(attributeCode);
+								if (matchVariables.find()) {
+									return getFormattedDateTimeString((LocalDateTime) attributeValue, matchVariables.group(1));
 								}					
+
 							} else {
-								log.info("This datetime attribute code ::"+attributeCode+ " needs no formatting");
-								/* if date needs no formatting, we directly return the string value for the attributeValue */
+
+								log.info("This DATETIME attribute code ::" + attributeCode + " does not need formatting");
+
 								return getBaseEntityAttrValueAsString(be, attributeCode);
 							}
-						} else if(attributeValue instanceof java.time.LocalDate) {
-							if(entityArr != null && entityArr.length > 2) {
-								/* the date merge field has a format-merge-string */
-								log.info("This date attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
-								Matcher matchVariables = DATEFORMAT_PATTERN_VARIABLE.matcher(entityArr[2]);
-								if(matchVariables.find()) {
+
+						} else if (attributeValue instanceof java.time.LocalDate) {
+							// Handle Dates
+
+							if (attributeCode != null && attributeCode.contains(DATEFORMAT_VARIABLE_REGEX_START) && attributeCode.contains(DATEFORMAT_VARIABLE_REGEX_END)) {
+
+								log.info("This DATE attribute code ::"+attributeCode+ " needs to be formatted");
+
+								Matcher matchVariables = DATEFORMAT_PATTERN_VARIABLE.matcher(attributeCode);
+								if (matchVariables.find()) {
 									return getFormattedDateString((LocalDate) attributeValue, matchVariables.group(1));
-								}					
+								}		
+
 							} else {
-								log.info("This date attribute code ::"+attributeCode+ " needs no formatting");
-								/* if date needs no formatting, we directly return the string value for the attributeValue */
+								log.info("This DATE attribute code ::" + attributeCode + " does not need formatting");
+
 								return getBaseEntityAttrValueAsString(be, attributeCode);
 							}
-						} else if(attributeValue instanceof java.lang.String){
+
+						} else if (attributeValue instanceof java.lang.String) {
 							return getBaseEntityAttrValueAsString(be, attributeCode);
-						}
-						else {
+						} else {
 							return getBaseEntityAttrValueAsString(be, attributeCode);
 						}
 						
@@ -286,10 +312,10 @@ public class MergeUtil {
 
 	}
 	
-	public static String getFormattedDateString(LocalDateTime dateToBeFormatted, String format) {
-		if(dateToBeFormatted != null && format != null) {
+	public static String getFormattedDateTimeString(LocalDateTime dateTimeToBeFormatted, String format) {
+		if(dateTimeToBeFormatted != null && format != null) {
 			DateTimeFormatter dateformat = DateTimeFormatter.ofPattern(format);
-			return dateToBeFormatted.format(dateformat);
+			return dateTimeToBeFormatted.format(dateformat);
 		}
 		return null;
 	}

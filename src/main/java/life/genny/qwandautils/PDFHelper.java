@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
 
 import com.google.gson.Gson;
+import life.genny.utils.BaseEntityUtils;
 
 public class PDFHelper {
 	
@@ -23,7 +24,7 @@ public class PDFHelper {
 		return QwandaUtils.apiGet(headerURL, null);
 	}
 	
-	public static String getDownloadablePdfLinkForHtml(String htmlHeaderUrl, String htmlRowUrl, HashMap<String, Object> contextMap, List<HashMap<String, Object>> contextMapList){
+	public static String getDownloadablePdfLinkForHtml(BaseEntityUtils beUtils, String htmlHeaderUrl, String htmlRowUrl, HashMap<String, Object> contextMap, List<HashMap<String, Object>> contextMapList){
 		
 		String content = null;
 		String downloadablePdfUrl = null;
@@ -36,12 +37,12 @@ public class PDFHelper {
 			
 			// Merge the header
 			headerContent = QwandaUtils.apiGet(htmlHeaderUrl, null);
-			headerContent = MergeUtil.merge(headerContent, contextMap);
+			headerContent = MergeUtil.merge(beUtils, headerContent, contextMap);
 			
 			finalContent += headerContent;
 			/* If merge is required, use MergeUtils for merge with context map */
 			for(HashMap<String, Object> ctxMap : contextMapList) {
-				finalContent += MergeUtil.merge(content, ctxMap);
+				finalContent += MergeUtil.merge(beUtils, content, ctxMap);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -60,7 +61,7 @@ public class PDFHelper {
 		return downloadablePdfUrl;
 	}
 	
-	public static String getDownloadablePdfLinkForHtml(String htmlUrl, HashMap<String, Object> contextMap){
+	public static String getDownloadablePdfLinkForHtml(BaseEntityUtils beUtils, String htmlUrl, HashMap<String, Object> contextMap){
 		
 		String content = null;
 		String downloadablePdfUrl = null;
@@ -69,7 +70,7 @@ public class PDFHelper {
 			/* Get content from link in String format */
 			content = QwandaUtils.apiGet(htmlUrl, null);			
 			/* If merge is required, use MergeUtils for merge with context map */
-			content = MergeUtil.merge(content, contextMap);
+			content = MergeUtil.merge(beUtils, content, contextMap);
 
 		} catch (IOException e) {
 			e.printStackTrace();
