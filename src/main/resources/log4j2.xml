@@ -9,7 +9,7 @@
 		<Root level="error">
 			<AppenderRef ref="CONSOLE" />
 		</Root>
-		<logger name="life.genny" level="TRACE" />
+		<logger name="life.genny" level="INFO" />
 
 	</Loggers>
 </Configuration>
