@@ -24,38 +24,24 @@
 		<!--java version -->
 		<java-version>11</java-version>
 
-		<junit-version>4.13.1</junit-version>
-		<log4j-core-version>2.13.3</log4j-core-version>
+		<junit-version>4.13.2</junit-version>
+		<log4j-core-version>2.14.1</log4j-core-version>
 
 
 		<!-- plugin versions -->
-		<ejb-plugin-version>2.3</ejb-plugin-version>
-		<war-plugin-version>2.4</war-plugin-version>
-		<ear-plugin-version>2.9</ear-plugin-version>
 		<compiler-plugin-version>3.1</compiler-plugin-version>
 		<version.maven-jar-plugin>3.1.2</version.maven-jar-plugin>
 		<version.maven-source-plugin>3.1.0</version.maven-source-plugin>
 
-		<!-- dependency versions -->
-		<javaee-api-version>8.0</javaee-api-version>
+		<jackson.version>2.12.4</jackson.version>
 
-		<!-- EJB spec version -->
-		<ejb-spec-version>3.2</ejb-spec-version>
-
-
-
-		<!-- <jackson.version>2.8.7</jackson.version> -->
-		<jackson.version>2.10.5.1</jackson.version>
-
-		<jersey-version>2.13</jersey-version>
 		<version.apache-httpclient>4.5.13</version.apache-httpclient>
 		<version.keycloak>13.0.0</version.keycloak>
 
-		<version.resteasy>3.0.10.Final</version.resteasy>
-		<vertx.version>3.9.3</vertx.version>
-		<aws.version>1.11.327</aws.version>
+		<vertx.version>3.9.8</vertx.version>
+		<aws.version>1.12.30</aws.version>
 		<opencsv.version>4.0</opencsv.version>
-		<gson.version>2.8.5</gson.version>
+		<gson.version>2.8.7</gson.version>
 		<twilio.version>7.54.1</twilio.version>
 	</properties>
 
