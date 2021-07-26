@@ -297,9 +297,9 @@ public class BaseEntityUtils implements Serializable {
 		try {
 			JsonObject json = new JsonObject(JsonUtils.toJson(answer));
 			json.put("token", this.token);
-			log.info("Saving answer");
+			log.debug("Saving answer");
 			VertxUtils.eb.write("answer", json);
-			log.info("Finished saving answer");
+			log.debug("Finished saving answer");
 		} catch (NamingException e) {
 			log.error("Error in saving answer through kafka :::: " + e.getMessage());
 		}
@@ -366,9 +366,9 @@ public class BaseEntityUtils implements Serializable {
 							try {
 								JsonObject json = new JsonObject(JsonUtils.toJson(answer));
 								json.put("token", this.token);
-								log.info("Saving answer");
+								log.debug("Saving answer");
 								VertxUtils.eb.write("answer", json);
-								log.info("Finished saving answer");
+								log.debug("Finished saving answer");
 							} catch (NamingException e) {
 								log.error("Error in saving answer through kafka :::: " + e.getMessage());
 							}
