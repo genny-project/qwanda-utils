@@ -53,32 +53,38 @@ public class MergeUtil {
 	public static String merge(String mergeStr, Map<String, Object> templateEntityMap) { 
 		
 		/* matching [OBJECT.ATTRIBUTE] patterns */
-		Matcher match = PATTERN_MATCHER.matcher(mergeStr);
-		Matcher matchVariables = PATTERN_VARIABLE.matcher(mergeStr);
+		if (mergeStr != null) {
+
+			Matcher match = PATTERN_MATCHER.matcher(mergeStr);
+			Matcher matchVariables = PATTERN_VARIABLE.matcher(mergeStr);
 		
-		if(templateEntityMap != null && templateEntityMap.size() > 0) {
-			
-			while (match.find()) {	
+			if(templateEntityMap != null && templateEntityMap.size() > 0) {
 				
-				Object mergedtext = wordMerge(templateEntityMap, match.group(1));
-				if(mergedtext != null) {
-					mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, mergedtext.toString());
-				} else {
-					mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, "");
-				}			
-			}
-			
-			/* duplicating this for now. ideally wordMerge should be a bit more flexible and allows all kind of data to be passed */
-			while(matchVariables.find()) {
+				while (match.find()) {	
+					
+					Object mergedtext = wordMerge(templateEntityMap, match.group(1));
+					if(mergedtext != null) {
+						mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, mergedtext.toString());
+					} else {
+						mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, "");
+					}			
+				}
 				
-				Object mergedText = templateEntityMap.get(matchVariables.group(1));
-				if(mergedText != null) {
-					mergeStr = mergeStr.replace(VARIABLE_REGEX_START + matchVariables.group(1) + VARIABLE_REGEX_END, mergedText.toString());
-				} else {
-					mergeStr = mergeStr.replace(VARIABLE_REGEX_START + matchVariables.group(1) + VARIABLE_REGEX_END, "");
-				}	
+				/* duplicating this for now. ideally wordMerge should be a bit more flexible and allows all kind of data to be passed */
+				while(matchVariables.find()) {
+					
+					Object mergedText = templateEntityMap.get(matchVariables.group(1));
+					if(mergedText != null) {
+						mergeStr = mergeStr.replace(VARIABLE_REGEX_START + matchVariables.group(1) + VARIABLE_REGEX_END, mergedText.toString());
+					} else {
+						mergeStr = mergeStr.replace(VARIABLE_REGEX_START + matchVariables.group(1) + VARIABLE_REGEX_END, "");
+					}	
+				}
+				
 			}
-			
+
+		} else {
+			log.warn("mergeStr is NULL");
 		}
 	
 		return mergeStr;
