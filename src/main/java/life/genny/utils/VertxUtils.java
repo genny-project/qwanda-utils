@@ -381,7 +381,7 @@ public class VertxUtils {
             if (be!=null)
                 be.setFromCache(false);
             else
-                log.error(String.format("BaseEntity: %s fetched is null", code));
+                log.warn(String.format("BaseEntity: %s fetched is null", code));
         }
         return be;
     }
