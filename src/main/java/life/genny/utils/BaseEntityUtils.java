@@ -2880,10 +2880,13 @@ public class BaseEntityUtils implements Serializable {
 			String serValue = searchAtt.get().getValueString();
 			log.info("Attribute exists in "+defBe.getCode()+" for SER_" + attributeCode+" --> "+serValue);
 			JsonObject serJson = new JsonObject(serValue);
-			if (serJson.containsKey("enabled") || GennySettings.projectUrl.contains("dev")) {
+			if (serJson.containsKey("enabled")) {
 				Boolean isEnabled = serJson.getBoolean("enabled");
 				return isEnabled;
 			} else {
+				if (GennySettings.projectUrl.contains("dev")) {
+					return true;
+				}
 				log.info("Attribute exists in "+defBe.getCode()+" for SER_" + attributeCode+" --> but NOT enabled!");
 			}
 		} else {
