@@ -171,24 +171,26 @@ public class BaseEntityUtils implements Serializable {
             item = createUser(defBE, randomEmail);
         }
         if (item == null){
-            String prefix = defBE.getValueAsString("PRI_PREFIX");
-            if (StringUtils.isBlank(prefix)){
-                log.error("No prefix set for the def: "+ defBE.getCode());
-                throw new Exception("No prefix set for the def: "+ defBE.getCode());
-            }
-            if (StringUtils.isBlank(code)){
-                code = prefix + "_" + UUID.randomUUID().toString().substring(0,32).toUpperCase();
-            }
+			String prefix = defBE.getValueAsString("PRI_PREFIX");
+			if (StringUtils.isBlank(prefix)){
+				log.error("No prefix set for the def: "+ defBE.getCode());
+				throw new Exception("No prefix set for the def: "+ defBE.getCode());
+			}
+			if (StringUtils.isBlank(code)){
+				code = prefix + "_" + UUID.randomUUID().toString().substring(0,32).toUpperCase();
+			}
 
-            if (StringUtils.isBlank(name)){
-                name = defBE.getName();
-            }
-            item = new BaseEntity(code.toUpperCase(), name);
+			if (StringUtils.isBlank(name)){
+				name = defBE.getName();
+			}
+			item = new BaseEntity(code.toUpperCase(), name);
 			// item = QwandaUtils.createBaseEntityByCode(code.toUpperCase(), name, qwandaServiceUrl, this.token);
+		}
 
-            // Establish all mandatory base entity attributes
-            for(EntityAttribute ea : defBE.getBaseEntityAttributes()){
-                if (ea.getAttribute().getCode().startsWith("ATT_")) {
+		if (item != null) {
+			// Establish all mandatory base entity attributes
+			for(EntityAttribute ea : defBE.getBaseEntityAttributes()){
+				if (ea.getAttribute().getCode().startsWith("ATT_")) {
 
 					String attrCode = ea.getAttributeCode().substring("ATT_".length());
 					Attribute attribute = RulesUtils.getAttribute(attrCode, this.getGennyToken().getToken());
@@ -211,8 +213,8 @@ public class BaseEntityUtils implements Serializable {
 						log.warn("No Attribute found for def attr " + attrCode);
 					}
 
-                }
-            }
+				}
+			}
 
         }
         this.saveBaseEntity(item);
@@ -233,8 +235,8 @@ public class BaseEntityUtils implements Serializable {
 //                    TODO: check to see if the email exists in the database and keycloak
                 }
             }
-        // this is a user, generate keycloak id
-        uuid = KeycloakUtils.createDummyUser(serviceToken.getToken(), serviceToken.getRealm());
+			// this is a user, generate keycloak id
+			uuid = KeycloakUtils.createDummyUser(serviceToken.getToken(), serviceToken.getRealm());
             Optional<String> optCode = defBE.getValue("PRI_PREFIX");
             if (optCode.isPresent()){
                 String name = defBE.getName();
