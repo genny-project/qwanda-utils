@@ -2936,6 +2936,10 @@ public class BaseEntityUtils implements Serializable {
 	}
 
 	public BaseEntity getDEF(final BaseEntity be) {
+		if (be == null) {
+			log.error("be param is NULL");
+			return null;
+		}
 		Set<EntityAttribute> newMerge = new HashSet<>();
 		List<EntityAttribute> isAs = be.findPrefixEntityAttributes("PRI_IS_");
 		if (isAs.size() == 1) {
