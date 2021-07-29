@@ -26,10 +26,10 @@ public class MergeUtil {
     public static final String ANSI_BLUE = "\u001B[34m";
     public static final String ANSI_RED = "\u001B[31m";
 	
-    /* [VARIABLENAME.ATTRIBUTE] pattern */
+    /* [[VARIABLENAME.ATTRIBUTE]] pattern */
     /* Used for baseentity-attribute merging */
-	public static final String REGEX_START = "[";
-	public static final String REGEX_END = "]";
+	public static final String REGEX_START = "[[";
+	public static final String REGEX_END = "]]";
 	public static final String REGEX_START_PATTERN = Pattern.quote(REGEX_START);
     public static final String REGEX_END_PATTERN = Pattern.quote(REGEX_END);
     public static final Pattern PATTERN = Pattern.compile(REGEX_START_PATTERN + "(?s)(.*?)" + REGEX_END_PATTERN);

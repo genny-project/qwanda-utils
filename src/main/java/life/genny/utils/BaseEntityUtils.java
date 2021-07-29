@@ -60,6 +60,7 @@ import life.genny.qwandautils.GennySettings;
 import life.genny.qwandautils.JsonUtils;
 import life.genny.qwandautils.QwandaUtils;
 import life.genny.utils.Layout.LayoutUtils;
+import life.genny.qwandautils.KeycloakUtils;
 
 public class BaseEntityUtils implements Serializable {
 
@@ -111,31 +112,147 @@ public class BaseEntityUtils implements Serializable {
 
 	/* =============== refactoring =============== */
 
-	public BaseEntity create(final String uniqueCode, final String bePrefix, final String name) {
+	// public BaseEntity create(final String uniqueCode, final String bePrefix, final String name) {
 
-		String uniqueId = QwandaUtils.getUniqueId(bePrefix, uniqueCode);
-		if (uniqueId != null) {
-			return this.create(uniqueId, name);
+		// String uniqueId = QwandaUtils.getUniqueId(bePrefix, uniqueCode);
+	// 	if (uniqueId != null) {
+	// 		return this.create(uniqueId, name);
+	// 	}
+
+	// 	return null;
+	// }
+
+	// public BaseEntity create(String baseEntityCode, String name) {
+
+	// 	BaseEntity newBaseEntity = null;
+	// 	if (VertxUtils.cachedEnabled == false) {
+	// 		newBaseEntity = QwandaUtils.createBaseEntityByCode(baseEntityCode, name, qwandaServiceUrl, this.token);
+	// 	} else {
+	// 		GennyToken gt = new GennyToken(this.token);
+	// 		newBaseEntity = new BaseEntity(baseEntityCode, name);
+	// 		newBaseEntity.setRealm(gt.getRealm());
+	// 	}
+	// 	this.addAttributes(newBaseEntity);
+	// 	VertxUtils.writeCachedJson(newBaseEntity.getRealm(), newBaseEntity.getCode(), JsonUtils.toJson(newBaseEntity),
+	// 			this.token);
+	// 	return newBaseEntity;
+	// }
+
+    public BaseEntity create(final String defCode) throws Exception {
+        String localRealm = this.getGennyToken().getRealm();
+        BaseEntity defBE = RulesUtils.defs.get(localRealm).get(defCode);
+        return create(defBE);
+    }
+
+    public BaseEntity create(final BaseEntity defBE) throws Exception {
+        return create(defBE, null, null);
+    }
+
+    public BaseEntity create(final BaseEntity defBE, String name) throws Exception {
+        return create(defBE, name, null);
+    }
+
+    public BaseEntity create(final BaseEntity defBE, String name, String code) throws Exception {
+		if (defBE == null) {
+			String errorMsg = "defBE is NULL";
+			log.error(errorMsg);
+			throw new Exception(errorMsg);
 		}
-
-		return null;
-	}
-
-	public BaseEntity create(String baseEntityCode, String name) {
-
-		BaseEntity newBaseEntity = null;
-		if (VertxUtils.cachedEnabled == false) {
-			newBaseEntity = QwandaUtils.createBaseEntityByCode(baseEntityCode, name, qwandaServiceUrl, this.token);
-		} else {
-			GennyToken gt = new GennyToken(this.token);
-			newBaseEntity = new BaseEntity(baseEntityCode, name);
-			newBaseEntity.setRealm(gt.getRealm());
+		if (code != null && code.charAt(4) != '_') {
+			String errorMsg = "Code parameter " + code + " is not a valid BE code!";
+			log.error(errorMsg);
+			throw new Exception(errorMsg);
 		}
-		this.addAttributes(newBaseEntity);
-		VertxUtils.writeCachedJson(newBaseEntity.getRealm(), newBaseEntity.getCode(), JsonUtils.toJson(newBaseEntity),
-				this.token);
-		return newBaseEntity;
-	}
+        BaseEntity item = null;
+        Optional<EntityAttribute> uuidEA = defBE.findEntityAttribute("ATT_PRI_UUID");
+        if (uuidEA.isPresent()){
+            // if the defBE is a user without an email provided, create a keycloak acc using a unique random uuid
+            String randomEmail = "random+" + UUID.randomUUID().toString().substring(0,20) + "@gada.io";
+            item = createUser(defBE, randomEmail);
+        }
+        if (item == null){
+            String prefix = defBE.getValueAsString("PRI_PREFIX");
+            if (StringUtils.isBlank(prefix)){
+                log.error("No prefix set for the def: "+ defBE.getCode());
+                throw new Exception("No prefix set for the def: "+ defBE.getCode());
+            }
+            if (StringUtils.isBlank(code)){
+                code = prefix + "_" + UUID.randomUUID().toString().substring(0,32).toUpperCase();
+            }
+
+            if (StringUtils.isBlank(name)){
+                name = defBE.getName();
+            }
+            item = new BaseEntity(code.toUpperCase(), name);
+
+            // Establish all mandatory base entity attributes
+            for(EntityAttribute ea : defBE.getBaseEntityAttributes()){
+                if (ea.getAttribute().getCode().startsWith("ATT_")){
+//                    Only process mandatory attributes
+                    if(ea.getValueBoolean()){
+                        String attrCode = ea.getAttributeCode().substring("ATT_".length());
+                        Attribute attribute = RulesUtils.getAttribute(attrCode, this.getGennyToken().getToken());
+
+                        String defaultDefValue = "DFT_" + attrCode;
+
+                        String value = defBE.getValue(defaultDefValue, attribute.getDefaultValue());
+
+                        EntityAttribute newEA = new EntityAttribute(item, attribute, ea.getWeight(),value);
+
+                        item.addAttribute(newEA);
+                    }
+
+                }
+            }
+
+        }
+        this.saveBaseEntity(item);
+        return item;
+    }
+
+    public BaseEntity createUser(final BaseEntity defBE, final String email) throws Exception {
+        BaseEntity item = null;
+        String uuid = null;
+        Optional<EntityAttribute> uuidEA = defBE.findEntityAttribute("ATT_PRI_UUID");
+        if (uuidEA.isPresent()){
+
+            if (!StringUtils.isBlank(email)){
+//                TODO: run a regexp check to see if the email is valid
+
+                if (!email.startsWith("random+")){
+                    //  Check to see if the email exists
+//                    TODO: check to see if the email exists in the database and keycloak
+                }
+            }
+        // this is a user, generate keycloak id
+        uuid = KeycloakUtils.createDummyUser(serviceToken.getToken(), serviceToken.getRealm());
+            Optional<String> optCode = defBE.getValue("PRI_PREFIX");
+            if (optCode.isPresent()){
+                String name = defBE.getName();
+                item = new BaseEntity(optCode.get() + "_" + uuid.toUpperCase(), name);
+                //Add PRI_UUID
+                //Add Email
+                if (!email.startsWith("random+")){
+                    //  Check to see if the email exists
+//                    TODO: check to see if the email exists in the database and keycloak
+                    Attribute emailAttribute = RulesUtils.getAttribute("PRI_EMAIL", this.getGennyToken().getToken());
+                    item.addAnswer(new Answer(item, item, emailAttribute, email));
+                }
+
+                Attribute uuidAttribute = RulesUtils.getAttribute("PRI_UUID", this.getGennyToken().getToken());
+                item.addAnswer(new Answer(item, item, uuidAttribute, uuid.toUpperCase()));
+
+            }else{
+                log.error("Prefix not provided");
+                throw new Exception("Prefix not provided" + defBE.getCode());
+            }
+        }else{
+            log.error("Passed defBE is not a user def!");
+            throw new Exception("Passed defBE is not a user def!" + defBE.getCode());
+        }
+
+        return item;
+    }
 
 	public List<BaseEntity> getBaseEntityFromSelectionAttribute(BaseEntity be, String attributeCode) {
 
@@ -1180,7 +1297,13 @@ public class BaseEntityUtils implements Serializable {
 	public BaseEntity duplicateBaseEntityAttributesAndLinks(final BaseEntity oldBe, final String bePrefix,
 			final String name) {
 
-		BaseEntity newBe = this.create(oldBe.getCode(), bePrefix, name);
+		BaseEntity defBE = getDEF(oldBe);
+		BaseEntity newBe = null;
+		try {
+			newBe = this.create(defBE, name, bePrefix+"_"+oldBe.getCode());
+		} catch (Exception e) {
+			log.error(e.getStackTrace());
+		}
 		duplicateAttributes(oldBe, newBe);
 		duplicateLinks(oldBe, newBe);
 		return getBaseEntityByCode(newBe.getCode());
@@ -1188,14 +1311,26 @@ public class BaseEntityUtils implements Serializable {
 
 	public BaseEntity duplicateBaseEntityAttributes(final BaseEntity oldBe, final String bePrefix, final String name) {
 
-		BaseEntity newBe = this.create(oldBe.getCode(), bePrefix, name);
+		BaseEntity defBE = getDEF(oldBe);
+		BaseEntity newBe = null;
+		try {
+			newBe = this.create(defBE, name, bePrefix+"_"+oldBe.getCode());
+		} catch (Exception e) {
+			log.error(e.getStackTrace());
+		}
 		duplicateAttributes(oldBe, newBe);
 		return getBaseEntityByCode(newBe.getCode());
 	}
 
 	public BaseEntity duplicateBaseEntityLinks(final BaseEntity oldBe, final String bePrefix, final String name) {
 
-		BaseEntity newBe = this.create(oldBe.getCode(), bePrefix, name);
+		BaseEntity defBE = getDEF(oldBe);
+		BaseEntity newBe = null;
+		try {
+			newBe = this.create(defBE, name, bePrefix+"_"+oldBe.getCode());
+		} catch (Exception e) {
+			log.error(e.getStackTrace());
+		}
 		duplicateLinks(oldBe, newBe);
 		return getBaseEntityByCode(newBe.getCode());
 	}
@@ -1751,7 +1886,12 @@ public class BaseEntityUtils implements Serializable {
 				log.info("Layout - Creating base entity " + layoutCode);
 
 				/* otherwise we create it */
-				beLayout = this.create(layoutCode, layout.getName());
+				try {
+					BaseEntity defBE = this.getDEFByCode("DEF_LAYOUT");
+					beLayout = this.create(defBE, layout.getName(), layoutCode);
+				} catch (Exception e) {
+					log.error(e.getStackTrace());
+				}
 			}
 
 			// if (beLayout != null) {
@@ -2762,6 +2902,16 @@ public class BaseEntityUtils implements Serializable {
 		return attribute;
 	}
 
+	public BaseEntity getDEFByCode(final String code) {
+		if (code == null || !code.startsWith("DEF_")) {
+			log.error("code " + code + " is not valid");
+			return null;
+		}
+        String localRealm = this.getGennyToken().getRealm();
+        BaseEntity defBE = RulesUtils.defs.get(localRealm).get(code);
+		return defBE;
+	}
+
 	public BaseEntity getDEF(final BaseEntity be) {
 		Set<EntityAttribute> newMerge = new HashSet<>();
 		List<EntityAttribute> isAs = be.findPrefixEntityAttributes("PRI_IS_");
@@ -2884,10 +3034,8 @@ public class BaseEntityUtils implements Serializable {
 				Boolean isEnabled = serJson.getBoolean("enabled");
 				return isEnabled;
 			} else {
-				if (GennySettings.projectUrl.contains("dev")) {
-					return true;
-				}
 				log.info("Attribute exists in "+defBe.getCode()+" for SER_" + attributeCode+" --> but NOT enabled!");
+				return true;
 			}
 		} else {
 			log.info("No attribute exists in "+defBe.getCode()+" for SER_" + attributeCode);
