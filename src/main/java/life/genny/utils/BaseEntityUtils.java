@@ -158,7 +158,7 @@ public class BaseEntityUtils implements Serializable {
 			log.error(errorMsg);
 			throw new Exception(errorMsg);
 		}
-		if (code != null && code.charAt(4) != '_') {
+		if (code != null && code.charAt(3) != '_') {
 			String errorMsg = "Code parameter " + code + " is not a valid BE code!";
 			log.error(errorMsg);
 			throw new Exception(errorMsg);
