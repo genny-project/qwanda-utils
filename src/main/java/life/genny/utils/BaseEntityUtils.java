@@ -184,23 +184,32 @@ public class BaseEntityUtils implements Serializable {
                 name = defBE.getName();
             }
             item = new BaseEntity(code.toUpperCase(), name);
+			// item = QwandaUtils.createBaseEntityByCode(code.toUpperCase(), name, qwandaServiceUrl, this.token);
 
             // Establish all mandatory base entity attributes
             for(EntityAttribute ea : defBE.getBaseEntityAttributes()){
-                if (ea.getAttribute().getCode().startsWith("ATT_")){
-//                    Only process mandatory attributes
-                    if(ea.getValueBoolean()){
-                        String attrCode = ea.getAttributeCode().substring("ATT_".length());
-                        Attribute attribute = RulesUtils.getAttribute(attrCode, this.getGennyToken().getToken());
+                if (ea.getAttribute().getCode().startsWith("ATT_")) {
 
-                        String defaultDefValue = "DFT_" + attrCode;
+					String attrCode = ea.getAttributeCode().substring("ATT_".length());
+					Attribute attribute = RulesUtils.getAttribute(attrCode, this.getGennyToken().getToken());
 
-                        String value = defBE.getValue(defaultDefValue, attribute.getDefaultValue());
+					if (attribute != null) {
 
-                        EntityAttribute newEA = new EntityAttribute(item, attribute, ea.getWeight(),value);
+						// Find any default val for this Attr
+						String defaultDefValueAttr = "DFT_" + attrCode;
+						String defaultVal = defBE.getValue(defaultDefValueAttr, attribute.getDefaultValue());
 
-                        item.addAttribute(newEA);
-                    }
+						// Only process mandatory attributes, or defaults
+						if (ea.getValueBoolean() || defaultVal != null) {
+
+							EntityAttribute newEA = new EntityAttribute(item, attribute, ea.getWeight(), defaultVal);
+							item.addAttribute(newEA);
+
+						}
+
+					} else {
+						log.warn("No Attribute found for def attr " + attrCode);
+					}
 
                 }
             }
@@ -229,18 +238,24 @@ public class BaseEntityUtils implements Serializable {
             Optional<String> optCode = defBE.getValue("PRI_PREFIX");
             if (optCode.isPresent()){
                 String name = defBE.getName();
-                item = new BaseEntity(optCode.get() + "_" + uuid.toUpperCase(), name);
-                //Add PRI_UUID
-                //Add Email
-                if (!email.startsWith("random+")){
-                    //  Check to see if the email exists
-//                    TODO: check to see if the email exists in the database and keycloak
-                    Attribute emailAttribute = RulesUtils.getAttribute("PRI_EMAIL", this.getGennyToken().getToken());
-                    item.addAnswer(new Answer(item, item, emailAttribute, email));
-                }
+				String code = optCode.get() + "_" + uuid.toUpperCase();
+				item = new BaseEntity(code, name);
+				// item = QwandaUtils.createBaseEntityByCode(code, name, qwandaServiceUrl, this.token);
+				if (item != null) {
+					// Add PRI_EMAIL
+					if (!email.startsWith("random+")){
+						// Check to see if the email exists
+						// TODO: check to see if the email exists in the database and keycloak
+						Attribute emailAttribute = RulesUtils.getAttribute("PRI_EMAIL", this.getGennyToken().getToken());
+						item.addAnswer(new Answer(item, item, emailAttribute, email));
+					}
 
-                Attribute uuidAttribute = RulesUtils.getAttribute("PRI_UUID", this.getGennyToken().getToken());
-                item.addAnswer(new Answer(item, item, uuidAttribute, uuid.toUpperCase()));
+					// Add PRI_UUID
+					Attribute uuidAttribute = RulesUtils.getAttribute("PRI_UUID", this.getGennyToken().getToken());
+					item.addAnswer(new Answer(item, item, uuidAttribute, uuid.toUpperCase()));
+				} else {
+					log.error("create BE returned NULL for " + code);
+				}
 
             }else{
                 log.error("Prefix not provided");
@@ -409,18 +424,23 @@ public class BaseEntityUtils implements Serializable {
 
 	public BaseEntity saveAnswer(Answer answer) {
 
-		BaseEntity ret = addAnswer(answer);
+		// Filter Non-valid answers using DEF
+		if (answerValidForDEF(answer)) {
+			BaseEntity ret = addAnswer(answer);
 
-		try {
-			JsonObject json = new JsonObject(JsonUtils.toJson(answer));
-			json.put("token", this.token);
-			log.debug("Saving answer");
-			VertxUtils.eb.write("answer", json);
-			log.debug("Finished saving answer");
-		} catch (NamingException e) {
-			log.error("Error in saving answer through kafka :::: " + e.getMessage());
+			try {
+				JsonObject json = new JsonObject(JsonUtils.toJson(answer));
+				json.put("token", this.token);
+				log.debug("Saving answer");
+				VertxUtils.eb.write("answer", json);
+				log.debug("Finished saving answer");
+			} catch (NamingException e) {
+				log.error("Error in saving answer through kafka :::: " + e.getMessage());
+			}
+			return ret;
 		}
-		return ret;
+
+		return null;
 	}
 
 	public BaseEntity addAnswer(Answer answer) {
@@ -463,6 +483,9 @@ public class BaseEntityUtils implements Serializable {
 			// Sort answers into target Baseentitys
 			Map<String, List<Answer>> answersPerTargetCodeMap = answers.stream()
 					.collect(Collectors.groupingBy(Answer::getTargetCode));
+
+			// Filter Non-valid answers using def
+			answers = answers.stream().filter(item -> answerValidForDEF(item)).collect(Collectors.toList());
 
 			for (String targetCode : answersPerTargetCodeMap.keySet()) {
 				List<Answer> targetAnswers = answersPerTargetCodeMap.get(targetCode);
@@ -3042,6 +3065,22 @@ public class BaseEntityUtils implements Serializable {
 		}
 		return false;
 
+	}
+
+	public Boolean answerValidForDEF(Answer answer) 
+	{
+		BaseEntity target = this.getBaseEntityByCode(answer.getTargetCode());
+		BaseEntity defBE = this.getDEF(target);
+
+		List<EntityAttribute> attrs = defBE.findPrefixEntityAttributes("ATT_");
+
+		for (EntityAttribute ea : attrs) {
+			if (answer.getAttributeCode().equals(ea.getAttributeCode().substring("ATT_".length()))) {
+				return true;
+			}
+		}
+		log.error("Invalid attribute " + answer.getAttributeCode() + " for " + defBE.getCode());
+		return false;
 	}
 
 
