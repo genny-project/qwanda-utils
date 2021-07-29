@@ -197,7 +197,7 @@ public class BaseEntityUtils implements Serializable {
 
 						// Find any default val for this Attr
 						String defaultDefValueAttr = "DFT_" + attrCode;
-						String defaultVal = defBE.getValue(defaultDefValueAttr, attribute.getDefaultValue());
+						Object defaultVal = defBE.getValue(defaultDefValueAttr, attribute.getDefaultValue());
 
 						// Only process mandatory attributes, or defaults
 						if (ea.getValueBoolean() || defaultVal != null) {
