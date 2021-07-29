@@ -3069,17 +3069,25 @@ public class BaseEntityUtils implements Serializable {
 
 	public Boolean answerValidForDEF(Answer answer) 
 	{
-		BaseEntity target = this.getBaseEntityByCode(answer.getTargetCode());
+		String targetCode = answer.getTargetCode();
+		String attributeCode = answer.getAttributeCode();
+
+		// Allow if it is Capability saved to a Role
+		if (targetCode.startsWith("ROL_") && attributeCode.startsWith("PRM_")) {
+			return true;
+		}
+
+		BaseEntity target = this.getBaseEntityByCode(targetCode);
 		BaseEntity defBE = this.getDEF(target);
 
 		List<EntityAttribute> attrs = defBE.findPrefixEntityAttributes("ATT_");
 
 		for (EntityAttribute ea : attrs) {
-			if (answer.getAttributeCode().equals(ea.getAttributeCode().substring("ATT_".length()))) {
+			if (attributeCode.equals(ea.getAttributeCode().substring("ATT_".length()))) {
 				return true;
 			}
 		}
-		log.error("Invalid attribute " + answer.getAttributeCode() + " for " + defBE.getCode());
+		log.error("Invalid attribute " + attributeCode + " for " + defBE.getCode());
 		return false;
 	}
 
