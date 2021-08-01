@@ -143,7 +143,7 @@ public class MergeUtil {
 								/* 1st component -> BaseEntity code ; 2nd component -> attribute code ; 3rd component -> (date-Format) */
 								if (matchFormat != null && matchFormat.find()) {
 									log.info("This datetime attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
-										return getFormattedDateString((LocalDateTime) attributeValue, matchFormat.group(1));
+										return getFormattedDateTimeString((LocalDateTime) attributeValue, matchFormat.group(1));
 								} else {
 									log.info("This DateTime attribute code ::"+attributeCode+ " needs no formatting");
 									return getBaseEntityAttrValueAsString(be, attributeCode);
@@ -301,7 +301,7 @@ public class MergeUtil {
 
 	}
 	
-	public static String getFormattedDateString(LocalDateTime dateToBeFormatted, String format) {
+	public static String getFormattedDateTimeString(LocalDateTime dateToBeFormatted, String format) {
 		if(dateToBeFormatted != null && format != null) {
 			DateTimeFormatter dateformat = DateTimeFormatter.ofPattern(format);
 			return dateToBeFormatted.format(dateformat);
