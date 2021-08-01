@@ -1140,6 +1140,7 @@ public class VertxUtils {
 				return;
 			}
 		}
+		// Just a log
 
 		// Set token and send
 		msg.setToken(beUtils.getGennyToken().getToken());
