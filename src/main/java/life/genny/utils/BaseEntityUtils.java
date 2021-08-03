@@ -3086,6 +3086,7 @@ public class BaseEntityUtils implements Serializable {
 		Optional<EntityAttribute> depAtt = defBe.findEntityAttribute("DEP_" + attributeCode);
 		if (depAtt.isPresent()) {
 			String depValue = depAtt.get().getValueString();
+			log.info("depValue = " + depValue);
 			if (depValue != null) {
 				String[] codeArray = cleanUpAttributeValue(depValue).split(",");
 
