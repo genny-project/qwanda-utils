@@ -3044,6 +3044,70 @@ public class BaseEntityUtils implements Serializable {
 
 	}
 
+	public Boolean dependenciesMet(final String attributeCode, List<Answer> answers, final BaseEntity targetBe, final BaseEntity defBe) {
+		if (!defBe.getCode().startsWith("DEF_")) {
+			log.error("Cannot determine if dropdown exists , Not a DEF! "+defBe.getCode());
+		}
+		if (targetBe == null) {
+			log.error("Checking DEPs, targetBe is NULL");
+			return null;
+		}
+
+		// NOTE: A BIT HACKY HERE WITH THE ANSWERS, BUT OH WELL - Jasper (4/08/2021)
+		// Need to ensure dependencies take into account the incoming answers from processAnswers.
+		// So filter to find only the answers we care about.
+		if (answers != null) {
+			answers = answers.stream()
+				.filter(item -> item.getTargetCode().equals(targetBe.getCode()))
+				.collect(Collectors.toList());
+		}
+
+		// Check if attribute code exists as a DEP
+		Optional<EntityAttribute> depAtt = defBe.findEntityAttribute("DEP_" + attributeCode);
+		if (depAtt.isPresent()) {
+			String depValue = depAtt.get().getValueString();
+			if (depValue != null) {
+				String[] codeArray = cleanUpAttributeValue(depValue).split(",");
+				for (String code : codeArray) {
+					if (answers != null) {
+						// Find any deps in answers that aren't empty
+						Boolean foundInAnswers = answers.stream().anyMatch(item -> (item.getAttributeCode().equals(code) && !item.getValue().toString().isEmpty()));
+						if (foundInAnswers) {
+							continue;
+						}
+					}
+					Object value = targetBe.getValue(code, null);
+					if (value == null || value.toString().isEmpty()) {
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+		return null;
+
+	}
+
+	public List<String> getDependants(final String attributeCode, final BaseEntity defBe) {
+		if (!defBe.getCode().startsWith("DEF_")) {
+			log.error("Cannot determine if dropdown exists , Not a DEF! "+defBe.getCode());
+		}
+		List<String> ret = new ArrayList<>();
+		List<EntityAttribute> deps = defBe.findPrefixEntityAttributes("DEP_");
+		for (EntityAttribute ea : deps) {
+			String depValue = ea.getValueString();
+			if (depValue != null) {
+				String[] codeArray = cleanUpAttributeValue(depValue).split(",");
+				for (String code : codeArray) {
+					if (code.equals(attributeCode)) {
+						ret.add(ea.getAttributeCode().substring("DEP_".length()));
+					}
+				}
+			}
+		}
+		return ret;
+	}
+
 	public Boolean answerValidForDEF(Answer answer) 
 	{
 		String targetCode = answer.getTargetCode();
