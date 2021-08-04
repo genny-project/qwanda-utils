@@ -3087,7 +3087,7 @@ public class BaseEntityUtils implements Serializable {
 		// So filter to find only the answers we care about.
 		if (answers != null) {
 			answers = answers.stream()
-				.filter(item -> (item.getTargetCode().equals(targetBe.getCode()) && item.getAttributeCode().equals(attributeCode)))
+				.filter(item -> item.getTargetCode().equals(targetBe.getCode()))
 				.collect(Collectors.toList());
 		}
 
