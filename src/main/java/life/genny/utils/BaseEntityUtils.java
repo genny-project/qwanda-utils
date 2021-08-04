@@ -3091,14 +3091,12 @@ public class BaseEntityUtils implements Serializable {
 
 				for (String code : codeArray) {
 					Object value = targetBe.getValue(code, null);
-					if (value == null) {
+					if (value == null || value.toString().isEmpty()) {
 						return false;
 					}
 				}
 				return true;
 			}
-		} else {
-			log.info("No attribute exists in "+defBe.getCode()+" for SER_" + attributeCode);
 		}
 		return null;
 
