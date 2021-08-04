@@ -2951,49 +2951,20 @@ public class BaseEntityUtils implements Serializable {
 			return defBe;
 		} else if (isAs.isEmpty()) {
 			// THIS HANDLES CURRENT BAD BEs
-			if (be.getCode().startsWith("CPY_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_COMPANY");
-				return defBe;
-			} else if (be.getCode().startsWith("PER_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_PERSON");
-				return defBe;
-			} else if (be.getCode().startsWith("BEG_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_INTERNSHIP");
-				return defBe;
-			} else if (be.getCode().startsWith("JNL_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_JOURNAL");
-				return defBe;
-			} else if (be.getCode().startsWith("RUL_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_RULE");
-				return defBe;
-			} else if (be.getCode().startsWith("ROL_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_ROLE");
-				return defBe;
-			} else if (be.getCode().startsWith("BKT_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_BUCKET_PAGE");
-				return defBe;
-			} else if (be.getCode().startsWith("APT_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_APPOINTMENT");
-				return defBe;
-			} else if (be.getCode().startsWith("DEV_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_DEVICE");
-				return defBe;
-			} else if (be.getCode().startsWith("FRM_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_FORM");
-				return defBe;
-			}
-
-			else if (be.getCode().startsWith("APP_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_APPLICATION");
-				if (defBe == null) {
-					log.error("NO DEF ASSOCIATED WITH APP be " + be.getCode());
-					return new BaseEntity("ERR_DEF", "No DEF");
+			// loop through the defs looking for matching prefix
+			for (BaseEntity defBe : RulesUtils.defs.get(this.gennyToken.getRealm()).values()) {
+				String prefix = defBe.getValue("PRI_PREFIX",null);
+				if (prefix == null) {
+					continue;
 				}
-				return defBe;
+				if (be.getCode().startsWith(prefix+"_")) {
+					return defBe;
+				}
 			}
 
 			log.error("NO DEF ASSOCIATED WITH be " + be.getCode());
 			return new BaseEntity("ERR_DEF", "No DEF");
+
 		} else {
 			// Create sorted merge code
 			String mergedCode = "DEF_" + isAs.stream().sorted(Comparator.comparing(EntityAttribute::getAttributeCode))
