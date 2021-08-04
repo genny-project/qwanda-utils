@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -2942,8 +2943,45 @@ public class BaseEntityUtils implements Serializable {
 			log.error("be param is NULL");
 			return null;
 		}
+		
+
+		
+		
 		Set<EntityAttribute> newMerge = new HashSet<>();
 		List<EntityAttribute> isAs = be.findPrefixEntityAttributes("PRI_IS_");
+		
+		// remove the non DEF ones
+		/*PRI_IS_DELETED
+		PRI_IS_EXPANDABLE
+		PRI_IS_FULL
+		PRI_IS_INHERITABLE
+		PRI_IS_PHONE (?)
+		PRI_IS_SKILLS*/
+		Iterator<EntityAttribute> i = isAs.iterator();
+		while (i.hasNext()) {
+			EntityAttribute ea = i.next();
+			
+			if (ea.getAttributeCode().startsWith("PRI_IS_APPLIED_") ) 				
+			{
+				i.remove();
+			} else {
+				switch (ea.getAttributeCode()) {
+				case "PRI_IS_DELETED":
+				case "PRI_IS_EXPANDABLE":
+				case "PRI_IS_FULL":
+				case "PRI_IS_INHERITABLE":
+				case "PRI_IS_PHONE":
+				case "PRI_IS SKILLS":
+					log.warn("getDEF -> detected non DEFy attributeCode "+ea.getAttributeCode());
+					i.remove();
+				break;
+				default:
+					
+				}
+			}
+		}
+		
+		
 		if (isAs.size() == 1) {
 			// Easy
 			BaseEntity defBe = RulesUtils.defs.get(be.getRealm())
@@ -2951,45 +2989,15 @@ public class BaseEntityUtils implements Serializable {
 			return defBe;
 		} else if (isAs.isEmpty()) {
 			// THIS HANDLES CURRENT BAD BEs
-			if (be.getCode().startsWith("CPY_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_COMPANY");
-				return defBe;
-			} else if (be.getCode().startsWith("PER_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_PERSON");
-				return defBe;
-			} else if (be.getCode().startsWith("BEG_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_INTERNSHIP");
-				return defBe;
-			} else if (be.getCode().startsWith("JNL_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_JOURNAL");
-				return defBe;
-			} else if (be.getCode().startsWith("RUL_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_RULE");
-				return defBe;
-			} else if (be.getCode().startsWith("ROL_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_ROLE");
-				return defBe;
-			} else if (be.getCode().startsWith("BKT_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_BUCKET_PAGE");
-				return defBe;
-			} else if (be.getCode().startsWith("APT_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_APPOINTMENT");
-				return defBe;
-			} else if (be.getCode().startsWith("DEV_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_DEVICE");
-				return defBe;
-			} else if (be.getCode().startsWith("FRM_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_FORM");
-				return defBe;
-			}
-
-			else if (be.getCode().startsWith("APP_")) {
-				BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_APPLICATION");
-				if (defBe == null) {
-					log.error("NO DEF ASSOCIATED WITH APP be " + be.getCode());
-					return new BaseEntity("ERR_DEF", "No DEF");
+			// loop through the defs looking for matching prefix
+			for (BaseEntity defBe : RulesUtils.defs.get(this.gennyToken.getRealm()).values()) {
+				String prefix = defBe.getValue("PRI_PREFIX",null);
+				if (prefix == null) {
+					continue;
 				}
-				return defBe;
+				if (be.getCode().startsWith(prefix+"_")) {
+					return defBe;
+				}
 			}
 
 			log.error("NO DEF ASSOCIATED WITH be " + be.getCode());
