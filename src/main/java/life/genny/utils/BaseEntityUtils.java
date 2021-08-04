@@ -3104,6 +3104,26 @@ public class BaseEntityUtils implements Serializable {
 
 	}
 
+	public List<String> getDependants(final String attributeCode, final BaseEntity defBe) {
+		if (!defBe.getCode().startsWith("DEF_")) {
+			log.error("Cannot determine if dropdown exists , Not a DEF! "+defBe.getCode());
+		}
+		List<String> ret = new ArrayList<>();
+		List<EntityAttribute> deps = defBe.findPrefixEntityAttributes("DEP_");
+		for (EntityAttribute ea : deps) {
+			String depValue = ea.getValueString();
+			if (depValue != null) {
+				String[] codeArray = cleanUpAttributeValue(depValue).split(",");
+				for (String code : codeArray) {
+					if (code.equals(attributeCode)) {
+						ret.add(ea.getAttributeCode().substring("DEP_".length()));
+					}
+				}
+			}
+		}
+		return ret;
+	}
+
 	public Boolean answerValidForDEF(Answer answer) 
 	{
 		String targetCode = answer.getTargetCode();
