@@ -3085,9 +3085,11 @@ public class BaseEntityUtils implements Serializable {
 		// NOTE: A BIT HACKY HERE WITH THE ANSWERS, BUT OH WELL - Jasper (4/08/2021)
 		// Need to ensure dependencies take into account the incoming answers from processAnswers.
 		// So filter to find only the answers we care about.
-		answers = answers.stream()
-			.filter(item -> (item.getTargetCode().equals(targetBe.getCode()) && item.getAttributeCode().equals(attributeCode)))
-			.collect(Collectors.toList());
+		if (answers != null) {
+			answers = answers.stream()
+				.filter(item -> (item.getTargetCode().equals(targetBe.getCode()) && item.getAttributeCode().equals(attributeCode)))
+				.collect(Collectors.toList());
+		}
 
 		// Check if attribute code exists as a DEP
 		Optional<EntityAttribute> depAtt = defBe.findEntityAttribute("DEP_" + attributeCode);
@@ -3096,10 +3098,12 @@ public class BaseEntityUtils implements Serializable {
 			if (depValue != null) {
 				String[] codeArray = cleanUpAttributeValue(depValue).split(",");
 				for (String code : codeArray) {
-					// Find any deps in answers that aren't empty
-					Boolean foundInAnswers = answers.stream().anyMatch(item -> (item.getAttributeCode().equals(code) && !item.getValue().toString().isEmpty()));
-					if (foundInAnswers) {
-						continue;
+					if (answers != null) {
+						// Find any deps in answers that aren't empty
+						Boolean foundInAnswers = answers.stream().anyMatch(item -> (item.getAttributeCode().equals(code) && !item.getValue().toString().isEmpty()));
+						if (foundInAnswers) {
+							continue;
+						}
 					}
 					Object value = targetBe.getValue(code, null);
 					if (value == null || value.toString().isEmpty()) {
