@@ -100,7 +100,7 @@ public class MergeUtil {
 				/* we split the text to merge into 2 components: BE.PRI... becomes [BE, PRI...] */
 				String[] entityArr = mergeText.split("\\.");
 				String keyCode = entityArr[0];
-				System.out.println(keyCode);
+				log.debug(keyCode);
 				
 				if((entityArr.length == 0))
 					return DEFAULT;
@@ -110,7 +110,7 @@ public class MergeUtil {
 					Object value = entitymap.get(keyCode);
 
 					if (value == null) {
-						System.out.println("value is NULL for key " + keyCode);
+						log.info("value is NULL for key " + keyCode);
 					} else {
 						
 						if(value.getClass().equals(BaseEntity.class)) {
@@ -118,10 +118,10 @@ public class MergeUtil {
 							BaseEntity be = (BaseEntity)value;
 
 							String attributeCode = entityArr[1];
-							System.out.println(attributeCode);
+							log.debug(attributeCode);
 							
 							Object attributeValue = be.getValue(attributeCode, null);
-							System.out.println(attributeValue);
+							log.debug(attributeValue);
 
 							Matcher matchFormat = null;
 							if(entityArr != null && entityArr.length > 2) {

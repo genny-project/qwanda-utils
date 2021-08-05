@@ -3107,9 +3107,13 @@ public class BaseEntityUtils implements Serializable {
 				String[] codeArray = cleanUpAttributeValue(depValue).split(",");
 				for (String code : codeArray) {
 					if (answers != null) {
-						// Find any deps in answers that aren't empty
-						Boolean foundInAnswers = answers.stream().anyMatch(item -> (item.getAttributeCode().equals(code) && !item.getValue().toString().isEmpty()));
-						if (foundInAnswers) {
+						// Find any deps in answers that match code
+						List<Answer> matchingAnswers = answers.stream().filter(item -> (item.getAttributeCode().equals(code))).collect(Collectors.toList());
+						// Check if any are being cleared
+						Boolean itemCleared = matchingAnswers.stream().anyMatch(item -> (item.getValue().toString().isEmpty() || item.getValue().toString().equals("[]")));
+						if (itemCleared) {
+							return false;
+						} else if (matchingAnswers.size() > 0) {
 							continue;
 						}
 					}
