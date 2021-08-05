@@ -100,7 +100,7 @@ public class MergeUtil {
 				/* we split the text to merge into 2 components: BE.PRI... becomes [BE, PRI...] */
 				String[] entityArr = mergeText.split("\\.");
 				String keyCode = entityArr[0];
-				System.out.println(keyCode);
+				log.debug(keyCode);
 				
 				if((entityArr.length == 0))
 					return DEFAULT;
@@ -110,7 +110,7 @@ public class MergeUtil {
 					Object value = entitymap.get(keyCode);
 
 					if (value == null) {
-						System.out.println("value is NULL for key " + keyCode);
+						log.info("value is NULL for key " + keyCode);
 					} else {
 						
 						if(value.getClass().equals(BaseEntity.class)) {
@@ -118,10 +118,10 @@ public class MergeUtil {
 							BaseEntity be = (BaseEntity)value;
 
 							String attributeCode = entityArr[1];
-							System.out.println(attributeCode);
+							log.debug(attributeCode);
 							
 							Object attributeValue = be.getValue(attributeCode, null);
-							System.out.println(attributeValue);
+							log.debug(attributeValue);
 
 							Matcher matchFormat = null;
 							if(entityArr != null && entityArr.length > 2) {
@@ -143,7 +143,7 @@ public class MergeUtil {
 								/* 1st component -> BaseEntity code ; 2nd component -> attribute code ; 3rd component -> (date-Format) */
 								if (matchFormat != null && matchFormat.find()) {
 									log.info("This datetime attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
-										return getFormattedDateString((LocalDateTime) attributeValue, matchFormat.group(1));
+										return getFormattedDateTimeString((LocalDateTime) attributeValue, matchFormat.group(1));
 								} else {
 									log.info("This DateTime attribute code ::"+attributeCode+ " needs no formatting");
 									return getBaseEntityAttrValueAsString(be, attributeCode);
@@ -186,6 +186,44 @@ public class MergeUtil {
 		}
 		
 		return DEFAULT;	
+	}
+
+
+	/**
+	 * Check to see if all contexts are present
+	 */
+	public static Boolean contextsArePresent(String mergeStr, Map<String, Object> templateEntityMap) { 
+		
+		/* matching [OBJECT.ATTRIBUTE] patterns */
+		if (mergeStr != null) {
+
+			Matcher match = PATTERN_MATCHER.matcher(mergeStr);
+			Matcher matchVariables = PATTERN_VARIABLE.matcher(mergeStr);
+		
+			if(templateEntityMap != null && templateEntityMap.size() > 0) {
+				
+				while (match.find()) {
+					
+					String mergedText = wordMerge(templateEntityMap, match.group(1));
+					if (mergedText == null || mergedText.isEmpty()) {
+						return false;
+					}			
+				}
+				
+				while(matchVariables.find()) {
+					
+					Object mergedText = templateEntityMap.get(matchVariables.group(1));
+					if (mergedText == null) {
+						return false;
+					}	
+				}
+				
+			}
+
+		} else {
+			log.warn("mergeStr is NULL");
+		}
+		return true;
 	}
 
 	
@@ -301,7 +339,7 @@ public class MergeUtil {
 
 	}
 	
-	public static String getFormattedDateString(LocalDateTime dateToBeFormatted, String format) {
+	public static String getFormattedDateTimeString(LocalDateTime dateToBeFormatted, String format) {
 		if(dateToBeFormatted != null && format != null) {
 			DateTimeFormatter dateformat = DateTimeFormatter.ofPattern(format);
 			return dateToBeFormatted.format(dateformat);
