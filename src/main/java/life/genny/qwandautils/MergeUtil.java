@@ -188,6 +188,44 @@ public class MergeUtil {
 		return DEFAULT;	
 	}
 
+
+	/**
+	 * Check to see if all contexts are present
+	 */
+	public static Boolean contextsArePresent(String mergeStr, Map<String, Object> templateEntityMap) { 
+		
+		/* matching [OBJECT.ATTRIBUTE] patterns */
+		if (mergeStr != null) {
+
+			Matcher match = PATTERN_MATCHER.matcher(mergeStr);
+			Matcher matchVariables = PATTERN_VARIABLE.matcher(mergeStr);
+		
+			if(templateEntityMap != null && templateEntityMap.size() > 0) {
+				
+				while (match.find()) {
+					
+					String mergedText = wordMerge(templateEntityMap, match.group(1));
+					if (mergedText == null || mergedText.isEmpty()) {
+						return false;
+					}			
+				}
+				
+				while(matchVariables.find()) {
+					
+					Object mergedText = templateEntityMap.get(matchVariables.group(1));
+					if (mergedText == null) {
+						return false;
+					}	
+				}
+				
+			}
+
+		} else {
+			log.warn("mergeStr is NULL");
+		}
+		return true;
+	}
+
 	
 	/**
 	 * 
