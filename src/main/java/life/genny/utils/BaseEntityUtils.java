@@ -2995,6 +2995,10 @@ public class BaseEntityUtils implements Serializable {
 				if (prefix == null) {
 					continue;
 				}
+				// LITTLE HACK FOR OHS DOCS, SORRY!
+				if (prefix.equals("DOC") && be.getCode().startsWith("DOC_OHS_")) {
+					continue;
+				}
 				if (be.getCode().startsWith(prefix+"_")) {
 					return defBe;
 				}
