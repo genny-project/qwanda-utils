@@ -2942,8 +2942,45 @@ public class BaseEntityUtils implements Serializable {
 			log.error("be param is NULL");
 			return null;
 		}
+		
+
+		
+		
 		Set<EntityAttribute> newMerge = new HashSet<>();
 		List<EntityAttribute> isAs = be.findPrefixEntityAttributes("PRI_IS_");
+		
+		// remove the non DEF ones
+		/*PRI_IS_DELETED
+		PRI_IS_EXPANDABLE
+		PRI_IS_FULL
+		PRI_IS_INHERITABLE
+		PRI_IS_PHONE (?)
+		PRI_IS_SKILLS*/
+		Iterator<EntityAttribute> i = isAs.iterator();
+		while (i.hasNext()) {
+			EntityAttribute ea = i.next();
+			
+			if (ea.getAttributeCode().startsWith("PRI_IS_APPLIED_") ) 				
+			{
+				i.remove();
+			} else {
+				switch (ea.getAttributeCode()) {
+				case "PRI_IS_DELETED":
+				case "PRI_IS_EXPANDABLE":
+				case "PRI_IS_FULL":
+				case "PRI_IS_INHERITABLE":
+				case "PRI_IS_PHONE":
+				case "PRI_IS SKILLS":
+					log.warn("getDEF -> detected non DEFy attributeCode "+ea.getAttributeCode());
+					i.remove();
+				break;
+				default:
+					
+				}
+			}
+		}
+		
+		
 		if (isAs.size() == 1) {
 			// Easy
 			BaseEntity defBe = RulesUtils.defs.get(be.getRealm())
@@ -2964,7 +3001,6 @@ public class BaseEntityUtils implements Serializable {
 
 			log.error("NO DEF ASSOCIATED WITH be " + be.getCode());
 			return new BaseEntity("ERR_DEF", "No DEF");
-
 		} else {
 			// Create sorted merge code
 			String mergedCode = "DEF_" + isAs.stream().sorted(Comparator.comparing(EntityAttribute::getAttributeCode))
