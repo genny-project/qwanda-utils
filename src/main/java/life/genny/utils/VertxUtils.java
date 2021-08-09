@@ -1076,10 +1076,10 @@ public class VertxUtils {
 
 	static public void sendCmdMsg(BaseEntityUtils beUtils, String msgType, String code, String message, List<String> targetCodes) 
 	{
-		QCmdMessage msg = new QCmdMessage(code, code);
+		QCmdMessage msg = new QCmdMessage(msgType, code);
 		msg.setToken(beUtils.getGennyToken().getToken());
 		msg.setSend(true);  		
-		if (code != null) {
+		if (message != null) {
 			msg.setMessage(message);
 		}
 		if (targetCodes != null) {
