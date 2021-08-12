@@ -64,6 +64,7 @@ public class MergeUtil {
 					
 					Object mergedObject = wordMerge(match.group(1), templateEntityMap);
 					if (mergedObject != null) {
+						log.info("mergedObject = " + mergedObject);
 						mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, mergedObject.toString());
 					} else {
 						mergeStr = mergeStr.replace(REGEX_START + match.group(1) + REGEX_END, "");
@@ -100,7 +101,7 @@ public class MergeUtil {
 				/* we split the text to merge into 2 components: BE.PRI... becomes [BE, PRI...] */
 				String[] entityArr = mergeText.split("\\.");
 				String keyCode = entityArr[0];
-				log.debug(keyCode);
+				log.info(keyCode);
 				
 				if((entityArr.length == 0))
 					return DEFAULT;
@@ -118,10 +119,10 @@ public class MergeUtil {
 							BaseEntity be = (BaseEntity)value;
 
 							String attributeCode = entityArr[1];
-							log.debug(attributeCode);
+							log.info(attributeCode);
 							
 							Object attributeValue = be.getValue(attributeCode, null);
-							log.debug(attributeValue);
+							log.info(attributeValue);
 
 							Matcher matchFormat = null;
 							if (entityArr != null && entityArr.length > 2) {
