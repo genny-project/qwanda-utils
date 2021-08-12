@@ -3164,15 +3164,29 @@ public class BaseEntityUtils implements Serializable {
 		}
 
 		BaseEntity target = this.getBaseEntityByCode(targetCode);
+
+		if (target == null) {
+			log.error("No Target found for code " + targetCode);
+			return false;
+		}
+
 		BaseEntity defBE = this.getDEF(target);
+
+		if (defBE == null) {
+			log.error("No DEF found for target " + target.getCode());
+			return false;
+		}
 
 		List<EntityAttribute> attrs = defBE.findPrefixEntityAttributes("ATT_");
 
-		for (EntityAttribute ea : attrs) {
-			if (attributeCode.equals(ea.getAttributeCode().substring("ATT_".length()))) {
-				return true;
+		if (attrs != null) {
+			for (EntityAttribute ea : attrs) {
+				if (attributeCode.equals(ea.getAttributeCode().substring("ATT_".length()))) {
+					return true;
+				}
 			}
 		}
+
 		log.error("Invalid attribute " + attributeCode + " for " + defBE.getCode());
 		return false;
 	}
