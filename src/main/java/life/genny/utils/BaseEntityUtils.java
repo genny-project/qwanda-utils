@@ -3163,6 +3163,11 @@ public class BaseEntityUtils implements Serializable {
 			return true;
 		}
 
+		// Allow Saving of Mapping Field
+		if (targetCode.startsWith("SAM_") && attributeCode.startsWith("FLD_")) {
+			return true;
+		}
+
 		BaseEntity target = this.getBaseEntityByCode(targetCode);
 
 		if (target == null) {
