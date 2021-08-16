@@ -3165,7 +3165,10 @@ public class BaseEntityUtils implements Serializable {
 
 		BaseEntity target = this.getBaseEntityByCode(targetCode);
 		BaseEntity defBE = this.getDEF(target);
-
+		if (defBE == null) {
+			log.error("Cannot work out DEF "+answer.getTargetCode());
+			return true; // default
+		}
 		List<EntityAttribute> attrs = defBE.findPrefixEntityAttributes("ATT_");
 
 		for (EntityAttribute ea : attrs) {
