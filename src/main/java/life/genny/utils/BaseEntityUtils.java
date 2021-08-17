@@ -2986,6 +2986,9 @@ public class BaseEntityUtils implements Serializable {
 			// Easy
 			BaseEntity defBe = RulesUtils.defs.get(be.getRealm())
 					.get("DEF_" + isAs.get(0).getAttributeCode().substring("PRI_IS_".length()));
+			if (defBe == null) {
+				log.error("No such DEF called "+"DEF_" + isAs.get(0).getAttributeCode().substring("PRI_IS_".length()));
+			}
 			return defBe;
 		} else if (isAs.isEmpty()) {
 			// THIS HANDLES CURRENT BAD BEs
