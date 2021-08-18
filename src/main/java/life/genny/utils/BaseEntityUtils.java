@@ -1551,6 +1551,23 @@ public class BaseEntityUtils implements Serializable {
 		return ret;
 	}
 
+	public Boolean clearCache(final String beCode) { // TODO: Ugly
+		if (this.getGennyToken().hasRole("admin")||this.getGennyToken().hasRole("dev") || this.getGennyToken().hasRole("superuser")) {
+		try {
+			if (beCode != null) {
+				VertxUtils.writeCachedJson(getRealm(), beCode, null,this.getServiceToken().getToken());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		}
+		} else {
+			return false;
+		}
+		return true;
+	}
+
+	
 	public String saveBaseEntity(BaseEntity be) { // TODO: Ugly
 		String ret = null;
 		try {
