@@ -251,11 +251,15 @@ public class BaseEntityUtils implements Serializable {
 						// TODO: check to see if the email exists in the database and keycloak
 						Attribute emailAttribute = RulesUtils.getAttribute("PRI_EMAIL", this.getGennyToken().getToken());
 						item.addAnswer(new Answer(item, item, emailAttribute, email));
+						Attribute usernameAttribute = RulesUtils.getAttribute("PRI_USERNAME", this.getGennyToken().getToken());
+						item.addAnswer(new Answer(item, item, usernameAttribute, email));
 					}
 
 					// Add PRI_UUID
 					Attribute uuidAttribute = RulesUtils.getAttribute("PRI_UUID", this.getGennyToken().getToken());
 					item.addAnswer(new Answer(item, item, uuidAttribute, uuid.toUpperCase()));
+					Attribute keycloakAttribute = RulesUtils.getAttribute("PRI_KEYCLOAK_UUID", this.getGennyToken().getToken());
+					item.addAnswer(new Answer(item, item, keycloakAttribute, uuid.toUpperCase()));
 				} else {
 					log.error("create BE returned NULL for " + code);
 				}
