@@ -16,6 +16,7 @@ import life.genny.qwanda.datatype.DataType;
 import life.genny.qwanda.attribute.Attribute;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
+import life.genny.qwanda.entity.SearchEntity;
 import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.message.*;
 import life.genny.qwandautils.GennyCacheInterface;
@@ -744,6 +745,31 @@ public class VertxUtils {
         writeMsg("events",msg);
         return msg;
     }
+
+	public static List<String> getSearchColumnFilterArray(SearchEntity searchBE)
+	{
+		List<String> attributeFilter = new ArrayList<String>();
+		List<String> assocAttributeFilter = new ArrayList<String>();
+
+		for (EntityAttribute ea : searchBE.getBaseEntityAttributes()) {
+			String attributeCode = ea.getAttributeCode();
+			if (attributeCode.startsWith("COL_") || attributeCode.startsWith("CAL_")) {
+				if (attributeCode.equals("COL_PRI_ADDRESS_FULL")) {
+					attributeFilter.add("PRI_ADDRESS_LATITUDE");
+					attributeFilter.add("PRI_ADDRESS_LONGITUDE");
+				}
+				if (attributeCode.startsWith("COL__")) {
+					String[] splitCode = attributeCode.substring("COL__".length()).split("__");
+					assocAttributeFilter.add(splitCode[0]);
+				} else {
+				attributeFilter.add(attributeCode.substring("COL_".length()));
+				}
+			}
+		}
+		attributeFilter.addAll(assocAttributeFilter);
+		return attributeFilter;
+	}
+
     static public Object privacyFilter(BaseEntity user, Object payload, final String[] filterAttributes) {
         if (payload instanceof QDataBaseEntityMessage) {
             return JsonUtils.toJson(privacyFilter(user, (QDataBaseEntityMessage) payload,
