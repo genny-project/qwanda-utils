@@ -49,7 +49,6 @@ public class RulesUtils {
     static public Map<String, Attribute> attributeMap = new ConcurrentHashMap<String, Attribute>();
     static public QDataAttributeMessage attributesMsg = null;
 
-    static public Map<String,Map<String,BaseEntity>> defs = new ConcurrentHashMap<>();  // realm and DEF lookup
 
     public static String executeJBPMLogger(final String status, final String module, final String topColour,
                                            final String bottomColour) {

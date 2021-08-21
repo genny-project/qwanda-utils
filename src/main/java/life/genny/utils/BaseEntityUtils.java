@@ -144,7 +144,7 @@ public class BaseEntityUtils implements Serializable {
 
 	public BaseEntity create(final String defCode) throws Exception {
 		String localRealm = this.getGennyToken().getRealm();
-		BaseEntity defBE = RulesUtils.defs.get(localRealm).get(defCode);
+		BaseEntity defBE = DefUtils.defs.get(localRealm).get(defCode);
 		return create(defBE);
 	}
 
@@ -2969,7 +2969,7 @@ public class BaseEntityUtils implements Serializable {
 			return null;
 		}
 		String localRealm = this.getGennyToken().getRealm();
-		BaseEntity defBE = RulesUtils.defs.get(localRealm).get(code);
+		BaseEntity defBE = DefUtils.defs.get(localRealm).get(code);
 		return defBE;
 	}
 
@@ -3016,7 +3016,7 @@ public class BaseEntityUtils implements Serializable {
 
 		if (isAs.size() == 1) {
 			// Easy
-			BaseEntity defBe = RulesUtils.defs.get(be.getRealm())
+			BaseEntity defBe = DefUtils.defs.get(be.getRealm())
 					.get("DEF_" + isAs.get(0).getAttributeCode().substring("PRI_IS_".length()));
 			if (defBe == null) {
 				log.error(
@@ -3026,7 +3026,7 @@ public class BaseEntityUtils implements Serializable {
 		} else if (isAs.isEmpty()) {
 			// THIS HANDLES CURRENT BAD BEs
 			// loop through the defs looking for matching prefix
-			for (BaseEntity defBe : RulesUtils.defs.get(this.gennyToken.getRealm()).values()) {
+			for (BaseEntity defBe : DefUtils.defs.get(this.gennyToken.getRealm()).values()) {
 				String prefix = defBe.getValue("PRI_PREFIX", null);
 				if (prefix == null) {
 					continue;
@@ -3054,11 +3054,11 @@ public class BaseEntityUtils implements Serializable {
 				Optional<EntityAttribute> topDog = be.getHighestEA("PRI_IS_");
 				if (topDog.isPresent()) {
 					String topCode = topDog.get().getAttributeCode().substring("PRI_IS_".length());
-					BaseEntity defTopDog = RulesUtils.defs.get(be.getRealm()).get("DEF_" + topCode);
+					BaseEntity defTopDog = DefUtils.defs.get(be.getRealm()).get("DEF_" + topCode);
 					mergedBe = new BaseEntity(mergedCode, mergedCode); // So this combination DEF inherits top dogs name
 					// now copy all the combined DEF eas.
 					for (EntityAttribute isea : isAs) {
-						BaseEntity defEa = RulesUtils.defs.get(be.getRealm())
+						BaseEntity defEa = DefUtils.defs.get(be.getRealm())
 								.get("DEF_" + isea.getAttributeCode().substring("PRI_IS_".length()));
 						if (defEa != null) {
 							for (EntityAttribute ea : defEa.getBaseEntityAttributes()) {
@@ -3074,7 +3074,7 @@ public class BaseEntityUtils implements Serializable {
 							return null;
 						}
 					}
-					RulesUtils.defs.get(be.getRealm()).put(mergedCode, mergedBe);
+					DefUtils.defs.get(be.getRealm()).put(mergedCode, mergedBe);
 					return mergedBe;
 
 				} else {
