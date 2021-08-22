@@ -35,6 +35,9 @@ public class RulesUtils {
             .getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
     static public AsyncMap<String, BaseEntity> baseEntityMap;
+    
+    static public Map<String,Map<String,BaseEntity>> defs = new ConcurrentHashMap<>();  // realm and DEF lookup
+
 
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLUE = "\u001B[34m";
