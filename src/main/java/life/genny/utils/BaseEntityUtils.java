@@ -3017,12 +3017,7 @@ public class BaseEntityUtils implements Serializable {
 			return null;
 		}
 
-<<<<<<< HEAD
 
-
-
-=======
->>>>>>> 8058d86d404f89e5b8be868594899147e3973c25
 		Set<EntityAttribute> newMerge = new HashSet<>();
 		List<EntityAttribute> isAs = be.findPrefixEntityAttributes("PRI_IS_");
 
@@ -3035,12 +3030,10 @@ public class BaseEntityUtils implements Serializable {
 		while (i.hasNext()) {
 			EntityAttribute ea = i.next();
 
-<<<<<<< HEAD
+
 			if (ea.getAttributeCode().startsWith("PRI_IS_APPLIED_") )
 			{
-=======
-			if (ea.getAttributeCode().startsWith("PRI_IS_APPLIED_")) {
->>>>>>> 8058d86d404f89e5b8be868594899147e3973c25
+
 				i.remove();
 			} else {
 				switch (ea.getAttributeCode()) {
@@ -3063,10 +3056,7 @@ public class BaseEntityUtils implements Serializable {
 			}
 		}
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 8058d86d404f89e5b8be868594899147e3973c25
 		if (isAs.size() == 1) {
 			// Easy
 			BaseEntity defBe = RulesUtils.defs.get(be.getRealm())
@@ -3247,12 +3237,10 @@ public class BaseEntityUtils implements Serializable {
 		return ret;
 	}
 
-<<<<<<< HEAD
+
 	public Boolean answerValidForDEF(Answer answer)
 	{
-=======
-	public Boolean answerValidForDEF(Answer answer) {
->>>>>>> 8058d86d404f89e5b8be868594899147e3973c25
+
 		String targetCode = answer.getTargetCode();
 		String attributeCode = answer.getAttributeCode();
 
