@@ -36,7 +36,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-
+import java.time.format.DateTimeFormatter;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
@@ -2726,6 +2726,44 @@ public class BaseEntityUtils implements Serializable {
 		return value;
 	}
 
+	public String extractTenureDates(String tenureStr) {
+		String startDate = null;
+		String endDate = null;
+		JsonObject tenureJson = null;
+		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MMM-yy");
+
+		if (tenureStr != null) {
+			tenureJson = new JsonObject(tenureStr);
+			startDate = (String) tenureJson.getString("startDate");
+			endDate = (String) tenureJson.getString("endDate");
+
+			if (startDate != null) {
+				String[] startDateSplit = startDate.split("T");
+				startDate = startDateSplit[0];
+				startDate = (LocalDate.parse(startDate, dateFormat)).toString();
+			} else {
+				startDate = "";
+				System.out.println("startDate is empty!");
+			}
+
+			if (endDate != null) {
+				String[] endDateSplit = endDate.split("T");
+				endDate = endDateSplit[0];
+				endDate = (LocalDate.parse(endDate, dateFormat)).toString();
+			} else {
+				endDate = "";
+				System.out.println("endDate is empty!");
+			}
+
+			tenureStr = startDate + " - " + endDate;
+			System.out.println("tenureStr:: " + tenureStr);
+		} else {
+			System.out.println("tenureStr is null!");
+		}
+
+		return tenureStr;
+	}
+
 	public void quantumCopy(BaseEntity sourceBE, String sourceAtt, Boolean saveLink, Boolean strip, String userToken,
 			String targetBE, String targetAtt) {
 		try {
@@ -2943,13 +2981,13 @@ public class BaseEntityUtils implements Serializable {
 			log.error("be param is NULL");
 			return null;
 		}
-		
 
-		
-		
+
+
+
 		Set<EntityAttribute> newMerge = new HashSet<>();
 		List<EntityAttribute> isAs = be.findPrefixEntityAttributes("PRI_IS_");
-		
+
 		// remove the non DEF ones
 		/*PRI_IS_DELETED
 		PRI_IS_EXPANDABLE
@@ -2960,8 +2998,8 @@ public class BaseEntityUtils implements Serializable {
 		Iterator<EntityAttribute> i = isAs.iterator();
 		while (i.hasNext()) {
 			EntityAttribute ea = i.next();
-			
-			if (ea.getAttributeCode().startsWith("PRI_IS_APPLIED_") ) 				
+
+			if (ea.getAttributeCode().startsWith("PRI_IS_APPLIED_") )
 			{
 				i.remove();
 			} else {
@@ -2976,12 +3014,12 @@ public class BaseEntityUtils implements Serializable {
 					i.remove();
 				break;
 				default:
-					
+
 				}
 			}
 		}
-		
-		
+
+
 		if (isAs.size() == 1) {
 			// Easy
 			BaseEntity defBe = RulesUtils.defs.get(be.getRealm())
@@ -3057,7 +3095,7 @@ public class BaseEntityUtils implements Serializable {
 
 		return hasDropdown(attributeCode, defBe);
 	}
-	
+
 	public Boolean hasDropdown(final String attributeCode, final BaseEntity defBe) throws Exception {
 		if (!defBe.getCode().startsWith("DEF_")) {
 			log.error("Cannot determine if dropdown exists , Not a DEF! "+defBe.getCode());
@@ -3153,7 +3191,7 @@ public class BaseEntityUtils implements Serializable {
 		return ret;
 	}
 
-	public Boolean answerValidForDEF(Answer answer) 
+	public Boolean answerValidForDEF(Answer answer)
 	{
 		String targetCode = answer.getTargetCode();
 		String attributeCode = answer.getAttributeCode();
