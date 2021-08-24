@@ -3042,10 +3042,16 @@ public class BaseEntityUtils implements Serializable {
 				case "PRI_IS_FULL":
 				case "PRI_IS_INHERITABLE":
 				case "PRI_IS_PHONE":
+				case "PRI_IS_AGENT_PROFILE_GRP":
+				case "PRI_IS_BUYER_PROFILE_GRP":
+				case "PRI_IS_EDU_PROVIDER_STAFF_PROFILE_GRP":
+				case "PRI_IS_REFERRER_PROFILE_GRP":
+				case "PRI_IS_SELLER_PROFILE_GRP":
 				case "PRI_IS SKILLS":
 					log.warn("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
 					i.remove();
 					break;
+				
 				case "PRI_IS_LOGBOOK":
 					log.debug("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
 					i.remove();
