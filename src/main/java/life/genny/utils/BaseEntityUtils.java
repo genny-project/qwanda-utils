@@ -228,7 +228,7 @@ public class BaseEntityUtils implements Serializable {
 			}
 
 		}
-		this.saveBaseEntity(item);
+		this.saveBaseEntity(defBE,item);
 		return item;
 	}
 
@@ -463,6 +463,27 @@ public class BaseEntityUtils implements Serializable {
 
 		return null;
 	}
+	
+	public BaseEntity saveAnswer(BaseEntity defBe,Answer answer) {
+
+		// Filter Non-valid answers using DEF
+		if (answerValidForDEF(defBe,answer)) {
+			BaseEntity ret = addAnswer(answer);
+
+			try {
+				JsonObject json = new JsonObject(JsonUtils.toJson(answer));
+				json.put("token", this.token);
+				log.debug("Saving answer");
+				VertxUtils.eb.write("answer", json);
+				log.debug("Finished saving answer");
+			} catch (NamingException e) {
+				log.error("Error in saving answer through kafka :::: " + e.getMessage());
+			}
+			return ret;
+		}
+
+		return null;
+	}
 
 	public BaseEntity addAnswer(Answer answer) {
 
@@ -544,6 +565,64 @@ public class BaseEntityUtils implements Serializable {
 			}
 		}
 	}
+
+	public void saveAnswers(BaseEntity defBe,List<Answer> answers, final boolean changeEvent) {
+		if (!((answers == null) || (answers.isEmpty()))) {
+
+			if (!changeEvent) {
+				for (Answer answer : answers) {
+					answer.setChangeEvent(false);
+				}
+			}
+
+			// Sort answers into target Baseentitys
+			Map<String, List<Answer>> answersPerTargetCodeMap = answers.stream()
+					.collect(Collectors.groupingBy(Answer::getTargetCode));
+
+			// Filter Non-valid answers using def
+			answers = answers.stream().filter(item -> answerValidForDEF(defBe,item)).collect(Collectors.toList());
+
+			for (String targetCode : answersPerTargetCodeMap.keySet()) {
+				List<Answer> targetAnswers = answersPerTargetCodeMap.get(targetCode);
+				Answer items[] = new Answer[targetAnswers.size()];
+				items = targetAnswers.toArray(items);
+
+				QDataAnswerMessage msg = new QDataAnswerMessage(items);
+				this.updateCachedBaseEntity(targetAnswers);
+
+				if (!VertxUtils.cachedEnabled) { // if not running junit, no need for api
+					// String jsonAnswer = JsonUtils.toJson(msg);
+					// jsonAnswer.replace("\\\"", "\"");
+
+					if (!VertxUtils.cachedEnabled) { // only post if not in junit
+//							QwandaUtils.apiPostEntity(this.qwandaServiceUrl + "/qwanda/answers/bulk", jsonAnswer,
+//									token);
+						for (Answer answer : targetAnswers) {
+							try {
+								JsonObject json = new JsonObject(JsonUtils.toJson(answer));
+								json.put("token", this.token);
+								log.debug("Saving answer");
+								VertxUtils.eb.write("answer", json);
+								log.debug("Finished saving answer");
+							} catch (NamingException e) {
+								log.error("Error in saving answer through kafka :::: " + e.getMessage());
+							}
+
+						}
+					}
+				} else {
+					for (Answer answer : answers) {
+						log.info("Saving Answer :" + answer);
+					}
+				}
+			}
+		}
+	}
+	
+	public void saveAnswers(BaseEntity defBe,List<Answer> answers) {
+		this.saveAnswers(defBe,answers, true);
+	}
+
 
 	public void saveAnswers(List<Answer> answers) {
 		this.saveAnswers(answers, true);
@@ -1612,6 +1691,37 @@ public class BaseEntityUtils implements Serializable {
 		}
 		return ret;
 	}
+	
+	public String saveBaseEntity(BaseEntity defBe,BaseEntity be) { // TODO: Ugly
+		String ret = null;
+		try {
+			if (be != null) {
+				if (!be.hasCode()) {
+					log.error("ERROR! BaseEntity se has no code!");
+				}
+				if (be.getId() == null) {
+					BaseEntity existing = VertxUtils.readFromDDT(getRealm(), be.getCode(), this.token);
+					if (existing != null) {
+						be.setId(existing.getId());
+					}
+				}
+				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be));
+				if (be.getId() != null) {
+					ret = QwandaUtils.apiPutEntity(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
+							this.token);
+
+				} else {
+					ret = QwandaUtils.apiPostEntity(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
+							this.token);
+				}
+				saveBaseEntityAttributes(defBe,be);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		}
+		return ret;
+	}
 
 	public void saveBaseEntityAttributes(BaseEntity be) {
 		if ((be == null) || (be.getCode() == null)) {
@@ -1625,6 +1735,20 @@ public class BaseEntityUtils implements Serializable {
 			answers.add(attributeAnswer);
 		}
 		this.saveAnswers(answers);
+	}
+	
+	public void saveBaseEntityAttributes(BaseEntity defBe,BaseEntity be) {
+		if ((be == null) || (be.getCode() == null)) {
+			throw new NullPointerException("Cannot save be because be is null or be.getCode is null");
+		}
+		List<Answer> answers = new CopyOnWriteArrayList<Answer>();
+
+		for (EntityAttribute ea : be.getBaseEntityAttributes()) {
+			Answer attributeAnswer = new Answer(be.getCode(), be.getCode(), ea.getAttributeCode(), ea.getAsString());
+			attributeAnswer.setChangeEvent(false);
+			answers.add(attributeAnswer);
+		}
+		this.saveAnswers(defBe,answers);
 	}
 
 	public <T extends BaseEntity> T updateCachedBaseEntity(final Answer answer, Class clazz) {
@@ -3262,6 +3386,39 @@ public class BaseEntityUtils implements Serializable {
 		return ret;
 	}
 
+	public Boolean answerValidForDEF(BaseEntity defBE,Answer answer)
+	{
+
+		String targetCode = answer.getTargetCode();
+		String attributeCode = answer.getAttributeCode();
+
+		// Allow if it is Capability saved to a Role
+		if (targetCode.startsWith("ROL_") && attributeCode.startsWith("PRM_")) {
+			return true;
+		}
+
+		BaseEntity target = this.getBaseEntityByCode(targetCode);
+		if (defBE == null) {
+			log.error("Cannot work out DEF " + answer.getTargetCode());
+			return true; // default
+		}
+
+		// just make use of the faster attribute lookup
+		if ( !defBE.containsEntityAttribute("ATT_"+attributeCode)) {
+			log.error("Invalid attribute " + attributeCode + " for " + defBE.getCode());
+			return false;
+		}
+		return true;
+//		List<EntityAttribute> attrs = defBE.findPrefixEntityAttributes("ATT_");
+		
+//		for (EntityAttribute ea : attrs) {
+//			if (attributeCode.equals(ea.getAttributeCode().substring("ATT_".length()))) {
+//				return true;
+//			}
+//		}
+//		log.error("Invalid attribute " + attributeCode + " for " + defBE.getCode());
+//		return false;
+	}
 
 	public Boolean answerValidForDEF(Answer answer)
 	{
