@@ -2762,38 +2762,57 @@ public class BaseEntityUtils implements Serializable {
 	}
 
 	public String extractTenureDates(String tenureStr) {
+		String prevPeriodStr = tenureStr;
 		String startDate = null;
 		String endDate = null;
 		JsonObject tenureJson = null;
 		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MMM-yy");
+		LocalDate startDateLD = null;
+		LocalDate endDateLD = null;
 
-		if (tenureStr != null) {
-			tenureJson = new JsonObject(tenureStr);
+		if(prevPeriodStr != null) {
+			System.out.println("prevPeriodStr is:: " + prevPeriodStr);
+
+			tenureJson = new JsonObject(prevPeriodStr);
 			startDate = (String) tenureJson.getString("startDate");
 			endDate = (String) tenureJson.getString("endDate");
 
 			if (startDate != null) {
 				String[] startDateSplit = startDate.split("T");
 				startDate = startDateSplit[0];
-				startDate = (LocalDate.parse(startDate, dateFormat)).toString();
+				startDateLD = LocalDate.parse(startDate);
+
+				if (startDateLD != null) {
+					startDate = (String) startDateLD.format(dateFormat);
+				} else {
+					System.out.println("startDateLD is null! ");
+				}
 			} else {
 				startDate = "";
-				System.out.println("startDate is empty!");
+				System.out.println("startDate is null!");
 			}
 
 			if (endDate != null) {
 				String[] endDateSplit = endDate.split("T");
 				endDate = endDateSplit[0];
-				endDate = (LocalDate.parse(endDate, dateFormat)).toString();
+				endDateLD = LocalDate.parse(endDate);
+
+				if (endDateLD != null) {
+					endDate = (String) endDateLD.format(dateFormat);
+				} else {
+					System.out.println("endDateLD is null! ");
+				}
 			} else {
 				endDate = "";
-				System.out.println("endDate is empty!");
+				System.out.println("endDate is null!");
 			}
 
-			tenureStr = startDate + " - " + endDate;
-			System.out.println("tenureStr:: " + tenureStr);
+			prevPeriodStr = startDate + " - " + endDate;
+
+			System.out.println("prevPeriodStr  :: " + prevPeriodStr);
+
 		} else {
-			System.out.println("tenureStr is null!");
+			System.out.println("prevPeriodStr is empty.");
 		}
 
 		return tenureStr;
