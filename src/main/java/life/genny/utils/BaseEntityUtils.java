@@ -2815,7 +2815,7 @@ public class BaseEntityUtils implements Serializable {
 			System.out.println("prevPeriodStr is empty.");
 		}
 
-		return tenureStr;
+		return prevPeriodStr;
 	}
 
 	public void quantumCopy(BaseEntity sourceBE, String sourceAtt, Boolean saveLink, Boolean strip, String userToken,
@@ -3070,7 +3070,7 @@ public class BaseEntityUtils implements Serializable {
 					log.warn("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
 					i.remove();
 					break;
-				
+
 				case "PRI_IS_LOGBOOK":
 					log.debug("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
 					i.remove();
