@@ -3280,15 +3280,22 @@ public class BaseEntityUtils implements Serializable {
 			log.error("Cannot work out DEF " + answer.getTargetCode());
 			return true; // default
 		}
-		List<EntityAttribute> attrs = defBE.findPrefixEntityAttributes("ATT_");
 
-		for (EntityAttribute ea : attrs) {
-			if (attributeCode.equals(ea.getAttributeCode().substring("ATT_".length()))) {
-				return true;
-			}
+		// just make use of the faster attribute lookup
+		if ( !defBE.containsEntityAttribute("ATT_"+attributeCode)) {
+			log.error("Invalid attribute " + attributeCode + " for " + defBE.getCode());
+			return false;
 		}
-		log.error("Invalid attribute " + attributeCode + " for " + defBE.getCode());
-		return false;
+		return true;
+//		List<EntityAttribute> attrs = defBE.findPrefixEntityAttributes("ATT_");
+		
+//		for (EntityAttribute ea : attrs) {
+//			if (attributeCode.equals(ea.getAttributeCode().substring("ATT_".length()))) {
+//				return true;
+//			}
+//		}
+//		log.error("Invalid attribute " + attributeCode + " for " + defBE.getCode());
+//		return false;
 	}
 
 }
