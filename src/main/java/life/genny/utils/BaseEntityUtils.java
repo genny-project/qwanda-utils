@@ -3429,6 +3429,8 @@ public class BaseEntityUtils implements Serializable {
 		// Allow if it is Capability saved to a Role
 		if (targetCode.startsWith("ROL_") && attributeCode.startsWith("PRM_")) {
 			return true;
+		} else if (targetCode.startsWith("SCH_") && ( attributeCode.startsWith("COL_") || attributeCode.startsWith("CAL_") || attributeCode.startsWith("SRT_") || attributeCode.startsWith("ACT_") )) {
+			return true;
 		}
 
 		BaseEntity target = this.getBaseEntityByCode(targetCode);
