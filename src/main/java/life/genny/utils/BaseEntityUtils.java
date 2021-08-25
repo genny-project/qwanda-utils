@@ -3395,7 +3395,7 @@ public class BaseEntityUtils implements Serializable {
 		// Allow if it is Capability saved to a Role
 		if (targetCode.startsWith("ROL_") && attributeCode.startsWith("PRM_")) {
 			return true;
-		} else if (targetCode.startsWith("SCH_") && ( attributeCode.startsWith("COL_") || attributeCode.startsWith("CAL_") || attributeCode.startsWith("SRT_") || attributeCode.startsWith("ACT_") )) {
+		} else if (targetCode.startsWith("SBE_") && ( attributeCode.startsWith("COL_") || attributeCode.startsWith("CAL_") || attributeCode.startsWith("SRT_") || attributeCode.startsWith("ACT_") )) {
 			return true;
 		}
 	//	BaseEntity target = this.getBaseEntityByCode(targetCode);
@@ -3404,9 +3404,10 @@ public class BaseEntityUtils implements Serializable {
 			return true; // default
 		}
 
+		
 		// just make use of the faster attribute lookup
 		if ( !defBE.containsEntityAttribute("ATT_"+attributeCode)) {
-			log.error("Invalid attribute " + attributeCode + " for " + defBE.getCode());
+			log.error("Invalid attribute " + attributeCode + " for " + answer.getTargetCode()+" with def= "+defBE.getCode());
 			return false;
 		}
 		return true;
@@ -3430,7 +3431,7 @@ public class BaseEntityUtils implements Serializable {
 		// Allow if it is Capability saved to a Role
 		if (targetCode.startsWith("ROL_") && attributeCode.startsWith("PRM_")) {
 			return true;
-		} else if (targetCode.startsWith("SCH_") && ( attributeCode.startsWith("COL_") || attributeCode.startsWith("CAL_") || attributeCode.startsWith("SRT_") || attributeCode.startsWith("ACT_") )) {
+		} else if (targetCode.startsWith("SBE_") && ( attributeCode.startsWith("COL_") || attributeCode.startsWith("CAL_") || attributeCode.startsWith("SRT_") || attributeCode.startsWith("ACT_") )) {
 			return true;
 		}
 
@@ -3443,7 +3444,7 @@ public class BaseEntityUtils implements Serializable {
 
 		// just make use of the faster attribute lookup
 		if ( !defBE.containsEntityAttribute("ATT_"+attributeCode)) {
-			log.error("Invalid attribute " + attributeCode + " for " + defBE.getCode());
+			log.error("Invalid attribute " + attributeCode + " for " + targetCode+" with def = "+ defBE.getCode());
 			return false;
 		}
 		return true;
