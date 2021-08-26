@@ -69,7 +69,8 @@ public class MessageUtils {
 			Map<String, String> contextMap, String[] recipientArray, String token) {
 
 
-		QMessageGennyMSG msgMessage = new QMessageGennyMSG("MSG_MESSAGE", messageType, templateCode, contextMap,
+		QBaseMSGMessageType[] messageTypeArr = { messageType };
+		QMessageGennyMSG msgMessage = new QMessageGennyMSG("MSG_MESSAGE", messageTypeArr, templateCode, contextMap,
 				recipientArray);
 		msgMessage.setToken(token);
 
@@ -86,7 +87,8 @@ public class MessageUtils {
 			String token) {
 
 
-		QMessageGennyMSG msgMessage = new QMessageGennyMSG("MSG_MESSAGE", messageType, templateCode, contextMap,
+		QBaseMSGMessageType[] messageTypeArr = { messageType };
+		QMessageGennyMSG msgMessage = new QMessageGennyMSG("MSG_MESSAGE", messageTypeArr, templateCode, contextMap,
 				recipientArray, attachmentList);
 		msgMessage.setToken(token);
 
@@ -133,7 +135,8 @@ public class MessageUtils {
 	public static QMessageGennyMSG prepareMessageTemplateForDirectRecipients(String templateCode, QBaseMSGMessageType messageType,
 			Map<String, String> contextMap, String[] to, String token) {
 
-		QMessageGennyMSG msgMessage = new QMessageGennyMSG(messageType.name(), templateCode, messageType, contextMap, to);
+		QBaseMSGMessageType[] messageTypeArr = { messageType };
+		QMessageGennyMSG msgMessage = new QMessageGennyMSG(messageType.name(), templateCode, messageTypeArr, contextMap, to);
 		msgMessage.setToken(token);
 
 		log.info("------------------------------------------------------------------------");
@@ -150,7 +153,8 @@ public class MessageUtils {
 			Map<String, String> contextMap, String[] to, List<QBaseMSGAttachment> attachmentList,
 			String token) {
 
-		QMessageGennyMSG msgMessage = new QMessageGennyMSG(messageType.name(), templateCode, messageType, contextMap, attachmentList, to);
+		QBaseMSGMessageType[] messageTypeArr = { messageType };
+		QMessageGennyMSG msgMessage = new QMessageGennyMSG(messageType.name(), templateCode, messageTypeArr, contextMap, attachmentList, to);
 		msgMessage.setToken(token);
 
 		log.info("------------------------------------------------------------------------");
