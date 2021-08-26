@@ -29,6 +29,8 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.core.MediaType;
+import java.security.SecureRandom;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
@@ -65,11 +67,14 @@ import io.vertx.core.json.JsonObject;
 import life.genny.models.GennyToken;
 import life.genny.qwanda.attribute.AttributeLink;
 import life.genny.qwanda.entity.BaseEntity;
+import life.genny.qwanda.Answer;
 import life.genny.qwanda.entity.Group;
 import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.message.QDataRegisterMessage;
 import life.genny.qwandautils.KeycloakService;
+import life.genny.qwandautils.ANSIColour;
+import life.genny.utils.BaseEntityUtils;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 
@@ -820,6 +825,69 @@ public class KeycloakUtils {
     	return responseCode;
 	}
 	
+	public static String initialiseUser(BaseEntityUtils beUtils, BaseEntity userBE)
+	/**
+	 * Initialising User in keycloak and setup random password
+	 **/
+	{
+		if (userBE == null) {
+			ANSIColour.logError("User BE is NULL");
+			return null;
+		}
+
+		String firstname = userBE.getValue("PRI_FIRSTNAME",null);
+		if (firstname == null) {
+			ANSIColour.logError("No PRI_FIRSTNAME found for user " + userBE.getCode());
+			return null;
+		}
+
+		String lastname = userBE.getValue("PRI_LASTNAME",null);
+		if (lastname == null) {
+			ANSIColour.logError("No PRI_LASTNAME found for user " + userBE.getCode());
+			return null;
+		}
+
+		String email = userBE.getValue("PRI_EMAIL",null);
+		if (email == null) {
+			ANSIColour.logError("No PRI_EMAIL found for user " + userBE.getCode());
+			return null;
+		}
+
+		// Update The users first and last name, also fetch userID
+		String userId = null;
+		try {
+			userId = updateUser(userBE.getCode(), beUtils.getServiceToken().getToken(), beUtils.getServiceToken().getRealm(), email, firstname, lastname,  email, null, "user", "users");
+		} catch (IOException e) {
+			ANSIColour.logError(e.getStackTrace().toString());
+			return null;
+		}
+
+		// Null Check the UserId
+		if (userId == null) {
+			ANSIColour.logError("User ID is NULL");
+			return null;
+		}
+
+		// Ensure ID is saved to user BE
+		userId = userId.toUpperCase();
+		beUtils.saveAnswer(new Answer(beUtils.getServiceToken().getUserCode(), userBE.getCode(), "PRI_UUID", userId));
+		log.info("Created User "+email+" in Keycloak with id = " + userId);
+
+		/* Generate a random 15 char password */
+		char[] allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGJKLMNPRSTUVWXYZ0123456789^$?!@#%&".toCharArray();
+		String newPassword = new SecureRandom().ints(15, 0, allowed.length).mapToObj(i -> String.valueOf(allowed[i])).collect(Collectors.joining());
+
+		// Update The Keycloak Password
+		try {
+			setPassword(beUtils.getServiceToken().getToken(), beUtils.getServiceToken().getRealm(), userId, newPassword, true);
+		} catch (IOException e) {
+			ANSIColour.logError(e.getStackTrace().toString());
+			return null;
+		}
+
+		return newPassword;
+	}
+
 	public String createEncryptedPassword(String key, final String customercode, final String password) {
 		String newkey = null;
 		if (key.length()>16) {
