@@ -194,6 +194,11 @@ public class BaseEntityUtils implements Serializable {
 		}
 
 		if (item != null) {
+			// Set PRI_CODE for the entity
+			Attribute codeAttr = RulesUtils.getAttribute("PRI_CODE", this.getGennyToken().getToken());
+			EntityAttribute codeEA = new EntityAttribute(item, codeAttr, 1.0, item.getCode());
+			item.addAttribute(codeEA);
+
 			// Establish all mandatory base entity attributes
 			for (EntityAttribute ea : defBE.getBaseEntityAttributes()) {
 				if (ea.getAttribute().getCode().startsWith("ATT_")) {
