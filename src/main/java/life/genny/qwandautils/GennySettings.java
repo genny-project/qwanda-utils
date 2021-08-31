@@ -107,6 +107,7 @@ public class GennySettings {
     public static final String keycloakUrl = System.getenv("KEYCLOAKURL") != null ? System.getenv("KEYCLOAKURL") : "http://keycloak.genny.life";
     public static final Integer defaultPageSize  = System.getenv("DEFAULT_PAGE_SIZE")==null?10:(Integer.parseInt(System.getenv("DEFAULT_PAGE_SIZE")));
     public static final Integer defaultDropDownPageSize  = System.getenv("DEFAULT_DROPDOWN_PAGE_SIZE")==null?25:(Integer.parseInt(System.getenv("DEFAULT_DROPDOWN_PAGE_SIZE")));
+    public static final Integer defaultBucketSize  = System.getenv("DEFAULT_BUCKET_SIZE")==null?8:(Integer.parseInt(System.getenv("DEFAULT_BUCKET_SIZE")));
     
     public static final String emailSmtpHost = System.getenv("EMAIL_SMTP_HOST") != null ? System.getenv("EMAIL_SMTP_HOST") : "http://keycloak.genny.life";
     public static final String emailSmtpUser = System.getenv("EMAIL_SMTP_USER") != null ? System.getenv("EMAIL_SMTP_USER") : "http://keycloak.genny.life";
