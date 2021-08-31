@@ -23,6 +23,8 @@ import life.genny.qwandautils.GennyCacheInterface;
 import life.genny.qwandautils.GennySettings;
 import life.genny.qwandautils.JsonUtils;
 import life.genny.qwandautils.QwandaUtils;
+import life.genny.qwandautils.ANSIColour;
+import life.genny.utils.BaseEntityUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.ClientProtocolException;
@@ -1135,5 +1137,56 @@ public class VertxUtils {
 		msg.setToken(beUtils.getGennyToken().getToken());
 		msg.setReplace(true);
 		VertxUtils.writeMsg("webcmds", JsonUtils.toJson(msg));
+	}
+
+	/**
+	 * Used to send on-the-fly messages such as SMS or Toast
+	 * */
+	public static void sendMessage(BaseEntityUtils beUtils, QBaseMSGMessageType type, String recipient, String body, String style)
+	{
+		QMessageGennyMSG msg = new QMessageGennyMSG(type);
+		if (body != null) {
+			msg.addContext("BODY", body);
+		}
+		if (style != null) {
+			msg.addContext("STYLE", style);
+		}
+		msg.addRecipient(recipient);
+		sendMessage(beUtils, msg);
+	}
+
+	/**
+	 * Used to send a message to the messages service.
+	 * */
+	public static void sendMessage(BaseEntityUtils beUtils, QMessageGennyMSG msg) 
+	{
+		// Check if template code is present
+		if (msg.getTemplateCode() == null) {
+			log.warn(ANSIColour.YELLOW+"Message does not contain a Template Code!!"+ANSIColour.RESET);
+		} else {
+			// Make sure template exists
+			BaseEntity templateBE = beUtils.getBaseEntityByCode(msg.getTemplateCode());
+
+			if (templateBE == null) {
+				log.error(ANSIColour.RED+"Message template " + msg.getTemplateCode() + " does not exist!!"+ANSIColour.RESET);
+				return;
+			}
+
+			// Find any required contexts for template
+			List<String> contextList = beUtils.getBaseEntityCodeArrayFromLNKAttr(templateBE, "PRI_CONTEXT_LIST");
+
+			if (contextList != null) {
+				// Check that all required contexts are present
+				boolean containsAllContexts = contextList.stream().allMatch(item -> msg.getMessageContextMap().containsKey(item));
+
+				if (!containsAllContexts) {
+					log.error(ANSIColour.RED+"Msg does not contain all required contexts : " + contextList.toString() + ANSIColour.RESET);
+					return;
+				}
+			}
+		}
+		// Set token and send
+		msg.setToken(beUtils.getGennyToken().getToken());
+		VertxUtils.writeMsg("messages", msg);
 	}
 }
