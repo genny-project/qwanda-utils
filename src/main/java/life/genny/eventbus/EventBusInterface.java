@@ -211,8 +211,8 @@ public interface EventBusInterface {
 //				com.google.gson.JsonObject event = parser.parse(json).getAsJsonObject();
 //				event.addProperty("eventbus", "WRITE");
                 json = event.toString();
-                QwandaUtils.apiPostEntity(GennySettings.bridgeServiceUrl + "?channel=" + channel, json,
-                        event.getString("token"));
+                QwandaUtils.apiPostEntity2(GennySettings.bridgeServiceUrl + "?channel=" + channel, json,
+                        event.getString("token"), null);
             } catch (Exception e) {
                 String json2 = msg.toString();
                 log.error("Error in posting message to bridge eventbus:" + channel + ":" + msg);

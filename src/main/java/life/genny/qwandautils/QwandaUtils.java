@@ -1879,6 +1879,7 @@ public class QwandaUtils {
 		HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().POST(requestBody).uri(URI.create(postUrl))
 				.setHeader("Content-Type", "application/json")
 				.setHeader("Authorization", "Bearer " + authToken);
+
 		
 		if (postUrl.contains("genny.life")) { // Hack for local server not having http2
 			requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);

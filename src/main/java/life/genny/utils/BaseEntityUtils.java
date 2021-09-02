@@ -1834,7 +1834,12 @@ public class BaseEntityUtils implements Serializable {
 				// Add an attribute if not already there
 				try {
 					if (answer.getAttribute() == null) {
-						Attribute attribute = RulesUtils.getAttribute(answer.getAttributeCode(), token);
+						Attribute attribute = null;
+						if (answer.getAttributeCode().startsWith("COL_")||answer.getAttributeCode().startsWith("CAL_")||answer.getAttributeCode().startsWith("SRT_")){
+							attribute = new AttributeText(answer.getAttributeCode(), answer.getValue());
+						}else{
+							attribute = RulesUtils.getAttribute(answer.getAttributeCode(), token);
+						}
 
 						if (attribute != null) {
 							answer.setAttribute(attribute);
