@@ -475,8 +475,8 @@ public class KeycloakUtils {
 //	}
 	
 	// This is the one called from rules to create a keycloak user
-	public static String updateUser(String keycloakUUID,String token, String realm, String newUsername,
-			String newFirstname, String newLastname, String newEmail, String password,String newRealmRoles, String newGroupRoles)
+	public static String updateUser(String keycloakUUID, String token, String realm, String newUsername,
+			String newFirstname, String newLastname, String newEmail, String password, String newRealmRoles, String newGroupRoles)
 			throws IOException {
 		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
 		keycloakUUID = keycloakUUID.toLowerCase();
@@ -824,10 +824,53 @@ public class KeycloakUtils {
 		}
     	return responseCode;
 	}
-	
-	public static String initialiseUser(BaseEntityUtils beUtils, BaseEntity userBE)
+
+	public static void updateUserDetails(BaseEntityUtils beUtils, BaseEntity userBE)
 	/**
 	 * Initialising User in keycloak and setup random password
+	 **/
+	{
+		if (userBE == null) {
+			ANSIColour.logError("User BE is NULL");
+			return;
+		}
+
+		String uuid = userBE.getValue("PRI_UUID",null);
+		if (uuid == null) {
+			ANSIColour.logError("No PRI_UUID found for user " + userBE.getCode());
+			return;
+		}
+
+		String firstname = userBE.getValue("PRI_FIRSTNAME",null);
+		if (firstname == null) {
+			ANSIColour.logError("No PRI_FIRSTNAME found for user " + userBE.getCode());
+			return;
+		}
+
+		String lastname = userBE.getValue("PRI_LASTNAME",null);
+		if (lastname == null) {
+			ANSIColour.logError("No PRI_LASTNAME found for user " + userBE.getCode());
+			return;
+		}
+
+		String email = userBE.getValue("PRI_EMAIL",null);
+		if (email == null) {
+			ANSIColour.logError("No PRI_EMAIL found for user " + userBE.getCode());
+			return;
+		}
+
+		// Update The users email, first and last name, also fetch userID
+		try {
+			updateUser(uuid, beUtils.getServiceToken().getToken(), beUtils.getServiceToken().getRealm(), email, firstname, lastname,  email, null, "user", "users");
+		} catch (IOException e) {
+			ANSIColour.logError(e.getStackTrace().toString());
+		}
+		return;
+	}
+	
+	public static String generateRandomPassword(BaseEntityUtils beUtils, BaseEntity userBE)
+	/**
+	 * Setup a random password in keycloak
 	 **/
 	{
 		if (userBE == null) {
@@ -835,43 +878,11 @@ public class KeycloakUtils {
 			return null;
 		}
 
-		String firstname = userBE.getValue("PRI_FIRSTNAME",null);
-		if (firstname == null) {
-			ANSIColour.logError("No PRI_FIRSTNAME found for user " + userBE.getCode());
+		String uuid = userBE.getValue("PRI_UUID",null);
+		if (uuid == null) {
+			ANSIColour.logError("No PRI_UUID found for user " + userBE.getCode());
 			return null;
 		}
-
-		String lastname = userBE.getValue("PRI_LASTNAME",null);
-		if (lastname == null) {
-			ANSIColour.logError("No PRI_LASTNAME found for user " + userBE.getCode());
-			return null;
-		}
-
-		String email = userBE.getValue("PRI_EMAIL",null);
-		if (email == null) {
-			ANSIColour.logError("No PRI_EMAIL found for user " + userBE.getCode());
-			return null;
-		}
-
-		// Update The users first and last name, also fetch userID
-		String userId = null;
-		try {
-			userId = updateUser(userBE.getCode(), beUtils.getServiceToken().getToken(), beUtils.getServiceToken().getRealm(), email, firstname, lastname,  email, null, "user", "users");
-		} catch (IOException e) {
-			ANSIColour.logError(e.getStackTrace().toString());
-			return null;
-		}
-
-		// Null Check the UserId
-		if (userId == null) {
-			ANSIColour.logError("User ID is NULL");
-			return null;
-		}
-
-		// Ensure ID is saved to user BE
-		userId = userId.toUpperCase();
-		beUtils.saveAnswer(new Answer(beUtils.getServiceToken().getUserCode(), userBE.getCode(), "PRI_UUID", userId));
-		log.info("Created User "+email+" in Keycloak with id = " + userId);
 
 		/* Generate a random 15 char password */
 		char[] allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGJKLMNPRSTUVWXYZ0123456789^$?!@#%&".toCharArray();
@@ -879,7 +890,7 @@ public class KeycloakUtils {
 
 		// Update The Keycloak Password
 		try {
-			setPassword(beUtils.getServiceToken().getToken(), beUtils.getServiceToken().getRealm(), userId, newPassword, true);
+			setPassword(beUtils.getServiceToken().getToken(), beUtils.getServiceToken().getRealm(), uuid, newPassword, true);
 		} catch (IOException e) {
 			ANSIColour.logError(e.getStackTrace().toString());
 			return null;
@@ -1089,6 +1100,22 @@ public class KeycloakUtils {
 		log.info("Get " + results.size() + " keycloak users");
 		return userCodeUUIDMapping;
 	}
+
+	public static String getImpersonatedToken(String keycloakUrl, String realm, BaseEntity project, BaseEntity userBE, String exchangedToken) throws IOException {
+
+		if (userBE == null) {
+			ANSIColour.logError("User BE is NULL");
+			return null;
+		}
+
+		String email = userBE.getValue("PRI_EMAIL",null);
+		if (email == null) {
+			ANSIColour.logError("No PRI_EMAIL found for user " + userBE.getCode());
+			return null;
+		}
+
+		return getImpersonatedToken(keycloakUrl, realm, project, email, exchangedToken);
+	}
 	
 	public static String getImpersonatedToken(String keycloakUrl, String realm, BaseEntity project, String uuid, String exchangedToken) throws IOException {
 
@@ -1097,76 +1124,8 @@ public class KeycloakUtils {
 		JsonObject credentials = json.getJsonObject("credentials");
 		String secret = credentials.getString("secret");
 		
-		return  getImpersonatedToken(keycloakUrl, realm, realm, secret, uuid, exchangedToken);
+		return getImpersonatedToken(keycloakUrl, realm, realm, secret, uuid, exchangedToken);
 		
-//      	HttpClient httpClient = 
-//      			
-//      			
-//      			
-//      			
-//      			
-//      			
-//      			new DefaultHttpClient();
-//
-//    		try {
-//    			ArrayList<NameValuePair> postParameters;											
-//
-//       			HttpPost post = new HttpPost(keycloakUrl + "/auth/admin/realms/" + realm + "/users/"+uuid+"/impersonation");
-//
-//
-//       			post.addHeader("Content-Type", "application/json");
-//    			post.addHeader("Authorization", "Bearer " + exchangedToken);
-//
-//    			
-//    			HttpResponse response = httpClient.execute(post);
-//
-//    			int statusCode = response.getStatusLine().getStatusCode();
-//    			log.info("KeycloakUtils: StatusCode: " + statusCode);
-//
-//    			HttpEntity entity = response.getEntity();
-//    			
-//    			String content = null;
-//    			if (statusCode != 200) {
-//    				content = getContent(entity);
-//    				throw new IOException("" + statusCode);
-//    			}
-//    			if (entity == null) {
-//    				throw new IOException("Null Entity");
-//    			} else {
-//    				content = getContent(entity);
-//    				Header[] cookies = response.getHeaders("Set-Cookie");
-//    				log.info("KeycloakUtils: getImpersonationToken before cookies");
-//    				if (cookies.length>0) {
-//    					log.info("KeycloakUtils: getImpersonationToken cookies > 0");
-//    					for (Header cookie : cookies) {
-//    						String value = cookie.getValue();
-//    						log.info("KeycloakUtils: getImpersonationToken cookie="+value);
-//    						if (value.startsWith("KEYCLOAK_IDENTITY=")) {
-//    							if (!value.startsWith("KEYCLOAK_IDENTITY=;")) {
-//    								String token = cookie.getValue();
-//    						
-//    								token = token.substring("KEYCLOAK_IDENTITY=".length());
-//    								log.info(token);
-//    								//JsonObject jsonToken = new JsonObject(token);
-//    								String[] splitStr = token.split(";");//jsonToken.getString("userTokenStr");
-//    								String rawToken = splitStr[0];
-//    								log.info("RAWTOKEN="+rawToken);
-//    								return rawToken;
-//    							}
-//    						}
-//    					}
-//    				}
-//
-//    			}
-//    			
-////    				
-////    				System.out.println(content);
-//    		} catch (Exception ee) {
-//    		
-//    		} finally {
-//    			httpClient.getConnectionManager().shutdown();
-//    		}
-//    		return null;
 	}
 	
 	public static String getImpersonatedToken(String keycloakUrl, String realm, String clientId, String secret, String username, String exchangedToken) throws IOException {
