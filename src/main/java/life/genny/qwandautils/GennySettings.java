@@ -59,6 +59,9 @@ public class GennySettings {
 	public final static Boolean skipGithubInStartup = "TRUE".equalsIgnoreCase(System.getenv("SKIP_GITHUB_IN_STARTUP"));
 	public final static String  githubLayoutsUrl = System.getenv("GITHUB_LAYOUTS_URL") == null ? ("http://github.com/genny-project/layouts.git")
 			: System.getenv("GITHUB_LAYOUTS_URL");
+	// Load google sheets and process it during qwanda service startup
+	public final static Boolean disableBatchLoading = System.getenv("DISABLE_BATCH_LOADING") !=null ? "TRUE".equalsIgnoreCase(System.getenv("DISABLE_BATCH_LOADING")):false;
+
 	public final static Boolean isTestServer = "TRUE".equalsIgnoreCase(System.getenv("IS_TEST_SERVER"));
 
 	public final static Boolean logWorkflows = System.getenv("LOG_WORKFLOWS") !=null ? "TRUE".equalsIgnoreCase(System.getenv("LOG_WORKFLOWS")):true;	
