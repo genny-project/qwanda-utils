@@ -729,12 +729,13 @@ public class KeycloakUtils {
 	    
 	    try {
 	    	String encodedUsername = encodeValue(username);
-	      final HttpGet get =
-	          new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm + "/users?username=" + encodedUsername);
+	    	String uri = keycloakUrl + "/auth/admin/realms/" + realm + "/users?username=" + encodedUsername;
+	      final HttpGet get = new HttpGet(uri);
 	      get.addHeader("Authorization", "Bearer " + token);
 	      try {
 	        final HttpResponse response = client.execute(get);
 	        if (response.getStatusLine().getStatusCode() != 200) {
+	          log.error("Failed to get user from Keycloak, url:" + uri + ", response code:" + response.getStatusLine().getStatusCode());
 	          throw new IOException();
 	        }
 	        final HttpEntity entity = response.getEntity();
