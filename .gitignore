@@ -24,3 +24,4 @@ src/main/resources/rebel.xml
 ./.project
 **/bin/*
 bin
+*.iml
