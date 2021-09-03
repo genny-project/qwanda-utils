@@ -1100,13 +1100,19 @@ public class KeycloakUtils {
 			return null;
 		}
 
-		String email = userBE.getValue("PRI_EMAIL",null);
-		if (email == null) {
-			ANSIColour.logError("No PRI_EMAIL found for user " + userBE.getCode());
+		// String email = userBE.getValue("PRI_EMAIL", null);
+		// if (email == null) {
+		// 	ANSIColour.logError("No PRI_EMAIL found for user " + userBE.getCode());
+		// 	return null;
+		// }
+
+		String uuid = userBE.getValue("PRI_UUID", null);
+		if (uuid == null) {
+			ANSIColour.logError("No PRI_UUID found for user " + userBE.getCode());
 			return null;
 		}
 
-		return getImpersonatedToken(keycloakUrl, realm, project, email, exchangedToken);
+		return getImpersonatedToken(keycloakUrl, realm, project, uuid, exchangedToken);
 	}
 	
 	public static String getImpersonatedToken(String keycloakUrl, String realm, BaseEntity project, String uuid, String exchangedToken) throws IOException {
