@@ -62,6 +62,7 @@ import life.genny.qwandautils.JsonUtils;
 import life.genny.qwandautils.QwandaUtils;
 import life.genny.utils.Layout.LayoutUtils;
 import life.genny.qwandautils.KeycloakUtils;
+import life.genny.qwandautils.ANSIColour;
 
 public class BaseEntityUtils implements Serializable {
 
@@ -3396,45 +3397,20 @@ public class BaseEntityUtils implements Serializable {
 		return ret;
 	}
 
-	public Boolean answerValidForDEF(BaseEntity defBE,Answer answer)
-	{
-
-		String targetCode = answer.getTargetCode();
-		String attributeCode = answer.getAttributeCode();
-
-		// Allow if it is Capability saved to a Role
-		if (targetCode.startsWith("ROL_") && attributeCode.startsWith("PRM_")) {
-			return true;
-		} else if (targetCode.startsWith("SBE_") && ( attributeCode.startsWith("COL_") || attributeCode.startsWith("CAL_") || attributeCode.startsWith("SRT_") || attributeCode.startsWith("ACT_") )) {
-			return true;
-		}
-	//	BaseEntity target = this.getBaseEntityByCode(targetCode);
-		if (defBE == null) {
-			log.error("Cannot work out DEF " + answer.getTargetCode());
-			return true; // default
-		}
-
-		
-		// just make use of the faster attribute lookup
-		if ( !defBE.containsEntityAttribute("ATT_"+attributeCode)) {
-			log.error("Invalid attribute " + attributeCode + " for " + answer.getTargetCode()+" with def= "+defBE.getCode());
-			return false;
-		}
-		return true;
-//		List<EntityAttribute> attrs = defBE.findPrefixEntityAttributes("ATT_");
-		
-//		for (EntityAttribute ea : attrs) {
-//			if (attributeCode.equals(ea.getAttributeCode().substring("ATT_".length()))) {
-//				return true;
-//			}
-//		}
-//		log.error("Invalid attribute " + attributeCode + " for " + defBE.getCode());
-//		return false;
-	}
-
 	public Boolean answerValidForDEF(Answer answer)
 	{
+		BaseEntity target = this.getBaseEntityByCode(answer.getTargetCode());
+		BaseEntity defBE = this.getDEF(target);
 
+		return answerValidForDEF(defBE, answer);
+	}
+
+	/**
+	 * A function to determine the whether or not an attribute
+	 * is allowed to be saved to a BaseEntity.
+	 **/
+	public Boolean answerValidForDEF(BaseEntity defBE, Answer answer)
+	{
 		String targetCode = answer.getTargetCode();
 		String attributeCode = answer.getAttributeCode();
 
@@ -3445,28 +3421,18 @@ public class BaseEntityUtils implements Serializable {
 			return true;
 		}
 
-		BaseEntity target = this.getBaseEntityByCode(targetCode);
-		BaseEntity defBE = this.getDEF(target);
 		if (defBE == null) {
 			log.error("Cannot work out DEF " + answer.getTargetCode());
-			return true; // default
+			return true;
 		}
-
+		
 		// just make use of the faster attribute lookup
 		if ( !defBE.containsEntityAttribute("ATT_"+attributeCode)) {
-			log.error("Invalid attribute " + attributeCode + " for " + targetCode+" with def = "+ defBE.getCode());
+			log.error(ANSIColour.RED+"Invalid attribute " + attributeCode + " for " + answer.getTargetCode()+" with def= "+defBE.getCode()+ANSIColour.RESET);
 			return false;
 		}
 		return true;
-//		List<EntityAttribute> attrs = defBE.findPrefixEntityAttributes("ATT_");
-		
-//		for (EntityAttribute ea : attrs) {
-//			if (attributeCode.equals(ea.getAttributeCode().substring("ATT_".length()))) {
-//				return true;
-//			}
-//		}
-//		log.error("Invalid attribute " + attributeCode + " for " + defBE.getCode());
-//		return false;
 	}
+
 
 }

@@ -196,10 +196,15 @@ public class MessageUtils {
 		return url;
 	}
 
+	public static void sendMessage(BaseEntityUtils beUtils, QBaseMSGMessageType type, BaseEntity recipient, String body, String style)
+	{
+		sendMessage(beUtils, type, recipient.getCode(), body, style);
+	}
+	
+	public static void sendMessage(BaseEntityUtils beUtils, QBaseMSGMessageType type, String recipient, String body, String style)
 	/**
 	 * Used to send on-the-fly messages such as SMS or Toast
 	 * */
-	public static void sendMessage(BaseEntityUtils beUtils, QBaseMSGMessageType type, String recipient, String body, String style)
 	{
 		QMessageGennyMSG msg = new QMessageGennyMSG(type);
 		if (body != null) {
