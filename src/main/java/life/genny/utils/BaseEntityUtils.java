@@ -3170,6 +3170,9 @@ public class BaseEntityUtils implements Serializable {
 			return null;
 		}
 
+		if (be.getCode().startsWith("DEF_")) {
+			return be;
+		}
 
 		Set<EntityAttribute> newMerge = new HashSet<>();
 		List<EntityAttribute> isAs = be.findPrefixEntityAttributes("PRI_IS_");
