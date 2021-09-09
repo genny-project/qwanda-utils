@@ -1740,6 +1740,11 @@ public class QwandaUtils {
 			count--;
 		}
 //	        System.out.println(result);
+// can't find
+		if (result.equals("<html><head><title>Error</title></head><body>Not Found</body></html>")) {
+			log.error("Can't find result for request:" + url + ", set returned result to NULL");
+			result = null;
+		}
 
 		return result;
 //		
