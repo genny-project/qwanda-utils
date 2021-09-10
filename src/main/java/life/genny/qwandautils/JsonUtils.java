@@ -75,6 +75,20 @@ public class JsonUtils {
 	        }
 	        return item;
 	}
+
+	public static <T> T fromJson(final String json, Type clazz, boolean nolog)
+	{
+		T item = null;
+		if (json != null) {
+			try {
+				item = (T)gson.fromJson(json, clazz);
+
+			} catch (Exception e) {
+				// do nothing
+			}
+		}
+		return item;
+	}
 	
 	public static String toJson(Object obj)
 	{

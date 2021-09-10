@@ -236,16 +236,21 @@ public class VertxUtils {
                     log.debug(" DDT URL:" + GennySettings.ddtUrl + ", realm:" + realm + "key:" + key + "token:" + token );
                     //resultStr = QwandaUtils.apiGet(GennySettings.ddtUrl + "/service/cache/read/" + realm + "/" + key, token);
                     int count=5;
-                    while (count>0) {
+                    boolean resultFound = false;
+                    while (count > 0) {
                         resultStr = QwandaUtils.apiGet(GennySettings.ddtUrl + "/service/cache/read/" + key, token);
-                        count--;
-                        if ( resultStr == null || ("<html><head><title>Error</title></head><body>Not Found</body></html>".equals(resultStr)) || ("<html><body><h1>Resource not found</h1></body></html>".equals(resultStr))) {
-
+                        if (resultStr == null
+                        || ("<html><head><title>Error</title></head><body>Not Found</body></html>".equals(resultStr))
+                        || ("<html><body><h1>Resource not found</h1></body></html>".equals(resultStr))) {
+                            log.error("Count:" + count  + ", can't find key:" + key + " from cache, response:" + resultStr);
+                            count--;
                         } else {
-                            count=0;
+                            count = 0;
+                            resultFound = true;
                         }
-
                     }
+                    // result not found, set result to null for next if check
+                    if(!resultFound)  resultStr = null;
 //					if (resultStr==null) {
 //						resultStr = QwandaUtils.apiGet(GennySettings.ddtUrl + "/read/" + realm + "/" + key, token);
 //					}
