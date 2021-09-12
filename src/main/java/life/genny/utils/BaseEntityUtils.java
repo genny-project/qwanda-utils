@@ -3437,5 +3437,21 @@ public class BaseEntityUtils implements Serializable {
 		return true;
 	}
 
+	public Long getCount(SearchEntity searchBE) {
+		Long total = 0L;
+		try {
+			/* Hit the api for a count */
+			String resultJsonStr = QwandaUtils.apiPostEntity2(
+					GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/count25/",
+					JsonUtils.toJson(searchBE), this.getServiceToken().getToken(), null);
 
+			System.out.println("Count = " + resultJsonStr);
+			total = Long.parseLong(resultJsonStr);
+
+		} catch (Exception e) {
+			System.out.println("EXCEPTION RUNNING COUNT: " + e.toString());
+		}
+		return total;
+	}
+	
 }
