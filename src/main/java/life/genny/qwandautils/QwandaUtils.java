@@ -1968,5 +1968,55 @@ public class QwandaUtils {
 //        return response;
 
 	}
+	
+	public static String apiPutEntity2(final String putUrl, final String entityString, final String authToken,
+			final Consumer<String> callback) throws IOException {
+		
+		Integer httpTimeout = 7;  // 7 secnds
+		
+		if (StringUtils.isBlank(putUrl)) {
+			log.error("Blank url in apiPutEntity");
+		}
+
+		BodyPublisher requestBody = BodyPublishers.ofString(entityString);
+
+		HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().PUT(requestBody).uri(URI.create(putUrl))
+				.setHeader("Content-Type", "application/json")
+				.setHeader("Authorization", "Bearer " + authToken);
+
+		
+		if (putUrl.contains("genny.life")) { // Hack for local server not having http2
+			requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
+		}
+		
+		HttpRequest request = requestBuilder.build();
+
+		String result = null;
+		Boolean done = false;
+		int count = 5;
+		while ((!done) && (count > 0)) {
+			CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
+					java.net.http.HttpResponse.BodyHandlers.ofString());
+
+			try {
+				result = response.thenApply(java.net.http.HttpResponse::body).get(httpTimeout, TimeUnit.SECONDS);
+				done = true;
+			} catch (InterruptedException | ExecutionException | TimeoutException e) {
+				// TODO Auto-generated catch block
+				log.error("Count:" + count + ", Exception occurred when post to URL: "+ putUrl + ",Body is entityString:" + entityString + ", Exception details:"  + e.getCause() );
+				// try renewing the httpclient
+				httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
+						.connectTimeout(Duration.ofSeconds(httpTimeout)).build();
+				if (count <= 0) {
+					done = true;
+				}
+			}
+			count--;
+		}
+		return result;
+
+
+
+	}
 
 }

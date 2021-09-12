@@ -43,6 +43,7 @@ import io.vavr.Tuple3;
 import io.vertx.core.json.JsonObject;
 import life.genny.models.GennyToken;
 import life.genny.qwanda.Answer;
+import life.genny.qwanda.EEntityStatus;
 import life.genny.qwanda.Layout;
 import life.genny.qwanda.Link;
 import life.genny.qwanda.attribute.Attribute;
@@ -218,7 +219,7 @@ public class BaseEntityUtils implements Serializable {
 
 							}
 						} else {
-							log.info(item.getCode()+" already has value for "+attribute.getCode());
+							log.info(item.getCode() + " already has value for " + attribute.getCode());
 						}
 
 					} else {
@@ -229,7 +230,7 @@ public class BaseEntityUtils implements Serializable {
 			}
 
 		}
-		this.saveBaseEntity(defBE,item);
+		this.saveBaseEntity(defBE, item);
 		return item;
 	}
 
@@ -279,7 +280,8 @@ public class BaseEntityUtils implements Serializable {
 					// Author of the BE
 					// NOTE: Maybe should be moved to run for all BEs
 					Attribute lnkAuthorAttr = RulesUtils.getAttribute("LNK_AUTHOR", this.getGennyToken().getToken());
-					item.addAnswer(new Answer(item, item, lnkAuthorAttr, "[\""+getGennyToken().getUserCode()+"\"]"));
+					item.addAnswer(
+							new Answer(item, item, lnkAuthorAttr, "[\"" + getGennyToken().getUserCode() + "\"]"));
 				} else {
 					log.error("create BE returned NULL for " + code);
 				}
@@ -457,7 +459,7 @@ public class BaseEntityUtils implements Serializable {
 
 			try {
 				JsonObject json = new JsonObject(JsonUtils.toJson(answer));
-				json.put("token", this.token);
+				json.put("token", this.getGennyToken().getToken());
 				log.debug("Saving answer");
 				VertxUtils.eb.write("answer", json);
 				log.debug("Finished saving answer");
@@ -469,16 +471,16 @@ public class BaseEntityUtils implements Serializable {
 
 		return null;
 	}
-	
-	public BaseEntity saveAnswer(BaseEntity defBe,Answer answer) {
+
+	public BaseEntity saveAnswer(BaseEntity defBe, Answer answer) {
 
 		// Filter Non-valid answers using DEF
-		if (answerValidForDEF(defBe,answer)) {
+		if (answerValidForDEF(defBe, answer)) {
 			BaseEntity ret = addAnswer(answer);
 
 			try {
 				JsonObject json = new JsonObject(JsonUtils.toJson(answer));
-				json.put("token", this.token);
+				json.put("token", this.getGennyToken().getToken());
 				log.debug("Saving answer");
 				VertxUtils.eb.write("answer", json);
 				log.debug("Finished saving answer");
@@ -572,7 +574,7 @@ public class BaseEntityUtils implements Serializable {
 		}
 	}
 
-	public void saveAnswers(BaseEntity defBe,List<Answer> answers, final boolean changeEvent) {
+	public void saveAnswers(BaseEntity defBe, List<Answer> answers, final boolean changeEvent) {
 		if (!((answers == null) || (answers.isEmpty()))) {
 
 			if (!changeEvent) {
@@ -586,7 +588,7 @@ public class BaseEntityUtils implements Serializable {
 					.collect(Collectors.groupingBy(Answer::getTargetCode));
 
 			// Filter Non-valid answers using def
-			answers = answers.stream().filter(item -> answerValidForDEF(defBe,item)).collect(Collectors.toList());
+			answers = answers.stream().filter(item -> answerValidForDEF(defBe, item)).collect(Collectors.toList());
 
 			for (String targetCode : answersPerTargetCodeMap.keySet()) {
 				List<Answer> targetAnswers = answersPerTargetCodeMap.get(targetCode);
@@ -624,11 +626,10 @@ public class BaseEntityUtils implements Serializable {
 			}
 		}
 	}
-	
-	public void saveAnswers(BaseEntity defBe,List<Answer> answers) {
-		this.saveAnswers(defBe,answers, true);
-	}
 
+	public void saveAnswers(BaseEntity defBe, List<Answer> answers) {
+		this.saveAnswers(defBe, answers, true);
+	}
 
 	public void saveAnswers(List<Answer> answers) {
 		this.saveAnswers(answers, true);
@@ -1697,8 +1698,8 @@ public class BaseEntityUtils implements Serializable {
 		}
 		return ret;
 	}
-	
-	public String saveBaseEntity(BaseEntity defBe,BaseEntity be) { // TODO: Ugly
+
+	public String saveBaseEntity(BaseEntity defBe, BaseEntity be) { // TODO: Ugly
 		String ret = null;
 		try {
 			if (be != null) {
@@ -1713,14 +1714,14 @@ public class BaseEntityUtils implements Serializable {
 				}
 				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be));
 				if (be.getId() != null) {
-					ret = QwandaUtils.apiPutEntity(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
-							this.token);
+					ret = QwandaUtils.apiPutEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
+							this.token, null);
 
 				} else {
-					ret = QwandaUtils.apiPostEntity(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
-							this.token);
+					ret = QwandaUtils.apiPostEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys",
+							JsonUtils.toJson(be), this.token, null);
 				}
-				saveBaseEntityAttributes(defBe,be);
+				saveBaseEntityAttributes(defBe, be);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1735,15 +1736,18 @@ public class BaseEntityUtils implements Serializable {
 		}
 		List<Answer> answers = new CopyOnWriteArrayList<Answer>();
 
-		for (EntityAttribute ea : be.getBaseEntityAttributes()) {
-			Answer attributeAnswer = new Answer(be.getCode(), be.getCode(), ea.getAttributeCode(), ea.getAsString());
-			attributeAnswer.setChangeEvent(false);
-			answers.add(attributeAnswer);
+		if (be.getBaseEntityAttributes() != null) {
+			for (EntityAttribute ea : be.getBaseEntityAttributes()) {
+				Answer attributeAnswer = new Answer(be.getCode(), be.getCode(), ea.getAttributeCode(),
+						ea.getAsString());
+				attributeAnswer.setChangeEvent(false);
+				answers.add(attributeAnswer);
+			}
+			this.saveAnswers(answers);
 		}
-		this.saveAnswers(answers);
 	}
-	
-	public void saveBaseEntityAttributes(BaseEntity defBe,BaseEntity be) {
+
+	public void saveBaseEntityAttributes(BaseEntity defBe, BaseEntity be) {
 		if ((be == null) || (be.getCode() == null)) {
 			throw new NullPointerException("Cannot save be because be is null or be.getCode is null");
 		}
@@ -1754,7 +1758,7 @@ public class BaseEntityUtils implements Serializable {
 			attributeAnswer.setChangeEvent(false);
 			answers.add(attributeAnswer);
 		}
-		this.saveAnswers(defBe,answers);
+		this.saveAnswers(defBe, answers);
 	}
 
 	public <T extends BaseEntity> T updateCachedBaseEntity(final Answer answer, Class clazz) {
@@ -1841,9 +1845,10 @@ public class BaseEntityUtils implements Serializable {
 				try {
 					if (answer.getAttribute() == null) {
 						Attribute attribute = null;
-						if (answer.getAttributeCode().startsWith("COL_")||answer.getAttributeCode().startsWith("CAL_")||answer.getAttributeCode().startsWith("SRT_")){
+						if (answer.getAttributeCode().startsWith("COL_") || answer.getAttributeCode().startsWith("CAL_")
+								|| answer.getAttributeCode().startsWith("SRT_")) {
 							attribute = new AttributeText(answer.getAttributeCode(), answer.getValue());
-						}else{
+						} else {
 							attribute = RulesUtils.getAttribute(answer.getAttributeCode(), token);
 						}
 
@@ -2905,7 +2910,7 @@ public class BaseEntityUtils implements Serializable {
 		LocalDate startDateLD = null;
 		LocalDate endDateLD = null;
 
-		if(prevPeriodStr != null) {
+		if (prevPeriodStr != null) {
 			System.out.println("prevPeriodStr is:: " + prevPeriodStr);
 
 			tenureJson = new JsonObject(prevPeriodStr);
@@ -3187,9 +3192,7 @@ public class BaseEntityUtils implements Serializable {
 		while (i.hasNext()) {
 			EntityAttribute ea = i.next();
 
-
-			if (ea.getAttributeCode().startsWith("PRI_IS_APPLIED_") )
-			{
+			if (ea.getAttributeCode().startsWith("PRI_IS_APPLIED_")) {
 
 				i.remove();
 			} else {
@@ -3218,7 +3221,6 @@ public class BaseEntityUtils implements Serializable {
 				}
 			}
 		}
-
 
 		if (isAs.size() == 1) {
 			// Easy
@@ -3400,8 +3402,7 @@ public class BaseEntityUtils implements Serializable {
 		return ret;
 	}
 
-	public Boolean answerValidForDEF(Answer answer)
-	{
+	public Boolean answerValidForDEF(Answer answer) {
 		BaseEntity target = this.getBaseEntityByCode(answer.getTargetCode());
 		BaseEntity defBE = this.getDEF(target);
 
@@ -3409,18 +3410,19 @@ public class BaseEntityUtils implements Serializable {
 	}
 
 	/**
-	 * A function to determine the whether or not an attribute
-	 * is allowed to be saved to a BaseEntity.
+	 * A function to determine the whether or not an attribute is allowed to be
+	 * saved to a BaseEntity.
 	 **/
-	public Boolean answerValidForDEF(BaseEntity defBE, Answer answer)
-	{
+	public Boolean answerValidForDEF(BaseEntity defBE, Answer answer) {
 		String targetCode = answer.getTargetCode();
 		String attributeCode = answer.getAttributeCode();
 
 		// Allow if it is Capability saved to a Role
 		if (targetCode.startsWith("ROL_") && attributeCode.startsWith("PRM_")) {
 			return true;
-		} else if (targetCode.startsWith("SBE_") && ( attributeCode.startsWith("COL_") || attributeCode.startsWith("CAL_") || attributeCode.startsWith("SRT_") || attributeCode.startsWith("ACT_") )) {
+		} else if (targetCode.startsWith("SBE_")
+				&& (attributeCode.startsWith("COL_") || attributeCode.startsWith("CAL_")
+						|| attributeCode.startsWith("SRT_") || attributeCode.startsWith("ACT_"))) {
 			return true;
 		}
 
@@ -3428,10 +3430,11 @@ public class BaseEntityUtils implements Serializable {
 			log.error("Cannot work out DEF " + answer.getTargetCode());
 			return true;
 		}
-		
+
 		// just make use of the faster attribute lookup
-		if ( !defBE.containsEntityAttribute("ATT_"+attributeCode)) {
-			log.error(ANSIColour.RED+"Invalid attribute " + attributeCode + " for " + answer.getTargetCode()+" with def= "+defBE.getCode()+ANSIColour.RESET);
+		if (!defBE.containsEntityAttribute("ATT_" + attributeCode)) {
+			log.error(ANSIColour.RED + "Invalid attribute " + attributeCode + " for " + answer.getTargetCode()
+					+ " with def= " + defBE.getCode() + ANSIColour.RESET);
 			return false;
 		}
 		return true;
@@ -3442,8 +3445,8 @@ public class BaseEntityUtils implements Serializable {
 		try {
 			/* Hit the api for a count */
 			String resultJsonStr = QwandaUtils.apiPostEntity2(
-					GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/count25/",
-					JsonUtils.toJson(searchBE), this.getServiceToken().getToken(), null);
+					GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/count25/", JsonUtils.toJson(searchBE),
+					this.getServiceToken().getToken(), null);
 
 			System.out.println("Count = " + resultJsonStr);
 			total = Long.parseLong(resultJsonStr);
@@ -3452,6 +3455,70 @@ public class BaseEntityUtils implements Serializable {
 			System.out.println("EXCEPTION RUNNING COUNT: " + e.toString());
 		}
 		return total;
+	}
+
+	public Set<BaseEntity> getLinkedBaseEntitys(BaseEntity be, final String lnkAttributeCode) {
+		Set<BaseEntity> retSet = new HashSet<>();
+		if (lnkAttributeCode == null) {
+			log.error("BaseEntityUtils:getLinkedBaseEntitys-> linkAttributeCode is NULL");
+			return retSet;
+		}
+		if (!lnkAttributeCode.startsWith("LNK_")) {
+			log.error("BaseEntityUtils:getLinkedBaseEntitys-> " + lnkAttributeCode + " is NOT a LNK Attribute");
+			return retSet;
+		}
+
+		// ASSUME A SINGLE BE
+		String lnkBeCode = be.getValue(lnkAttributeCode, null);
+		if ((lnkBeCode == null) || ("[]".equals(lnkBeCode))) {
+			return retSet;
+		}
+		lnkBeCode = lnkBeCode.trim();
+		io.vertx.core.json.JsonArray jaItems = new io.vertx.core.json.JsonArray(lnkBeCode);
+		for (Object jItem : jaItems) {
+			String beCode = (String) jItem;
+			BaseEntity selectionBe = getBaseEntityByCode(beCode);
+			retSet.add(selectionBe);
+		}
+		return retSet;
+	}
+
+	public BaseEntity getLinkedBaseEntity(BaseEntity be, final String lnkAttributeCode) {
+		Set<BaseEntity> retSet = getLinkedBaseEntitys(be, lnkAttributeCode);
+		if (retSet.isEmpty()) {
+			return null;
+		}
+		for (BaseEntity linkBe : retSet) {
+			return linkBe;
+		}
+		return null;
+	}
+
+	public BaseEntity saveNameStatus(String code, String name, EEntityStatus status)
+	{
+		BaseEntity be = getBaseEntityByCode(code);
+		return saveNameStatus(be,name,status);
+	}
+	
+	public BaseEntity saveNameStatus(BaseEntity be, String name, EEntityStatus status)
+	{
+		if (be != null) {
+			BaseEntity putBe = new BaseEntity(be.getCode(),name);	
+			if (name == null) {
+				name = be.getName();
+			}
+			if (status == null) {
+				status = be.getStatus();
+			}
+			putBe.setName(name);			
+			putBe.setStatus(status);
+			putBe.setBaseEntityAttributes(null);
+			be.setName(name);
+			be.setStatus(status);
+			VertxUtils.writeCachedJson(be.getRealm(),be.getCode(), JsonUtils.toJson(be));			
+			saveBaseEntity(putBe);
+		}
+		return be;
 	}
 	
 }
