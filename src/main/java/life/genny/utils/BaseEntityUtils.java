@@ -453,6 +453,17 @@ public class BaseEntityUtils implements Serializable {
 
 	public BaseEntity saveAnswer(Answer answer) {
 
+		BaseEntity target = this.getBaseEntityByCode(answer.getTargetCode());
+		if (target == null) {
+			return null;
+		}
+		String existingString = target.getValueAsString(answer.getAttributeCode());
+		if (!StringUtils.isBlank(answer.getValue())) {
+			if (answer.getValue().equals(existingString)) {
+				return target; // already there, no need to send
+			}
+		}
+		
 		// Filter Non-valid answers using DEF
 		if (answerValidForDEF(answer)) {
 			BaseEntity ret = addAnswer(answer);
