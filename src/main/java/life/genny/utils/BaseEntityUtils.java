@@ -1681,15 +1681,20 @@ public class BaseEntityUtils implements Serializable {
 						be.setId(existing.getId());
 					}
 				}
-				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be));
-				if (be.getId() != null) {
-					ret = QwandaUtils.apiPutEntity(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
-							this.token);
 
+				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be));
+
+				String endpointUrl = null;
+				if (be.getId() != null) {
+					endpointUrl = this.qwandaServiceUrl + "/qwanda/baseentitys";
 				} else {
-					ret = QwandaUtils.apiPostEntity(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
-							this.token);
+					endpointUrl = this.qwandaServiceUrl + "/qwanda/baseentitys";
 				}
+				ret = QwandaUtils.apiPostEntity(endpointUrl, JsonUtils.toJson(be), this.token);
+
+				boolean isExist = checkIfBaseEntityInCache(be.getCode());
+				if(!isExist) log.warn("Can't find BaseEntityCode:" + be.getCode() + " from cache after call qwanda endpint:" + qwandaServiceUrl);
+
 				saveBaseEntityAttributes(be);
 			}
 		} catch (Exception e) {
@@ -1699,7 +1704,19 @@ public class BaseEntityUtils implements Serializable {
 		return ret;
 	}
 
-	public String saveBaseEntity(BaseEntity defBe, BaseEntity be) { // TODO: Ugly
+	private boolean checkIfBaseEntityInCache(String beCode) {
+		int count = 3;
+		while( count > 0) {
+			if (VertxUtils.readCachedJson(realm, beCode) == null){
+				count--;
+			} else {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public String saveBaseEntity(BaseEntity defBe,BaseEntity be) { // TODO: Ugly
 		String ret = null;
 		try {
 			if (be != null) {
