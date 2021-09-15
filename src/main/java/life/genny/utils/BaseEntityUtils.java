@@ -22,6 +22,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -799,8 +802,9 @@ public class BaseEntityUtils implements Serializable {
 
 		T be = null;
 
-		if (code == null) {
-			log.error("Cannot pass a null code");
+		if (StringUtils.isEmpty(code)) {
+			String str = code == null?"null code":"empty code";
+			log.error("Cannot pass " + str);
 			return null;
 		}
 
@@ -1692,15 +1696,20 @@ public class BaseEntityUtils implements Serializable {
 						be.setId(existing.getId());
 					}
 				}
-				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be));
-				if (be.getId() != null) {
-					ret = QwandaUtils.apiPutEntity(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
-							this.token);
 
+				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be));
+
+				String endpointUrl = null;
+				if (be.getId() != null) {
+					endpointUrl = this.qwandaServiceUrl + "/qwanda/baseentitys";
 				} else {
-					ret = QwandaUtils.apiPostEntity(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
-							this.token);
+					endpointUrl = this.qwandaServiceUrl + "/qwanda/baseentitys";
 				}
+				ret = QwandaUtils.apiPostEntity(endpointUrl, JsonUtils.toJson(be), this.token);
+
+				boolean isExist = checkIfBaseEntityInCache(be.getCode());
+				if(!isExist) log.warn("Can't find BaseEntityCode:" + be.getCode() + " from cache after call qwanda endpint:" + qwandaServiceUrl);
+
 				saveBaseEntityAttributes(be);
 			}
 		} catch (Exception e) {
@@ -1710,7 +1719,25 @@ public class BaseEntityUtils implements Serializable {
 		return ret;
 	}
 
-	public String saveBaseEntity(BaseEntity defBe, BaseEntity be) { // TODO: Ugly
+	private boolean checkIfBaseEntityInCache(String beCode) {
+		int count = 3;
+		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+		while( count > 0) {
+			if (VertxUtils.readCachedJson(realm, beCode) == null){
+				count--;
+				try {
+					TimeUnit.SECONDS.sleep(1);
+				} catch (InterruptedException ie) {
+					log.error("Got InterruptedException when check if baseentity in cache.");
+				}
+			} else {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public String saveBaseEntity(BaseEntity defBe,BaseEntity be) { // TODO: Ugly
 		String ret = null;
 		try {
 			if (be != null) {
