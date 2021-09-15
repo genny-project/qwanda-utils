@@ -792,7 +792,8 @@ public class BaseEntityUtils implements Serializable {
 		T be = null;
 
 		if (StringUtils.isEmpty(code)) {
-			log.error("Cannot pass a " + code == null?"null code":"empty code"  + " code");
+			String str = code == null?"null code":"empty code";
+			log.error("Cannot pass " + str);
 			return null;
 		}
 
