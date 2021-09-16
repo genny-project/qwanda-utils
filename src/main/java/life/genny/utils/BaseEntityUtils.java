@@ -460,12 +460,12 @@ public class BaseEntityUtils implements Serializable {
 		if (target == null) {
 			return null;
 		}
-		String existingString = target.getValueAsString(answer.getAttributeCode());
-		if (!StringUtils.isBlank(answer.getValue())) {
-			if (answer.getValue().equals(existingString)) {
-				return target; // already there, no need to send
-			}
-		}
+//		String existingString = target.getValueAsString(answer.getAttributeCode());
+//		if (!StringUtils.isBlank(answer.getValue())) {
+//			if (answer.getValue().equals(existingString)) {
+//				return target; // already there, no need to send
+//			}
+//		}
 		
 		// Filter Non-valid answers using DEF
 		if (answerValidForDEF(answer)) {
