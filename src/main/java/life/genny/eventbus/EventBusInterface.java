@@ -20,11 +20,13 @@ import com.google.gson.JsonParser;
 
 import io.vertx.core.json.JsonObject;
 import life.genny.models.GennyToken;
+import life.genny.qwanda.Answer;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBulkMessage;
 import life.genny.qwanda.message.QBulkPullMessage;
 import life.genny.qwanda.message.QCmdMessage;
+import life.genny.qwanda.message.QDataAnswerMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
 import life.genny.qwanda.message.QMessage;
 import life.genny.qwandautils.GennySettings;
@@ -196,11 +198,12 @@ public interface EventBusInterface {
 //								Matcher.quoteReplacement("]"));
                         json = resultStr5.replaceAll(Pattern.quote("}\""), Matcher.quoteReplacement("}"));
                     } else {
-                        json = msgStr; //VertxUtils.fixJson(msgStr);
+                         json = msgStr; //VertxUtils.fixJson(msgStr);
                     }
 
 
                 } else {
+                	
                     json = JsonUtils.toJson(msg);
                 }
 
