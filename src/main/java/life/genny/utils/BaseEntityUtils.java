@@ -474,16 +474,23 @@ public class BaseEntityUtils implements Serializable {
 			try {
 				String jsonStr = "";
 				if (GennySettings.forceEventBusApi) { // This is to handle junit Answers that need to use the standard QDataAnswerMessage format
-					QDataAnswerMessage msg = new QDataAnswerMessage(answer);
-					msg.setToken( this.getGennyToken().getToken());
-					jsonStr = JsonUtils.toJson(msg);
+//					QDataAnswerMessage msg = new QDataAnswerMessage(answer);
+//					msg.setToken( this.getGennyToken().getToken());
+//					jsonStr = JsonUtils.toJson(msg);
+					try {
+						QwandaUtils.apiPostEntity2(qwandaServiceUrl + "/qwanda/answers", JsonUtils.toJson(answer), this.getGennyToken().getToken(),null);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				} else {
 					JsonObject json = new JsonObject(JsonUtils.toJson(answer));
 					json.put("token", this.getGennyToken().getToken());
 					jsonStr = json.toString();
-				}
-				log.debug("Saving answer");
+				
+				log.debug("Saving answer to messageBus");
 				VertxUtils.eb.writeMsg("answer", jsonStr);
+			}
 				log.debug("Finished saving answer");
 			} catch (NamingException e) {
 				log.error("Error in saving answer through kafka :::: " + e.getMessage());
