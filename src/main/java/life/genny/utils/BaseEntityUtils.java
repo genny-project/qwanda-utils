@@ -475,7 +475,7 @@ public class BaseEntityUtils implements Serializable {
 				JsonObject json = new JsonObject(JsonUtils.toJson(answer));
 				json.put("token", this.getGennyToken().getToken());
 				log.debug("Saving answer");
-				VertxUtils.eb.write("answer", json);
+				VertxUtils.eb.writeMsg("answer", json.toString());
 				log.debug("Finished saving answer");
 			} catch (NamingException e) {
 				log.error("Error in saving answer through kafka :::: " + e.getMessage());
