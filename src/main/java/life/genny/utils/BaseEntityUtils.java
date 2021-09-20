@@ -3457,6 +3457,10 @@ public class BaseEntityUtils implements Serializable {
 
 	public Boolean answerValidForDEF(Answer answer) {
 		BaseEntity target = this.getBaseEntityByCode(answer.getTargetCode());
+		if (target == null) {
+			log.error("answerValidForDEF: TargetCode "+answer.getTargetCode()+" does not exist");
+			return false; // Target does not exist
+		}
 		BaseEntity defBE = this.getDEF(target);
 
 		return answerValidForDEF(defBE, answer);
