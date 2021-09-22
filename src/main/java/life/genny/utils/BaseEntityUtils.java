@@ -3239,6 +3239,12 @@ public class BaseEntityUtils implements Serializable {
 		if (be.getCode().startsWith("DEF_")) {
 			return be;
 		}
+		// Some quick ones
+		if (be.getCode().startsWith("PRJ_")) {
+			BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_PROJECT");
+			return defBe;
+		}
+
 
 		Set<EntityAttribute> newMerge = new HashSet<>();
 		List<EntityAttribute> isAs = be.findPrefixEntityAttributes("PRI_IS_");
