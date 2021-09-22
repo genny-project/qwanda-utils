@@ -57,6 +57,7 @@ import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.EntityEntity;
 import life.genny.qwanda.entity.SearchEntity;
 import life.genny.qwanda.exception.BadDataException;
+import life.genny.qwanda.exception.DebugException;
 import life.genny.qwanda.message.QBulkPullMessage;
 import life.genny.qwanda.message.QDataAnswerMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
@@ -3226,6 +3227,12 @@ public class BaseEntityUtils implements Serializable {
 	public BaseEntity getDEF(final BaseEntity be) {
 		if (be == null) {
 			log.error("be param is NULL");
+			try {
+				throw new DebugException("BaseEntityUtils: getDEF: The passed BaseEntity is NULL, supplying trace");
+			} catch (DebugException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return null;
 		}
 
@@ -3264,7 +3271,16 @@ public class BaseEntityUtils implements Serializable {
 					log.warn("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
 					i.remove();
 					break;
-
+				case "PRI_IS_DISABLED":
+					log.warn("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
+					// don't remove until we work it out...
+					try {
+						throw new DebugException("Bad DEF "+ ea.getAttributeCode());
+					} catch (DebugException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					break;
 				case "PRI_IS_LOGBOOK":
 					log.debug("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
 					i.remove();
