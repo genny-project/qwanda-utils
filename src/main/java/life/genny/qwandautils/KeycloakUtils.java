@@ -823,31 +823,31 @@ public class KeycloakUtils {
 	 **/
 	{
 		if (userBE == null) {
-			ANSIColour.logError("User BE is NULL");
+			log.error(ANSIColour.RED+"User BE is NULL"+ANSIColour.RESET);
 			return;
 		}
 
 		String uuid = userBE.getValue("PRI_UUID",null);
 		if (uuid == null) {
-			ANSIColour.logError("No PRI_UUID found for user " + userBE.getCode());
+			log.error(ANSIColour.RED+"No PRI_UUID found for user " + userBE.getCode()+ANSIColour.RESET);
 			return;
 		}
 
 		String firstname = userBE.getValue("PRI_FIRSTNAME",null);
 		if (firstname == null) {
-			ANSIColour.logError("No PRI_FIRSTNAME found for user " + userBE.getCode());
+			log.error(ANSIColour.RED+"No PRI_FIRSTNAME found for user " + userBE.getCode()+ANSIColour.RESET);
 			return;
 		}
 
 		String lastname = userBE.getValue("PRI_LASTNAME",null);
 		if (lastname == null) {
-			ANSIColour.logError("No PRI_LASTNAME found for user " + userBE.getCode());
+			log.error(ANSIColour.RED+"No PRI_LASTNAME found for user " + userBE.getCode()+ANSIColour.RESET);
 			return;
 		}
 
 		String email = userBE.getValue("PRI_EMAIL",null);
 		if (email == null) {
-			ANSIColour.logError("No PRI_EMAIL found for user " + userBE.getCode());
+			log.error(ANSIColour.RED+"No PRI_EMAIL found for user " + userBE.getCode()+ANSIColour.RESET);
 			return;
 		}
 
@@ -855,7 +855,7 @@ public class KeycloakUtils {
 		try {
 			updateUser(uuid, beUtils.getServiceToken().getToken(), beUtils.getServiceToken().getRealm(), email, firstname, lastname,  email, null, "user", "users");
 		} catch (IOException e) {
-			ANSIColour.logError(e.getStackTrace().toString());
+			log.error(ANSIColour.RED+e.getStackTrace().toString()+ANSIColour.RESET);
 		}
 		return;
 	}
@@ -866,13 +866,13 @@ public class KeycloakUtils {
 	 **/
 	{
 		if (userBE == null) {
-			ANSIColour.logError("User BE is NULL");
+			log.error(ANSIColour.RED+"User BE is NULL"+ANSIColour.RESET);
 			return null;
 		}
 
 		String uuid = userBE.getValue("PRI_UUID",null);
 		if (uuid == null) {
-			ANSIColour.logError("No PRI_UUID found for user " + userBE.getCode());
+			log.error(ANSIColour.RED+"No PRI_UUID found for user " + userBE.getCode()+ANSIColour.RESET);
 			return null;
 		}
 
@@ -884,7 +884,7 @@ public class KeycloakUtils {
 		try {
 			setPassword(beUtils.getServiceToken().getToken(), beUtils.getServiceToken().getRealm(), uuid, newPassword, true);
 		} catch (IOException e) {
-			ANSIColour.logError(e.getStackTrace().toString());
+			log.error(ANSIColour.RED+e.getStackTrace().toString()+ANSIColour.RESET);
 			return null;
 		}
 
@@ -1096,20 +1096,18 @@ public class KeycloakUtils {
 	public static String getImpersonatedToken(String keycloakUrl, String realm, BaseEntity project, BaseEntity userBE, String exchangedToken) throws IOException {
 
 		if (userBE == null) {
-			ANSIColour.logError("User BE is NULL");
+			log.error(ANSIColour.RED+"User BE is NULL"+ANSIColour.RESET);
 			return null;
 		}
 
-		// String email = userBE.getValue("PRI_EMAIL", null);
-		// if (email == null) {
-		// 	ANSIColour.logError("No PRI_EMAIL found for user " + userBE.getCode());
-		// 	return null;
-		// }
-
 		String uuid = userBE.getValue("PRI_UUID", null);
 		if (uuid == null) {
-			ANSIColour.logError("No PRI_UUID found for user " + userBE.getCode());
-			return null;
+			log.warn(ANSIColour.YELLOW+"No PRI_UUID found for user " + userBE.getCode()+", attempting to use PRI_EMAIL instead"+ANSIColour.RESET);
+			uuid = userBE.getValue("PRI_EMAIL", null);
+			if (uuid == null) {
+				log.error(ANSIColour.RED+"No PRI_EMAIL found for user " + userBE.getCode()+ANSIColour.RESET);
+				return null;
+			}
 		}
 
 		return getImpersonatedToken(keycloakUrl, realm, project, uuid, exchangedToken);

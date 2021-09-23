@@ -101,7 +101,7 @@ public class MergeUtil {
 				/* we split the text to merge into 2 components: BE.PRI... becomes [BE, PRI...] */
 				String[] entityArr = mergeText.split("\\.");
 				String keyCode = entityArr[0];
-				log.info(keyCode);
+				log.debug("looking for key in map: " + keyCode);
 				
 				if((entityArr.length == 0))
 					return DEFAULT;
@@ -117,12 +117,9 @@ public class MergeUtil {
 						if (value.getClass().equals(BaseEntity.class)) {
 							
 							BaseEntity be = (BaseEntity)value;
-
 							String attributeCode = entityArr[1];
-							log.info(attributeCode);
-							
 							Object attributeValue = be.getValue(attributeCode, null);
-							log.info(attributeValue);
+							log.info("context: " + keyCode + ", attr: " + attributeCode + ", value: " + attributeValue);
 
 							Matcher matchFormat = null;
 							if (entityArr != null && entityArr.length > 2) {
