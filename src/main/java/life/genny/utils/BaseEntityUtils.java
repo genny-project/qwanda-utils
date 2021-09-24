@@ -821,6 +821,13 @@ public class BaseEntityUtils implements Serializable {
 		if (StringUtils.isEmpty(code)) {
 			String str = code == null?"null code":"empty code";
 			log.error("Cannot pass " + str);
+			try {
+				throw new DebugException("BaseEntityUtils: BaseEntityByCode: The passed code is emoty, supplying trace");
+			} catch (DebugException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 			return null;
 		}
 
