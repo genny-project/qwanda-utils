@@ -3594,7 +3594,7 @@ public class BaseEntityUtils implements Serializable {
 			}
 			putBe.setName(name);			
 			putBe.setStatus(status);
-			putBe.setBaseEntityAttributes(null);
+			//putBe.setBaseEntityAttributes(null);
 			be.setName(name);
 			be.setStatus(status);
 			VertxUtils.writeCachedJson(be.getRealm(),be.getCode(), JsonUtils.toJson(be));			
