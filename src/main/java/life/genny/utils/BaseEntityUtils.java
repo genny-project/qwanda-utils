@@ -195,8 +195,7 @@ public class BaseEntityUtils implements Serializable {
 				name = defBE.getName();
 			}
 			item = new BaseEntity(code.toUpperCase(), name);
-			// item = QwandaUtils.createBaseEntityByCode(code.toUpperCase(), name,
-			// qwandaServiceUrl, this.token);
+			VertxUtils.writeCachedJson(getRealm(), item.getCode(), JsonUtils.toJson(item));
 		}
 
 		if (item != null) {
