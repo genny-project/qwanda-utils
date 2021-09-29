@@ -3307,14 +3307,16 @@ public class BaseEntityUtils implements Serializable {
 		if (isAs.size() == 1) {
 			// Easy
 			Map<String,Map<String,BaseEntity>> defMapping =RulesUtils.defs;
-			assert(be != null);
 			Map<String,BaseEntity> beMapping = defMapping.get(be.getRealm());
-			assert(beMapping != null);
+			log.info("DEBUG, reaml code is " +  be.getRealm());
+			log.info("DEBUG, beMapping is" + beMapping);
+
 			String attrCode = isAs.get(0).getAttributeCode();
 			log.info("DEBUG, attribute code is " +  attrCode);
-			assert(attrCode != null);
+
 			String trimedAttrCode = attrCode.substring("PRI_IS_".length());
 			log.info("DEBUG, trimmed attribute code is " +  trimedAttrCode);
+
 			BaseEntity defBe = beMapping.get("DEF_" + trimedAttrCode);
 
 //			BaseEntity defBe = RulesUtils.defs.get(be.getRealm())
