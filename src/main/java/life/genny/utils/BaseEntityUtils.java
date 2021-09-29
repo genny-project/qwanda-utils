@@ -822,7 +822,7 @@ public class BaseEntityUtils implements Serializable {
 			String str = code == null?"null code":"empty code";
 			log.error("Cannot pass " + str);
 			try {
-				throw new DebugException("BaseEntityUtils: BaseEntityByCode: The passed code is emoty, supplying trace");
+				throw new DebugException("BaseEntityUtils: BaseEntityByCode: The passed code is empty, supplying trace");
 			} catch (DebugException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1041,7 +1041,8 @@ public class BaseEntityUtils implements Serializable {
 	public BaseEntity getBaseEntityFromLNKAttr(BaseEntity baseEntity, String attributeCode) {
 
 		String newBaseEntityCode = getBaseEntityCodeFromLNKAttr(baseEntity, attributeCode);
-		if (newBaseEntityCode == null) {
+		// return null if attributeCode valueString is null or empty
+		if (StringUtils.isEmpty(newBaseEntityCode)) {
 			return null;
 		}
 		BaseEntity newBe = getBaseEntityByCode(newBaseEntityCode);
