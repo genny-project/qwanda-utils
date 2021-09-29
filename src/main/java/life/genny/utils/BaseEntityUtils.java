@@ -3306,8 +3306,19 @@ public class BaseEntityUtils implements Serializable {
 
 		if (isAs.size() == 1) {
 			// Easy
-			BaseEntity defBe = RulesUtils.defs.get(be.getRealm())
-					.get("DEF_" + isAs.get(0).getAttributeCode().substring("PRI_IS_".length()));
+			Map<String,Map<String,BaseEntity>> defMapping =RulesUtils.defs;
+			assert(be != null);
+			Map<String,BaseEntity> beMapping = defMapping.get(be.getRealm());
+			assert(beMapping != null);
+			String attrCode = isAs.get(0).getAttributeCode();
+			log.info("DEBUG, attribute code is " +  attrCode);
+			assert(attrCode != null);
+			String trimedAttrCode = attrCode.substring("PRI_IS_".length());
+			log.info("DEBUG, trimmed attribute code is " +  trimedAttrCode);
+			BaseEntity defBe = beMapping.get("DEF_" + trimedAttrCode);
+
+//			BaseEntity defBe = RulesUtils.defs.get(be.getRealm())
+//					.get("DEF_" + isAs.get(0).getAttributeCode().substring("PRI_IS_".length()));
 			if (defBe == null) {
 				log.error(
 						"No such DEF called " + "DEF_" + isAs.get(0).getAttributeCode().substring("PRI_IS_".length()));
