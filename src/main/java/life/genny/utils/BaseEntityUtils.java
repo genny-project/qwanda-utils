@@ -1033,7 +1033,8 @@ public class BaseEntityUtils implements Serializable {
 	public BaseEntity getBaseEntityFromLNKAttr(BaseEntity baseEntity, String attributeCode) {
 
 		String newBaseEntityCode = getBaseEntityCodeFromLNKAttr(baseEntity, attributeCode);
-		if (newBaseEntityCode == null) {
+		// return null if attributeCode valueString is null or empty
+		if (StringUtils.isEmpty(newBaseEntityCode)) {
 			return null;
 		}
 		BaseEntity newBe = getBaseEntityByCode(newBaseEntityCode);
