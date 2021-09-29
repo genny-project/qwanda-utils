@@ -195,6 +195,8 @@ public class BaseEntityUtils implements Serializable {
 				name = defBE.getName();
 			}
 			item = new BaseEntity(code.toUpperCase(), name);
+			item.setRealm(getRealm());
+			
 			VertxUtils.writeCachedJson(getRealm(), item.getCode(), JsonUtils.toJson(item));
 		}
 
@@ -3248,7 +3250,7 @@ public class BaseEntityUtils implements Serializable {
 		}
 		// Some quick ones
 		if (be.getCode().startsWith("PRJ_")) {
-			BaseEntity defBe = RulesUtils.defs.get(be.getRealm()).get("DEF_PROJECT");
+			BaseEntity defBe = RulesUtils.defs.get(this.getGennyToken().getRealm()).get("DEF_PROJECT");
 			return defBe;
 		}
 
@@ -3307,7 +3309,7 @@ public class BaseEntityUtils implements Serializable {
 		if (isAs.size() == 1) {
 			// Easy
 			Map<String,Map<String,BaseEntity>> defMapping =RulesUtils.defs;
-			Map<String,BaseEntity> beMapping = defMapping.get(be.getRealm());
+			Map<String,BaseEntity> beMapping = defMapping.get(this.gennyToken.getRealm());
 			log.info("DEBUG, reaml code is " +  be.getRealm());
 			log.info("DEBUG, beMapping is" + beMapping);
 
@@ -3350,18 +3352,18 @@ public class BaseEntityUtils implements Serializable {
 			String mergedCode = "DEF_" + isAs.stream().sorted(Comparator.comparing(EntityAttribute::getAttributeCode))
 					.map(ea -> ea.getAttributeCode()).collect(Collectors.joining("_"));
 			mergedCode = mergedCode.replaceAll("_PRI_IS_DELETED", "");
-			BaseEntity mergedBe = RulesUtils.defs.get(be.getRealm()).get(mergedCode);
+			BaseEntity mergedBe = RulesUtils.defs.get(this.gennyToken.getRealm()).get(mergedCode);
 			if (mergedBe == null) {
 				log.info("Detected NEW Combination DEF - " + mergedCode);
 				// Get primary PRI_IS
 				Optional<EntityAttribute> topDog = be.getHighestEA("PRI_IS_");
 				if (topDog.isPresent()) {
 					String topCode = topDog.get().getAttributeCode().substring("PRI_IS_".length());
-					BaseEntity defTopDog = RulesUtils.defs.get(be.getRealm()).get("DEF_" + topCode);
+					BaseEntity defTopDog = RulesUtils.defs.get(this.gennyToken.getRealm()).get("DEF_" + topCode);
 					mergedBe = new BaseEntity(mergedCode, mergedCode); // So this combination DEF inherits top dogs name
 					// now copy all the combined DEF eas.
 					for (EntityAttribute isea : isAs) {
-						BaseEntity defEa = RulesUtils.defs.get(be.getRealm())
+						BaseEntity defEa = RulesUtils.defs.get(this.gennyToken.getRealm())
 								.get("DEF_" + isea.getAttributeCode().substring("PRI_IS_".length()));
 						if (defEa != null) {
 							for (EntityAttribute ea : defEa.getBaseEntityAttributes()) {
@@ -3377,7 +3379,7 @@ public class BaseEntityUtils implements Serializable {
 							return null;
 						}
 					}
-					RulesUtils.defs.get(be.getRealm()).put(mergedCode, mergedBe);
+					RulesUtils.defs.get(this.gennyToken.getRealm()).put(mergedCode, mergedBe);
 					return mergedBe;
 
 				} else {
@@ -3610,7 +3612,7 @@ public class BaseEntityUtils implements Serializable {
 			//putBe.setBaseEntityAttributes(null);
 			be.setName(name);
 			be.setStatus(status);
-			VertxUtils.writeCachedJson(be.getRealm(),be.getCode(), JsonUtils.toJson(be));			
+			VertxUtils.writeCachedJson(this.gennyToken.getRealm(),be.getCode(), JsonUtils.toJson(be));			
 			saveBaseEntity(putBe);
 		}
 		return be;
