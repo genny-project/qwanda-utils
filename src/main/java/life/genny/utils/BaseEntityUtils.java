@@ -198,6 +198,8 @@ public class BaseEntityUtils implements Serializable {
 			item.setRealm(getRealm());
 			
 			VertxUtils.writeCachedJson(getRealm(), item.getCode(), JsonUtils.toJson(item));
+			Attribute attributeDEF = RulesUtils.getAttribute("PRI_"+defBE.getCode().substring("DEF_".length()), this.getGennyToken().getToken());
+			item = saveAnswer(new Answer(item,item,attributeDEF,"TRUE")); // force the be type
 		}
 
 		if (item != null) {
