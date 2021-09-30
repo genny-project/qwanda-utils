@@ -194,8 +194,7 @@ public class BaseEntityUtils implements Serializable {
 				name = defBE.getName();
 			}
 			item = new BaseEntity(code.toUpperCase(), name);
-			// item = QwandaUtils.createBaseEntityByCode(code.toUpperCase(), name,
-			// qwandaServiceUrl, this.token);
+			VertxUtils.writeCachedJson(getRealm(), item.getCode(), JsonUtils.toJson(item));
 		}
 
 		if (item != null) {
@@ -1033,7 +1032,8 @@ public class BaseEntityUtils implements Serializable {
 	public BaseEntity getBaseEntityFromLNKAttr(BaseEntity baseEntity, String attributeCode) {
 
 		String newBaseEntityCode = getBaseEntityCodeFromLNKAttr(baseEntity, attributeCode);
-		if (newBaseEntityCode == null) {
+		// return null if attributeCode valueString is null or empty
+		if (StringUtils.isEmpty(newBaseEntityCode)) {
 			return null;
 		}
 		BaseEntity newBe = getBaseEntityByCode(newBaseEntityCode);

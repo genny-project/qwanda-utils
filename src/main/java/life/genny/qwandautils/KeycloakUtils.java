@@ -75,6 +75,12 @@ public class KeycloakUtils {
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
+	private static String getKeycloakUrlFromToken(String token) {
+		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
+		keycloakUrl = keycloakUrl.replaceAll(":-1", ""); // get rid of weird -1
+		return keycloakUrl;
+	}
+
 	public static String register(final String token,QDataRegisterMessage register) throws IOException 
 	{
 		String newRealmRoles = "user,offline_access,uma_authorization";
@@ -299,8 +305,8 @@ public class KeycloakUtils {
 
 		try {
 
-			String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
-			
+			String keycloakUrl = getKeycloakUrlFromToken(token);
+
 			HttpPut putRequest = new HttpPut(
 					keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password");
 			log.info(keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password");
@@ -372,7 +378,7 @@ public class KeycloakUtils {
 	// This is the one called from rules to create a keycloak user
 	public static String createDummyUser(String token, String realm)
 			throws IOException {
-		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
+		String keycloakUrl = getKeycloakUrlFromToken(token);
 		
 		String randomCode = UUID.randomUUID().toString().substring(0, 18);
 		String randomPassword = "password1"; //UUID.randomUUID().toString().substring(0, 18);
@@ -469,7 +475,7 @@ public class KeycloakUtils {
 	public static String updateUser(String keycloakUUID, String token, String realm, String newUsername,
 			String newFirstname, String newLastname, String newEmail, String password, String newRealmRoles, String newGroupRoles)
 			throws IOException {
-		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
+		String keycloakUrl = getKeycloakUrlFromToken(token);
 		keycloakUUID = keycloakUUID.toLowerCase();
 	
 		String json = "{ " +  "\"username\" : \"" + newUsername + "\"," + "\"email\" : \"" + newEmail + "\" , "
@@ -535,7 +541,7 @@ public class KeycloakUtils {
 	
 	public static int updateUserEmail(String keycloakUUID,String token, String realm,String newEmail)
 			throws IOException {
-		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
+		String keycloakUrl = getKeycloakUrlFromToken(token);
 		keycloakUUID = keycloakUUID.toLowerCase();
 	
 		String json = "{ \"email\" : \"" + newEmail + "\" , "
@@ -595,7 +601,7 @@ public class KeycloakUtils {
 	public static String createUser(String keycloakUUID,String token, String realm, String newUsername,
 			String newFirstname, String newLastname, String newEmail, String password,String newRealmRoles, String newGroupRoles)
 			throws IOException {
-		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
+		String keycloakUrl = getKeycloakUrlFromToken(token);
 		
 		String idJson = "";
 		if (!StringUtils.isBlank(keycloakUUID)) {
@@ -675,7 +681,7 @@ public class KeycloakUtils {
 	public static String removeUser(String token, String realm, String userId)
         throws IOException {
 
-		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
+		String keycloakUrl = getKeycloakUrlFromToken(token);
     HttpClient httpClient = new DefaultHttpClient();
     
     try {
@@ -704,7 +710,6 @@ public class KeycloakUtils {
     
 	
 	public static String getKeycloakUserId(final String token, final String realm, final String username) throws IOException {
-		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
     final List<LinkedHashMap> users = fetchKeycloakUsers(token, realm, username);
     if(!users.isEmpty()) {
       return (String) users.get(0).get("id");
@@ -713,7 +718,7 @@ public class KeycloakUtils {
 }
 	
 	public static List<LinkedHashMap> fetchKeycloakUsers(final String token, final String realm, final String username) {
-		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
+		String keycloakUrl = getKeycloakUrlFromToken(token);
 		List<LinkedHashMap> results = new ArrayList<LinkedHashMap>();
 	    final HttpClient client = new DefaultHttpClient();
 
@@ -726,7 +731,7 @@ public class KeycloakUtils {
 	      try {
 	        final HttpResponse response = client.execute(get);
 	        if (response.getStatusLine().getStatusCode() != 200) {
-	          log.error("Failed to get user from Keycloak, url:" + uri + ", response code:" + response.getStatusLine().getStatusCode());
+	          log.error("Failed to get user from Keycloak, url:" + uri + ", response code:" + response.getStatusLine().getStatusCode() + ", token:" + token);
 	          throw new IOException();
 	        }
 	        final HttpEntity entity = response.getEntity();
@@ -772,8 +777,7 @@ public class KeycloakUtils {
 	
 	public static int setPassword(String token,String realm, String userId, String password, Boolean askUserToResetPassword)
 			throws IOException {
-		String keycloakUrl = (new GennyToken(token)).getKeycloakUrl();
-		keycloakUrl = keycloakUrl.replaceAll(":-1", ""); // get rid of weird -1
+		String keycloakUrl = getKeycloakUrlFromToken(token);
 		String json = "{\"type\": \"password\", " + "\"temporary\": \""+(askUserToResetPassword?"true":"false")+"\",\"value\": \"" + password + "\"" + "}";
 
 		int responseCode = 0;
@@ -954,7 +958,7 @@ public class KeycloakUtils {
     
     public static String sendVerifyEmail(final String realm, final String username, final String servicetoken)
     {
-    	String keycloakUrl = (new GennyToken(servicetoken)).getKeycloakUrl();
+    	String keycloakUrl = getKeycloakUrlFromToken(servicetoken);
     	String userId;
 		try {
 			userId = getKeycloakUserId(servicetoken, realm, username);
