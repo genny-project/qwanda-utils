@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +17,10 @@ import org.javamoney.moneta.Money;
 import life.genny.qwanda.Link;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
+import life.genny.utils.BaseEntityUtils;
+
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 public class MergeUtil {
 	
@@ -375,13 +380,22 @@ public class MergeUtil {
 		return null;
 	}
 
+	/**
+	 * Author - Jasper Robison (27/07/21)
+	 *
+	 * This is a utility used to format strings during merging.
+	 * Feel free to add some cool little string formatting tools below.
+	 *
+	 * @param	stringToBeFormatted		The string we want to format
+	 * @param	format					how it should be formatted (can be dot seperated string for multiple)
+	 *
+	 * @return	The formatted string.
+	 */
 	public static String getFormattedString(String stringToBeFormatted, String format) {
-		/*
-		 * This is a utility used to format strings during merging.
-		 * Feel free to add some cool little string formatting tools below. (Jasper - 27/07/21)
-		 */
-		if(stringToBeFormatted != null && format != null) {
+
+		if (stringToBeFormatted != null && format != null) {
 			String[] formatCommands = format.split("\\.");
+
 			for (String cmd : formatCommands) {
 				// A nice little clean up command for attribute values
 				if (cmd.equals("CLEAN")) {
@@ -404,17 +418,52 @@ public class MergeUtil {
 		return null;
 	}
 
-	
-	/*public static void main(String[] args) {
-		DateTimeFormatter dateformat = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss");
-		DateTimeFormatter dateformat1 = DateTimeFormatter.ofPattern("H:m a, EE, dd, MMMM, yyyy");
-		LocalDateTime localDateTime = LocalDateTime.now();
-		String text = localDateTime.format(dateformat);
-		String text1 = localDateTime.format(dateformat1);
-		log.info("formattedDate ::"+text);
-		log.info("formattedDate ::"+text1);
-	}*/
-	
-	
+	/**
+	 * Author - Jasper Robison (30/09/2021)
+	 *
+	 * This method is used to find any associated contexts. 
+	 * This allows us to provide a default set of context associations
+	 * that the system can fetch for us in order to reduce code in rules 
+	 * and other areas.
+	 *
+	 * @param	ctxMap	the context map to add to, and fetch associations from.
+	 * @param	contextAssociationJson	the json instructions for fetching associations.
+	 */
+	public static void addAssociatedContexts(BaseEntityUtils beUtils, HashMap<String, Object> ctxMap, String contextAssociationJson) {
+
+		// Enter Try-Catch for better error logging
+		try {
+
+			// TODO: Make sure dependant contexts are handled in correct order automatically
+
+			// convert to JsonObject for easier processing
+			JsonObject ctxAssocJson = new JsonObject(contextAssociationJson);
+			JsonArray ctxAssocArray = ctxAssocJson.getJsonArray("associations");
+
+			for (Object obj : ctxAssocArray) {
+
+				JsonObject ctxAssoc = (JsonObject) obj;
+
+				// These are the required params in the json
+				String code = ctxAssoc.getString("code");
+				String parent = ctxAssoc.getString("parent");
+				String attributeCode = ctxAssoc.getString("attributeCode");
+
+				// Grab Parent from map so we can fetch associated entity
+				BaseEntity parentBE = (BaseEntity) ctxMap.get(parent);
+				BaseEntity assocBE = beUtils.getBaseEntityFromLNKAttr(parentBE, attributeCode);
+
+				// Add the context map if associated be is found
+				if (assocBE != null) {
+					ctxMap.put(code, assocBE);
+				} else {
+					log.error(ANSIColour.RED+"Associated BE not found for " + parent + "." + attributeCode+ANSIColour.RESET);
+				}
+
+			}
+		} catch (Exception e) {
+			log.error(ANSIColour.RED+"Something is wrong with the context association JSON!!!!!"+ANSIColour.RESET);
+		}
+	}
 
 }
