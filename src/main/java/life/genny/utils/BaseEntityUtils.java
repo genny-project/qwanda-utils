@@ -383,7 +383,7 @@ public class BaseEntityUtils implements Serializable {
 		}
 
 		for (String capabilityCode : capabilityCodes) {
-			Attribute capabilityAttribute = RulesUtils.attributeMap.get("CAP_" + capabilityCode);
+			Attribute capabilityAttribute = RulesUtils.realmAttributeMap.get(this.getGennyToken().getRealm()).get("CAP_" + capabilityCode);
 			try {
 				role.addAttribute(capabilityAttribute, 1.0, "TRUE");
 			} catch (BadDataException e) {
@@ -413,8 +413,8 @@ public class BaseEntityUtils implements Serializable {
 	}
 
 	public Attribute saveAttribute(Attribute attribute, final String token) throws IOException {
-
-		RulesUtils.attributeMap.put(attribute.getCode(), attribute);
+		GennyToken gennyToken = new GennyToken(token);
+		RulesUtils.realmAttributeMap.get(gennyToken.getRealm()).put(attribute.getCode(), attribute);
 		try {
 			if (!VertxUtils.cachedEnabled) { // only post if not in junit
 
@@ -437,12 +437,12 @@ public class BaseEntityUtils implements Serializable {
 				// or raw attributes
 				for (EntityAttribute ea : be.getBaseEntityAttributes()) {
 					if (ea != null) {
-						Attribute attribute = RulesUtils.attributeMap.get(ea.getAttributeCode());
+						Attribute attribute = RulesUtils.realmAttributeMap.get(this.getGennyToken().getRealm()).get(ea.getAttributeCode());
 						if (attribute != null) {
 							ea.setAttribute(attribute);
 						} else {
 							RulesUtils.loadAllAttributesIntoCache(this.token);
-							attribute = RulesUtils.attributeMap.get(ea.getAttributeCode());
+							attribute = RulesUtils.realmAttributeMap.get(this.getGennyToken().getRealm()).get(ea.getAttributeCode());
 							if (attribute != null) {
 								ea.setAttribute(attribute);
 							} else {
@@ -1835,11 +1835,11 @@ public class BaseEntityUtils implements Serializable {
 			if (!attributeCode.startsWith("RAW_")) {
 				Attribute attribute = answer.getAttribute();
 
-				if (RulesUtils.attributeMap != null) {
-					if (RulesUtils.attributeMap.isEmpty()) {
+				if (RulesUtils.realmAttributeMap != null) {
+					if (RulesUtils.realmAttributeMap.isEmpty()) {
 						RulesUtils.loadAllAttributesIntoCache(token);
 					}
-					attribute = RulesUtils.attributeMap.get(attributeCode);
+					attribute = RulesUtils.realmAttributeMap.get(this.getGennyToken().getRealm()).get(attributeCode);
 
 					if (attribute != null) {
 						answer.setAttribute(attribute);
