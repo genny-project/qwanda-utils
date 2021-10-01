@@ -846,7 +846,8 @@ public class BaseEntityUtils implements Serializable {
 				this.addAttributes(be);
 			}
 		} catch (Exception e) {
-			log.info("Failed to read cache for baseentity " + code);
+			log.error("Failed to read cache for baseentity " + code + ", exception:" + e.getMessage());
+			e.printStackTrace();
 		}
 
 		if (filterAttributes != null) {
