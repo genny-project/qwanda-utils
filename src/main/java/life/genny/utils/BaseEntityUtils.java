@@ -205,7 +205,7 @@ public class BaseEntityUtils implements Serializable {
 		if (item != null) {
 			// Establish all mandatory base entity attributes
 			for (EntityAttribute ea : defBE.getBaseEntityAttributes()) {
-				if (ea.getAttribute().getCode().startsWith("ATT_")) {
+				if (ea.getAttributeCode().startsWith("ATT_")) {
 					
 					String attrCode = ea.getAttributeCode().substring("ATT_".length());
 					Attribute attribute = RulesUtils.getAttribute(attrCode, this.getGennyToken().getToken());

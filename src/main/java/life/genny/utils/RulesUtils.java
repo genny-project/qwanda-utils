@@ -822,7 +822,7 @@ public class RulesUtils {
                 for (Attribute attribute : attributeArray) {
                     attributeMap.put(attribute.getCode(), attribute);
                 }
-                realmAttributeMap.put(realm, attributeMap);
+               // realmAttributeMap.put(realm, attributeMap);
                 println("All the attributes have been loaded in "+attributeMap.size()+" attributes");
             } else {
                 println("LOADING ATTRIBUTES FROM API");
@@ -841,7 +841,7 @@ public class RulesUtils {
                     for (Attribute attribute : attributeArray) {
                         attributeMap.put(attribute.getCode(), attribute);
                     }
-                    realmAttributeMap.put(realm, attributeMap);
+                   // realmAttributeMap.put(realm, attributeMap);
                     
                     println("All the attributes have been loaded from api in" + attributeMap.size() + " attributes");
                 } else {
