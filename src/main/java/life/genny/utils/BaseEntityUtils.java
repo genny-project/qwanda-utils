@@ -236,11 +236,12 @@ public class BaseEntityUtils implements Serializable {
 			}
 
 		}
+
+		this.saveBaseEntity(defBE, item);
 		// Force the type of baseentity
 		Attribute attributeDEF = RulesUtils.getAttribute("PRI_IS_"+defBE.getCode().substring("DEF_".length()), this.getGennyToken().getToken());
 		item = saveAnswer(new Answer(item,item,attributeDEF,"TRUE")); // force the be type
 
-		this.saveBaseEntity(defBE, item);
 		return item;
 	}
 
