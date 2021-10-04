@@ -46,7 +46,7 @@ public class RulesUtils {
     public static final String ANSI_WHITE = "\u001B[37m";
     public static final String ANSI_BOLD = "\u001b[1m";
 
-    static public Map<String, Attribute> attributeMap = new ConcurrentHashMap<String, Attribute>();
+    static public Map<String,Map<String, Attribute>> realmAttributeMap = new ConcurrentHashMap<>();
     static public QDataAttributeMessage attributesMsg = null;
 
     static public Map<String,Map<String,BaseEntity>> defs = new ConcurrentHashMap<>();  // realm and DEF lookup
@@ -807,16 +807,22 @@ public class RulesUtils {
     public static QDataAttributeMessage loadAllAttributesIntoCache(final GennyToken token) {
         try {
             boolean cacheWorked = false;
-            println("All the attributes about to become loaded ...");
-            JsonObject json = VertxUtils.readCachedJson(token.getRealm(),"attributes",token.getToken());
+            String realm = token.getRealm();
+            println("All the attributes about to become loaded ... for realm "+realm);
+            JsonObject json = VertxUtils.readCachedJson(realm,"attributes",token.getToken());
             if ("ok".equals(json.getString("status"))) {
                 //	println("LOADING ATTRIBUTES FROM CACHE!");
                 attributesMsg = JsonUtils.fromJson(json.getString("value"), QDataAttributeMessage.class);
                 Attribute[] attributeArray = attributesMsg.getItems();
 
+                if (!realmAttributeMap.containsKey(realm)) {
+                	realmAttributeMap.put(realm, new ConcurrentHashMap<String,Attribute>());
+                }
+                Map<String,Attribute> attributeMap = realmAttributeMap.get(realm);
                 for (Attribute attribute : attributeArray) {
                     attributeMap.put(attribute.getCode(), attribute);
                 }
+               // realmAttributeMap.put(realm, attributeMap);
                 println("All the attributes have been loaded in "+attributeMap.size()+" attributes");
             } else {
                 println("LOADING ATTRIBUTES FROM API");
@@ -827,9 +833,16 @@ public class RulesUtils {
                     attributesMsg = JsonUtils.fromJson(jsonString, QDataAttributeMessage.class);
                     Attribute[] attributeArray = attributesMsg.getItems();
 
+                    if (!realmAttributeMap.containsKey(realm)) {
+                    	realmAttributeMap.put(realm, new ConcurrentHashMap<String,Attribute>());
+                    }
+                    Map<String,Attribute> attributeMap = realmAttributeMap.get(realm);
+      
                     for (Attribute attribute : attributeArray) {
                         attributeMap.put(attribute.getCode(), attribute);
                     }
+                   // realmAttributeMap.put(realm, attributeMap);
+                    
                     println("All the attributes have been loaded from api in" + attributeMap.size() + " attributes");
                 } else {
                     log.error("NO ATTRIBUTES LOADED FROM API");
@@ -846,25 +859,32 @@ public class RulesUtils {
         return loadAllAttributesIntoCache(new GennyToken(token));
     }
 
-    public static Attribute getAttribute(final String attributeCode, final GennyToken token) {
-        return getAttribute(attributeCode,token.getToken());
-    }
-
+ 
     public static Attribute getAttribute(final String attributeCode, final String token) {
-        Attribute ret = attributeMap.get(attributeCode);
+    	GennyToken gennyToken = new GennyToken(token);
+    	return getAttribute(attributeCode, gennyToken);
+    }
+    
+    public static Attribute getAttribute(final String attributeCode, final GennyToken gennyToken) {
+    	String realm = gennyToken.getRealm();
+    	if (!realmAttributeMap.containsKey(realm)) {
+    		loadAllAttributesIntoCache(gennyToken);
+    	}
+        Attribute ret = realmAttributeMap.get(gennyToken.getRealm()).get(attributeCode);
         if (ret == null) {
             if (attributeCode.startsWith("SRT_") || attributeCode.startsWith("RAW_")) {
                 ret = new AttributeText(attributeCode, attributeCode);
             } else {
-                loadAllAttributesIntoCache(token);
-                ret = attributeMap.get(attributeCode);
+                loadAllAttributesIntoCache(gennyToken);
+                ret = realmAttributeMap.get(gennyToken.getRealm()).get(attributeCode);
                 if (ret == null) {
-                    log.error("Attribute NOT FOUND :"+attributeCode);
+                    log.error("Attribute NOT FOUND :"+realm+":"+attributeCode);
                 }
             }
         }
         return ret;
     }
+
 
     public static String getChildren(final String sourceCode, final String linkCode, final String linkValue,
                                      String token) {

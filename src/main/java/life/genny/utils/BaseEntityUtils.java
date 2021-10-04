@@ -57,6 +57,7 @@ import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.EntityEntity;
 import life.genny.qwanda.entity.SearchEntity;
 import life.genny.qwanda.exception.BadDataException;
+import life.genny.qwanda.exception.DebugException;
 import life.genny.qwanda.message.QBulkPullMessage;
 import life.genny.qwanda.message.QDataAnswerMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
@@ -194,18 +195,21 @@ public class BaseEntityUtils implements Serializable {
 				name = defBE.getName();
 			}
 			item = new BaseEntity(code.toUpperCase(), name);
+
+			item.setRealm(getRealm());
 			VertxUtils.writeCachedJson(getRealm(), item.getCode(), JsonUtils.toJson(item));
 		}
 
 		if (item != null) {
 			// Establish all mandatory base entity attributes
 			for (EntityAttribute ea : defBE.getBaseEntityAttributes()) {
-				if (ea.getAttribute().getCode().startsWith("ATT_")) {
-
+				if (ea.getAttributeCode().startsWith("ATT_")) {
+					
 					String attrCode = ea.getAttributeCode().substring("ATT_".length());
 					Attribute attribute = RulesUtils.getAttribute(attrCode, this.getGennyToken().getToken());
 
 					if (attribute != null) {
+												
 						// if not already filled in
 						if (!item.containsEntityAttribute(attribute.getCode())) {
 							// Find any default val for this Attr
@@ -232,7 +236,12 @@ public class BaseEntityUtils implements Serializable {
 			}
 
 		}
+
 		this.saveBaseEntity(defBE, item);
+		// Force the type of baseentity
+		Attribute attributeDEF = RulesUtils.getAttribute("PRI_IS_"+defBE.getCode().substring("DEF_".length()), this.getGennyToken().getToken());
+		item = saveAnswer(new Answer(item,item,attributeDEF,"TRUE")); // force the be type
+
 		return item;
 	}
 
@@ -377,7 +386,7 @@ public class BaseEntityUtils implements Serializable {
 		}
 
 		for (String capabilityCode : capabilityCodes) {
-			Attribute capabilityAttribute = RulesUtils.attributeMap.get("CAP_" + capabilityCode);
+			Attribute capabilityAttribute = RulesUtils.realmAttributeMap.get(this.getGennyToken().getRealm()).get("CAP_" + capabilityCode);
 			try {
 				role.addAttribute(capabilityAttribute, 1.0, "TRUE");
 			} catch (BadDataException e) {
@@ -407,8 +416,8 @@ public class BaseEntityUtils implements Serializable {
 	}
 
 	public Attribute saveAttribute(Attribute attribute, final String token) throws IOException {
-
-		RulesUtils.attributeMap.put(attribute.getCode(), attribute);
+		GennyToken gennyToken = new GennyToken(token);
+		RulesUtils.realmAttributeMap.get(gennyToken.getRealm()).put(attribute.getCode(), attribute);
 		try {
 			if (!VertxUtils.cachedEnabled) { // only post if not in junit
 
@@ -431,12 +440,12 @@ public class BaseEntityUtils implements Serializable {
 				// or raw attributes
 				for (EntityAttribute ea : be.getBaseEntityAttributes()) {
 					if (ea != null) {
-						Attribute attribute = RulesUtils.attributeMap.get(ea.getAttributeCode());
+						Attribute attribute = RulesUtils.realmAttributeMap.get(this.getGennyToken().getRealm()).get(ea.getAttributeCode());
 						if (attribute != null) {
 							ea.setAttribute(attribute);
 						} else {
 							RulesUtils.loadAllAttributesIntoCache(this.token);
-							attribute = RulesUtils.attributeMap.get(ea.getAttributeCode());
+							attribute = RulesUtils.realmAttributeMap.get(this.getGennyToken().getRealm()).get(ea.getAttributeCode());
 							if (attribute != null) {
 								ea.setAttribute(attribute);
 							} else {
@@ -819,6 +828,13 @@ public class BaseEntityUtils implements Serializable {
 		if (StringUtils.isEmpty(code)) {
 			String str = code == null?"null code":"empty code";
 			log.error("Cannot pass " + str);
+			try {
+				throw new DebugException("BaseEntityUtils: BaseEntityByCode: The passed code is empty, supplying trace");
+			} catch (DebugException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 			return null;
 		}
 
@@ -833,7 +849,8 @@ public class BaseEntityUtils implements Serializable {
 				this.addAttributes(be);
 			}
 		} catch (Exception e) {
-			log.info("Failed to read cache for baseentity " + code);
+			log.error("Failed to read cache for baseentity " + code + ", exception:" + e.getMessage());
+			e.printStackTrace();
 		}
 
 		if (filterAttributes != null) {
@@ -1822,11 +1839,11 @@ public class BaseEntityUtils implements Serializable {
 			if (!attributeCode.startsWith("RAW_")) {
 				Attribute attribute = answer.getAttribute();
 
-				if (RulesUtils.attributeMap != null) {
-					if (RulesUtils.attributeMap.isEmpty()) {
+				if (RulesUtils.realmAttributeMap != null) {
+					if (RulesUtils.realmAttributeMap.isEmpty()) {
 						RulesUtils.loadAllAttributesIntoCache(token);
 					}
-					attribute = RulesUtils.attributeMap.get(attributeCode);
+					attribute = RulesUtils.realmAttributeMap.get(this.getGennyToken().getRealm()).get(attributeCode);
 
 					if (attribute != null) {
 						answer.setAttribute(attribute);
@@ -3226,12 +3243,24 @@ public class BaseEntityUtils implements Serializable {
 	public BaseEntity getDEF(final BaseEntity be) {
 		if (be == null) {
 			log.error("be param is NULL");
+			try {
+				throw new DebugException("BaseEntityUtils: getDEF: The passed BaseEntity is NULL, supplying trace");
+			} catch (DebugException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return null;
 		}
 
 		if (be.getCode().startsWith("DEF_")) {
 			return be;
 		}
+		// Some quick ones
+		if (be.getCode().startsWith("PRJ_")) {
+			BaseEntity defBe = RulesUtils.defs.get(this.getGennyToken().getRealm()).get("DEF_PROJECT");
+			return defBe;
+		}
+
 
 		Set<EntityAttribute> newMerge = new HashSet<>();
 		List<EntityAttribute> isAs = be.findPrefixEntityAttributes("PRI_IS_");
@@ -3264,7 +3293,16 @@ public class BaseEntityUtils implements Serializable {
 					log.warn("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
 					i.remove();
 					break;
-
+				case "PRI_IS_DISABLED":
+					log.warn("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
+					// don't remove until we work it out...
+					try {
+						throw new DebugException("Bad DEF "+ ea.getAttributeCode());
+					} catch (DebugException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					break;
 				case "PRI_IS_LOGBOOK":
 					log.debug("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
 					i.remove();
@@ -3277,8 +3315,21 @@ public class BaseEntityUtils implements Serializable {
 
 		if (isAs.size() == 1) {
 			// Easy
-			BaseEntity defBe = RulesUtils.defs.get(be.getRealm())
-					.get("DEF_" + isAs.get(0).getAttributeCode().substring("PRI_IS_".length()));
+			Map<String,Map<String,BaseEntity>> defMapping =RulesUtils.defs;
+			Map<String,BaseEntity> beMapping = defMapping.get(this.gennyToken.getRealm());
+			log.info("DEBUG, reaml code is " +  be.getRealm());
+			log.info("DEBUG, beMapping is" + beMapping);
+
+			String attrCode = isAs.get(0).getAttributeCode();
+			log.info("DEBUG, attribute code is " +  attrCode);
+
+			String trimedAttrCode = attrCode.substring("PRI_IS_".length());
+			log.info("DEBUG, trimmed attribute code is " +  trimedAttrCode);
+
+			BaseEntity defBe = beMapping.get("DEF_" + trimedAttrCode);
+
+//			BaseEntity defBe = RulesUtils.defs.get(be.getRealm())
+//					.get("DEF_" + isAs.get(0).getAttributeCode().substring("PRI_IS_".length()));
 			if (defBe == null) {
 				log.error(
 						"No such DEF called " + "DEF_" + isAs.get(0).getAttributeCode().substring("PRI_IS_".length()));
@@ -3308,18 +3359,18 @@ public class BaseEntityUtils implements Serializable {
 			String mergedCode = "DEF_" + isAs.stream().sorted(Comparator.comparing(EntityAttribute::getAttributeCode))
 					.map(ea -> ea.getAttributeCode()).collect(Collectors.joining("_"));
 			mergedCode = mergedCode.replaceAll("_PRI_IS_DELETED", "");
-			BaseEntity mergedBe = RulesUtils.defs.get(be.getRealm()).get(mergedCode);
+			BaseEntity mergedBe = RulesUtils.defs.get(this.gennyToken.getRealm()).get(mergedCode);
 			if (mergedBe == null) {
 				log.info("Detected NEW Combination DEF - " + mergedCode);
 				// Get primary PRI_IS
 				Optional<EntityAttribute> topDog = be.getHighestEA("PRI_IS_");
 				if (topDog.isPresent()) {
 					String topCode = topDog.get().getAttributeCode().substring("PRI_IS_".length());
-					BaseEntity defTopDog = RulesUtils.defs.get(be.getRealm()).get("DEF_" + topCode);
+					BaseEntity defTopDog = RulesUtils.defs.get(this.gennyToken.getRealm()).get("DEF_" + topCode);
 					mergedBe = new BaseEntity(mergedCode, mergedCode); // So this combination DEF inherits top dogs name
 					// now copy all the combined DEF eas.
 					for (EntityAttribute isea : isAs) {
-						BaseEntity defEa = RulesUtils.defs.get(be.getRealm())
+						BaseEntity defEa = RulesUtils.defs.get(this.gennyToken.getRealm())
 								.get("DEF_" + isea.getAttributeCode().substring("PRI_IS_".length()));
 						if (defEa != null) {
 							for (EntityAttribute ea : defEa.getBaseEntityAttributes()) {
@@ -3335,7 +3386,7 @@ public class BaseEntityUtils implements Serializable {
 							return null;
 						}
 					}
-					RulesUtils.defs.get(be.getRealm()).put(mergedCode, mergedBe);
+					RulesUtils.defs.get(this.gennyToken.getRealm()).put(mergedCode, mergedBe);
 					return mergedBe;
 
 				} else {
@@ -3569,10 +3620,10 @@ public class BaseEntityUtils implements Serializable {
 			}
 			putBe.setName(name);			
 			putBe.setStatus(status);
-			putBe.setBaseEntityAttributes(null);
+			//putBe.setBaseEntityAttributes(null);
 			be.setName(name);
 			be.setStatus(status);
-			VertxUtils.writeCachedJson(be.getRealm(),be.getCode(), JsonUtils.toJson(be));			
+			VertxUtils.writeCachedJson(this.gennyToken.getRealm(),be.getCode(), JsonUtils.toJson(be));			
 			saveBaseEntity(putBe);
 		}
 		return be;

@@ -123,8 +123,10 @@ public class MergeUtil {
 							
 							BaseEntity be = (BaseEntity)value;
 							String attributeCode = entityArr[1];
+
 							Object attributeValue = be.getValue(attributeCode, null);
 							log.info("context: " + keyCode + ", attr: " + attributeCode + ", value: " + attributeValue);
+
 
 							Matcher matchFormat = null;
 							if (entityArr != null && entityArr.length > 2) {
@@ -164,15 +166,18 @@ public class MergeUtil {
 								}
 
 							} else if (attributeValue instanceof java.lang.String){
-
+								String result = null;
 								if (matchFormat != null && matchFormat.find()) {
-									log.info("This String attribute code ::"+attributeCode+ " needs to be formatted and the format is ::"+entityArr[2]);
-									return getFormattedString((String) attributeValue, matchFormat.group(1));
+									result  =  getFormattedString((String) attributeValue, matchFormat.group(1));
+									log.info("This String attribute code ::" + attributeCode
+									+ " needs to be formatted " + "and the format is ::" + entityArr[2]
+									+ ", result is:" + result);
 								} else {
-									log.info("This String attribute code ::"+attributeCode+ " needs no formatting");
-									return getBaseEntityAttrValueAsString(be, attributeCode);
+									result =  getBaseEntityAttrValueAsString(be, attributeCode);
+									log.info("This String attribute code ::" + attributeCode
+									+ " needs no formatting, result is:" + result);
 								}
-
+								return result;
 							} else if (attributeValue instanceof java.lang.Boolean) {
 								return (Boolean) attributeValue;
 							} else if (attributeValue instanceof java.lang.Integer) {
