@@ -445,7 +445,7 @@ public class BaseEntityUtils implements Serializable {
 							ea.setAttribute(attribute);
 						} else {
 							RulesUtils.loadAllAttributesIntoCache(this.token);
-							attribute = attribute = RulesUtils.getAttribute(ea.getAttributeCode(), this.getGennyToken());
+							attribute  = RulesUtils.getAttribute(ea.getAttributeCode(), this.getGennyToken());
 							if (attribute != null) {
 								ea.setAttribute(attribute);
 							} else {
