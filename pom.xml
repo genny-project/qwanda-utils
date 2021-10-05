@@ -79,11 +79,6 @@
 	</distributionManagement>
 	<repositories>
 		<repository>
-			<id>JBoss repository</id>
-			<url>https://repository.jboss.org/nexus/content/groups/public/</url>
-			<name>Repository for JBoss</name>
-		</repository>
-		<repository>
 			<id>java.net</id>
 			<url>https://maven.java.net/content/repositories/public/</url>
 		</repository>
