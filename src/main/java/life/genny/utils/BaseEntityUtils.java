@@ -440,12 +440,12 @@ public class BaseEntityUtils implements Serializable {
 				// or raw attributes
 				for (EntityAttribute ea : be.getBaseEntityAttributes()) {
 					if (ea != null) {
-						Attribute attribute = RulesUtils.realmAttributeMap.get(this.getGennyToken().getRealm()).get(ea.getAttributeCode());
+						Attribute attribute = RulesUtils.getAttribute(ea.getAttributeCode(), this.getGennyToken());
 						if (attribute != null) {
 							ea.setAttribute(attribute);
 						} else {
 							RulesUtils.loadAllAttributesIntoCache(this.token);
-							attribute = RulesUtils.realmAttributeMap.get(this.getGennyToken().getRealm()).get(ea.getAttributeCode());
+							attribute = attribute = RulesUtils.getAttribute(ea.getAttributeCode(), this.getGennyToken());
 							if (attribute != null) {
 								ea.setAttribute(attribute);
 							} else {
