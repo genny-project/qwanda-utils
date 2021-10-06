@@ -386,10 +386,10 @@ public class MergeUtil {
 	}
 
 	/**
-	 * Author - Jasper Robison (27/07/21)
-	 *
 	 * This is a utility used to format strings during merging.
 	 * Feel free to add some cool little string formatting tools below.
+	 *
+	 * Author - Jasper Robison (27/07/21)
 	 *
 	 * @param	stringToBeFormatted		The string we want to format
 	 * @param	format					how it should be formatted (can be dot seperated string for multiple)
@@ -424,14 +424,15 @@ public class MergeUtil {
 	}
 
 	/**
-	 * Author - Jasper Robison (30/09/2021)
-	 *
 	 * This method is used to find any associated contexts. 
 	 * This allows us to provide a default set of context associations
 	 * that the system can fetch for us in order to reduce code in rules 
 	 * and other areas.
 	 *
-	 * @param	ctxMap	the context map to add to, and fetch associations from.
+	 * Author - Jasper Robison (30/09/2021)
+	 *
+	 * @param	beUtils					Standard genny utility
+	 * @param	ctxMap					the context map to add to, and fetch associations from.
 	 * @param	contextAssociationJson	the json instructions for fetching associations.
 	 */
 	public static void addAssociatedContexts(BaseEntityUtils beUtils, HashMap<String, Object> ctxMap, String contextAssociationJson) {
