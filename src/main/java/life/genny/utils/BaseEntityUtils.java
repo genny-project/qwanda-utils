@@ -1,45 +1,10 @@
 package life.genny.utils;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Type;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.naming.NamingException;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
-import org.mindrot.jbcrypt.BCrypt;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import java.time.format.DateTimeFormatter;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
@@ -62,12 +27,30 @@ import life.genny.qwanda.message.QBulkPullMessage;
 import life.genny.qwanda.message.QDataAnswerMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
 import life.genny.qwanda.message.QMessage;
-import life.genny.qwandautils.GennySettings;
-import life.genny.qwandautils.JsonUtils;
-import life.genny.qwandautils.QwandaUtils;
+import life.genny.qwandautils.*;
 import life.genny.utils.Layout.LayoutUtils;
-import life.genny.qwandautils.KeycloakUtils;
-import life.genny.qwandautils.ANSIColour;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Logger;
+import org.mindrot.jbcrypt.BCrypt;
+
+import javax.naming.NamingException;
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Type;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class BaseEntityUtils implements Serializable {
 
@@ -1130,6 +1113,16 @@ public class BaseEntityUtils implements Serializable {
 	 */
 	public String cleanUpAttributeValue(String value) {
 		String cleanCode = value.replace("\"", "").replace("[", "").replace("]", "").replace(" ", "");
+		return cleanCode;
+	}
+
+	/**
+	 * Removes only symbols like \,[,] if exists
+	 * @param value
+	 * @return
+	 */
+	public String cleanUpSymbols(String value) {
+		String cleanCode = value.replace("\"", "").replace("[", "").replace("]", "");
 		return cleanCode;
 	}
 
