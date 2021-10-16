@@ -3315,10 +3315,7 @@ public class BaseEntityUtils implements Serializable {
 
 		if (isAs.size() == 1) {
 			// Easy
-			Map<String,Map<String,BaseEntity>> defMapping =RulesUtils.defs;
-			Map<String,BaseEntity> beMapping = defMapping.get(this.gennyToken.getRealm());
-			log.info("DEBUG, reaml code is " +  be.getRealm());
-
+			Map<String,BaseEntity> beMapping = RulesUtils.getDefMap(gennyToken);
 			String attrCode = isAs.get(0).getAttributeCode();
 
 			String trimedAttrCode = attrCode.substring("PRI_IS_".length());

@@ -17,7 +17,7 @@ public class GennySettings {
 	public static int ACCESS_TOKEN_EXPIRY_LIMIT_SECONDS = 60;
 	
 
-	public static String hostIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : (System.getenv("MYIP") != null ? System.getenv("MYIP"): "alyson.genny.life");   // remember to set up this local IP on the host
+	public static String hostIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : (System.getenv("MYIP") != null ? System.getenv("MYIP") : "alyson.genny.life");   // remember to set up this local IP on the host
 	public static String myIP = System.getenv("MYIP") != null ? System.getenv("MYIP") : System.getenv("HOSTIP");   // remember to set up this local IP on the host
 	public static String cacheApiPort = System.getenv("CACHE_API_PORT") != null ? System.getenv("CACHE_API_PORT") : "8280";
 	public static String apiPort = System.getenv("API_PORT") != null ? System.getenv("API_PORT") : "8088";
