@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
@@ -20,8 +21,11 @@ import life.genny.qwanda.Answer;
 import life.genny.qwanda.Link;
 import life.genny.qwanda.attribute.Attribute;
 import life.genny.qwanda.attribute.AttributeText;
+import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.EntityEntity;
+import life.genny.qwanda.entity.SearchEntity;
+import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.message.QDataAnswerMessage;
 import life.genny.qwanda.message.QDataAttributeMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
@@ -859,6 +863,57 @@ public class RulesUtils {
         return loadAllAttributesIntoCache(new GennyToken(token));
     }
 
+    public static Map<String,BaseEntity> getDefMap(final GennyToken userToken) {
+    	if ((defs == null) || (defs.isEmpty())) {
+    		// Load in Defs
+    		try {
+				setUpDefs(userToken);
+				return defs.get(userToken.getRealm());
+			} catch (BadDataException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
+    	return null;
+    }
+    
+    public static void setUpDefs(final GennyToken userToken) throws BadDataException {
+        BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
+ 
+        SearchEntity searchBE = new SearchEntity("SBE_DEF", "DEF check")
+                .addSort("PRI_NAME", "Created", SearchEntity.Sort.ASC)
+                .addFilter("PRI_CODE", SearchEntity.StringFilter.LIKE, "DEF_%")
+                .addColumn("PRI_CODE", "Name");
+
+        searchBE.setRealm(userToken.getRealm());
+        searchBE.setPageStart(0);
+        searchBE.setPageSize(1000);
+
+        List<BaseEntity> items = beUtils.getBaseEntitys(searchBE);
+        // Load up RuleUtils.defs
+
+        RulesUtils.defs.put(userToken.getRealm(),new ConcurrentHashMap<String,BaseEntity>());
+
+        for (BaseEntity item : items) {
+//            if the item is a def appointment, then add a default datetime for the start (Mandatory)
+            if (item.getCode().equals("DEF_APPOINTMENT")){
+                Attribute attribute = new AttributeText("DFT_PRI_START_DATETIME", "Default Start Time");
+                attribute.setRealm(userToken.getRealm());
+                EntityAttribute newEA = new EntityAttribute(item, attribute, 1.0, "2021-07-28 00:00:00");
+                item.addAttribute(newEA);
+
+                Optional<EntityAttribute> ea = item.findEntityAttribute("ATT_PRI_START_DATETIME");
+                if (ea.isPresent()){
+                    ea.get().setValue(true);
+                }
+            }
+
+//            Save the BaseEntity created
+            item.setFastAttributes(true); // make fast
+            RulesUtils.defs.get(userToken.getRealm()).put(item.getCode(),item);
+            log.info("Saving ("+userToken.getRealm()+") DEF "+item.getCode());
+        }
+    }
  
     public static Attribute getAttribute(final String attributeCode, final String token) {
     	GennyToken gennyToken = new GennyToken(token);
