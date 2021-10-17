@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -868,13 +869,16 @@ public class RulesUtils {
     		// Load in Defs
     		try {
 				setUpDefs(userToken);
-				return defs.get(userToken.getRealm());
 			} catch (BadDataException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-    	}
-    	return null;
+        }
+
+        if (defs != null) {
+            return defs.getOrDefault(userToken.getRealm(), null);
+        }
+        return Collections.emptyMap();
     }
     
     public static void setUpDefs(final GennyToken userToken) throws BadDataException {
