@@ -3622,5 +3622,15 @@ public class BaseEntityUtils implements Serializable {
 		}
 		return be;
 	}
+
+	/**
+	 * Removes only symbols like \,[,] if exists
+	 * @param value
+	 * @return
+	 */
+	public String cleanUpSymbols(String value) {
+		String cleanCode = value.replace("\"", "").replace("[", "").replace("]", "");
+		return cleanCode;
+	}
 	
 }
