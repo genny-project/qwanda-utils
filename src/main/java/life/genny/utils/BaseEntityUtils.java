@@ -1512,13 +1512,17 @@ public class BaseEntityUtils implements Serializable {
 		return getBaseEntityByCode(newBe.getCode());
 	}
 
-	public void duplicateAttributes(final BaseEntity oldBe, final BaseEntity newBe) {
+	public void duplicateAttributes(final BaseEntity sourceBe, final BaseEntity targetBe) {
 
 		List<Answer> duplicateAnswerList = new CopyOnWriteArrayList<>();
 
-		for (EntityAttribute ea : oldBe.getBaseEntityAttributes()) {
-			duplicateAnswerList
-					.add(new Answer(newBe.getCode(), newBe.getCode(), ea.getAttributeCode(), ea.getAsString()));
+		for (EntityAttribute ea : sourceBe.getBaseEntityAttributes()) {
+			// PRI_KEYCLOAK_UUID, PRI_UUID value equals to its baseentityCode, leave it as it is
+			if(ea.getAsString().equals(sourceBe.getCode())) {
+				duplicateAnswerList.add(new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(), targetBe.getCode()));
+			} else {
+				duplicateAnswerList.add(new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(), ea.getAsString()));
+			}
 		}
 
 		this.saveAnswers(duplicateAnswerList);
