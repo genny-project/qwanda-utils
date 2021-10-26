@@ -1518,9 +1518,10 @@ public class BaseEntityUtils implements Serializable {
 
 		for (EntityAttribute ea : sourceBe.getBaseEntityAttributes()) {
 			// PRI_KEYCLOAK_UUID, PRI_UUID value equals to its baseentityCode, leave it as it is
-			if(ea.getAsString() != null && ea.getAsString().contains(sourceBe.getCode())) {
-				log.info("AttributeCode:" +  ea.getAttributeCode() + "sourceValue:" + ea.getAsString() +" contains sourceCode:" + sourceBe.getCode()
-				+ ", we can't use it, use target code:" + targetBe.getCode() + " as value");
+			if(ea.getAttributeCode().equals("PRI_UUID")) {
+				// PER_xxxx, remove PER_
+				duplicateAnswerList.add(new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(), targetBe.getCode().substring(4)));
+			}  else if (ea.getAttributeCode().equals("PRI_KEYCLOAK_UUID")) {
 				duplicateAnswerList.add(new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(), targetBe.getCode()));
 			} else {
 				duplicateAnswerList.add(new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(), ea.getAsString()));
