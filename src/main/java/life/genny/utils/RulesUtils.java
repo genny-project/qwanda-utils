@@ -833,8 +833,9 @@ public class RulesUtils {
                 println("LOADING ATTRIBUTES FROM API");
                 String jsonString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/attributes", token.getToken());
                 if (!StringUtils.isBlank(jsonString)) {
-                    VertxUtils.writeCachedJson(token.getRealm(), "attributes", jsonString, token.getToken());
 
+                	 VertxUtils.writeCachedJson(token.getRealm(), "attributes", jsonString, token.getToken());
+                	 
                     attributesMsg = JsonUtils.fromJson(jsonString, QDataAttributeMessage.class);
                     Attribute[] attributeArray = attributesMsg.getItems();
 
@@ -847,7 +848,8 @@ public class RulesUtils {
                         attributeMap.put(attribute.getCode(), attribute);
                     }
                    // realmAttributeMap.put(realm, attributeMap);
-                    
+                   
+
                     println("All the attributes have been loaded from api in" + attributeMap.size() + " attributes");
                 } else {
                     log.error("NO ATTRIBUTES LOADED FROM API");
