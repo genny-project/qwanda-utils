@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
@@ -52,7 +54,9 @@ public class RulesUtils {
     public static final String ANSI_BOLD = "\u001b[1m";
 
     static public Map<String,Map<String, Attribute>> realmAttributeMap = new ConcurrentHashMap<>();
-    static public QDataAttributeMessage attributesMsg = null;
+ 
+    static public Map<String,QDataAttributeMessage> attributesMsg = new ConcurrentHashMap<>();
+    static public Map<String,QDataAttributeMessage> defAttributesMap = new ConcurrentHashMap<>();
 
     static public Map<String,Map<String,BaseEntity>> defs = new ConcurrentHashMap<>();  // realm and DEF lookup
 
@@ -812,13 +816,15 @@ public class RulesUtils {
     public static QDataAttributeMessage loadAllAttributesIntoCache(final GennyToken token) {
         try {
             boolean cacheWorked = false;
+            QDataAttributeMessage ret = null;
             String realm = token.getRealm();
             println("All the attributes about to become loaded ... for realm "+realm);
             JsonObject json = VertxUtils.readCachedJson(realm,"attributes",token.getToken());
             if ("ok".equals(json.getString("status"))) {
                 //	println("LOADING ATTRIBUTES FROM CACHE!");
-                attributesMsg = JsonUtils.fromJson(json.getString("value"), QDataAttributeMessage.class);
-                Attribute[] attributeArray = attributesMsg.getItems();
+                QDataAttributeMessage attMsg = JsonUtils.fromJson(json.getString("value"), QDataAttributeMessage.class);
+                ret = attMsg;
+                Attribute[] attributeArray = attMsg.getItems();
 
                 if (!realmAttributeMap.containsKey(realm)) {
                 	realmAttributeMap.put(realm, new ConcurrentHashMap<String,Attribute>());
@@ -836,8 +842,9 @@ public class RulesUtils {
 
                 	 VertxUtils.writeCachedJson(token.getRealm(), "attributes", jsonString, token.getToken());
                 	 
-                    attributesMsg = JsonUtils.fromJson(jsonString, QDataAttributeMessage.class);
-                    Attribute[] attributeArray = attributesMsg.getItems();
+                	 QDataAttributeMessage attMsg  = JsonUtils.fromJson(jsonString, QDataAttributeMessage.class);
+                	 ret = attMsg;
+                    Attribute[] attributeArray = attMsg.getItems();
 
                     if (!realmAttributeMap.containsKey(realm)) {
                     	realmAttributeMap.put(realm, new ConcurrentHashMap<String,Attribute>());
@@ -856,7 +863,7 @@ public class RulesUtils {
                 }
             }
 
-            return attributesMsg;
+            return ret;
         } catch (Exception e) {
             log.error("Attributes API not available");
         }
@@ -898,7 +905,8 @@ public class RulesUtils {
         List<BaseEntity> items = beUtils.getBaseEntitys(searchBE);
         // Load up RuleUtils.defs
 
-        RulesUtils.defs.put(userToken.getRealm(),new ConcurrentHashMap<String,BaseEntity>());
+        Set<Attribute> defAttributes = new HashSet<>();
+        ConcurrentHashMap<String,BaseEntity> newItems = new ConcurrentHashMap<>();
 
         for (BaseEntity item : items) {
 //            if the item is a def appointment, then add a default datetime for the start (Mandatory)
@@ -913,12 +921,27 @@ public class RulesUtils {
                     ea.get().setValue(true);
                 }
             }
-
-//            Save the BaseEntity created
+            // Load all attributes into the defAttributes
+            for (EntityAttribute ea : item.getBaseEntityAttributes()) {
+            	if (ea.getAttributeCode().startsWith("ATT_")||ea.getAttributeCode().startsWith("LNK_")||ea.getAttributeCode().startsWith("BCE_")) {
+            		Attribute defAttribute = getAttribute(ea.getAttributeCode().substring("ATT_".length()),userToken);
+            		defAttributes.add(defAttribute);
+            	}
+            }
+            
+           //  Save the BaseEntity created
             item.setFastAttributes(true); // make fast
-            RulesUtils.defs.get(userToken.getRealm()).put(item.getCode(),item);
+            newItems.put(item.getCode(), item);
             log.info("Saving ("+userToken.getRealm()+") DEF "+item.getCode());
         }
+        // Now switch in the new stuff
+        RulesUtils.defs.get(userToken.getRealm()).putAll(newItems);
+        // Now set the QDataAttributeMessage to store only the defs for this realm
+        QDataAttributeMessage qdamsg = new QDataAttributeMessage(defAttributes.toArray(new Attribute[0]));
+        qdamsg.setReplace(true);
+        RulesUtils.defAttributesMap.put(userToken.getRealm(),qdamsg);
+        
+        
     }
  
     public static Attribute getAttribute(final String attributeCode, final String token) {
@@ -932,7 +955,7 @@ public class RulesUtils {
     		loadAllAttributesIntoCache(gennyToken);
     	}
         Attribute ret = realmAttributeMap.get(gennyToken.getRealm()).get(attributeCode);
-        if (ret == null) {
+        if ((ret == null)&&(!attributeCode.startsWith("PRI_APP_"))) { // ignore the dynamic attributes
             if (attributeCode.startsWith("SRT_") || attributeCode.startsWith("RAW_")) {
                 ret = new AttributeText(attributeCode, attributeCode);
             } else {
