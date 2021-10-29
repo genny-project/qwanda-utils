@@ -449,11 +449,12 @@ public class BaseEntityUtils implements Serializable {
 							if (attribute != null) {
 								ea.setAttribute(attribute);
 							} else {
+								if (!ea.getAttributeCode().startsWith("PRI_APP_")) {
 								log.error("Cannot get Attribute - " + ea.getAttributeCode());
 
 								Attribute dummy = new AttributeText(ea.getAttributeCode(), ea.getAttributeCode());
 								ea.setAttribute(dummy);
-
+								}
 							}
 						}
 					}
