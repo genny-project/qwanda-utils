@@ -940,7 +940,11 @@ public class RulesUtils {
             for (EntityAttribute ea : item.getBaseEntityAttributes()) {
             	if (ea.getAttributeCode().startsWith("ATT_")||ea.getAttributeCode().startsWith("LNK_")||ea.getAttributeCode().startsWith("BCE_")) {
             		Attribute defAttribute = getAttribute(ea.getAttributeCode().substring("ATT_".length()),userToken);
-            		defAttributes.add(defAttribute);
+            		if (defAttribute!=null) {
+            			defAttributes.add(defAttribute);
+            		} else {
+            			log.error("Attribute not found for "+ea.getAttributeCode());
+            		}
             	}
             }
             
