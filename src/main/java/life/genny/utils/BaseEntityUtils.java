@@ -204,12 +204,12 @@ public class BaseEntityUtils implements Serializable {
 			// Establish all mandatory base entity attributes
 			for (EntityAttribute ea : defBE.getBaseEntityAttributes()) {
 				if (ea.getAttributeCode().startsWith("ATT_")) {
-					
+
 					String attrCode = ea.getAttributeCode().substring("ATT_".length());
 					Attribute attribute = RulesUtils.getAttribute(attrCode, this.getGennyToken().getToken());
 
 					if (attribute != null) {
-												
+
 						// if not already filled in
 						if (!item.containsEntityAttribute(attribute.getCode())) {
 							// Find any default val for this Attr
@@ -239,8 +239,9 @@ public class BaseEntityUtils implements Serializable {
 
 		this.saveBaseEntity(defBE, item);
 		// Force the type of baseentity
-		Attribute attributeDEF = RulesUtils.getAttribute("PRI_IS_"+defBE.getCode().substring("DEF_".length()), this.getGennyToken().getToken());
-		item = saveAnswer(new Answer(item,item,attributeDEF,"TRUE")); // force the be type
+		Attribute attributeDEF = RulesUtils.getAttribute("PRI_IS_" + defBE.getCode().substring("DEF_".length()),
+				this.getGennyToken().getToken());
+		item = saveAnswer(new Answer(item, item, attributeDEF, "TRUE")); // force the be type
 
 		return item;
 	}
@@ -386,7 +387,8 @@ public class BaseEntityUtils implements Serializable {
 		}
 
 		for (String capabilityCode : capabilityCodes) {
-			Attribute capabilityAttribute = RulesUtils.realmAttributeMap.get(this.getGennyToken().getRealm()).get("CAP_" + capabilityCode);
+			Attribute capabilityAttribute = RulesUtils.realmAttributeMap.get(this.getGennyToken().getRealm())
+					.get("CAP_" + capabilityCode);
 			try {
 				role.addAttribute(capabilityAttribute, 1.0, "TRUE");
 			} catch (BadDataException e) {
@@ -440,20 +442,25 @@ public class BaseEntityUtils implements Serializable {
 				// or raw attributes
 				for (EntityAttribute ea : be.getBaseEntityAttributes()) {
 					if (ea != null) {
-						Attribute attribute = RulesUtils.getAttribute(ea.getAttributeCode(), this.getGennyToken());
-						if (attribute != null) {
-							ea.setAttribute(attribute);
-						} else {
-							RulesUtils.loadAllAttributesIntoCache(this.token);
-							attribute  = RulesUtils.getAttribute(ea.getAttributeCode(), this.getGennyToken());
+						if (!ea.getAttributeCode().startsWith("PRI_APP_")) { // ignore bad attributes
+							Attribute attribute = RulesUtils.getAttribute(ea.getAttributeCode(), this.getGennyToken());
 							if (attribute != null) {
 								ea.setAttribute(attribute);
 							} else {
-								log.error("Cannot get Attribute - " + ea.getAttributeCode());
 
-								Attribute dummy = new AttributeText(ea.getAttributeCode(), ea.getAttributeCode());
-								ea.setAttribute(dummy);
+								RulesUtils.loadAllAttributesIntoCache(this.token);
+								attribute = RulesUtils.getAttribute(ea.getAttributeCode(), this.getGennyToken());
+								if (attribute != null) {
+									ea.setAttribute(attribute);
+								} else {
+									if (!ea.getAttributeCode().startsWith("PRI_APP_")) {
+										log.error("Cannot get Attribute - " + ea.getAttributeCode());
 
+										Attribute dummy = new AttributeText(ea.getAttributeCode(),
+												ea.getAttributeCode());
+										ea.setAttribute(dummy);
+									}
+								}
 							}
 						}
 					}
@@ -474,19 +481,21 @@ public class BaseEntityUtils implements Serializable {
 //				return target; // already there, no need to send
 //			}
 //		}
-		
+
 		// Filter Non-valid answers using DEF
 		if (answerValidForDEF(answer)) {
 			BaseEntity ret = addAnswer(answer);
 
 			try {
 				String jsonStr = "";
-				if (GennySettings.forceEventBusApi) { // This is to handle junit Answers that need to use the standard QDataAnswerMessage format
+				if (GennySettings.forceEventBusApi) { // This is to handle junit Answers that need to use the standard
+														// QDataAnswerMessage format
 //					QDataAnswerMessage msg = new QDataAnswerMessage(answer);
 //					msg.setToken( this.getGennyToken().getToken());
 //					jsonStr = JsonUtils.toJson(msg);
 					try {
-						QwandaUtils.apiPostEntity2(qwandaServiceUrl + "/qwanda/answers", JsonUtils.toJson(answer), this.getGennyToken().getToken(),null);
+						QwandaUtils.apiPostEntity2(qwandaServiceUrl + "/qwanda/answers", JsonUtils.toJson(answer),
+								this.getGennyToken().getToken(), null);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -495,10 +504,10 @@ public class BaseEntityUtils implements Serializable {
 					JsonObject json = new JsonObject(JsonUtils.toJson(answer));
 					json.put("token", this.getGennyToken().getToken());
 					jsonStr = json.toString();
-				
-				log.debug("Saving answer to messageBus");
-				VertxUtils.eb.writeMsg("answer", jsonStr);
-			}
+
+					log.debug("Saving answer to messageBus");
+					VertxUtils.eb.writeMsg("answer", jsonStr);
+				}
 				log.debug("Finished saving answer");
 			} catch (NamingException e) {
 				log.error("Error in saving answer through kafka :::: " + e.getMessage());
@@ -826,10 +835,11 @@ public class BaseEntityUtils implements Serializable {
 		T be = null;
 
 		if (StringUtils.isEmpty(code)) {
-			String str = code == null?"null code":"empty code";
+			String str = code == null ? "null code" : "empty code";
 			log.error("Cannot pass " + str);
 			try {
-				throw new DebugException("BaseEntityUtils: BaseEntityByCode: The passed code is empty, supplying trace");
+				throw new DebugException(
+						"BaseEntityUtils: BaseEntityByCode: The passed code is empty, supplying trace");
 			} catch (DebugException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1517,14 +1527,18 @@ public class BaseEntityUtils implements Serializable {
 		List<Answer> duplicateAnswerList = new CopyOnWriteArrayList<>();
 
 		for (EntityAttribute ea : sourceBe.getBaseEntityAttributes()) {
-			// PRI_KEYCLOAK_UUID, PRI_UUID value equals to its baseentityCode, leave it as it is
-			if(ea.getAttributeCode().equals("PRI_UUID")) {
+			// PRI_KEYCLOAK_UUID, PRI_UUID value equals to its baseentityCode, leave it as
+			// it is
+			if (ea.getAttributeCode().equals("PRI_UUID")) {
 				// PER_xxxx, remove PER_
-				duplicateAnswerList.add(new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(), targetBe.getCode().substring(4)));
-			}  else if (ea.getAttributeCode().equals("PRI_KEYCLOAK_UUID")) {
-				duplicateAnswerList.add(new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(), targetBe.getCode()));
+				duplicateAnswerList.add(new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(),
+						targetBe.getCode().substring(4)));
+			} else if (ea.getAttributeCode().equals("PRI_KEYCLOAK_UUID")) {
+				duplicateAnswerList.add(
+						new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(), targetBe.getCode()));
 			} else {
-				duplicateAnswerList.add(new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(), ea.getAsString()));
+				duplicateAnswerList.add(
+						new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(), ea.getAsString()));
 			}
 		}
 
@@ -1747,7 +1761,9 @@ public class BaseEntityUtils implements Serializable {
 				ret = QwandaUtils.apiPostEntity(endpointUrl, JsonUtils.toJson(be), this.token);
 
 				boolean isExist = checkIfBaseEntityInCache(be.getCode());
-				if(!isExist) log.warn("Can't find BaseEntityCode:" + be.getCode() + " from cache after call qwanda endpint:" + qwandaServiceUrl);
+				if (!isExist)
+					log.warn("Can't find BaseEntityCode:" + be.getCode() + " from cache after call qwanda endpint:"
+							+ qwandaServiceUrl);
 
 				saveBaseEntityAttributes(be);
 			}
@@ -1761,8 +1777,8 @@ public class BaseEntityUtils implements Serializable {
 	private boolean checkIfBaseEntityInCache(String beCode) {
 		int count = 3;
 		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-		while( count > 0) {
-			if (VertxUtils.readCachedJson(realm, beCode) == null){
+		while (count > 0) {
+			if (VertxUtils.readCachedJson(realm, beCode) == null) {
 				count--;
 				try {
 					TimeUnit.SECONDS.sleep(1);
@@ -1775,8 +1791,8 @@ public class BaseEntityUtils implements Serializable {
 		}
 		return false;
 	}
-	
-	public String saveBaseEntity(BaseEntity defBe,BaseEntity be) { // TODO: Ugly
+
+	public String saveBaseEntity(BaseEntity defBe, BaseEntity be) { // TODO: Ugly
 		String ret = null;
 		try {
 			if (be != null) {
@@ -3268,7 +3284,6 @@ public class BaseEntityUtils implements Serializable {
 			return defBe;
 		}
 
-
 		Set<EntityAttribute> newMerge = new HashSet<>();
 		List<EntityAttribute> isAs = be.findPrefixEntityAttributes("PRI_IS_");
 
@@ -3304,7 +3319,7 @@ public class BaseEntityUtils implements Serializable {
 					log.warn("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
 					// don't remove until we work it out...
 					try {
-						throw new DebugException("Bad DEF "+ ea.getAttributeCode());
+						throw new DebugException("Bad DEF " + ea.getAttributeCode());
 					} catch (DebugException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -3322,7 +3337,7 @@ public class BaseEntityUtils implements Serializable {
 
 		if (isAs.size() == 1) {
 			// Easy
-			Map<String,BaseEntity> beMapping = RulesUtils.getDefMap(gennyToken);
+			Map<String, BaseEntity> beMapping = RulesUtils.getDefMap(gennyToken);
 			String attrCode = isAs.get(0).getAttributeCode();
 
 			String trimedAttrCode = attrCode.substring("PRI_IS_".length());
@@ -3510,7 +3525,7 @@ public class BaseEntityUtils implements Serializable {
 	public Boolean answerValidForDEF(Answer answer) {
 		BaseEntity target = this.getBaseEntityByCode(answer.getTargetCode());
 		if (target == null) {
-			log.error("answerValidForDEF: TargetCode "+answer.getTargetCode()+" does not exist");
+			log.error("answerValidForDEF: TargetCode " + answer.getTargetCode() + " does not exist");
 			return false; // Target does not exist
 		}
 		BaseEntity defBE = this.getDEF(target);
@@ -3603,28 +3618,26 @@ public class BaseEntityUtils implements Serializable {
 		return null;
 	}
 
-	public BaseEntity saveNameStatus(String code, String name, EEntityStatus status)
-	{
+	public BaseEntity saveNameStatus(String code, String name, EEntityStatus status) {
 		BaseEntity be = getBaseEntityByCode(code);
-		return saveNameStatus(be,name,status);
+		return saveNameStatus(be, name, status);
 	}
-	
-	public BaseEntity saveNameStatus(BaseEntity be, String name, EEntityStatus status)
-	{
+
+	public BaseEntity saveNameStatus(BaseEntity be, String name, EEntityStatus status) {
 		if (be != null) {
-			BaseEntity putBe = new BaseEntity(be.getCode(),name);	
+			BaseEntity putBe = new BaseEntity(be.getCode(), name);
 			if (name == null) {
 				name = be.getName();
 			}
 			if (status == null) {
 				status = be.getStatus();
 			}
-			putBe.setName(name);			
+			putBe.setName(name);
 			putBe.setStatus(status);
-			//putBe.setBaseEntityAttributes(null);
+			// putBe.setBaseEntityAttributes(null);
 			be.setName(name);
 			be.setStatus(status);
-			VertxUtils.writeCachedJson(this.gennyToken.getRealm(),be.getCode(), JsonUtils.toJson(be));			
+			VertxUtils.writeCachedJson(this.gennyToken.getRealm(), be.getCode(), JsonUtils.toJson(be));
 			saveBaseEntity(putBe);
 		}
 		return be;
@@ -3632,6 +3645,7 @@ public class BaseEntityUtils implements Serializable {
 
 	/**
 	 * Removes only symbols like \,[,] if exists
+	 * 
 	 * @param value
 	 * @return
 	 */
@@ -3639,5 +3653,5 @@ public class BaseEntityUtils implements Serializable {
 		String cleanCode = value.replace("\"", "").replace("[", "").replace("]", "");
 		return cleanCode;
 	}
-	
+
 }
