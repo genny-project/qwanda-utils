@@ -825,7 +825,7 @@ public class RulesUtils {
                 QDataAttributeMessage attMsg = JsonUtils.fromJson(json.getString("value"), QDataAttributeMessage.class);
                 ret = attMsg;
                 Attribute[] attributeArray = attMsg.getItems();
-
+                // Now set the return message to the DEF attributes (these are the ones used */
                 if (!realmAttributeMap.containsKey(realm)) {
                 	realmAttributeMap.put(realm, new ConcurrentHashMap<String,Attribute>());
                 }
@@ -833,6 +833,16 @@ public class RulesUtils {
                 for (Attribute attribute : attributeArray) {
                     attributeMap.put(attribute.getCode(), attribute);
                 }
+                if (!defAttributesMap.containsKey(realm)) {
+                	//setUpDefs(token);                    	
+                }
+                ret = defAttributesMap.get(realm);
+                if (ret == null) {
+                	setUpDefs(token);
+                	ret = defAttributesMap.get(realm);
+                }
+                ret.setToken(token.getToken());
+
                // realmAttributeMap.put(realm, attributeMap);
                 println("All the attributes have been loaded in "+attributeMap.size()+" attributes");
             } else {
@@ -845,7 +855,7 @@ public class RulesUtils {
                 	 QDataAttributeMessage attMsg  = JsonUtils.fromJson(jsonString, QDataAttributeMessage.class);
                 	 ret = attMsg;
                     Attribute[] attributeArray = attMsg.getItems();
-
+ 
                     if (!realmAttributeMap.containsKey(realm)) {
                     	realmAttributeMap.put(realm, new ConcurrentHashMap<String,Attribute>());
                     }
@@ -856,6 +866,11 @@ public class RulesUtils {
                     }
                    // realmAttributeMap.put(realm, attributeMap);
                    
+                    if (!defAttributesMap.containsKey(realm)) {
+                  //  	setUpDefs(token);                    	
+                    }
+                    ret = defAttributesMap.get(realm);
+                    ret.setToken(token.getToken());
 
                     println("All the attributes have been loaded from api in" + attributeMap.size() + " attributes");
                 } else {
@@ -952,19 +967,23 @@ public class RulesUtils {
     public static Attribute getAttribute(final String attributeCode, final GennyToken gennyToken) {
     	String realm = gennyToken.getRealm();
     	if (!realmAttributeMap.containsKey(realm)) {
-    		loadAllAttributesIntoCache(gennyToken);
+    		//loadAllAttributesIntoCache(gennyToken);
     	}
         Attribute ret = realmAttributeMap.get(gennyToken.getRealm()).get(attributeCode);
         if ((ret == null)&&(!attributeCode.startsWith("PRI_APP_"))) { // ignore the dynamic attributes
+        	if (attributeCode.substring(3).startsWith("_")) {
             if (attributeCode.startsWith("SRT_") || attributeCode.startsWith("RAW_")) {
                 ret = new AttributeText(attributeCode, attributeCode);
             } else {
-                loadAllAttributesIntoCache(gennyToken);
+              //  loadAllAttributesIntoCache(gennyToken);
                 ret = realmAttributeMap.get(gennyToken.getRealm()).get(attributeCode);
                 if (ret == null) {
                     log.error("Attribute NOT FOUND :"+realm+":"+attributeCode);
                 }
             }
+        	} else {
+        		log.error("Bad Attribute --> "+attributeCode);
+        	}
         }
         return ret;
     }
