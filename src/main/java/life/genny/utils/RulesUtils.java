@@ -918,13 +918,16 @@ public class RulesUtils {
     	if (!realmAttributeMap.containsKey(realm)) {
     		//loadAllAttributesIntoCache(gennyToken);
     	}
+    	if (realmAttributeMap.get(gennyToken.getRealm())==null) {
+    		loadAllAttributesIntoCache(gennyToken);
+    	}
         Attribute ret = realmAttributeMap.get(gennyToken.getRealm()).get(attributeCode);
         if ((ret == null)&&(!attributeCode.startsWith("PRI_APP_"))) { // ignore the dynamic attributes
         	if (attributeCode.substring(3).startsWith("_")) {
             if (attributeCode.startsWith("SRT_") || attributeCode.startsWith("RAW_")) {
                 ret = new AttributeText(attributeCode, attributeCode);
             } else {
-              //  loadAllAttributesIntoCache(gennyToken);
+            	   loadAllAttributesIntoCache(gennyToken);
                 ret = realmAttributeMap.get(gennyToken.getRealm()).get(attributeCode);
                 if (ret == null) {
                     log.error("Attribute NOT FOUND :"+realm+":"+attributeCode);
