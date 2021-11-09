@@ -977,7 +977,7 @@ public class RulesUtils {
             if (attributeCode.startsWith("SRT_") || attributeCode.startsWith("RAW_")) {
                 ret = new AttributeText(attributeCode, attributeCode);
             } else {
-              //  loadAllAttributesIntoCache(gennyToken);
+            	   loadAllAttributesIntoCache(gennyToken);
                 ret = realmAttributeMap.get(gennyToken.getRealm()).get(attributeCode);
                 if (ret == null) {
                     log.error("Attribute NOT FOUND :"+realm+":"+attributeCode);
