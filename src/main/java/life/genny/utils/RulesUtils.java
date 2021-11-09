@@ -838,7 +838,7 @@ public class RulesUtils {
                 }
                 ret = defAttributesMap.get(realm);
                 if (ret == null) {
-                	setUpDefs(token);
+                	//setUpDefs(token);
                 	ret = defAttributesMap.get(realm);
                 }
                 ret.setToken(token.getToken());
@@ -890,14 +890,16 @@ public class RulesUtils {
 
     public static Map<String,BaseEntity> getDefMap(final GennyToken userToken) {
     	if ((defs == null) || (defs.isEmpty())) {
+    		log.error("No defs present");
+    	}
     		// Load in Defs
-    		try {
-				setUpDefs(userToken);
-			} catch (BadDataException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        }
+//    		try {
+//				//setUpDefs(userToken);
+//			} catch (BadDataException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//        }
 
         if (defs != null) {
             return defs.getOrDefault(userToken.getRealm(), null);
@@ -905,63 +907,6 @@ public class RulesUtils {
         return Collections.emptyMap();
     }
     
-    public static void setUpDefs(final GennyToken userToken) throws BadDataException {
-        BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
- 
-        SearchEntity searchBE = new SearchEntity("SBE_DEF", "DEF check")
-                .addSort("PRI_NAME", "Created", SearchEntity.Sort.ASC)
-                .addFilter("PRI_CODE", SearchEntity.StringFilter.LIKE, "DEF_%")
-                .addColumn("PRI_CODE", "Name");
-
-        searchBE.setRealm(userToken.getRealm());
-        searchBE.setPageStart(0);
-        searchBE.setPageSize(1000);
-
-        List<BaseEntity> items = beUtils.getBaseEntitys(searchBE);
-        // Load up RuleUtils.defs
-
-        Set<Attribute> defAttributes = new HashSet<>();
-        ConcurrentHashMap<String,BaseEntity> newItems = new ConcurrentHashMap<>();
-
-        for (BaseEntity item : items) {
-//            if the item is a def appointment, then add a default datetime for the start (Mandatory)
-            if (item.getCode().equals("DEF_APPOINTMENT")){
-                Attribute attribute = new AttributeText("DFT_PRI_START_DATETIME", "Default Start Time");
-                attribute.setRealm(userToken.getRealm());
-                EntityAttribute newEA = new EntityAttribute(item, attribute, 1.0, "2021-07-28 00:00:00");
-                item.addAttribute(newEA);
-
-                Optional<EntityAttribute> ea = item.findEntityAttribute("ATT_PRI_START_DATETIME");
-                if (ea.isPresent()){
-                    ea.get().setValue(true);
-                }
-            }
-            // Load all attributes into the defAttributes
-            for (EntityAttribute ea : item.getBaseEntityAttributes()) {
-            	if (ea.getAttributeCode().startsWith("ATT_")||ea.getAttributeCode().startsWith("LNK_")||ea.getAttributeCode().startsWith("BCE_")) {
-            		Attribute defAttribute = getAttribute(ea.getAttributeCode().substring("ATT_".length()),userToken);
-            		if (defAttribute!=null) {
-            			defAttributes.add(defAttribute);
-            		} else {
-            			log.error("Attribute not found for "+ea.getAttributeCode());
-            		}
-            	}
-            }
-            
-           //  Save the BaseEntity created
-            item.setFastAttributes(true); // make fast
-            newItems.put(item.getCode(), item);
-            log.info("Saving ("+userToken.getRealm()+") DEF "+item.getCode());
-        }
-        // Now switch in the new stuff
-        RulesUtils.defs.get(userToken.getRealm()).putAll(newItems);
-        // Now set the QDataAttributeMessage to store only the defs for this realm
-        QDataAttributeMessage qdamsg = new QDataAttributeMessage(defAttributes.toArray(new Attribute[0]));
-        qdamsg.setReplace(true);
-        RulesUtils.defAttributesMap.put(userToken.getRealm(),qdamsg);
-        
-        
-    }
  
     public static Attribute getAttribute(final String attributeCode, final String token) {
     	GennyToken gennyToken = new GennyToken(token);
@@ -973,13 +918,16 @@ public class RulesUtils {
     	if (!realmAttributeMap.containsKey(realm)) {
     		//loadAllAttributesIntoCache(gennyToken);
     	}
+    	if (realmAttributeMap.get(gennyToken.getRealm())==null) {
+    		loadAllAttributesIntoCache(gennyToken);
+    	}
         Attribute ret = realmAttributeMap.get(gennyToken.getRealm()).get(attributeCode);
         if ((ret == null)&&(!attributeCode.startsWith("PRI_APP_"))) { // ignore the dynamic attributes
         	if (attributeCode.substring(3).startsWith("_")) {
             if (attributeCode.startsWith("SRT_") || attributeCode.startsWith("RAW_")) {
                 ret = new AttributeText(attributeCode, attributeCode);
             } else {
-              //  loadAllAttributesIntoCache(gennyToken);
+            	   loadAllAttributesIntoCache(gennyToken);
                 ret = realmAttributeMap.get(gennyToken.getRealm()).get(attributeCode);
                 if (ret == null) {
                     log.error("Attribute NOT FOUND :"+realm+":"+attributeCode);
