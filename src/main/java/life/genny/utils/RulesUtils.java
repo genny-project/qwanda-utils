@@ -971,6 +971,9 @@ public class RulesUtils {
     	if (!realmAttributeMap.containsKey(realm)) {
     		//loadAllAttributesIntoCache(gennyToken);
     	}
+    	if (realmAttributeMap.get(gennyToken.getRealm())==null) {
+    		loadAllAttributesIntoCache(gennyToken);
+    	}
         Attribute ret = realmAttributeMap.get(gennyToken.getRealm()).get(attributeCode);
         if ((ret == null)&&(!attributeCode.startsWith("PRI_APP_"))) { // ignore the dynamic attributes
         	if (attributeCode.substring(3).startsWith("_")) {
