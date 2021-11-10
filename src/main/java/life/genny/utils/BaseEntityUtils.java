@@ -1537,8 +1537,9 @@ public class BaseEntityUtils implements Serializable {
 				duplicateAnswerList.add(
 						new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(), targetBe.getCode()));
 			} else {
-				duplicateAnswerList.add(
-						new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(), ea.getAsString()));
+				// ignore if new value is empty
+				if(!StringUtils.isBlank(ea.getAsString()))
+					duplicateAnswerList.add( new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(), ea.getAsString()));
 			}
 		}
 
