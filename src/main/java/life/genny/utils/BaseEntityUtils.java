@@ -1807,6 +1807,7 @@ public class BaseEntityUtils implements Serializable {
 					}
 				}
 				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be));
+				log.info("Setting baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
 				if (be.getId() != null) {
 					ret = QwandaUtils.apiPutEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
 							this.token, null);
