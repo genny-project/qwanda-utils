@@ -238,7 +238,7 @@ public class VertxUtils {
                     int count=5;
                     boolean resultFound = false;
                     while (count > 0) {
-                        resultStr = QwandaUtils.apiGet(GennySettings.ddtUrl + "/service/cache/read/" + key, token);
+                        resultStr = QwandaUtils.apiGet(GennySettings.ddtUrl + "/service/cache/read/" + realm + "/" + key, token);
                         if (resultStr == null
                         || ("<html><head><title>Error</title></head><body>Not Found</body></html>".equals(resultStr))
                         || ("<html><body><h1>Resource not found</h1></body></html>".equals(resultStr))) {

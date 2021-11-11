@@ -908,59 +908,6 @@ public class RulesUtils {
         return Collections.emptyMap();
     }
     
-//    public static void setUpDefs(final GennyToken userToken) throws BadDataException {
-//        BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
-// 
-//        SearchEntity searchBE = new SearchEntity("SBE_DEF", "DEF check")
-//                .addSort("PRI_NAME", "Created", SearchEntity.Sort.ASC)
-//                .addFilter("PRI_CODE", SearchEntity.StringFilter.LIKE, "DEF_%")
-//                .addColumn("PRI_CODE", "Name");
-//
-//        searchBE.setRealm(userToken.getRealm());
-//        searchBE.setPageStart(0);
-//        searchBE.setPageSize(1000);
-//
-//        List<BaseEntity> items = beUtils.getBaseEntitys(searchBE);
-//        // Load up RuleUtils.defs
-//
-//        Set<Attribute> defAttributes = new HashSet<>();
-//        ConcurrentHashMap<String,BaseEntity> newItems = new ConcurrentHashMap<>();
-//
-//        for (BaseEntity item : items) {
-////            if the item is a def appointment, then add a default datetime for the start (Mandatory)
-//            if (item.getCode().equals("DEF_APPOINTMENT")){
-//                Attribute attribute = new AttributeText("DFT_PRI_START_DATETIME", "Default Start Time");
-//                attribute.setRealm(userToken.getRealm());
-//                EntityAttribute newEA = new EntityAttribute(item, attribute, 1.0, "2021-07-28 00:00:00");
-//                item.addAttribute(newEA);
-//
-//                Optional<EntityAttribute> ea = item.findEntityAttribute("ATT_PRI_START_DATETIME");
-//                if (ea.isPresent()){
-//                    ea.get().setValue(true);
-//                }
-//            }
-//            // Load all attributes into the defAttributes
-//            for (EntityAttribute ea : item.getBaseEntityAttributes()) {
-//            	if (ea.getAttributeCode().startsWith("ATT_")||ea.getAttributeCode().startsWith("LNK_")||ea.getAttributeCode().startsWith("BCE_")) {
-//            		Attribute defAttribute = getAttribute(ea.getAttributeCode().substring("ATT_".length()),userToken);
-//            		defAttributes.add(defAttribute);
-//            	}
-//            }
-//            
-//           //  Save the BaseEntity created
-//            item.setFastAttributes(true); // make fast
-//            newItems.put(item.getCode(), item);
-//            log.info("Saving ("+userToken.getRealm()+") DEF "+item.getCode());
-//        }
-//        // Now switch in the new stuff
-//        RulesUtils.defs.get(userToken.getRealm()).putAll(newItems);
-//        // Now set the QDataAttributeMessage to store only the defs for this realm
-//        QDataAttributeMessage qdamsg = new QDataAttributeMessage(defAttributes.toArray(new Attribute[0]));
-//        qdamsg.setReplace(true);
-//        RulesUtils.defAttributesMap.put(userToken.getRealm(),qdamsg);
-//        
-//        
-//    }
  
     public static Attribute getAttribute(final String attributeCode, final String token) {
     	GennyToken gennyToken = new GennyToken(token);

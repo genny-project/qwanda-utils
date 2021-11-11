@@ -17,11 +17,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class JsonUtils {
-	
+
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
-	static GsonBuilder gsonBuilder = new GsonBuilder();       
+	static GsonBuilder gsonBuilder = new GsonBuilder();
 
 	static public Gson gson = gsonBuilder.registerTypeAdapter(Money.class, new MoneyDeserializer())
 			.registerTypeAdapter(LocalDateTime.class, new DateTimeDeserializer())
@@ -42,7 +42,7 @@ public class JsonUtils {
 		    .setPrettyPrinting()
 			.create();
 
-	
+
 	public static <T> T fromJson(final String json, Class clazz)
 	{
 	        T item = null;
@@ -54,13 +54,13 @@ public class JsonUtils {
 	                      item = (T)gson.fromJson(json, clazz);
 	                	}
 	                } catch (Exception e) {
-	                	 log.error("The JSON file received is  :::  "+json);;
+	                	//  log.error("The JSON file received is  :::  "+json);;
 	                     log.error("Bad Deserialisation for "+clazz.getSimpleName()+":"+e.getLocalizedMessage());
 	                }
 	        }
 	        return item;
 	}
-	
+
 	public static <T> T fromJson(final String json, Type clazz)
 	{
 	        T item = null;
@@ -89,26 +89,26 @@ public class JsonUtils {
 		}
 		return item;
 	}
-	
+
 	public static String toJson(Object obj)
 	{
-	
+
 		String ret =  gson.toJson(obj);
 		return ret;
 	}
 
 	public static String toJsonWithNulls(Object obj)
 	{
-	
+
 		String ret =  gsonFull.toJson(obj);
 		return ret;
 	}
-	
+
 	public static org.json.simple.JSONObject jsonStringParser(String stringifiedJsonObject) {
-		
+
 		org.json.simple.JSONObject obj = null;
 		if(stringifiedJsonObject != null) {
-			
+
 			JSONParser parser = new JSONParser();
 			try {
 				obj = (org.json.simple.JSONObject) parser.parse(stringifiedJsonObject);
@@ -116,7 +116,7 @@ public class JsonUtils {
 				e.printStackTrace();
 			}
 		}
-		return obj;	
+		return obj;
 	}
 }
 
