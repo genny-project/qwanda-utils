@@ -197,7 +197,7 @@ public class BaseEntityUtils implements Serializable {
 			item = new BaseEntity(code.toUpperCase(), name);
 
 			item.setRealm(getRealm());
-			VertxUtils.writeCachedJson(getRealm(), item.getCode(), JsonUtils.toJson(item));
+			VertxUtils.writeCachedJson(getRealm(), item.getCode(), JsonUtils.toJson(item), this.token);
 		}
 
 		if (item != null) {
@@ -656,7 +656,7 @@ public class BaseEntityUtils implements Serializable {
 								JsonObject json = new JsonObject(JsonUtils.toJson(answer));
 								json.put("token", this.token);
 								log.debug("Saving answer");
-								VertxUtils.eb.write("answer", json);
+								VertxUtils.eb.writeMsg("answer", json);
 								log.debug("Finished saving answer");
 							} catch (NamingException e) {
 								log.error("Error in saving answer through kafka :::: " + e.getMessage());
@@ -1750,7 +1750,7 @@ public class BaseEntityUtils implements Serializable {
 					}
 				}
 
-				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be));
+				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be), this.token);
 
 				String endpointUrl = null;
 				if (be.getId() != null) {
