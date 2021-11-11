@@ -1807,12 +1807,13 @@ public class BaseEntityUtils implements Serializable {
 					}
 				}
 				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be));
-				log.info("Setting baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
 				if (be.getId() != null) {
+					log.info("Updating baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
 					ret = QwandaUtils.apiPutEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
 							this.token, null);
 
 				} else {
+					log.info("Inserting baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
 					ret = QwandaUtils.apiPostEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys",
 							JsonUtils.toJson(be), this.token, null);
 				}
