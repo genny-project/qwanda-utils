@@ -506,7 +506,7 @@ public class BaseEntityUtils implements Serializable {
 					jsonStr = json.toString();
 
 					log.debug("Saving answer to messageBus");
-					VertxUtils.eb.writeMsg("answer", jsonStr);
+					VertxUtils.eb.write("answer", jsonStr);
 				}
 				log.debug("Finished saving answer");
 			} catch (NamingException e) {
