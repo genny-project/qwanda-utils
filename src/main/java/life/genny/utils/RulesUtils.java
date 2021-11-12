@@ -839,9 +839,10 @@ public class RulesUtils {
                 ret = defAttributesMap.get(realm);
                 if (ret == null) {
                 	//setUpDefs(token);
-                	ret = defAttributesMap.get(realm);
+                	//ret = defAttributesMap.get(realm);
+                } else {
+                	ret.setToken(token.getToken());
                 }
-                ret.setToken(token.getToken());
 
                // realmAttributeMap.put(realm, attributeMap);
                 println("All the attributes have been loaded in "+attributeMap.size()+" attributes");
@@ -861,6 +862,7 @@ public class RulesUtils {
                     }
                     Map<String,Attribute> attributeMap = realmAttributeMap.get(realm);
       
+                    
                     for (Attribute attribute : attributeArray) {
                         attributeMap.put(attribute.getCode(), attribute);
                     }
@@ -870,7 +872,9 @@ public class RulesUtils {
                   //  	setUpDefs(token);                    	
                     }
                     ret = defAttributesMap.get(realm);
-                    ret.setToken(token.getToken());
+                    if (ret != null) {
+                    	ret.setToken(token.getToken());
+                    }
 
                     println("All the attributes have been loaded from api in" + attributeMap.size() + " attributes");
                 } else {
@@ -880,7 +884,8 @@ public class RulesUtils {
 
             return ret;
         } catch (Exception e) {
-            log.error("Attributes API not available");
+            log.error("Attributes API not available, exception:" + e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
