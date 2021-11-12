@@ -275,10 +275,10 @@ public class VertxUtils {
         return result;
     }
 
-    static public JsonObject writeCachedJson(final String realm, final String key, final String value) {
-        log.debug("The realm provided to writeCachedJson is :::" + realm);
-        return writeCachedJson(realm, key, value, DEFAULT_TOKEN);
-    }
+//    static public JsonObject writeCachedJson(final String realm, final String key, final String value) {
+//        log.debug("The realm provided to writeCachedJson is :::" + realm);
+//        return writeCachedJson(realm, key, value, DEFAULT_TOKEN);
+//    }
 
     static public JsonObject writeCachedJson(final String realm, final String key, final String value,
                                              final String token) {
@@ -384,7 +384,7 @@ public class VertxUtils {
                 }
 
                 if (be != null)
-                    writeCachedJson(realm, code, JsonUtils.toJson(be));
+                    writeCachedJson(realm, code, JsonUtils.toJson(be),token);
             }
             if (be!=null)
                 be.setFromCache(false);
