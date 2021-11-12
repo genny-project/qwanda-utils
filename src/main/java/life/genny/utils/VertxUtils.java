@@ -683,7 +683,7 @@ public class VertxUtils {
         }
 
         try {
-            eb.writeMsg(channel, payload);
+            eb.write(channel, payload);
             if (!rxList.isEmpty()) {
                 // send ends
                 writeMsgEnd(new GennyToken(token),rxList);
