@@ -247,7 +247,7 @@ public class CacheUtils implements Serializable {
             if(targetEntity != null) {
 
                 String json = JsonUtils.toJson(targetEntity);
-                VertxUtils.writeCachedJson(this.realm,targetCode, json);
+                VertxUtils.writeCachedJson(this.realm,targetCode, json,this.baseEntityUtils.getServiceToken().getToken());
             }
         }
         catch (IOException e) {

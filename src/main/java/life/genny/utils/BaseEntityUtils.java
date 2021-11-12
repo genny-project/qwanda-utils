@@ -197,7 +197,7 @@ public class BaseEntityUtils implements Serializable {
 			item = new BaseEntity(code.toUpperCase(), name);
 
 			item.setRealm(getRealm());
-			VertxUtils.writeCachedJson(getRealm(), item.getCode(), JsonUtils.toJson(item));
+			VertxUtils.writeCachedJson(getRealm(), item.getCode(), JsonUtils.toJson(item),serviceToken.getToken());
 		}
 
 		if (item != null) {
@@ -383,7 +383,7 @@ public class BaseEntityUtils implements Serializable {
 			role = QwandaUtils.createBaseEntityByCode(code, name, qwandaServiceUrl, this.token);
 			this.addAttributes(role);
 
-			VertxUtils.writeCachedJson(role.getRealm(), role.getCode(), JsonUtils.toJson(role));
+			VertxUtils.writeCachedJson(role.getRealm(), role.getCode(), JsonUtils.toJson(role),serviceToken.getToken());
 		}
 
 		for (String capabilityCode : capabilityCodes) {
@@ -603,7 +603,7 @@ public class BaseEntityUtils implements Serializable {
 								JsonObject json = new JsonObject(JsonUtils.toJson(answer));
 								json.put("token", this.token);
 								log.debug("Saving answer");
-								VertxUtils.eb.write("answer", json);
+								VertxUtils.eb.writeMsg("answer", json);
 								log.debug("Finished saving answer");
 							} catch (NamingException e) {
 								log.error("Error in saving answer through kafka :::: " + e.getMessage());
@@ -1680,7 +1680,7 @@ public class BaseEntityUtils implements Serializable {
 
 	public String updateBaseEntity(BaseEntity be) {
 		try {
-			VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be));
+			VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),serviceToken.getToken());
 			return QwandaUtils.apiPutEntity(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
 					this.token);
 		} catch (Exception e) {
@@ -1702,7 +1702,7 @@ public class BaseEntityUtils implements Serializable {
 						se.setId(existing.getId());
 					}
 				}
-				VertxUtils.writeCachedJson(getRealm(), se.getCode(), JsonUtils.toJson(se));
+				VertxUtils.writeCachedJson(getRealm(), se.getCode(), JsonUtils.toJson(se),serviceToken.getToken());
 				if (se.getId() != null) {
 					ret = QwandaUtils.apiPutEntity(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(se),
 							this.token);
@@ -1751,7 +1751,7 @@ public class BaseEntityUtils implements Serializable {
 					}
 				}
 
-				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be));
+				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),serviceToken.getToken());
 
 				String endpointUrl = null;
 				if (be.getId() != null) {
@@ -1806,7 +1806,7 @@ public class BaseEntityUtils implements Serializable {
 						be.setId(existing.getId());
 					}
 				}
-				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be));
+				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),serviceToken.getToken());
 				if (be.getId() != null) {
 					log.info("Updating baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
 					ret = QwandaUtils.apiPutEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
@@ -3640,7 +3640,7 @@ public class BaseEntityUtils implements Serializable {
 			// putBe.setBaseEntityAttributes(null);
 			be.setName(name);
 			be.setStatus(status);
-			VertxUtils.writeCachedJson(this.gennyToken.getRealm(), be.getCode(), JsonUtils.toJson(be));
+			VertxUtils.writeCachedJson(this.gennyToken.getRealm(), be.getCode(), JsonUtils.toJson(be),serviceToken.getToken());
 			saveBaseEntity(putBe);
 		}
 		return be;
