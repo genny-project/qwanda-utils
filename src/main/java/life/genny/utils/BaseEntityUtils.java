@@ -850,7 +850,7 @@ public class BaseEntityUtils implements Serializable {
 
 		try {
 			// log.info("Fetching BaseEntityByCode, code="+code);
-			be = VertxUtils.readFromDDT(getRealm(), code, withAttributes, this.token, clazz);
+			be = VertxUtils.readFromDDT(getRealm(), code, withAttributes, this.serviceToken.getToken(), clazz);
 			if (be == null) {
 				if (!VertxUtils.cachedEnabled) { // because during junit it annoys me
 					log.info("be (" + code + ") fetched is NULL ");
