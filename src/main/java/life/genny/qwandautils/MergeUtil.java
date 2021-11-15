@@ -435,12 +435,10 @@ public class MergeUtil {
 	 * @param	ctxMap					the context map to add to, and fetch associations from.
 	 * @param	contextAssociationJson	the json instructions for fetching associations.
 	 */
-	public static void addAssociatedContexts(BaseEntityUtils beUtils, HashMap<String, Object> ctxMap, String contextAssociationJson) {
+	public static void addAssociatedContexts(BaseEntityUtils beUtils, HashMap<String, Object> ctxMap, String contextAssociationJson, boolean overwrite) {
 
 		// Enter Try-Catch for better error logging
 		try {
-
-			// TODO: Make sure dependant contexts are handled in correct order automatically
 
 			// convert to JsonObject for easier processing
 			JsonObject ctxAssocJson = new JsonObject(contextAssociationJson);
@@ -452,18 +450,46 @@ public class MergeUtil {
 
 				// These are the required params in the json
 				String code = ctxAssoc.getString("code");
-				String parent = ctxAssoc.getString("parent");
-				String attributeCode = ctxAssoc.getString("attributeCode");
+				String sourceCode = ctxAssoc.getString("sourceCode");
 
-				// Grab Parent from map so we can fetch associated entity
-				BaseEntity parentBE = (BaseEntity) ctxMap.get(parent);
-				BaseEntity assocBE = beUtils.getBaseEntityFromLNKAttr(parentBE, attributeCode);
+				if (code == null) {
+					log.error("Bad code field in " + contextAssociationJson);
+					return;
+				}
+				if (sourceCode == null) {
+					log.error("Bad sourceCode field in " + contextAssociationJson);
+					return;
+				}
 
-				// Add the context map if associated be is found
-				if (assocBE != null) {
-					ctxMap.put(code, assocBE);
-				} else {
-					log.error(ANSIColour.RED+"Associated BE not found for " + parent + "." + attributeCode+ANSIColour.RESET);
+				// Check to see if overwriting context is ok
+				if (!ctxMap.containsKey(code) || (ctxMap.containsKey(code) && overwrite)) {
+
+					String[] sourceArray = sourceCode.split("\\.");
+					String parent = sourceArray[0];
+
+					BaseEntity parentBE = (BaseEntity) ctxMap.get(parent);
+					BaseEntity assocBE = null;
+
+					// Iterate through attribute links to get BE
+					for (int i = 1; i < sourceArray.length; i++) {
+
+						String attributeCode = sourceCode.split("\\.")[i];
+
+						// Grab Parent from map so we can fetch associated entity
+						assocBE = beUtils.getBaseEntityFromLNKAttr(parentBE, attributeCode);
+						if (assocBE != null) {
+							parentBE = assocBE;
+						} else {
+							log.error("Found a NULL BE for sourceCode = " + sourceCode + ", attributeCode = " +attributeCode);
+						}
+					}
+
+					// Add the context map if associated be is found
+					if (assocBE != null) {
+						ctxMap.put(code, assocBE);
+					} else {
+						log.error(ANSIColour.RED+"Associated BE not found for " + parent + "." + sourceCode+ANSIColour.RESET);
+					}
 				}
 
 			}
