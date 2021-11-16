@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 import life.genny.qwanda.message.QBaseMSGAttachment;
 import life.genny.qwanda.message.QBaseMSGAttachment.AttachmentType;
 import life.genny.qwanda.message.QBaseMSGMessageType;
-import life.genny.qwanda.message.QMessageGennyMSG;
+import life.genny.message.QMessageGennyMSG;
 import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.utils.BaseEntityUtils;
