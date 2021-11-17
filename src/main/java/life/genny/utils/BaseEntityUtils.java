@@ -3453,6 +3453,40 @@ public class BaseEntityUtils implements Serializable {
 
 	}
 
+	public Boolean hasCapabilityDependantDropdown(final String attributeCode, final BaseEntity defBe) throws Exception {
+		if (!defBe.getCode().startsWith("DEF_")) {
+			log.error("Cannot determine if dropdown exists , Not a DEF! " + defBe.getCode());
+			throw new Exception("Cannot determine if dropdown exists , Not a DEF!");
+		}
+
+		// Check if attribute code exists as a SER
+		Optional<EntityAttribute> searchAtt = defBe.findEntityAttribute("SER_" + attributeCode); // SER_
+		if (searchAtt.isPresent()) {
+			// temporary enable check
+			String serValue = searchAtt.get().getValueString();
+			log.info("Attribute exists in " + defBe.getCode() + " for SER_" + attributeCode + " --> " + serValue);
+			JsonObject serJson = new JsonObject(serValue);
+
+			Boolean isConditional = serValue.contains("conditions");
+
+			Boolean isEnabled = true;
+			if (serJson.containsKey("enabled")) {
+				isEnabled = serJson.getBoolean("enabled");
+			} else {
+				log.info("Attribute exists in " + defBe.getCode() + " for SER_" + attributeCode
+						+ " --> but NOT enabled!");
+			}
+
+			if (isConditional && isEnabled) {
+				return true;
+			}
+		} else {
+			log.info("No attribute exists in " + defBe.getCode() + " for SER_" + attributeCode);
+		}
+		return false;
+
+	}
+
 	public Boolean dependenciesMet(final String attributeCode, List<Answer> answers, final BaseEntity targetBe,
 			final BaseEntity defBe) {
 		if (!defBe.getCode().startsWith("DEF_")) {
