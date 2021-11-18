@@ -1745,13 +1745,13 @@ public class BaseEntityUtils implements Serializable {
 					log.error("ERROR! BaseEntity se has no code!");
 				}
 				if (be.getId() == null) {
-					BaseEntity existing = VertxUtils.readFromDDT(getRealm(), be.getCode(), this.token);
+					BaseEntity existing = VertxUtils.readFromDDT(getRealm(), be.getCode(), this.getServiceToken().getToken());
 					if (existing != null) {
 						be.setId(existing.getId());
 					}
 				}
 
-				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),serviceToken.getToken());
+				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),this.getServiceToken().getToken());
 
 
 				String endpointUrl = null;
@@ -1780,7 +1780,7 @@ public class BaseEntityUtils implements Serializable {
 		int count = 3;
 		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 		while (count > 0) {
-			if (VertxUtils.readCachedJson(realm, beCode) == null) {
+			if (VertxUtils.readCachedJson(realm, beCode, this.getGennyToken().getToken()) == null) {
 				count--;
 				try {
 					TimeUnit.SECONDS.sleep(1);
@@ -1802,12 +1802,12 @@ public class BaseEntityUtils implements Serializable {
 					log.error("ERROR! BaseEntity se has no code!");
 				}
 				if (be.getId() == null) {
-					BaseEntity existing = VertxUtils.readFromDDT(getRealm(), be.getCode(), this.token);
+					BaseEntity existing = VertxUtils.readFromDDT(getRealm(), be.getCode(), this.getServiceToken().getToken());
 					if (existing != null) {
 						be.setId(existing.getId());
 					}
 				}
-				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),serviceToken.getToken());
+				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),this.getServiceToken().getToken());
 				if (be.getId() != null) {
 					log.info("Updating baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
 					ret = QwandaUtils.apiPutEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
@@ -1963,7 +1963,7 @@ public class BaseEntityUtils implements Serializable {
 			}
 		}
 
-		VertxUtils.writeCachedJson(getRealm(), cachedBe.getCode(), JsonUtils.toJson(cachedBe), this.token);
+		VertxUtils.writeCachedJson(getRealm(), cachedBe.getCode(), JsonUtils.toJson(cachedBe), this.getGennyToken().getToken());
 
 		return cachedBe;
 	}
