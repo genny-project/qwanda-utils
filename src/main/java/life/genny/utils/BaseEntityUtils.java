@@ -1831,16 +1831,17 @@ public class BaseEntityUtils implements Serializable {
 		if ((be == null) || (be.getCode() == null)) {
 			throw new NullPointerException("Cannot save be because be is null or be.getCode is null");
 		}
-		List<Answer> answers = new CopyOnWriteArrayList<Answer>();
+	//	List<Answer> answers = new CopyOnWriteArrayList<Answer>();
 
 		if (be.getBaseEntityAttributes() != null) {
 			for (EntityAttribute ea : be.getBaseEntityAttributes()) {
 				Answer attributeAnswer = new Answer(be.getCode(), be.getCode(), ea.getAttributeCode(),
 						ea.getAsString());
 				attributeAnswer.setChangeEvent(false);
-				answers.add(attributeAnswer);
+			//	answers.add(attributeAnswer);
+				this.saveAnswer(attributeAnswer);
 			}
-			this.saveAnswers(answers);
+			//this.saveAnswers(answers);
 		}
 	}
 
