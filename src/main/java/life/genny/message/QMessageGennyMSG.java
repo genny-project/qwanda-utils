@@ -261,7 +261,7 @@ public class QMessageGennyMSG extends QMessage {
 		private QMessageGennyMSG msg;
 		private BaseEntityUtils beUtils;
 
-		private Builder(final String templateCode) {
+		public Builder(final String templateCode) {
 			this.msg.setTemplateCode(templateCode);
 		}
 
