@@ -258,11 +258,11 @@ public class QMessageGennyMSG extends QMessage {
 
 	public static class Builder {
 
-		private QMessageGennyMSG msg;
-		private BaseEntityUtils beUtils;
+		public QMessageGennyMSG msg;
+		public BaseEntityUtils beUtils;
 
-		private Builder(final String templateCode) {
-			this.msg.setTemplateCode(templateCode);
+		public Builder(final String templateCode) {
+			this.msg = new QMessageGennyMSG(templateCode);
 		}
 
 		public Builder addRecipient(BaseEntity recipient) {
