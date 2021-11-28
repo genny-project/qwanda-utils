@@ -515,7 +515,7 @@ public class BaseEntityUtils implements Serializable {
 			return ret;
 		}
 
-		return null;
+		return target;
 	}
 
 	public BaseEntity saveAnswer(BaseEntity defBe, Answer answer) {

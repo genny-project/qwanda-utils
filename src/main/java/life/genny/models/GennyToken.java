@@ -52,6 +52,7 @@ public class GennyToken implements Serializable {
 	String userCode;
 	String userUUID;
 	String token;
+	String username;
 	Map<String, Object> adecodedTokenMap = null;
 	String realm = null;
 	Set<String> userRoles = new HashSet<String>();
@@ -85,8 +86,8 @@ public class GennyToken implements Serializable {
 				this.token = token;
 				this.realm = realm;
 				String uuid = adecodedTokenMap.get("sub").toString();
-				String username = (String) adecodedTokenMap.get("preferred_username");
-				String normalisedUsername = QwandaUtils.getNormalisedUsername(username);
+				this.username = (String) adecodedTokenMap.get("preferred_username");
+				//String normalisedUsername = QwandaUtils.getNormalisedUsername(this.username);
 				this.userUUID = "PER_" + this.getUuid().toUpperCase(); // normalisedUsername.toUpperCase();
 				if ("service".equals(username)) {
 					this.userCode = "PER_SERVICE";
@@ -187,6 +188,7 @@ public class GennyToken implements Serializable {
 		}
 
 		this.code = code;
+		this.username = username;
 		setupRoles();
 	}
 
@@ -266,7 +268,8 @@ public class GennyToken implements Serializable {
 	}
 
 	public String getUsername() {
-		return getString("preferred_username");
+		return this.username;
+		//return getString("preferred_username");
 	}
 
 	public String getKeycloakUrl() {
