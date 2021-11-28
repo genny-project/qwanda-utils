@@ -258,28 +258,24 @@ public class QMessageGennyMSG extends QMessage {
 
 	public static class Builder {
 
-		private QMessageGennyMSG msg;
-		private BaseEntityUtils beUtils;
+		public QMessageGennyMSG msg;
+		public BaseEntityUtils beUtils;
 
 		public Builder(final String templateCode) {
-			log.info("Initialising");
-			this.msg.setTemplateCode(templateCode);
+			this.msg = new QMessageGennyMSG(templateCode);
 		}
 
 		public Builder addRecipient(BaseEntity recipient) {
-			log.info("ADDING Recipient");
 			this.msg.addRecipient(recipient);
 			return this;
 		}
 
 		public Builder addRecipient(String recipient) {
-			log.info("ADDING Recipient");
 			this.msg.addRecipient(recipient);
 			return this;
 		}
 
 		public Builder addContext(String key, Object value) {
-			log.info("ADDING Context " + key);
 			this.msg.addContext(key, value);
 			return this;
 		}
@@ -295,7 +291,6 @@ public class QMessageGennyMSG extends QMessage {
 		}
 
 		public Builder setUtils(BaseEntityUtils beUtils) {
-			log.info("SETTING Utils");
 			this.beUtils = beUtils;
 			return this;
 		}
