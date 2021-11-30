@@ -265,6 +265,11 @@ public class QMessageGennyMSG extends QMessage {
 			this.msg = new QMessageGennyMSG(templateCode);
 		}
 
+		public Builder(final String templateCode, BaseEntityUtils beUtils) {
+			this.msg = new QMessageGennyMSG(templateCode);
+			this.beUtils = beUtils;
+		}
+
 		public Builder addRecipient(BaseEntity recipient) {
 			this.msg.addRecipient(recipient);
 			return this;
