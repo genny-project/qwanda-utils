@@ -443,7 +443,7 @@ public class BaseEntityUtils implements Serializable {
 				for (EntityAttribute ea : be.getBaseEntityAttributes()) {
 					if (ea != null) {
 						if (!ea.getAttributeCode().startsWith("PRI_APP_")) { // ignore bad attributes
-							Attribute attribute = RulesUtils.getAttribute(ea.getAttributeCode(), this.getGennyToken());
+							Attribute attribute = RulesUtils.getAttribute(ea.getAttributeCode(), this.getServiceToken());
 							if (attribute != null) {
 								ea.setAttribute(attribute);
 							} else {
