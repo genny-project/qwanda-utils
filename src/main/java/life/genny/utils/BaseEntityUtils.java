@@ -380,7 +380,7 @@ public class BaseEntityUtils implements Serializable {
 		log.info("Creating Role " + code + ":" + name);
 		BaseEntity role = this.getBaseEntityByCode(code);
 		if (role == null) {
-			role = QwandaUtils.createBaseEntityByCode(code, name, qwandaServiceUrl, this.token);
+			role = QwandaUtils.createBaseEntityByCode(code, name, qwandaServiceUrl, this.getServiceToken().getToken());
 			this.addAttributes(role);
 
 			VertxUtils.writeCachedJson(role.getRealm(), role.getCode(), JsonUtils.toJson(role),serviceToken.getToken());
@@ -400,7 +400,7 @@ public class BaseEntityUtils implements Serializable {
 		// Now force the role to only have these capabilitys
 		try {
 			String result = QwandaUtils.apiPutEntity(qwandaServiceUrl + "/qwanda/baseentitys/force",
-					JsonUtils.toJson(role), this.token);
+					JsonUtils.toJson(role), this.getServiceToken().getToken());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -601,7 +601,7 @@ public class BaseEntityUtils implements Serializable {
 						for (Answer answer : targetAnswers) {
 							try {
 								JsonObject json = new JsonObject(JsonUtils.toJson(answer));
-								json.put("token", this.token);
+								json.put("token", this.getServiceToken().getToken());
 								log.debug("Saving answer");
 								VertxUtils.eb.write("answer", json);
 								log.debug("Finished saving answer");
@@ -654,7 +654,7 @@ public class BaseEntityUtils implements Serializable {
 						for (Answer answer : targetAnswers) {
 							try {
 								JsonObject json = new JsonObject(JsonUtils.toJson(answer));
-								json.put("token", this.token);
+								json.put("token", this.getServiceToken().getToken());
 								log.debug("Saving answer");
 								VertxUtils.eb.write("answer", json);
 								log.debug("Finished saving answer");
@@ -693,7 +693,7 @@ public class BaseEntityUtils implements Serializable {
 		 * TODO : Replace with searchEntity when it will be capable of filtering based
 		 * on linkWeight
 		 */
-		List linkList = this.getLinkList(groupCode, linkCode, linkValue, this.token);
+		List linkList = this.getLinkList(groupCode, linkCode, linkValue, this.getServiceToken().getToken());
 		String quoterCodeForOffer = null;
 
 		if (linkList != null) {
@@ -741,7 +741,7 @@ public class BaseEntityUtils implements Serializable {
 
 		SearchEntity searchBe = null;
 		try {
-			JsonObject cachedJsonObject = VertxUtils.readCachedJson(this.realm, code, this.token);
+			JsonObject cachedJsonObject = VertxUtils.readCachedJson(this.realm, code, this.getServiceToken().getToken());
 			if (cachedJsonObject != null) {
 				String data = cachedJsonObject.getString("value");
 				// log.info("json recieved :" + data);
@@ -930,7 +930,7 @@ public class BaseEntityUtils implements Serializable {
 			List<String> beCodes = VertxUtils.getObject(this.realm, "LIST", key, (Class) listType);
 			if (beCodes == null) {
 				bes = RulesUtils.getBaseEntitysByParentAndLinkCodeWithAttributes(qwandaServiceUrl, this.decodedMapToken,
-						this.token, parentCode, linkCode, pageStart, pageSize);
+						this.getServiceToken().getToken(), parentCode, linkCode, pageStart, pageSize);
 				beCodes = new CopyOnWriteArrayList<String>();
 				for (BaseEntity be : bes) {
 					VertxUtils.putObject(this.realm, "", be.getCode(), JsonUtils.toJson(be));
@@ -946,7 +946,7 @@ public class BaseEntityUtils implements Serializable {
 		} else {
 
 			bes = RulesUtils.getBaseEntitysByParentAndLinkCodeWithAttributes(qwandaServiceUrl, this.decodedMapToken,
-					this.token, parentCode, linkCode, pageStart, pageSize);
+					this.getServiceToken().getToken(), parentCode, linkCode, pageStart, pageSize);
 		}
 
 		return bes;
@@ -993,7 +993,7 @@ public class BaseEntityUtils implements Serializable {
 		List<BaseEntity> bes = null;
 
 		bes = RulesUtils.getBaseEntitysByParentAndLinkCodeAndLinkValueWithAttributes(qwandaServiceUrl,
-				this.decodedMapToken, this.token, parentCode, linkCode, linkValue, pageStart, pageSize);
+				this.decodedMapToken, this.getServiceToken().getToken(), parentCode, linkCode, linkValue, pageStart, pageSize);
 		return bes;
 	}
 
