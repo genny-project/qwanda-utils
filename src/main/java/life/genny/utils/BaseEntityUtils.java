@@ -241,7 +241,7 @@ public class BaseEntityUtils implements Serializable {
 		// Force the type of baseentity
 		Attribute attributeDEF = RulesUtils.getAttribute("PRI_IS_" + defBE.getCode().substring("DEF_".length()),
 				this.getServiceToken().getToken());
-		item = saveAnswer(new Answer(item, item, attributeDEF, "TRUE")); // force the be type
+		item = saveAnswer(defBE,new Answer(item, item, attributeDEF, "TRUE")); // force the be type
 
 		return item;
 	}
@@ -868,7 +868,7 @@ public class BaseEntityUtils implements Serializable {
 		}
 
 		if (filterAttributes != null) {
-			BaseEntity user = this.getBaseEntityByCode(this.gennyToken.getUserCode());
+			BaseEntity user = this.getBaseEntityByCode(this.serviceToken.getUserCode());
 			be = VertxUtils.privacyFilter(user, be, filterAttributes);
 		}
 
@@ -1879,9 +1879,9 @@ public class BaseEntityUtils implements Serializable {
 
 				if (RulesUtils.realmAttributeMap != null) {
 					if (RulesUtils.realmAttributeMap.isEmpty()) {
-						RulesUtils.loadAllAttributesIntoCache(token);
+						RulesUtils.loadAllAttributesIntoCache(this.getServiceToken().getToken());
 					}
-					attribute = RulesUtils.realmAttributeMap.get(this.getGennyToken().getRealm()).get(attributeCode);
+					attribute = RulesUtils.realmAttributeMap.get(this.getServiceToken().getRealm()).get(attributeCode);
 
 					if (attribute != null) {
 						answer.setAttribute(attribute);
@@ -1957,7 +1957,7 @@ public class BaseEntityUtils implements Serializable {
 								|| answer.getAttributeCode().startsWith("SRT_")) {
 							attribute = new AttributeText(answer.getAttributeCode(), answer.getValue());
 						} else {
-							attribute = RulesUtils.getAttribute(answer.getAttributeCode(), token);
+							attribute = RulesUtils.getAttribute(answer.getAttributeCode(), this.getServiceToken().getToken());
 						}
 
 						if (attribute != null) {
@@ -1974,7 +1974,7 @@ public class BaseEntityUtils implements Serializable {
 			}
 		}
 
-		VertxUtils.writeCachedJson(getRealm(), cachedBe.getCode(), JsonUtils.toJson(cachedBe), this.getGennyToken().getToken());
+		VertxUtils.writeCachedJson(getRealm(), cachedBe.getCode(), JsonUtils.toJson(cachedBe), this.getServiceToken().getToken());
 
 		return cachedBe;
 	}
