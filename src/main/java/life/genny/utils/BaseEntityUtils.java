@@ -237,10 +237,10 @@ public class BaseEntityUtils implements Serializable {
 
 		}
 
-		this.saveBaseEntity(defBE, item);
+		item = this.saveBaseEntity(defBE, item);
 		// Force the type of baseentity
 		Attribute attributeDEF = RulesUtils.getAttribute("PRI_IS_" + defBE.getCode().substring("DEF_".length()),
-				this.getGennyToken().getToken());
+				this.getServiceToken().getToken());
 		item = saveAnswer(new Answer(item, item, attributeDEF, "TRUE")); // force the be type
 
 		return item;
@@ -275,10 +275,10 @@ public class BaseEntityUtils implements Serializable {
 						// Check to see if the email exists
 						// TODO: check to see if the email exists in the database and keycloak
 						Attribute emailAttribute = RulesUtils.getAttribute("PRI_EMAIL",
-								this.getGennyToken().getToken());
+								this.getServiceToken().getToken());
 						item.addAnswer(new Answer(item, item, emailAttribute, email));
 						Attribute usernameAttribute = RulesUtils.getAttribute("PRI_USERNAME",
-								this.getGennyToken().getToken());
+								this.getServiceToken().getToken());
 						item.addAnswer(new Answer(item, item, usernameAttribute, email));
 					}
 
@@ -548,7 +548,7 @@ public class BaseEntityUtils implements Serializable {
 
 		T be2 = this.updateCachedBaseEntity(answer, clazz);
 		try {
-			Attribute attr = RulesUtils.getAttribute(answer.getAttributeCode(), this.getGennyToken().getToken());
+			Attribute attr = RulesUtils.getAttribute(answer.getAttributeCode(), this.getServiceToken().getToken());
 			be.setValue(attr, answer.getValue());
 		} catch (BadDataException e) {
 			// TODO Auto-generated catch block
@@ -567,7 +567,8 @@ public class BaseEntityUtils implements Serializable {
 		return updateBaseEntity(be, answer, BaseEntity.class);
 	}
 
-	public void saveAnswers(List<Answer> answers, final boolean changeEvent) {
+	public BaseEntity saveAnswers(List<Answer> answers, final boolean changeEvent) {
+		BaseEntity ret = null;
 		if (!((answers == null) || (answers.isEmpty()))) {
 
 			if (!changeEvent) {
@@ -589,7 +590,7 @@ public class BaseEntityUtils implements Serializable {
 				items = targetAnswers.toArray(items);
 
 				QDataAnswerMessage msg = new QDataAnswerMessage(items);
-				this.updateCachedBaseEntity(targetAnswers);
+				ret = this.updateCachedBaseEntity(targetAnswers);
 
 				if (!VertxUtils.cachedEnabled) { // if not running junit, no need for api
 					// String jsonAnswer = JsonUtils.toJson(msg);
@@ -618,9 +619,11 @@ public class BaseEntityUtils implements Serializable {
 				}
 			}
 		}
+		return ret;
 	}
 
-	public void saveAnswers(BaseEntity defBe, List<Answer> answers, final boolean changeEvent) {
+	public BaseEntity saveAnswers(BaseEntity defBe, List<Answer> answers, final boolean changeEvent) {
+		BaseEntity ret = null;
 		if (!((answers == null) || (answers.isEmpty()))) {
 
 			if (!changeEvent) {
@@ -642,7 +645,7 @@ public class BaseEntityUtils implements Serializable {
 				items = targetAnswers.toArray(items);
 
 				QDataAnswerMessage msg = new QDataAnswerMessage(items);
-				this.updateCachedBaseEntity(targetAnswers);
+				ret = this.updateCachedBaseEntity(targetAnswers);
 
 				if (!VertxUtils.cachedEnabled) { // if not running junit, no need for api
 					// String jsonAnswer = JsonUtils.toJson(msg);
@@ -671,14 +674,15 @@ public class BaseEntityUtils implements Serializable {
 				}
 			}
 		}
+		return ret;
 	}
 
-	public void saveAnswers(BaseEntity defBe, List<Answer> answers) {
-		this.saveAnswers(defBe, answers, true);
+	public BaseEntity saveAnswers(BaseEntity defBe, List<Answer> answers) {
+		return this.saveAnswers(defBe, answers, true);
 	}
 
-	public void saveAnswers(List<Answer> answers) {
-		this.saveAnswers(answers, true);
+	public BaseEntity saveAnswers(List<Answer> answers) {
+		return this.saveAnswers(answers, true);
 	}
 
 	public BaseEntity getOfferBaseEntity(String groupCode, String linkCode, String linkValue, String quoterCode,
@@ -730,11 +734,11 @@ public class BaseEntityUtils implements Serializable {
 		return null;
 	}
 
-	public void updateBaseEntityAttribute(final String sourceCode, final String beCode, final String attributeCode,
+	public BaseEntity updateBaseEntityAttribute(final String sourceCode, final String beCode, final String attributeCode,
 			final String newValue) {
 		List<Answer> answers = new CopyOnWriteArrayList<Answer>();
 		answers.add(new Answer(sourceCode, beCode, attributeCode, newValue));
-		this.saveAnswers(answers);
+		return this.saveAnswers(answers);
 	}
 
 	public SearchEntity getSearchEntityByCode(final String code) {
@@ -1794,8 +1798,9 @@ public class BaseEntityUtils implements Serializable {
 		return false;
 	}
 
-	public String saveBaseEntity(BaseEntity defBe, BaseEntity be) { // TODO: Ugly
-		String ret = null;
+	public BaseEntity saveBaseEntity(BaseEntity defBe, BaseEntity be) { // TODO: Ugly
+		BaseEntity ret = null;
+		String retStr = null;
 		try {
 			if (be != null) {
 				if (!be.hasCode()) {
@@ -1810,15 +1815,18 @@ public class BaseEntityUtils implements Serializable {
 				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),this.getServiceToken().getToken());
 				if (be.getId() != null) {
 					log.info("Updating baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
-					ret = QwandaUtils.apiPutEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
+					retStr = QwandaUtils.apiPutEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
 							this.getServiceToken().getToken(), null);
 
 				} else {
 					log.info("Inserting baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
-					ret = QwandaUtils.apiPostEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys",
+					retStr = QwandaUtils.apiPostEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys",
 							JsonUtils.toJson(be), this.getServiceToken().getToken(), null);
+					be.setId(Long.parseLong(retStr));
+					VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),this.getServiceToken().getToken());
 				}
-				saveBaseEntityAttributes(defBe, be);
+				
+				ret = saveBaseEntityAttributes(defBe, be);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1827,7 +1835,7 @@ public class BaseEntityUtils implements Serializable {
 		return ret;
 	}
 
-	public void saveBaseEntityAttributes(BaseEntity be) {
+	public BaseEntity saveBaseEntityAttributes(BaseEntity be) {
 		if ((be == null) || (be.getCode() == null)) {
 			throw new NullPointerException("Cannot save be because be is null or be.getCode is null");
 		}
@@ -1839,13 +1847,14 @@ public class BaseEntityUtils implements Serializable {
 						ea.getAsString());
 				attributeAnswer.setChangeEvent(false);
 			//	answers.add(attributeAnswer);
-				this.saveAnswer(attributeAnswer);
+				be = this.saveAnswer(attributeAnswer);
 			}
 			//this.saveAnswers(answers);
 		}
+		return be;
 	}
 
-	public void saveBaseEntityAttributes(BaseEntity defBe, BaseEntity be) {
+	public BaseEntity saveBaseEntityAttributes(BaseEntity defBe, BaseEntity be) {
 		if ((be == null) || (be.getCode() == null)) {
 			throw new NullPointerException("Cannot save be because be is null or be.getCode is null");
 		}
@@ -1856,7 +1865,8 @@ public class BaseEntityUtils implements Serializable {
 			attributeAnswer.setChangeEvent(false);
 			answers.add(attributeAnswer);
 		}
-		this.saveAnswers(defBe, answers);
+		be = this.saveAnswers(defBe, answers);
+		return be;
 	}
 
 	public <T extends BaseEntity> T updateCachedBaseEntity(final Answer answer, Class clazz) {
