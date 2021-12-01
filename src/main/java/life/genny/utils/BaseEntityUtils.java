@@ -2496,6 +2496,10 @@ public class BaseEntityUtils implements Serializable {
 	 */
 	public void setServiceToken(GennyToken serviceToken) {
 		this.serviceToken = serviceToken;
+		if (serviceToken == null) {
+			log.error("Error! NULL SERVICE TOKEN PASSED TO beUtils: using userToken only");
+			this.serviceToken = this.gennyToken;
+		}
 	}
 
 	/**
