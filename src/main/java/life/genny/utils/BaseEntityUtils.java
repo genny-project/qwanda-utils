@@ -283,15 +283,15 @@ public class BaseEntityUtils implements Serializable {
 					}
 
 					// Add PRI_UUID
-					Attribute uuidAttribute = RulesUtils.getAttribute("PRI_UUID", this.getGennyToken().getToken());
+					Attribute uuidAttribute = RulesUtils.getAttribute("PRI_UUID", this.getServiceToken().getToken());
 					item.addAnswer(new Answer(item, item, uuidAttribute, uuid.toUpperCase()));
 					// Keycloak UUID
 					Attribute keycloakAttribute = RulesUtils.getAttribute("PRI_KEYCLOAK_UUID",
-							this.getGennyToken().getToken());
+							this.getServiceToken().getToken());
 					item.addAnswer(new Answer(item, item, keycloakAttribute, uuid.toUpperCase()));
 					// Author of the BE
 					// NOTE: Maybe should be moved to run for all BEs
-					Attribute lnkAuthorAttr = RulesUtils.getAttribute("LNK_AUTHOR", this.getGennyToken().getToken());
+					Attribute lnkAuthorAttr = RulesUtils.getAttribute("LNK_AUTHOR", this.getServiceToken().getToken());
 					item.addAnswer(
 							new Answer(item, item, lnkAuthorAttr, "[\"" + getGennyToken().getUserCode() + "\"]"));
 				} else {
@@ -380,7 +380,7 @@ public class BaseEntityUtils implements Serializable {
 		log.info("Creating Role " + code + ":" + name);
 		BaseEntity role = this.getBaseEntityByCode(code);
 		if (role == null) {
-			role = QwandaUtils.createBaseEntityByCode(code, name, qwandaServiceUrl, this.token);
+			role = QwandaUtils.createBaseEntityByCode(code, name, qwandaServiceUrl, this.getServiceToken().getToken());
 			this.addAttributes(role);
 
 			VertxUtils.writeCachedJson(role.getRealm(), role.getCode(), JsonUtils.toJson(role),serviceToken.getToken());
@@ -400,7 +400,7 @@ public class BaseEntityUtils implements Serializable {
 		// Now force the role to only have these capabilitys
 		try {
 			String result = QwandaUtils.apiPutEntity(qwandaServiceUrl + "/qwanda/baseentitys/force",
-					JsonUtils.toJson(role), this.token);
+					JsonUtils.toJson(role), this.getServiceToken().getToken());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -443,13 +443,13 @@ public class BaseEntityUtils implements Serializable {
 				for (EntityAttribute ea : be.getBaseEntityAttributes()) {
 					if (ea != null) {
 						if (!ea.getAttributeCode().startsWith("PRI_APP_")) { // ignore bad attributes
-							Attribute attribute = RulesUtils.getAttribute(ea.getAttributeCode(), this.getGennyToken());
+							Attribute attribute = RulesUtils.getAttribute(ea.getAttributeCode(), this.getServiceToken());
 							if (attribute != null) {
 								ea.setAttribute(attribute);
 							} else {
 
-								RulesUtils.loadAllAttributesIntoCache(this.token);
-								attribute = RulesUtils.getAttribute(ea.getAttributeCode(), this.getGennyToken());
+								RulesUtils.loadAllAttributesIntoCache(this.getServiceToken());
+								attribute = RulesUtils.getAttribute(ea.getAttributeCode(), this.getServiceToken());
 								if (attribute != null) {
 									ea.setAttribute(attribute);
 								} else {
@@ -601,7 +601,7 @@ public class BaseEntityUtils implements Serializable {
 						for (Answer answer : targetAnswers) {
 							try {
 								JsonObject json = new JsonObject(JsonUtils.toJson(answer));
-								json.put("token", this.token);
+								json.put("token", this.getServiceToken().getToken());
 								log.debug("Saving answer");
 								VertxUtils.eb.write("answer", json);
 								log.debug("Finished saving answer");
@@ -654,7 +654,7 @@ public class BaseEntityUtils implements Serializable {
 						for (Answer answer : targetAnswers) {
 							try {
 								JsonObject json = new JsonObject(JsonUtils.toJson(answer));
-								json.put("token", this.token);
+								json.put("token", this.getServiceToken().getToken());
 								log.debug("Saving answer");
 								VertxUtils.eb.write("answer", json);
 								log.debug("Finished saving answer");
@@ -693,7 +693,7 @@ public class BaseEntityUtils implements Serializable {
 		 * TODO : Replace with searchEntity when it will be capable of filtering based
 		 * on linkWeight
 		 */
-		List linkList = this.getLinkList(groupCode, linkCode, linkValue, this.token);
+		List linkList = this.getLinkList(groupCode, linkCode, linkValue, this.getServiceToken().getToken());
 		String quoterCodeForOffer = null;
 
 		if (linkList != null) {
@@ -741,7 +741,7 @@ public class BaseEntityUtils implements Serializable {
 
 		SearchEntity searchBe = null;
 		try {
-			JsonObject cachedJsonObject = VertxUtils.readCachedJson(this.realm, code, this.token);
+			JsonObject cachedJsonObject = VertxUtils.readCachedJson(this.realm, code, this.getServiceToken().getToken());
 			if (cachedJsonObject != null) {
 				String data = cachedJsonObject.getString("value");
 				// log.info("json recieved :" + data);
@@ -850,7 +850,7 @@ public class BaseEntityUtils implements Serializable {
 
 		try {
 			// log.info("Fetching BaseEntityByCode, code="+code);
-			be = VertxUtils.readFromDDT(getRealm(), code, withAttributes, this.token, clazz);
+			be = VertxUtils.readFromDDT(getRealm(), code, withAttributes, this.getServiceToken().getToken(), clazz);
 			if (be == null) {
 				if (!VertxUtils.cachedEnabled) { // because during junit it annoys me
 					log.info("be (" + code + ") fetched is NULL ");
@@ -882,7 +882,7 @@ public class BaseEntityUtils implements Serializable {
 
 		try {
 			// log.info("Fetching BaseEntityByCode, code="+code);
-			be = Optional.ofNullable(VertxUtils.readFromDDT(getRealm(), code, withAttributes, this.token));
+			be = Optional.ofNullable(VertxUtils.readFromDDT(getRealm(), code, withAttributes, this.getServiceToken().getToken()));
 			if (be.isPresent()) {
 				this.addAttributes(be.orElse(null));
 			}
@@ -896,7 +896,7 @@ public class BaseEntityUtils implements Serializable {
 	public BaseEntity getBaseEntityByAttributeAndValue(final String attributeCode, final String value) {
 
 		BaseEntity be = null;
-		be = RulesUtils.getBaseEntityByAttributeAndValue(this.qwandaServiceUrl, this.decodedMapToken, this.token,
+		be = RulesUtils.getBaseEntityByAttributeAndValue(this.qwandaServiceUrl, this.decodedMapToken, this.getServiceToken().getToken(),
 				attributeCode, value);
 		if (be != null) {
 			this.addAttributes(be);
@@ -907,7 +907,7 @@ public class BaseEntityUtils implements Serializable {
 	public List<BaseEntity> getBaseEntitysByAttributeAndValue(final String attributeCode, final String value) {
 
 		List<BaseEntity> bes = null;
-		bes = RulesUtils.getBaseEntitysByAttributeAndValue(this.qwandaServiceUrl, this.decodedMapToken, this.token,
+		bes = RulesUtils.getBaseEntitysByAttributeAndValue(this.qwandaServiceUrl, this.decodedMapToken, this.getServiceToken().getToken(),
 				attributeCode, value);
 		return bes;
 	}
@@ -930,7 +930,7 @@ public class BaseEntityUtils implements Serializable {
 			List<String> beCodes = VertxUtils.getObject(this.realm, "LIST", key, (Class) listType);
 			if (beCodes == null) {
 				bes = RulesUtils.getBaseEntitysByParentAndLinkCodeWithAttributes(qwandaServiceUrl, this.decodedMapToken,
-						this.token, parentCode, linkCode, pageStart, pageSize);
+						this.getServiceToken().getToken(), parentCode, linkCode, pageStart, pageSize);
 				beCodes = new CopyOnWriteArrayList<String>();
 				for (BaseEntity be : bes) {
 					VertxUtils.putObject(this.realm, "", be.getCode(), JsonUtils.toJson(be));
@@ -946,7 +946,7 @@ public class BaseEntityUtils implements Serializable {
 		} else {
 
 			bes = RulesUtils.getBaseEntitysByParentAndLinkCodeWithAttributes(qwandaServiceUrl, this.decodedMapToken,
-					this.token, parentCode, linkCode, pageStart, pageSize);
+					this.getServiceToken().getToken(), parentCode, linkCode, pageStart, pageSize);
 		}
 
 		return bes;
@@ -961,7 +961,7 @@ public class BaseEntityUtils implements Serializable {
 		// if (isNull("BES_" + parentCode.toUpperCase() + "_" + linkCode)) {
 
 		bes = RulesUtils.getBaseEntitysByParentAndLinkCodeWithAttributes2(qwandaServiceUrl, this.decodedMapToken,
-				this.token, parentCode, linkCode, pageStart, pageSize);
+				this.getServiceToken().getToken(), parentCode, linkCode, pageStart, pageSize);
 
 		// } else {
 		// bes = getAsBaseEntitys("BES_" + parentCode.toUpperCase() + "_" + linkCode);
@@ -993,7 +993,7 @@ public class BaseEntityUtils implements Serializable {
 		List<BaseEntity> bes = null;
 
 		bes = RulesUtils.getBaseEntitysByParentAndLinkCodeAndLinkValueWithAttributes(qwandaServiceUrl,
-				this.decodedMapToken, this.token, parentCode, linkCode, linkValue, pageStart, pageSize);
+				this.decodedMapToken, this.getServiceToken().getToken(), parentCode, linkCode, linkValue, pageStart, pageSize);
 		return bes;
 	}
 
@@ -1002,7 +1002,7 @@ public class BaseEntityUtils implements Serializable {
 		List<BaseEntity> bes = null;
 
 		bes = RulesUtils.getBaseEntitysByParentAndLinkCodeWithAttributesAndStakeholderCode(qwandaServiceUrl,
-				this.decodedMapToken, this.token, parentCode, linkCode, stakeholderCode);
+				this.decodedMapToken, this.getServiceToken().getToken(), parentCode, linkCode, stakeholderCode);
 		if (cache) {
 			set("BES_" + parentCode.toUpperCase() + "_" + linkCode, bes); // WATCH THIS!!!
 		}
@@ -1027,7 +1027,7 @@ public class BaseEntityUtils implements Serializable {
 
 			/* we call the api */
 			QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/baseentitys/move/" + targetCode,
-					JsonUtils.toJson(link), this.token);
+					JsonUtils.toJson(link),this.getServiceToken().getToken());
 		} catch (IOException e) {
 			log.error(e.getMessage());
 		}
@@ -1260,13 +1260,13 @@ public class BaseEntityUtils implements Serializable {
 			String beJson = null;
 			if (linkCode == null && linkValue == null)
 				beJson = QwandaUtils.apiGet(this.qwandaServiceUrl + "/qwanda/entityentitys/" + targetCode + "/parents",
-						this.token);
+						this.getServiceToken().getToken());
 			else if (linkValue == null) {
 				beJson = QwandaUtils.apiGet(this.qwandaServiceUrl + "/qwanda/entityentitys/" + targetCode
-						+ "/linkcodes/" + linkCode + "/parents", this.token);
+						+ "/linkcodes/" + linkCode + "/parents", this.getServiceToken().getToken());
 			} else {
 				beJson = QwandaUtils.apiGet(this.qwandaServiceUrl + "/qwanda/entityentitys/" + targetCode
-						+ "/linkcodes/" + linkCode + "/parents/" + linkValue, this.token);
+						+ "/linkcodes/" + linkCode + "/parents/" + linkValue, this.getServiceToken().getToken());
 			}
 			Link[] linkArray = JsonUtils.fromJson(beJson, Link[].class);
 			if (linkArray != null && linkArray.length > 0) {
@@ -1438,7 +1438,7 @@ public class BaseEntityUtils implements Serializable {
 	public Boolean checkIfLinkExists(String parentCode, String linkCode, String childCode) {
 
 		Boolean isLinkExists = false;
-		QDataBaseEntityMessage dataBEMessage = QwandaUtils.getDataBEMessage(parentCode, linkCode, this.token);
+		QDataBaseEntityMessage dataBEMessage = QwandaUtils.getDataBEMessage(parentCode, linkCode, this.getServiceToken().getToken());
 
 		if (dataBEMessage != null) {
 			BaseEntity[] beArr = dataBEMessage.getItems();
@@ -1673,7 +1673,7 @@ public class BaseEntityUtils implements Serializable {
 	}
 
 	public List<Link> getLinks(final String parentCode, final String linkCode) {
-		List<Link> links = RulesUtils.getLinks(this.qwandaServiceUrl, this.decodedMapToken, this.token, parentCode,
+		List<Link> links = RulesUtils.getLinks(this.qwandaServiceUrl, this.decodedMapToken, this.getServiceToken().getToken(), parentCode,
 				linkCode);
 		return links;
 	}
@@ -1682,7 +1682,7 @@ public class BaseEntityUtils implements Serializable {
 		try {
 			VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),serviceToken.getToken());
 			return QwandaUtils.apiPutEntity(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
-					this.token);
+					this.getServiceToken().getToken());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1697,7 +1697,7 @@ public class BaseEntityUtils implements Serializable {
 					log.error("ERROR! searchEntity se has no code!");
 				}
 				if (se.getId() == null) {
-					BaseEntity existing = VertxUtils.readFromDDT(getRealm(), se.getCode(), this.token);
+					BaseEntity existing = VertxUtils.readFromDDT(getRealm(), se.getCode(), this.getServiceToken().getToken());
 					if (existing != null) {
 						se.setId(existing.getId());
 					}
@@ -1705,11 +1705,11 @@ public class BaseEntityUtils implements Serializable {
 				VertxUtils.writeCachedJson(getRealm(), se.getCode(), JsonUtils.toJson(se),serviceToken.getToken());
 				if (se.getId() != null) {
 					ret = QwandaUtils.apiPutEntity(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(se),
-							this.token);
+							this.getServiceToken().getToken());
 
 				} else {
 					ret = QwandaUtils.apiPostEntity(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(se),
-							this.token);
+							this.getServiceToken().getToken());
 				}
 				saveBaseEntityAttributes(se);
 			}
@@ -1760,7 +1760,7 @@ public class BaseEntityUtils implements Serializable {
 				} else {
 					endpointUrl = this.qwandaServiceUrl + "/qwanda/baseentitys";
 				}
-				ret = QwandaUtils.apiPostEntity(endpointUrl, JsonUtils.toJson(be), this.token);
+				ret = QwandaUtils.apiPostEntity(endpointUrl, JsonUtils.toJson(be), this.getServiceToken().getToken());
 
 				boolean isExist = checkIfBaseEntityInCache(be.getCode());
 				if (!isExist)
@@ -1811,12 +1811,12 @@ public class BaseEntityUtils implements Serializable {
 				if (be.getId() != null) {
 					log.info("Updating baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
 					ret = QwandaUtils.apiPutEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
-							this.token, null);
+							this.getServiceToken().getToken(), null);
 
 				} else {
 					log.info("Inserting baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
 					ret = QwandaUtils.apiPostEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys",
-							JsonUtils.toJson(be), this.token, null);
+							JsonUtils.toJson(be), this.getServiceToken().getToken(), null);
 				}
 				saveBaseEntityAttributes(defBe, be);
 			}
@@ -1883,7 +1883,7 @@ public class BaseEntityUtils implements Serializable {
 						cachedBe.addAnswer(answer);
 					}
 					VertxUtils.writeCachedJson(getRealm(), answer.getTargetCode(), JsonUtils.toJson(cachedBe),
-							this.token);
+							this.getServiceToken().getToken());
 				}
 			}
 
@@ -1984,7 +1984,7 @@ public class BaseEntityUtils implements Serializable {
 				this.updateBaseEntity(source);
 
 				QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/entityentitys", JsonUtils.toJson(link),
-						this.token);
+						this.getServiceToken().getToken());
 			} catch (BadDataException e) {
 				e.printStackTrace();
 			}
@@ -2008,7 +2008,7 @@ public class BaseEntityUtils implements Serializable {
 			source.addTarget(target, linkAttribute, weight, linkValue);
 
 			this.updateBaseEntity(source);
-			QwandaUtils.apiPutEntity(qwandaServiceUrl + "/qwanda/links", JsonUtils.toJson(link), this.token);
+			QwandaUtils.apiPutEntity(qwandaServiceUrl + "/qwanda/links", JsonUtils.toJson(link), this.getServiceToken().getToken());
 		} catch (IOException | BadDataException e) {
 			e.printStackTrace();
 		}
@@ -2021,7 +2021,7 @@ public class BaseEntityUtils implements Serializable {
 		Link link = new Link(groupCode, targetCode, linkCode);
 		link.setWeight(weight);
 		try {
-			QwandaUtils.apiPutEntity(qwandaServiceUrl + "/qwanda/links", JsonUtils.toJson(link), this.token);
+			QwandaUtils.apiPutEntity(qwandaServiceUrl + "/qwanda/links", JsonUtils.toJson(link), this.getServiceToken().getToken());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -2304,7 +2304,7 @@ public class BaseEntityUtils implements Serializable {
 		Link link = new Link(parentCode, childCode, linkCode);
 		try {
 			return QwandaUtils.apiDelete(this.qwandaServiceUrl + "/qwanda/entityentitys", JsonUtils.toJson(link),
-					this.token);
+					this.getServiceToken().getToken());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -2318,7 +2318,7 @@ public class BaseEntityUtils implements Serializable {
 		Link link = new Link(parentCode, childCode, linkCode, linkValue);
 		try {
 			return QwandaUtils.apiDelete(this.qwandaServiceUrl + "/qwanda/entityentitys", JsonUtils.toJson(link),
-					this.token);
+					this.getServiceToken().getToken());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -2329,7 +2329,7 @@ public class BaseEntityUtils implements Serializable {
 		try {
 
 			String result = QwandaUtils.apiDelete(this.qwandaServiceUrl + "/qwanda/baseentitys/" + baseEntityCode,
-					this.token);
+					this.getServiceToken().getToken());
 			log.info("Result from remove user: " + result);
 			return result;
 
@@ -2586,7 +2586,7 @@ public class BaseEntityUtils implements Serializable {
 
 				else {
 					sortCode = (attributeCode.substring("SRT_".length()));
-					Attribute attr = RulesUtils.getAttribute(sortCode, this.token);
+					Attribute attr = RulesUtils.getAttribute(sortCode, this.getServiceToken().getToken());
 					String dtt = attr.getDataType().getClassName();
 					Object sortValue = ea.getValue();
 					if (dtt.equals("Text")) {

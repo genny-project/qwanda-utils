@@ -265,6 +265,11 @@ public class QMessageGennyMSG extends QMessage {
 			this.msg = new QMessageGennyMSG(templateCode);
 		}
 
+		public Builder(final String templateCode, BaseEntityUtils beUtils) {
+			this.msg = new QMessageGennyMSG(templateCode);
+			this.beUtils = beUtils;
+		}
+
 		public Builder addRecipient(BaseEntity recipient) {
 			this.msg.addRecipient(recipient);
 			return this;
@@ -316,7 +321,7 @@ public class QMessageGennyMSG extends QMessage {
 				// Find any required contexts for template
 				List<String> contextList = beUtils.getBaseEntityCodeArrayFromLNKAttr(templateBE, "PRI_CONTEXT_LIST");
 
-				if (contextList != null) {
+				if (contextList != null && contextList.size() > 0) {
 					// Check that all required contexts are present
 					boolean containsAllContexts = contextList.stream().allMatch(item -> this.msg.getMessageContextMap().containsKey(item));
 
