@@ -283,15 +283,15 @@ public class BaseEntityUtils implements Serializable {
 					}
 
 					// Add PRI_UUID
-					Attribute uuidAttribute = RulesUtils.getAttribute("PRI_UUID", this.getGennyToken().getToken());
+					Attribute uuidAttribute = RulesUtils.getAttribute("PRI_UUID", this.getServiceToken().getToken());
 					item.addAnswer(new Answer(item, item, uuidAttribute, uuid.toUpperCase()));
 					// Keycloak UUID
 					Attribute keycloakAttribute = RulesUtils.getAttribute("PRI_KEYCLOAK_UUID",
-							this.getGennyToken().getToken());
+							this.getServiceToken().getToken());
 					item.addAnswer(new Answer(item, item, keycloakAttribute, uuid.toUpperCase()));
 					// Author of the BE
 					// NOTE: Maybe should be moved to run for all BEs
-					Attribute lnkAuthorAttr = RulesUtils.getAttribute("LNK_AUTHOR", this.getGennyToken().getToken());
+					Attribute lnkAuthorAttr = RulesUtils.getAttribute("LNK_AUTHOR", this.getServiceToken().getToken());
 					item.addAnswer(
 							new Answer(item, item, lnkAuthorAttr, "[\"" + getGennyToken().getUserCode() + "\"]"));
 				} else {
