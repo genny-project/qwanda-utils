@@ -1,4 +1,3 @@
-package life.genny.message;
 
 import java.lang.invoke.MethodHandles;
 import org.apache.logging.log4j.Logger;
@@ -321,7 +320,7 @@ public class QMessageGennyMSG extends QMessage {
 				// Find any required contexts for template
 				List<String> contextList = beUtils.getBaseEntityCodeArrayFromLNKAttr(templateBE, "PRI_CONTEXT_LIST");
 
-				if (contextList != null && contextList.size() > 0) {
+				if (contextList != null && !contextList.isEmpty()) {
 					// Check that all required contexts are present
 					boolean containsAllContexts = contextList.stream().allMatch(item -> this.msg.getMessageContextMap().containsKey(item));
 
