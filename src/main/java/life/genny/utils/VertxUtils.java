@@ -592,7 +592,9 @@ public class VertxUtils {
         }
 
         if ("webdata".equals(channel) || "webcmds".equals(channel)|| "events".equals(channel)|| "data".equals(channel)) {
-            // This is a standard session only
+			// This is a standard session only
+		} else if ("search_events".equals(channel)) {
+			payload = JsonUtils.toJson(payload);
         } else {
             // This looks like we are sending data to a subscription channel
 
