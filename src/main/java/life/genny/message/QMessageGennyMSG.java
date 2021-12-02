@@ -1,3 +1,4 @@
+package life.genny.message;
 
 import java.lang.invoke.MethodHandles;
 import org.apache.logging.log4j.Logger;
