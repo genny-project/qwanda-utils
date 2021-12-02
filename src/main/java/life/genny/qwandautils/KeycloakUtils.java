@@ -1081,9 +1081,15 @@ public class KeycloakUtils {
 		}
 
 		for (LinkedHashMap userMap : results) {
+			String code = "";
 			String username = (String) userMap.get("username");
 			String email = (String) userMap.get("email");
-			String code = QwandaUtils.getNormalisedUsername("PER_" + username);
+			// Username is Email address
+			if(username.contains("@")) {
+				code = QwandaUtils.getNormalisedUsername("PER_" + username);
+			} else {
+				code = QwandaUtils.getNormalisedUsername("PER_" + email);
+			}
 			String id = (String) userMap.get("id");
 			String uuid = "PER_" + id.toUpperCase();
 			if (userCodeUUIDMapping.containsKey(code)) {

@@ -337,6 +337,15 @@ public class VertxUtils {
     static public <T extends BaseEntity> T  readFromDDT(String realm, final String code, final boolean withAttributes,
                                                         final String token, Class clazz) {
         T be = null;
+        if (StringUtils.isBlank(token)) {
+        	log.error("TOKEN is null for "+code);
+        	return null;
+        }
+        if (StringUtils.isBlank(code)) {
+        	log.error("code is null for readFromDDT");
+        	return null;
+        }
+
 
         JsonObject json = readCachedJson(realm, code, token);
 
@@ -369,11 +378,11 @@ public class VertxUtils {
             } else {
 
                 try {
-                    if (withAttributes) {
+                  //  if (withAttributes) {
                         be = QwandaUtils.getBaseEntityByCodeWithAttributes(code, token);
-                    } else {
-                        be = QwandaUtils.getBaseEntityByCode(code, token);
-                    }
+                 //   } else {
+                  //      be = QwandaUtils.getBaseEntityByCode(code, token);
+                  //  }
                 } catch (Exception e) {
                     // Okay, this is bad. Usually the code is not in the database but in keycloak
                     // So lets leave it to the rules to sort out... (new user)

@@ -766,10 +766,14 @@ public class QwandaUtils {
 		String attributeString = null;
 		T be = null;
 		try {
-
+			if (StringUtils.isBlank(baseEntAttributeCode)) {
+				log.error("baseEntAttributeCode is NULL");
+				return null;
+			}
+ 
 			attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/"
 					+ baseEntAttributeCode.toUpperCase() + "/attributes", token);
-			if (attributeString != null) {
+			if (!StringUtils.isBlank(attributeString) ) {
 				be = JsonUtils.fromJson(attributeString, BaseEntity.class);
 			} else {
 				throw new IOException("Cannot find BE " + baseEntAttributeCode);
