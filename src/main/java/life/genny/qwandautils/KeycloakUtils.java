@@ -402,12 +402,14 @@ public class KeycloakUtils {
 		HttpClient httpClient = new DefaultHttpClient();
 		//log.info("Keycloak token used is "+token);
 		try {
-			HttpPost post = new HttpPost(keycloakUrl + "/auth/admin/realms/" + realm + "/users");
+			String uri =  keycloakUrl + "/auth/admin/realms/" + realm + "/users";
+			HttpPost post = new HttpPost(uri);
 			// HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl +
 			// "/auth/admin/realms/"+realm+"/users"));
 
 			post.addHeader("Content-Type", "application/json");
 			post.addHeader("Authorization", "Bearer " + token);
+			log.info("DEBUG, create keycloak user, url:" + uri + ", token:" + token);
 
 			StringEntity postingString = new StringEntity(json);
 			post.setEntity(postingString);
