@@ -319,14 +319,15 @@ public class QMessageGennyMSG extends QMessage {
 				}
 
 				// Find any required contexts for template
-				List<String> contextList = beUtils.getBaseEntityCodeArrayFromLNKAttr(templateBE, "PRI_CONTEXT_LIST");
+				String contextListString = templateBE.getValue("PRI_CONTEXT_LIST", "[]");
+				String[] contextArray = contextListString.replaceAll("[", "").replaceAll("]", "").replaceAll("\"", "").split(",");
 
-				if (contextList != null && !contextList.isEmpty()) {
+				if (!contextListString.equals("[]") && contextArray != null && contextArray.length > 0) {
 					// Check that all required contexts are present
-					boolean containsAllContexts = contextList.stream().allMatch(item -> this.msg.getMessageContextMap().containsKey(item));
+					boolean containsAllContexts = Arrays.stream(contextArray).allMatch(item -> this.msg.getMessageContextMap().containsKey(item));
 
 					if (!containsAllContexts) {
-						log.error(ANSIColour.RED+"Msg does not contain all required contexts : " + contextList.toString() + ANSIColour.RESET);
+						log.error(ANSIColour.RED+"Msg does not contain all required contexts : " + contextArray.toString() + ANSIColour.RESET);
 						return this.msg;
 					}
 				}
