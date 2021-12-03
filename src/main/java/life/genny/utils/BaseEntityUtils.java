@@ -1892,6 +1892,10 @@ public class BaseEntityUtils implements Serializable {
 					} else {
 						cachedBe.addAnswer(answer);
 					}
+					if (this.getServiceToken()==null) {
+						log.error("NO SERVICE TOKEN IN beUTILS");
+						this.setServiceToken(this.getGennyToken());
+					}
 					VertxUtils.writeCachedJson(getRealm(), answer.getTargetCode(), JsonUtils.toJson(cachedBe),
 							this.getServiceToken().getToken());
 				}
