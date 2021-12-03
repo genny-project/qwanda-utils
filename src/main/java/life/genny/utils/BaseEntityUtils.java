@@ -2523,9 +2523,17 @@ public class BaseEntityUtils implements Serializable {
 						+ searchBE.getPageSize(GennySettings.defaultPageSize), serviceToken.getToken(), 120);
 			} else {
 
-				resultJsonStr = QwandaUtils.apiPostEntity2(
-						GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/search25/", JsonUtils.toJson(searchBE),
-						serviceToken.getToken(), null);
+				Boolean useFyodor = (System.getenv("USE_FYODOR") != null && "TRUE".equalsIgnoreCase(System.getenv("USE_FYODOR"))) ? true : false;
+				// Set to FALSE to use regular search
+				if (useFyodor) {
+					resultJsonStr = QwandaUtils.apiPostEntity2(
+							GennySettings.fyodorServiceUrl + "/api/search",
+							JsonUtils.toJson(searchBE), serviceToken.getToken(), null);
+				} else {
+					resultJsonStr = QwandaUtils.apiPostEntity2(
+							GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/search25/", JsonUtils.toJson(searchBE),
+							serviceToken.getToken(), null);
+				}
 			}
 
 			JsonObject resultJson = null;
