@@ -318,19 +318,19 @@ public class QMessageGennyMSG extends QMessage {
 					return this.msg;
 				}
 
-				// Find any required contexts for template
-				String contextListString = templateBE.getValue("PRI_CONTEXT_LIST", "[]");
-				String[] contextArray = contextListString.replaceAll("[", "").replaceAll("]", "").replaceAll("\"", "").split(",");
+				// // Find any required contexts for template
+				// String contextListString = templateBE.getValue("PRI_CONTEXT_LIST", "[]");
+				// String[] contextArray = contextListString.replaceAll("[", "").replaceAll("]", "").replaceAll("\"", "").split(",");
 
-				if (!contextListString.equals("[]") && contextArray != null && contextArray.length > 0) {
-					// Check that all required contexts are present
-					boolean containsAllContexts = Arrays.stream(contextArray).allMatch(item -> this.msg.getMessageContextMap().containsKey(item));
+				// if (!contextListString.equals("[]") && contextArray != null && contextArray.length > 0) {
+				// 	// Check that all required contexts are present
+				// 	boolean containsAllContexts = Arrays.stream(contextArray).allMatch(item -> this.msg.getMessageContextMap().containsKey(item));
 
-					if (!containsAllContexts) {
-						log.error(ANSIColour.RED+"Msg does not contain all required contexts : " + contextArray.toString() + ANSIColour.RESET);
-						return this.msg;
-					}
-				}
+				// 	if (!containsAllContexts) {
+				// 		log.error(ANSIColour.RED+"Msg does not contain all required contexts : " + contextArray.toString() + ANSIColour.RESET);
+				// 		return this.msg;
+				// 	}
+				// }
 			}
 
 			// Set Msg Type to DEFAULT if none set already
