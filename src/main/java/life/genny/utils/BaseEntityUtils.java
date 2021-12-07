@@ -176,12 +176,14 @@ public class BaseEntityUtils implements Serializable {
 		BaseEntity item = null;
 		Optional<EntityAttribute> uuidEA = defBE.findEntityAttribute("ATT_PRI_UUID");
 		if (uuidEA.isPresent()) {
+			log.info("New BE is a user!");
 			// if the defBE is a user without an email provided, create a keycloak acc using
 			// a unique random uuid
 			String randomEmail = "random+" + UUID.randomUUID().toString().substring(0, 20) + "@gada.io";
 			item = createUser(defBE, randomEmail);
 		}
 		if (item == null) {
+			log.info("New BE is NOT a user!");
 			String prefix = defBE.getValueAsString("PRI_PREFIX");
 			if (StringUtils.isBlank(prefix)) {
 				log.error("No prefix set for the def: " + defBE.getCode());
@@ -267,6 +269,7 @@ public class BaseEntityUtils implements Serializable {
 				String name = defBE.getName();
 				String code = optCode.get() + "_" + uuid.toUpperCase();
 				item = new BaseEntity(code, name);
+				item.setRealm(getRealm());
 				// item = QwandaUtils.createBaseEntityByCode(code, name, qwandaServiceUrl,
 				// this.token);
 				if (item != null) {
@@ -275,23 +278,23 @@ public class BaseEntityUtils implements Serializable {
 						// Check to see if the email exists
 						// TODO: check to see if the email exists in the database and keycloak
 						Attribute emailAttribute = RulesUtils.getAttribute("PRI_EMAIL",
-								this.getGennyToken().getToken());
+								this.getServiceToken().getToken());
 						item.addAnswer(new Answer(item, item, emailAttribute, email));
 						Attribute usernameAttribute = RulesUtils.getAttribute("PRI_USERNAME",
-								this.getGennyToken().getToken());
+								this.getServiceToken().getToken());
 						item.addAnswer(new Answer(item, item, usernameAttribute, email));
 					}
 
 					// Add PRI_UUID
-					Attribute uuidAttribute = RulesUtils.getAttribute("PRI_UUID", this.getGennyToken().getToken());
+					Attribute uuidAttribute = RulesUtils.getAttribute("PRI_UUID", this.getServiceToken().getToken());
 					item.addAnswer(new Answer(item, item, uuidAttribute, uuid.toUpperCase()));
 					// Keycloak UUID
 					Attribute keycloakAttribute = RulesUtils.getAttribute("PRI_KEYCLOAK_UUID",
-							this.getGennyToken().getToken());
+							this.getServiceToken().getToken());
 					item.addAnswer(new Answer(item, item, keycloakAttribute, uuid.toUpperCase()));
 					// Author of the BE
 					// NOTE: Maybe should be moved to run for all BEs
-					Attribute lnkAuthorAttr = RulesUtils.getAttribute("LNK_AUTHOR", this.getGennyToken().getToken());
+					Attribute lnkAuthorAttr = RulesUtils.getAttribute("LNK_AUTHOR", this.getServiceToken().getToken());
 					item.addAnswer(
 							new Answer(item, item, lnkAuthorAttr, "[\"" + getGennyToken().getUserCode() + "\"]"));
 				} else {
