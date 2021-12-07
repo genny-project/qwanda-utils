@@ -267,6 +267,7 @@ public class BaseEntityUtils implements Serializable {
 				String name = defBE.getName();
 				String code = optCode.get() + "_" + uuid.toUpperCase();
 				item = new BaseEntity(code, name);
+				item.setRealm(getRealm());
 				// item = QwandaUtils.createBaseEntityByCode(code, name, qwandaServiceUrl,
 				// this.token);
 				if (item != null) {
