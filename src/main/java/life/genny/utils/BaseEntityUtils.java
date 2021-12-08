@@ -217,8 +217,13 @@ public class BaseEntityUtils implements Serializable {
 							Object defaultVal = defBE.getValue(defaultDefValueAttr, attribute.getDefaultValue());
 
 							// Only process mandatory attributes, or defaults
-							if (ea.getValueBoolean() || defaultVal != null) {
-
+							Boolean mandatory = ea.getValueBoolean();
+							if (mandatory==null) {
+								mandatory = false;
+								log.warn("**** DEF attribute ATT_"+attrCode+" has no mandatory boolean set in "+defBE.getCode());
+							}
+							// Only process mandatory attributes, or defaults
+							if (mandatory || defaultVal != null) {
 								EntityAttribute newEA = new EntityAttribute(item, attribute, ea.getWeight(),
 										defaultVal);
 								item.addAttribute(newEA);
