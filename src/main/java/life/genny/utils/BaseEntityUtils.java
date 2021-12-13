@@ -197,7 +197,6 @@ public class BaseEntityUtils implements Serializable {
 			item = new BaseEntity(code.toUpperCase(), name);
 
 			item.setRealm(getRealm());
-			VertxUtils.writeCachedJson(getRealm(), item.getCode(), JsonUtils.toJson(item), serviceToken.getToken());
 		}
 
 		if (item != null) {
@@ -1820,9 +1819,10 @@ public class BaseEntityUtils implements Serializable {
 					BaseEntity existing = VertxUtils.readFromDDT(getRealm(), be.getCode(), this.getServiceToken().getToken());
 					if (existing != null) {
 						be.setId(existing.getId());
+						// copy ea from existing
+						be = this.merge(be, existing, true);
 					}
 				}
-				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),this.getServiceToken().getToken());
 				if (be.getId() != null) {
 					log.info("Updating baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
 					retStr = QwandaUtils.apiPutEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
@@ -1833,10 +1833,10 @@ public class BaseEntityUtils implements Serializable {
 					retStr = QwandaUtils.apiPostEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys",
 							JsonUtils.toJson(be), this.getServiceToken().getToken(), null);
 					be.setId(Long.parseLong(retStr));
-					VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),this.getServiceToken().getToken());
 				}
-				
+
 				ret = saveBaseEntityAttributes(defBe, be);
+				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),this.getServiceToken().getToken());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1869,6 +1869,10 @@ public class BaseEntityUtils implements Serializable {
 			throw new NullPointerException("Cannot save be because be is null or be.getCode is null");
 		}
 		List<Answer> answers = new CopyOnWriteArrayList<Answer>();
+
+		if (be.getBaseEntityAttributes() == null || be.getBaseEntityAttributes().isEmpty()) {
+			return be;
+		}
 
 		for (EntityAttribute ea : be.getBaseEntityAttributes()) {
 			Answer attributeAnswer = new Answer(be.getCode(), be.getCode(), ea.getAttributeCode(), ea.getAsString());
@@ -3728,6 +3732,37 @@ public class BaseEntityUtils implements Serializable {
 	public String cleanUpSymbols(String value) {
 		String cleanCode = value.replace("\"", "").replace("[", "").replace("]", "");
 		return cleanCode;
+	}
+
+	public BaseEntity merge(BaseEntity targetBe, BaseEntity sourceBe, boolean overwrite) {
+		try {
+			for (final EntityAttribute ea : sourceBe.getBaseEntityAttributes()) {
+				boolean addNew = true;
+
+				if (targetBe.containsEntityAttribute(ea.getAttributeCode())) {
+					addNew = overwrite;
+				}
+
+				if(addNew){
+					// Make sure Attribute in ea is not null
+					if(ea.getAttribute() == null)
+						ea.setAttribute(RulesUtils.getAttribute(ea.getAttributeCode(), this.getServiceToken()));
+					targetBe.addAttribute(ea);
+				}
+			}
+
+			// links
+			if (!sourceBe.getLinks().isEmpty() && overwrite) {
+				Set<EntityEntity> copy = new HashSet<>(sourceBe.getLinks());
+				targetBe.setLinks(copy);
+			}
+
+			// build attributeMap
+			targetBe.setFastAttributes(true);
+		} catch (final BadDataException e) {
+			e.printStackTrace();
+		}
+		return targetBe;
 	}
 
 }
