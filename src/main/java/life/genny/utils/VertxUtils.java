@@ -386,8 +386,7 @@ public class VertxUtils {
                 } catch (Exception e) {
                     // Okay, this is bad. Usually the code is not in the database but in keycloak
                     // So lets leave it to the rules to sort out... (new user)
-                    log.error(
-                            "BE " + code + " for realm " + realm + " is NOT IN CACHE OR DB " + e.getLocalizedMessage());
+                    log.error( "BE " + code + " for realm " + realm + " is NOT IN CACHE OR DB " + e.getLocalizedMessage());
                     return null;
 
                 }

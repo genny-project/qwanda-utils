@@ -111,8 +111,7 @@ public class QwandaUtils {
 	private static HttpClient httpClient = HttpClient.newBuilder().executor(executorService)
 			.version(HttpClient.Version.HTTP_2).connectTimeout(Duration.ofSeconds(20)).build();
 
-	public static String apiGet(String getUrl, final String authToken, final int timeout)
-			throws ClientProtocolException, IOException {
+	public static String apiGet(String getUrl, final String authToken, final int timeout) {
 
 		// log.debug("GET:" + getUrl + ":");
 
@@ -762,25 +761,19 @@ public class QwandaUtils {
 	 */
 	public static <T extends BaseEntity> T getBaseEntityByCodeWithAttributes(String baseEntAttributeCode, String token)
 			throws IOException {
-
 		String attributeString = null;
 		T be = null;
-		try {
-			if (StringUtils.isBlank(baseEntAttributeCode)) {
-				log.error("baseEntAttributeCode is NULL");
-				return null;
-			}
- 
-			attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/"
-					+ baseEntAttributeCode.toUpperCase() + "/attributes", token);
-			if (!StringUtils.isBlank(attributeString) ) {
-				be = JsonUtils.fromJson(attributeString, BaseEntity.class);
-			} else {
-				throw new IOException("Cannot find BE " + baseEntAttributeCode);
-			}
+		if (StringUtils.isBlank(baseEntAttributeCode)) {
+			log.error("baseEntAttributeCode is NULL");
+			return null;
+		}
 
-		} catch (IOException e) {
-			throw new IOException("Cannot connect to QwandaURL " + GennySettings.qwandaServiceUrl);
+		attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/"
+				+ baseEntAttributeCode.toUpperCase() + "/attributes", token);
+		if (!StringUtils.isBlank(attributeString) ) {
+			be = JsonUtils.fromJson(attributeString, BaseEntity.class);
+		} else {
+			throw new IOException("Cannot find BE " + baseEntAttributeCode);
 		}
 
 		return be;
@@ -1696,7 +1689,7 @@ public class QwandaUtils {
 		return sendGET(url, null);
 	}
 
-	static public String sendGET(String url, String authToken) throws IOException {
+	static public String sendGET(String url, String authToken) {
 
 		HttpRequest.Builder requestBuilder = Optional.ofNullable(authToken)
 			.map(token ->
