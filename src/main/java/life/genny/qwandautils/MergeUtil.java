@@ -108,10 +108,10 @@ public class MergeUtil {
 				String keyCode = entityArr[0];
 				log.debug("looking for key in map: " + keyCode);
 				
-				if((entityArr.length == 0))
+				if ((entityArr.length == 0))
 					return DEFAULT;
 				
-				if(entitymap.containsKey(keyCode)) {
+				if (entitymap.containsKey(keyCode)) {
 					
 					Object value = entitymap.get(keyCode);
 
@@ -124,9 +124,15 @@ public class MergeUtil {
 							BaseEntity be = (BaseEntity)value;
 							String attributeCode = entityArr[1];
 
-							Object attributeValue = be.getValue(attributeCode, null);
-							log.info("context: " + keyCode + ", attr: " + attributeCode + ", value: " + attributeValue);
+							Object attributeValue = null;
 
+							if (attributeCode.equals("PRI_CODE")) {
+								attributeValue = be.getCode();
+							} else {
+								attributeValue = be.getValue(attributeCode, null);
+							}
+
+							log.info("context: " + keyCode + ", attr: " + attributeCode + ", value: " + attributeValue);
 
 							Matcher matchFormat = null;
 							if (entityArr != null && entityArr.length > 2) {
@@ -165,7 +171,7 @@ public class MergeUtil {
 									return (LocalDate) attributeValue;
 								}
 
-							} else if (attributeValue instanceof java.lang.String){
+							} else if (attributeValue instanceof java.lang.String) {
 								String result = null;
 								if (matchFormat != null && matchFormat.find()) {
 									result  =  getFormattedString((String) attributeValue, matchFormat.group(1));
@@ -217,7 +223,7 @@ public class MergeUtil {
 			Matcher match = PATTERN_MATCHER.matcher(mergeStr);
 			Matcher matchVariables = PATTERN_VARIABLE.matcher(mergeStr);
 		
-			if(templateEntityMap != null && templateEntityMap.size() > 0) {
+			if (templateEntityMap != null && templateEntityMap.size() > 0) {
 				
 				while (match.find()) {
 					
