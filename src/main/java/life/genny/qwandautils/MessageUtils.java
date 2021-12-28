@@ -1,22 +1,20 @@
 package life.genny.qwandautils;
 
-import java.lang.invoke.MethodHandles;
-import java.util.List;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Base64;
-
-import org.apache.logging.log4j.Logger;
-
+import life.genny.message.QMessageGennyMSG;
+import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGAttachment;
 import life.genny.qwanda.message.QBaseMSGAttachment.AttachmentType;
 import life.genny.qwanda.message.QBaseMSGMessageType;
-import life.genny.message.QMessageGennyMSG;
 import life.genny.qwanda.message.QMSGMessage;
-import life.genny.qwanda.entity.BaseEntity;
 import life.genny.utils.BaseEntityUtils;
 import life.genny.utils.VertxUtils;
-import life.genny.qwandautils.ANSIColour;
+import org.apache.http.util.Asserts;
+import org.apache.logging.log4j.Logger;
+
+import java.lang.invoke.MethodHandles;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 
 public class MessageUtils {
 
@@ -195,6 +193,57 @@ public class MessageUtils {
 			url = url +"?token=" + token;
 		}
 		return url;
+	}
+
+	/**
+	 * Uses String Builder Pattern
+	 * @param base
+	 * @param parentCode
+	 * @param code
+	 * @param targetCode
+	 * @return
+	 */
+	public static String encodedUrlBuilder(String base, String parentCode, String code, String targetCode) {
+		return encodedUrlBuilder(base, parentCode, code, targetCode, null);
+	}
+
+	/**
+	 * Uses StringBuilder Pattern
+	 * @param base
+	 * @param parentCode
+	 * @param code
+	 * @param targetCode
+	 * @param token
+	 * @return
+	 */
+	public static String encodedUrlBuilder(String base, String parentCode, String code, String targetCode, String token) {
+		Asserts.notNull(base, "Base is null");
+		/**
+		 * A Function for Base64 encoding urls
+		 **/
+		StringBuilder url = new StringBuilder();
+		// Encode Parent and Code
+		url
+				.append(base)
+				.append("/")
+				.append(Base64.getEncoder().encodeToString(parentCode.getBytes()))
+				.append("/")
+				.append(Base64.getEncoder().encodeToString(code.getBytes()));
+
+		// Add encoded targetCode if not null
+		if (targetCode != null) {
+			url
+					.append("/")
+					.append(Base64.getEncoder().encodeToString(targetCode.getBytes()));
+		}
+
+		// Add access token if not null
+		if (token != null) {
+			url
+					.append("?token=")
+					.append(token);
+		}
+		return url.toString();
 	}
 
 	public static void sendMessage(BaseEntityUtils beUtils, QBaseMSGMessageType type, BaseEntity recipient, String body, String style)
