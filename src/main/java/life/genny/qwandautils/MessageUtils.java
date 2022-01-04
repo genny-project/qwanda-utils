@@ -165,10 +165,6 @@ public class MessageUtils {
         return msgMessage;
     }
 
-    public static String encodeUrl(String base, String parentCode, String code) {
-        return encodeUrl(base, parentCode, code, null, null);
-    }
-
     public static String encodeUrl(String base, String parentCode, String code, String targetCode) {
         return encodeUrl(base, parentCode, code, targetCode, null);
     }
