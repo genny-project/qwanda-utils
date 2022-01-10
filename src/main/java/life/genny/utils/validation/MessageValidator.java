@@ -1,4 +1,4 @@
-package validation;
+package life.genny.utils.validation;
 
 import life.genny.qwanda.entity.BaseEntity;
 
