@@ -769,7 +769,7 @@ public class BaseEntityUtils implements Serializable {
 
 	public <T extends BaseEntity> T getBaseEntityByCode(final String code) {
 		if (StringUtils.isBlank(code)) {
-			log.error("Cannot retrieve empty BE Code");
+					log.error("Cannot retrieve empty BE Code");
 			return null;
 		}
 		return this.getBaseEntityByCode(code, true);
