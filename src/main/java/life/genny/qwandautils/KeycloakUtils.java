@@ -472,7 +472,7 @@ public class KeycloakUtils {
 //		return KeycloakUtils.getImpersonatedToken(keycloakUrl, realm, keycloakUUID, serviceToken);
 //		
 //	}
-	
+
 	// This is the one called from rules to create a keycloak user
 	public static String updateUser(String keycloakUUID, String token, String realm, String newUsername,
 			String newFirstname, String newLastname, String newEmail, String password, String newRealmRoles, String newGroupRoles)
@@ -536,6 +536,47 @@ public class KeycloakUtils {
 			}
 		}
 
+		finally {
+			httpClient.getConnectionManager().shutdown();
+		}
+	}
+
+	public static int updateUserField(String keycloakUUID, String token, String realm,
+									String fieldName, String newValue) throws IOException {
+		String keycloakUrl = getKeycloakUrlFromToken(token);
+		keycloakUUID = keycloakUUID.toLowerCase();
+
+		String json = "{\""  + fieldName  + "\":\"" + newValue + "\"}";
+		log.info("Update field " +  fieldName + "json=" + json);
+		HttpClient httpClient = new DefaultHttpClient();
+		try {
+			HttpPut post = new HttpPut(keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + keycloakUUID);
+			post.addHeader("Content-Type", "application/json");
+			post.addHeader("Authorization", "Bearer " + token);
+
+			StringEntity postingString = new StringEntity(json);
+			post.setEntity(postingString);
+
+			HttpResponse response = httpClient.execute(post);
+
+			int statusCode = response.getStatusLine().getStatusCode();
+			log.info("StatusCode: " + statusCode);
+
+			if (statusCode == 201 || statusCode == 204) {
+				return statusCode;
+			} else if (statusCode == 401) {
+				log.error("Unauthorized token used to create "+keycloakUUID);
+				return statusCode;
+			}
+
+			HttpEntity entity = response.getEntity();
+			if (entity == null) {
+				throw new IOException("We could not update the user field:" + fieldName + ", response code:" + statusCode);
+			} else {
+				log.info("Keycloak User ID: " + keycloakUUID);
+				return 200;
+			}
+		}
 		finally {
 			httpClient.getConnectionManager().shutdown();
 		}
