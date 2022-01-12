@@ -541,6 +541,43 @@ public class KeycloakUtils {
 		}
 	}
 
+	public static int updateUserField(String keycloakUUID, String token, String realm,
+									  String fieldName, String newValue) throws IOException {
+		String keycloakUrl = getKeycloakUrlFromToken(token);
+		keycloakUUID = keycloakUUID.toLowerCase();
+
+		String json = "{\""  + fieldName  + "\":\"" + newValue + "\"}";
+		log.info("Update field " +  fieldName + "json=" + json);
+		HttpClient httpClient = new DefaultHttpClient();
+		try {
+			HttpPut post = new HttpPut(keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + keycloakUUID);
+			post.addHeader("Content-Type", "application/json");
+			post.addHeader("Authorization", "Bearer " + token);
+
+			StringEntity postingString = new StringEntity(json);
+			post.setEntity(postingString);
+
+			HttpResponse response = httpClient.execute(post);
+			int statusCode = response.getStatusLine().getStatusCode();
+			log.info("StatusCode: " + statusCode);
+
+			HttpEntity entity = response.getEntity();
+			if (entity == null) {
+				throw new IOException("We could not update the user field:" + fieldName + ", response code:" + statusCode);
+			}
+
+			if (statusCode == 401) {
+				log.error("Unauthorized token used to create "+keycloakUUID);
+			} else if (statusCode == 400) {
+				log.error("Request is invalid, check request content.");
+			}
+			return statusCode;
+		}
+		finally {
+			httpClient.getConnectionManager().shutdown();
+		}
+	}
+
 	public static int updateUserEmail(String keycloakUUID,String token, String realm,String newEmail)
 			throws IOException {
 		String keycloakUrl = getKeycloakUrlFromToken(token);
