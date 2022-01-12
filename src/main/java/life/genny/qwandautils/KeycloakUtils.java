@@ -558,24 +558,20 @@ public class KeycloakUtils {
 			post.setEntity(postingString);
 
 			HttpResponse response = httpClient.execute(post);
-
 			int statusCode = response.getStatusLine().getStatusCode();
 			log.info("StatusCode: " + statusCode);
-
-			if (statusCode == 201 || statusCode == 204) {
-				return statusCode;
-			} else if (statusCode == 401) {
-				log.error("Unauthorized token used to create "+keycloakUUID);
-				return statusCode;
-			}
 
 			HttpEntity entity = response.getEntity();
 			if (entity == null) {
 				throw new IOException("We could not update the user field:" + fieldName + ", response code:" + statusCode);
-			} else {
-				log.info("Keycloak User ID: " + keycloakUUID);
-				return 200;
 			}
+
+			if (statusCode == 401) {
+				log.error("Unauthorized token used to create "+keycloakUUID);
+			} else if (statusCode == 400) {
+				log.error("Request is invalid, check request content.");
+			}
+			return statusCode;
 		}
 		finally {
 			httpClient.getConnectionManager().shutdown();
