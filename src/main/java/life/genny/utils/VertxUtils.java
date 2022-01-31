@@ -603,6 +603,14 @@ public class VertxUtils {
 			// This is a standard session only
 		} else if ("search_events".equals(channel)) {
 			payload = JsonUtils.toJson(payload);
+		} else 	if ("messages".equals(channel)) {
+			  JsonObject msg = (JsonObject) new JsonObject((String)payload);
+			if (msg.containsKey("eventbus")) {
+				msg.remove("eventbus");
+				 payload = msg.toString();
+	             channel = "messages";
+			}
+			
         } else {
             // This looks like we are sending data to a subscription channel
 
