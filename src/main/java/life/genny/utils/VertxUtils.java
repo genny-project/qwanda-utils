@@ -604,7 +604,10 @@ public class VertxUtils {
 		} else if ("search_events".equals(channel)) {
 			payload = JsonUtils.toJson(payload);
 		} else 	if ("messages".equals(channel)) {
-			  JsonObject msg = (JsonObject) new JsonObject((String)payload);
+			  String pl = (String)payload;
+			  pl = pl.substring(1);
+			  pl = pl.substring(0, pl.length()-1);
+			  JsonObject msg = (JsonObject) new JsonObject(pl);
 			if (msg.containsKey("eventbus")) {
 				msg.remove("eventbus");
 				 payload = msg.toString();
