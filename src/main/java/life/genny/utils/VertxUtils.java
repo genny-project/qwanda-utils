@@ -607,6 +607,7 @@ public class VertxUtils {
             // This looks like we are sending data to a subscription channel
 
             if (payload instanceof String) {
+            	log.info("payload = ["+payload+"]");
                 JsonObject msg = (JsonObject) new JsonObject((String)payload);
                 log.info(msg.getValue("event_type"));
                 JsonArray jsonArray = msg.getJsonArray("recipientCodeArray");
