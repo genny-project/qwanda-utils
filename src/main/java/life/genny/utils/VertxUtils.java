@@ -605,8 +605,10 @@ public class VertxUtils {
 		} else if ("search_events".equals(channel)) {
 			payload = JsonUtils.toJson(payload);
 		} else 	if ("messages".equals(channel)) {
+			if (payload instanceof QMessageGennyMSG) {
 			  String pl = JsonUtils.toJson((QMessageGennyMSG)payload);
 				 payload = pl;
+			}
 	             channel = "messages";
         } else {
             // This looks like we are sending data to a subscription channel
