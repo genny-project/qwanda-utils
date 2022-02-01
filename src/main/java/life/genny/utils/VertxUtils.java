@@ -9,6 +9,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.eventbus.MessageProducer;
 import life.genny.eventbus.EventBusInterface;
 import life.genny.eventbus.EventBusMock;
+import life.genny.message.QMessageGennyMSG;
 import life.genny.models.GennyToken;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.Ask;
@@ -603,10 +604,15 @@ public class VertxUtils {
 			// This is a standard session only
 		} else if ("search_events".equals(channel)) {
 			payload = JsonUtils.toJson(payload);
+		} else 	if ("messages".equals(channel)) {
+			  String pl = JsonUtils.toJson((QMessageGennyMSG)payload);
+				 payload = pl;
+	             channel = "messages";
         } else {
             // This looks like we are sending data to a subscription channel
 
             if (payload instanceof String) {
+            	log.info("payload = ["+payload+"]");
                 JsonObject msg = (JsonObject) new JsonObject((String)payload);
                 log.info(msg.getValue("event_type"));
                 JsonArray jsonArray = msg.getJsonArray("recipientCodeArray");
