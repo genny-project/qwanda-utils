@@ -605,7 +605,17 @@ public class VertxUtils {
 		} else if ("search_events".equals(channel)) {
 			payload = JsonUtils.toJson(payload);
 		} else 	if ("messages".equals(channel)) {
-			  String pl = JsonUtils.toJson((QMessageGennyMSG)payload);
+			String pl = null;
+			if (payload instanceof String) { // done in sending
+				JsonObject j = JsonUtils.fromJson((String)payload, JsonObject.class);
+				if (j.containsKey("eventbus")) {
+					j.remove("eventbus");
+				}
+				pl = j.toString();
+				
+			} else {
+				pl = JsonUtils.toJson((QMessageGennyMSG)payload); // done in Qwanda-service
+			}
 				 payload = pl;
 	             channel = "messages";
         } else {
