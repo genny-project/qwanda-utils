@@ -608,13 +608,15 @@ public class VertxUtils {
 			String pl = null;
 			if (payload instanceof String) { // done in sending
 				log.info("payload is String  j ="+payload);
-				JsonObject j = JsonUtils.fromJson((String)payload, JsonObject.class);
-				log.info("payload is String JsonObject j ="+j);
-				if (j.containsKey("eventbus")) {
-					j.remove("eventbus");
-				}
-				log.info("payload after eventbus removal  is String JsonObject j ="+j);
-				pl = JsonUtils.toJson(j);
+				String js = (String)payload;
+				js = js.replaceAll(",\"eventbus\":\"WRITE\"", "");
+//				JsonObject j = JsonUtils.fromJson((String)payload, JsonObject.class);
+//				log.info("payload is String JsonObject j ="+j);
+//				if (j.containsKey("eventbus")) {
+//					j.remove("eventbus");
+//				}
+				log.info("payload after eventbus removal  is String JsonObject j ="+js);
+				pl = JsonUtils.toJson(js);
 				System.out.println("Sending to Messages from Wildfly-Qwanda-Service junit rx :"+pl);
 				
 			} else {
