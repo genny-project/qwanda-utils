@@ -607,14 +607,18 @@ public class VertxUtils {
 		} else 	if ("messages".equals(channel)) {
 			String pl = null;
 			if (payload instanceof String) { // done in sending
+				log.info("payload is String  j ="+payload);
 				JsonObject j = JsonUtils.fromJson((String)payload, JsonObject.class);
+				log.info("payload is String JsonObject j ="+j);
 				if (j.containsKey("eventbus")) {
 					j.remove("eventbus");
 				}
 				pl = j.toString();
-				System.out.println("Sending to Messages from Wildfly-Qwanda-Service junit rx");
+				System.out.println("Sending to Messages from Wildfly-Qwanda-Service junit rx :"+pl);
 				
 			} else {
+				log.info("payload is QMessageGennyMSG  j ="+((QMessageGennyMSG)payload));
+
 				pl = JsonUtils.toJson((QMessageGennyMSG)payload); // done in Qwanda-service
 				System.out.println("Sending to Messages from junit and normal messages send");
 			}
