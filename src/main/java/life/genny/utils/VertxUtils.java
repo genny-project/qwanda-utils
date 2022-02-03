@@ -613,7 +613,8 @@ public class VertxUtils {
 				if (j.containsKey("eventbus")) {
 					j.remove("eventbus");
 				}
-				pl = j.toString();
+				log.info("payload after eventbus removal  is String JsonObject j ="+j);
+				pl = JsonUtils.toJson(j);
 				System.out.println("Sending to Messages from Wildfly-Qwanda-Service junit rx :"+pl);
 				
 			} else {
