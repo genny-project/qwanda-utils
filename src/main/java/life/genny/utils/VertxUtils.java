@@ -616,7 +616,7 @@ public class VertxUtils {
 //					j.remove("eventbus");
 //				}
 				log.info("payload after eventbus removal  is String JsonObject j ="+js);
-				pl = JsonUtils.toJson(js);
+				pl = js;
 				System.out.println("Sending to Messages from Wildfly-Qwanda-Service junit rx :"+pl);
 				
 			} else {
