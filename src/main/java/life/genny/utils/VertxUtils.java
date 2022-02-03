@@ -612,9 +612,11 @@ public class VertxUtils {
 					j.remove("eventbus");
 				}
 				pl = j.toString();
+				System.out.println("Sending to Messages from Wildfly-Qwanda-Service junit rx");
 				
 			} else {
 				pl = JsonUtils.toJson((QMessageGennyMSG)payload); // done in Qwanda-service
+				System.out.println("Sending to Messages from junit and normal messages send");
 			}
 				 payload = pl;
 	             channel = "messages";
