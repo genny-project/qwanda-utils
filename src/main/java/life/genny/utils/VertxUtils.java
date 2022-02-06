@@ -9,6 +9,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.eventbus.MessageProducer;
 import life.genny.eventbus.EventBusInterface;
 import life.genny.eventbus.EventBusMock;
+import life.genny.message.QMessageGennyMSG;
 import life.genny.models.GennyToken;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.Ask;
@@ -603,10 +604,34 @@ public class VertxUtils {
 			// This is a standard session only
 		} else if ("search_events".equals(channel)) {
 			payload = JsonUtils.toJson(payload);
+		} else 	if ("messages".equals(channel)) {
+			String pl = null;
+			if (payload instanceof String) { // done in sending
+				log.info("payload is String  j ="+payload);
+				String js = (String)payload;
+				js = js.replaceAll(",\"eventbus\":\"WRITE\"", "");
+//				JsonObject j = JsonUtils.fromJson((String)payload, JsonObject.class);
+//				log.info("payload is String JsonObject j ="+j);
+//				if (j.containsKey("eventbus")) {
+//					j.remove("eventbus");
+//				}
+				log.info("payload after eventbus removal  is String JsonObject j ="+js);
+				pl = js;
+				System.out.println("Sending to Messages from Wildfly-Qwanda-Service junit rx :"+pl);
+				
+			} else {
+				log.info("payload is QMessageGennyMSG  j ="+((QMessageGennyMSG)payload));
+
+				pl = JsonUtils.toJson((QMessageGennyMSG)payload); // done in Qwanda-service
+				System.out.println("Sending to Messages from junit and normal messages send");
+			}
+				 payload = pl;
+	             channel = "messages";
         } else {
             // This looks like we are sending data to a subscription channel
 
             if (payload instanceof String) {
+            	log.info("payload = ["+payload+"]");
                 JsonObject msg = (JsonObject) new JsonObject((String)payload);
                 log.info(msg.getValue("event_type"));
                 JsonArray jsonArray = msg.getJsonArray("recipientCodeArray");
