@@ -13,7 +13,7 @@ public class MessageValidator {
     }
 
     public static Boolean isMobileBlank(BaseEntity baseEntity) {
-        Boolean isBlank = isBlank(baseEntity, "PRI_EMAIL");
+        Boolean isBlank = isBlank(baseEntity, "PRI_MOBILE");
         if (isBlank) {
             System.out.println("Mobile no not found!!");
         }
@@ -21,11 +21,14 @@ public class MessageValidator {
     }
 
     public static Boolean isBlank(BaseEntity baseEntity, String attribute) {
+        if(baseEntity == null) {
+            System.out.println("BaseEntity is null!!");
+            return false;
+        }
         String element = baseEntity.getValueAsString(attribute);
         if (element != null && !element.isEmpty()) {
             return false;
         }
         return true;
-
     }
 }
