@@ -3765,4 +3765,27 @@ public class BaseEntityUtils implements Serializable {
 		return targetBe;
 	}
 
+	/* Creates PCM with the attributeMap
+	 */
+	public BaseEntity addPCMAttributes(String PCMName, String PCMCode, String PCMTemplateCode, Map<String,String> attributeMap) throws Exception
+	{
+		BaseEntity defBe = this.getDEFByCode("DEF_PCM");
+		BaseEntity pcmBe = this.create(defBe,PCMName,PCMCode);
+
+		Answer answer =  new Answer(serviceToken.getUserCode(), pcmBe.getCode(), "PRI_TEMPLATE_CODE", PCMTemplateCode ,false,true);
+		Attribute attribute = RulesUtils.getAttribute("PRI_TEMPLATE_CODE", serviceToken);
+		answer.setAttribute(attribute);
+		pcmBe.addAnswer(answer);
+
+		for(Map.Entry<String, String> entry : attributeMap.entrySet())
+		{
+			answer =  new Answer(serviceToken.getUserCode(), pcmBe.getCode(), entry.getKey(), entry.getValue() ,false,true);
+			attribute = RulesUtils.getAttribute(entry.getKey(), serviceToken);
+			answer.setAttribute(attribute);
+			pcmBe.addAnswer(answer);
+		}
+
+		return pcmBe;
+	}
+
 }
