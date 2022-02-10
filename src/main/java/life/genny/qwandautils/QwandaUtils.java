@@ -1870,7 +1870,7 @@ public class QwandaUtils {
 	public static String apiPostEntity2(final String postUrl, final String entityString, final String authToken,
 			final Consumer<String> callback) throws IOException {
 		
-		Integer httpTimeout = 1;  // 7 secnds
+		Integer httpTimeout = GennySettings.apiPostTimeOut;  // 7 secnds
 		
 		if (StringUtils.isBlank(postUrl)) {
 			log.error("Blank url in apiPostEntity");
@@ -1891,7 +1891,7 @@ public class QwandaUtils {
 
 		String result = null;
 		Boolean done = false;
-		int count = 3;
+		int count = GennySettings.apiPostRetryTimes;
 		while ((!done) && (count > 0)) {
 			CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
 					java.net.http.HttpResponse.BodyHandlers.ofString());

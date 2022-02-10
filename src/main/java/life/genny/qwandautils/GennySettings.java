@@ -124,8 +124,14 @@ public class GennySettings {
     public static final String twilioAuthToken = System.getenv("TWILIO_AUTH_TOKEN") != null ? System.getenv("TWILIO_AUTH_TOKEN") : "TWILIO_AUTH_TOKEN";   
     public static final String twilioSenderMobile = System.getenv("TWILIO_SENDER_MOBILE") != null ? System.getenv("TWILIO_SENDER_MOBILE") : "TWILIO_SENDER_MOBILE";
 	public static final Boolean CleanupTaskAndBeAttrForm = System.getenv("CLEANUP_TASK_AND_BEATTRFORM") !=null ? "TRUE".equalsIgnoreCase(System.getenv("CLEANUP_TASK_AND_BEATTRFORM")):true;
+	// API POST timeout
+	// 1 second by default
+	public static final Integer apiPostTimeOut= System.getenv("API_POST_TIMEOUT")==null?1:(Integer.parseInt(System.getenv("API_POST_TIMEOUT")));
+	// 3 times by default
+	public static final Integer apiPostRetryTimes= System.getenv("API_POST_RETRY_TIMES")==null?3:(Integer.parseInt(System.getenv("API_POST_RETRY_TIMES")));
 
-    static{
+
+	static{
         Optional<String> cacheServerNameOptional = Optional.ofNullable(System.getenv("CACHE_SERVER_NAME"));
         Optional<String> isCacheServerOptional = Optional.ofNullable(System.getenv("IS_CACHE_SERVER"));
         if(devMode){
