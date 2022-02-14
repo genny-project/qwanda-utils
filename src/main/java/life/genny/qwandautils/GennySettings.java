@@ -15,6 +15,8 @@ public class GennySettings {
     public final static String GENNY_REALM = "jenny"; //deliberatly not genny
 
 	public static int ACCESS_TOKEN_EXPIRY_LIMIT_SECONDS = 60;
+
+	public static int MAX_KEYCLOAK_USER_PER_CALL = 5000;
 	
 
 	public static String hostIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : (System.getenv("MYIP") != null ? System.getenv("MYIP") : "alyson.genny.life");   // remember to set up this local IP on the host

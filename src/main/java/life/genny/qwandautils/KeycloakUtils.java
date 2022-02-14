@@ -1106,15 +1106,21 @@ public class KeycloakUtils {
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 			String accessToken = getAccessToken(keycloakUrl, realm, "admin-cli", null, "service", servicePassword);
 
-			HttpGet get = new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm + "/users?first=0&max=" + count);
-			get.addHeader("Authorization", "Bearer " + accessToken);
-			HttpResponse response = client.execute(get);
-			if (response.getStatusLine().getStatusCode() != 200) {
+			int loopCount = count / GennySettings.MAX_KEYCLOAK_USER_PER_CALL;
+			for (int index = 0; index <= loopCount; index++) {
+				HttpGet get = new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm
+				+ "/users?first=" + index * GennySettings.MAX_KEYCLOAK_USER_PER_CALL
+				+ "&max=" + GennySettings.MAX_KEYCLOAK_USER_PER_CALL);
+				get.addHeader("Authorization", "Bearer " + accessToken);
+				HttpResponse response = client.execute(get);
+				if (response.getStatusLine().getStatusCode() != 200) {
 					throw new IOException("Get keycloak user response code:" + response.getStatusLine().getStatusCode());
+				}
+				HttpEntity entity = response.getEntity();
+				InputStream is = entity.getContent();
+				results.addAll(JsonSerialization.readValue(is, (new ArrayList<UserRepresentation>()).getClass()));
 			}
-			HttpEntity entity = response.getEntity();
-			InputStream is = entity.getContent();
-			results = JsonSerialization.readValue(is, (new ArrayList<UserRepresentation>()).getClass());
+			assert(results.size() == count);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
