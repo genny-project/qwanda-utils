@@ -1122,7 +1122,6 @@ public class KeycloakUtils {
 				results.addAll(JsonSerialization.readValue(is, (new ArrayList<UserRepresentation>()).getClass()));
 				log.info("Get user range:" + startNumber + ":" + (startNumber + GennySettings.MAX_KEYCLOAK_USER_PER_CALL - 1));
 			}
-			assert(results.size() == count);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
