@@ -1108,8 +1108,9 @@ public class KeycloakUtils {
 
 			int loopCount = count / GennySettings.MAX_KEYCLOAK_USER_PER_CALL;
 			for (int index = 0; index <= loopCount; index++) {
+				int startNumber = index * GennySettings.MAX_KEYCLOAK_USER_PER_CALL;
 				HttpGet get = new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm
-				+ "/users?first=" + index * GennySettings.MAX_KEYCLOAK_USER_PER_CALL
+				+ "/users?first=" + startNumber
 				+ "&max=" + GennySettings.MAX_KEYCLOAK_USER_PER_CALL);
 				get.addHeader("Authorization", "Bearer " + accessToken);
 				HttpResponse response = client.execute(get);
@@ -1119,6 +1120,7 @@ public class KeycloakUtils {
 				HttpEntity entity = response.getEntity();
 				InputStream is = entity.getContent();
 				results.addAll(JsonSerialization.readValue(is, (new ArrayList<UserRepresentation>()).getClass()));
+				log.info("Get user range:" + startNumber + ":" + (startNumber + GennySettings.MAX_KEYCLOAK_USER_PER_CALL - 1));
 			}
 			assert(results.size() == count);
 		} catch (IOException e) {
