@@ -241,6 +241,8 @@ public class BaseEntityUtils implements Serializable {
 
 		}
 
+		// Force initial status of baseentity to ACTIVE
+		item.setStatus(EEntityStatus.ACTIVE);
 		item = this.saveBaseEntity(defBE, item);
 		// Force the type of baseentity
 		Attribute attributeDEF = RulesUtils.getAttribute("PRI_IS_" + defBE.getCode().substring("DEF_".length()),
