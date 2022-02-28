@@ -1853,7 +1853,7 @@ public class QwandaUtils {
                 done = true;
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 // TODO Auto-generated catch block
-                log.error("Count:" + count + ", Exception occurred when post to URL: " + postUrl + ",Body is entityString:" + entityString + ", Exception details:" + e.getCause());
+                log.error("Count:" + count + " , TimeOut value:" + httpTimeout + ", Exception occurred when post to URL: " + postUrl + ",Body is entityString:" + entityString + ", Exception details:" + e.getCause());
                 // try renewing the httpclient
                 httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
                         .connectTimeout(Duration.ofSeconds(httpTimeout)).build();
