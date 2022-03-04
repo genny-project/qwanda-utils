@@ -320,9 +320,13 @@ public class GennyToken implements Serializable {
     return code;
   }
 
-  public String getJTI() {
+  public String getJti() {
     return getString("jti");
   }
+  
+  public String getJTI() {
+	    return getString("jti");
+	  }
 
   public String getUsername() {
     return this.username;
