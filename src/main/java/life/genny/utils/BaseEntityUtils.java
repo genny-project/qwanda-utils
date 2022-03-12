@@ -148,6 +148,10 @@ public class BaseEntityUtils implements Serializable {
 	// return newBaseEntity;
 	// }
 
+	public BaseEntity getUserBaseEntity() {
+		return this.getBaseEntityByCode(this.getGennyToken().getUserCode());
+	}
+
 	public BaseEntity create(final String defCode) throws Exception {
 		String localRealm = this.getGennyToken().getRealm();
 		BaseEntity defBE = RulesUtils.defs.get(localRealm).get(defCode);
