@@ -76,6 +76,8 @@ public class BaseEntityUtils implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	public static final String SERVICE_USERNAME = "service";
+
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
@@ -147,6 +149,10 @@ public class BaseEntityUtils implements Serializable {
 	// this.token);
 	// return newBaseEntity;
 	// }
+
+	public Boolean tokenIsServiceUser() {
+		return SERVICE_USERNAME.equals(this.getGennyToken().getUsername());
+	}
 
 	public BaseEntity getUserBaseEntity() {
 		return this.getBaseEntityByCode(this.getGennyToken().getUserCode());
