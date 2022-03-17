@@ -2,6 +2,8 @@ package life.genny.data;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.jboss.logging.Logger;
 
@@ -18,15 +20,18 @@ public class BridgeSwitch {
 
 	static final Logger log = Logger.getLogger(BridgeSwitch.class);
 
-	public static ConcurrentMap<String, String> mappings = new ConcurrentHashMap<>();
-
 	public static String BRIDGE_INFO_PREFIX = "BIF";
 
+	public static Set<String> activeBridgeIds = new HashSet<String>();
+
+	/**
+	 * A child class used to store bridge mappings for individual users.
+	 */
 	public static class BridgeInfo {
 
 		public BridgeInfo() {}
 
-		private ConcurrentMap<String, String> mappings = new ConcurrentHashMap<>();
+		public ConcurrentMap<String, String> mappings = new ConcurrentHashMap<>();
 	}
 
 	/**
