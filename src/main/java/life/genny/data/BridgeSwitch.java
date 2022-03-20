@@ -78,6 +78,7 @@ public class BridgeSwitch {
 		
 		if (info == null) {
 			log.error("No BridgeInfo object found for user " + gennyToken.getUserCode());
+			return null;
 		}
 
 		// grab entry for jti
