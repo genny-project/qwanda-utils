@@ -17,7 +17,7 @@ public class GpsTest {
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
-	@Test
+//	@Test
 	public void getApiUrlTest()
 	{
 		final String googleApiKey = "AIzaSyCtaue7XGY-pNto0DgjZUyMudu2o0NkI88"; 
