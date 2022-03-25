@@ -1,6 +1,7 @@
 package life.genny.qwandautils;
 
 import com.google.gson.JsonObject;
+import life.genny.dto.FileUploadRequest;
 import life.genny.models.GennyToken;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.Ask;
@@ -45,6 +46,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -1965,8 +1967,148 @@ public class QwandaUtils {
             count--;
         }
         return result;
+    }
 
+    /**
+     * Use this to get file from a url
+     * @param url
+     * @return
+     */
+    public static byte[] getForByteArray(final String url) {
 
+        Integer httpTimeout = GennySettings.apiPostTimeOut;
+
+        HttpRequest.Builder requestBuilder = HttpRequest
+                .newBuilder()
+                .version(httpClient.version())
+                .uri(URI.create(url))
+                .GET();
+
+        HttpRequest request = requestBuilder.build();
+
+        byte[] result = null;
+        Boolean done = false;
+        int count = 5;
+        while ((!done) && (count > 0)) {
+
+            CompletableFuture<java.net.http.HttpResponse<byte[]>> response = httpClient.sendAsync(
+                    request,
+                    java.net.http.HttpResponse.BodyHandlers.ofByteArray());
+            try {
+                result = response.thenApply(java.net.http.HttpResponse::body).get(httpTimeout, TimeUnit.SECONDS);
+                done = true;
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                log.error("Count:" + count + ", Exception occurred when post to URL: " + ", Exception details:" + e.getCause());
+                // try renewing the httpclient
+                httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
+                        .connectTimeout(Duration.ofSeconds(httpTimeout)).build();
+                if (count <= 0) {
+                    done = true;
+                }
+            }
+            count--;
+        }
+        if (result.equals("<html><head><title>Error</title></head><body>Not Found</body></html>")) {
+            log.error("Can't find result for request:" + url + ", set returned result to NULL");
+            result = null;
+        }
+        log.info("result: byte[]: {}", result);
+        return result;
+    }
+
+    public static String postFile(final String postUrl, final String authToken, String fileName, Map<Object, Object> data) throws IOException {
+        return postFile(postUrl,authToken, new FileUploadRequest(fileName, "application/octet-stream", data));
+    }
+
+    public static String postFile(final String postUrl, final String authToken, FileUploadRequest fileUploadRequest) throws IOException {
+        String boundary = UUID.randomUUID().toString();
+
+        Integer httpTimeout = GennySettings.apiPostTimeOut;
+
+        if (StringUtils.isBlank(postUrl)) {
+            log.info("Blank url in apiPostEntity");
+        }
+
+        HttpRequest.BodyPublisher bodyPublisher = ofMimeMultipartData(
+            fileUploadRequest.getData(),
+            boundary,
+            fileUploadRequest.getName(),
+            fileUploadRequest.getType()
+        );
+        String contentType = "multipart/form-data;boundary=" + boundary;
+        String authorization = "Bearer " + authToken;
+        log.info("contentType: {}", contentType);
+        HttpRequest.Builder requestBuilder = Optional.ofNullable(authToken)
+                .map(token ->
+                        HttpRequest.newBuilder()
+                                .POST(bodyPublisher)
+                                .uri(URI.create(postUrl))
+                                .setHeader("Content-Type", contentType)
+                                .setHeader("Authorization", authorization)
+                ).orElse(
+                        HttpRequest.newBuilder()
+                                .POST(bodyPublisher)
+                                .uri(URI.create(postUrl))
+                );
+
+        if (postUrl.contains("genny.life")) { // Hack for local server not having http2
+            requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
+        }
+
+        HttpRequest request = requestBuilder.build();
+        String result = null;
+        Boolean done = false;
+        int count = 5;
+        while ((!done) && (count > 0)) {
+            CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
+                    java.net.http.HttpResponse.BodyHandlers.ofString());
+            try {
+                result = response.thenApply(java.net.http.HttpResponse::body).get(httpTimeout, TimeUnit.SECONDS);
+                done = true;
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                log.error("Count:" + count + " , TimeOut value:" + httpTimeout + ", Exception occurred when post to URL: " + postUrl + ", Exception details:" + e.getCause());
+                // try renewing the httpclient
+                httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
+                        .connectTimeout(Duration.ofSeconds(httpTimeout)).build();
+                if (count <= 0) {
+                    done = true;
+                }
+            } catch (Exception ex) {
+                log.error("Exception : " + ex);
+            }
+            count--;
+        }
+        log.info("result: String: {}", result);
+        return result;
+    }
+
+    public static HttpRequest.BodyPublisher ofMimeMultipartData(Map<Object, Object> data,
+                                                                String boundary, String fileName, String contentType) throws IOException {
+        // Result request body
+        List<byte[]> byteArrays = new ArrayList<>();
+
+        // Separator with boundary
+        byte[] separator = ("--" + boundary + "\r\nContent-Disposition: form-data; name=").getBytes(StandardCharsets.UTF_8);
+
+        // Iterating over data parts
+        for (Map.Entry<Object, Object> entry : data.entrySet()) {
+
+            // Opening boundary
+            byteArrays.add(separator);
+
+            // If value is type of Path (file) append content type with file name and file binaries, otherwise simply append key=value
+            byteArrays.add(("\"" + entry.getKey() + "\"; filename=\"" + fileName
+                    + "\"\r\nContent-Type: " + contentType + "\r\n\r\n").getBytes(StandardCharsets.UTF_8));
+
+            byteArrays.add("\r\n".getBytes(StandardCharsets.UTF_8));
+
+        }
+
+        // Closing boundary
+        byteArrays.add(("--" + boundary + "--").getBytes(StandardCharsets.UTF_8));
+
+        // Serializing as byte array
+        return HttpRequest.BodyPublishers.ofByteArrays(byteArrays);
     }
 
 }
