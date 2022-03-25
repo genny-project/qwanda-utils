@@ -2012,7 +2012,6 @@ public class QwandaUtils {
             log.error("Can't find result for request:" + url + ", set returned result to NULL");
             result = null;
         }
-        log.info("result: byte[]: {}", result);
         return result;
     }
 

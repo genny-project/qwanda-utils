@@ -159,13 +159,13 @@ public class PDFHelper {
                 log.info("pdfBytes length: {}", pdfBytes.length);
                 Map<Object, Object> formData = new HashMap<>();
                 formData.put("file", pdfBytes);
-                log.info("form_data: {}", formData);
                 /* Posting file to media-proxy */
                 String[] linkTokens = camelotLink.split("/");
                 log.info("linkTokens: {}", linkTokens);
                 if (linkTokens != null && linkTokens.length > 0) {
                     String fileName = linkTokens[linkTokens.length - 1];
-                    response = QwandaUtils.postFile(GennySettings.mediaProxyUrl, token, fileName, formData);
+                   /* response = QwandaUtils.postFile(GennySettings.mediaProxyUrl, token, fileName, formData);*/
+                    response = QwandaUtils.postFile("https://internmatch-dev.gada.io/web/public", token, fileName, formData);
                     log.info("response for attachment ::" + response);
                     if (response != null) {
                         MinioResponse minioResponse = JsonUtils.fromJson(response, MinioResponse.class);
