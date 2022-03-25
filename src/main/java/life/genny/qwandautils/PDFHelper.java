@@ -172,13 +172,10 @@ public class PDFHelper {
                     if (response != null) {
                         JsonObject mediaProxyResponse = new JsonObject(response);
                         JsonArray files = mediaProxyResponse.getJsonArray("files");
-                        JsonObject file = files.getJsonObject(0);
-                        log.info("minioResponse: {}", JsonUtils.toJson(file));
-                        if (file != null) {
-                            String uuid = file.getString("uuid");
-                            log.info("minio object uuid: {}", uuid);
-                            return uuid;
-                        }
+                        JsonObject jsonObject = files.getJsonObject(0);
+                        String uuid = jsonObject.getString("uuid");
+                        log.info("minio object uuid: {}", uuid);
+                        return uuid;
                     }
                 }
             }
