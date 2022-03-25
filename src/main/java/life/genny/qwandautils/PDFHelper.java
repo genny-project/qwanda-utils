@@ -154,7 +154,7 @@ public class PDFHelper {
             if (camelotLink != null) {
                 String projectUrl = GennySettings.projectUrl;
                 if (projectUrl == null) projectUrl = "https://m.internmatch.io";
-                camelotLink = projectUrl + camelotLink;
+                camelotLink = projectUrl + "/camelot" + camelotLink;
                 log.info("Camelot full url: {}", camelotLink);
                 /* Fetching PDF Byte array */
                 byte[] pdfBytes = QwandaUtils.getForByteArray(camelotLink);
@@ -174,7 +174,6 @@ public class PDFHelper {
                         JsonArray files = mediaProxyResponse.getJsonArray("files");
                         JsonObject jsonObject = files.getJsonObject(0);
                         String uuid = jsonObject.getString("uuid");
-                        log.info("minio object uuid: {}", uuid);
                         return uuid;
                     }
                 }
