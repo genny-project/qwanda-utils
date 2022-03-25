@@ -144,22 +144,24 @@ public class PDFHelper {
     }
 
     public static String postCamelotFileToMinio(String htmlString, String token) {
+        String response = null;
         try {
-            String response = getHtmlStringToPdfInByte(htmlString);
-            log.info("response for attachment ::" + response);
+            String camelotLink = getHtmlStringToPdfInByte(htmlString);
+            log.info("camelot file path ::" + camelotLink);
 
-            if (response != null) {
-                JSONObject respObj = JsonUtils.fromJson(response, JSONObject.class);
-                String link = (String) respObj.get("path");
-                log.info("Camelot url: {}", link);
+            if (camelotLink != null) {
+                String projectUrl = GennySettings.projectUrl;
+                if (projectUrl == null) projectUrl = "https://m.internmatch.io";
+                camelotLink = projectUrl + camelotLink;
+                log.info("Camelot full url: {}", camelotLink);
                 /* Fetching PDF Byte array */
-                byte[] pdfBytes = QwandaUtils.getForByteArray(link);
+                byte[] pdfBytes = QwandaUtils.getForByteArray(camelotLink);
                 log.info("pdfBytes length: {}", pdfBytes.length);
                 Map<Object, Object> formData = new HashMap<>();
                 formData.put("file", pdfBytes);
                 log.info("form_data: {}", formData);
                 /* Posting file to media-proxy */
-                String[] linkTokens = link.split("/");
+                String[] linkTokens = camelotLink.split("/");
                 log.info("linkTokens: {}", linkTokens);
                 if (linkTokens != null && linkTokens.length > 0) {
                     String fileName = linkTokens[linkTokens.length - 1];
