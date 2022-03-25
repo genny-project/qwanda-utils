@@ -109,7 +109,8 @@ public class PDFHelper {
 
         if (objectUuid != null) {
 
-            downloadablePdfUrl = GennySettings.mediaProxyUrl + "/" + objectUuid;
+           /* downloadablePdfUrl = GennySettings.mediaProxyUrl + "/" + objectUuid;*/
+            downloadablePdfUrl = "https://internmatch-dev.gada.io/web/public"+ "/" + objectUuid;
             log.info("download url ::" + downloadablePdfUrl);
             return downloadablePdfUrl;
         }
