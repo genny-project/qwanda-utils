@@ -1,7 +1,8 @@
 package life.genny.qwandautils;
 
 import com.google.gson.Gson;
-import life.genny.dto.MinioResponse;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
 
@@ -109,8 +110,8 @@ public class PDFHelper {
 
         if (objectUuid != null) {
 
-           /* downloadablePdfUrl = GennySettings.mediaProxyUrl + "/" + objectUuid;*/
-            downloadablePdfUrl = "https://internmatch-dev.gada.io/web/public"+ "/" + objectUuid;
+            /* downloadablePdfUrl = GennySettings.mediaProxyUrl + "/" + objectUuid;*/
+            downloadablePdfUrl = "https://internmatch-dev.gada.io/web/public" + "/" + objectUuid;
             log.info("download url ::" + downloadablePdfUrl);
             return downloadablePdfUrl;
         }
@@ -165,14 +166,16 @@ public class PDFHelper {
                 log.info("linkTokens: {}", linkTokens);
                 if (linkTokens != null && linkTokens.length > 0) {
                     String fileName = linkTokens[linkTokens.length - 1];
-                   /* response = QwandaUtils.postFile(GennySettings.mediaProxyUrl, token, fileName, formData);*/
+                    /* response = QwandaUtils.postFile(GennySettings.mediaProxyUrl, token, fileName, formData);*/
                     response = QwandaUtils.postFile("https://internmatch-dev.gada.io/web/public", token, fileName, formData);
                     log.info("response for attachment ::" + response);
                     if (response != null) {
-                        MinioResponse minioResponse = JsonUtils.fromJson(response, MinioResponse.class);
-                        log.info("minioResponse: {}", JsonUtils.toJson(minioResponse));
-                        if (minioResponse != null && minioResponse.getFiles() != null && !minioResponse.getFiles().isEmpty()) {
-                            String uuid = minioResponse.getFiles().get(0).getUuid();
+                        JsonObject mediaProxyResponse = new JsonObject(response);
+                        JsonArray files = mediaProxyResponse.getJsonArray("files");
+                        JsonObject file = files.getJsonObject(0);
+                        log.info("minioResponse: {}", JsonUtils.toJson(file));
+                        if (file != null) {
+                            String uuid = file.getString("uuid");
                             log.info("minio object uuid: {}", uuid);
                             return uuid;
                         }
