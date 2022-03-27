@@ -1844,16 +1844,20 @@ public class QwandaUtils {
         }
 
         BodyPublisher requestBody = BodyPublishers.ofString(entityString);
-
+        log.info("contentType="+contentType);
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().POST(requestBody).uri(URI.create(postUrl))
                 .setHeader("Content-Type", contentType)
                 .setHeader("Authorization", "Bearer " + authToken);
 
 
-//        if (postUrl.contains("genny.life")) { // Hack for local server not having http2
-//            requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
-//        }
+        if (postUrl.contains("genny.life")) { // Hack for local server not having http2
+            requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
+        }
 
+        log.info("postUrl="+postUrl+"-->"+requestBody);
+        if (authToken != null) {
+        	log.info("authToken="+authToken.substring(0, 10));
+        }
         HttpRequest request = requestBuilder.build();
 
         String result = null;
@@ -1867,6 +1871,7 @@ public class QwandaUtils {
             try {
                 result = response.thenApply(java.net.http.HttpResponse::body).get(httpTimeout, TimeUnit.SECONDS);
                 done = true;
+                log.info("post result is "+result);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 // TODO Auto-generated catch block
                 log.error("Count:" + count + " , TimeOut value:" + httpTimeout + ", Exception occurred when post to URL: " + postUrl + ",Body is entityString:" + entityString + ", Exception details:" + e.getCause());
