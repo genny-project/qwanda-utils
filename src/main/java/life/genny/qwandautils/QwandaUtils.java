@@ -1679,13 +1679,14 @@ public class QwandaUtils {
                                 .GET()
                                 .uri(URI.create(url))
                                 .setHeader("Content-Type", contentType)
-                                .setHeader("Authorization", "Bearer " + token)
+                                .setHeader("Authorization", "Bearer " + authToken)
                 )
                 .orElse(
                         HttpRequest.newBuilder()
                                 .GET()
                                 .uri(URI.create(url))
                                 .setHeader("Content-Type", contentType)
+                                .setHeader("Authorization", "Bearer " + authToken)
                 );
         }
 
@@ -1719,7 +1720,7 @@ public class QwandaUtils {
             }
             count--;
         }
-//	        System.out.println(result);
+	        System.out.println(result);
 // can't find
         if (result.equals("<html><head><title>Error</title></head><body>Not Found</body></html>")) {
             log.error("Can't find result for request:" + url + ", set returned result to NULL");
