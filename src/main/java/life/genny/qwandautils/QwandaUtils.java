@@ -1827,7 +1827,14 @@ public class QwandaUtils {
         return response;
     }
 
+    
     public static String apiPostEntity2(final String postUrl, final String entityString, final String authToken,
+            final Consumer<String> callback) throws IOException {
+
+    	return apiPostEntity2(postUrl, entityString,"application/json",authToken,callback);
+    }
+    
+    public static String apiPostEntity2(final String postUrl, final String entityString, final String contentType,final String authToken,
                                         final Consumer<String> callback) throws IOException {
 
         Integer httpTimeout = GennySettings.apiPostTimeOut;  // 7 secnds
@@ -1839,7 +1846,7 @@ public class QwandaUtils {
         BodyPublisher requestBody = BodyPublishers.ofString(entityString);
 
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().POST(requestBody).uri(URI.create(postUrl))
-                .setHeader("Content-Type", "application/json")
+                .setHeader("Content-Type", contentType)
                 .setHeader("Authorization", "Bearer " + authToken);
 
 
@@ -2116,7 +2123,7 @@ public class QwandaUtils {
         return HttpRequest.BodyPublishers.ofByteArrays(byteArrays);
     }
 
-    public static String getKogitoApplicationProcessId(final String internCode, final String sourceCode)
+    public static String getKogitoApplicationProcessId(final String internCode, final String sourceCode,final String authToken)
     {
     	String graphQL = "query {  Application (where: {      internCode: { like: \""+internCode+"\" }, sourceCode: { like: \""+sourceCode+"\" }, newApplication: { equal: true}}) {   id  }}";
         Integer httpTimeout = GennySettings.apiPostTimeOut;  // 7 secnds
@@ -2130,38 +2137,15 @@ public class QwandaUtils {
         }
     	log.info("getKogitoApplicationProcessId: "+postUrl+"-->"+graphQL);
 
-        BodyPublisher requestBody = BodyPublishers.ofString(graphQL);
-
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().POST(requestBody).uri(URI.create(postUrl))
-                .setHeader("Content-Type", "application/GraphQL")
-                .setHeader("Accept", "application/json");
-
-
-        if (postUrl.contains("genny.life")) { // Hack for local server not having http2
-            requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
-        }
-
-        HttpRequest request = requestBuilder.build();
-
-        String result = null;
-
-             CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
-                    java.net.http.HttpResponse.BodyHandlers.ofString());
-
-            try {
-            	log.info("About to post "+request.toString());
-                result = response.thenApply(java.net.http.HttpResponse::body).get(httpTimeout, TimeUnit.SECONDS);
-           
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                // TODO Auto-generated catch block
-                // try renewing the httpclient
-                httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
-                        .connectTimeout(Duration.ofSeconds(httpTimeout)).build();
-
-            } catch (Exception ex) {
-                log.error("Exception : ", ex);
-            }
-
+    	String result = null;
+    	
+    	try {
+    	result = apiPostEntity2(postUrl, graphQL, "application/GraphQL",authToken,
+                null);
+    	} catch (IOException e) {
+    		log.error(e.getLocalizedMessage());
+    		return null;
+    	}
 
         // Now extract the processId
         log.info("result="+result);
