@@ -2135,6 +2135,7 @@ public class QwandaUtils {
 
     public static String getKogitoApplicationProcessId(final String internCode, final String sourceCode,final String authToken)
     {
+    	log.info("New kogito processId workaround");   	
     	String kogitoUrl = System.getenv("GENNY_KOGITO_SERVICE_URL");
     	if (kogitoUrl == null) {
     		kogitoUrl = "http://alyson2.genny.life:8580";
