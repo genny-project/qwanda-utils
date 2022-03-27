@@ -2142,19 +2142,19 @@ public class QwandaUtils {
             return null;
         }
     	log.info("getKogitoApplicationProcessId: "+postUrl+"-->"+graphQL);
-
     	String result = null;
-    	
-    	try {
-    	result = apiPostEntity2(postUrl, graphQL, "application/GraphQL",authToken,
-                null);
-    	} catch (IOException e) {
-    		log.error(e.getLocalizedMessage());
-    		return null;
-    	}
+    	java.net.http.HttpResponse<String> response = post(postUrl, graphQL, "application/GraphQL", authToken);
+        if (response != null) {
 
+           result = response.body();
+            log.info("responseBody:" + result);
+ 
+        } else {
+           log.error("No processId found");
+           return null;
+        }
         // Now extract the processId
-        log.info("result2="+result);
+        log.info("result3="+result);
         if (!result.contains("Error id")) {
             // isolate the id
             JsonObject responseJson = JsonUtils.fromJson(result, JsonObject.class);
@@ -2181,5 +2181,37 @@ public class QwandaUtils {
 
     }
     
-    
+    /**
+	* Create and send a POST  request.
+	*
+	* @param uri The target URI of the request.
+	* @param body The json string to use as the body.
+	* @param contentType The contentType to use in the header. Default: "application/json"
+	* @param token The token to use in authorization.
+	* @return The returned response object.
+	* import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+	 */
+	public static java.net.http.HttpResponse<String> post(String uri, String body, String contentType, String token) {
+
+		HttpClient client = java.net.http.HttpClient.newHttpClient();
+
+		HttpRequest request = java.net.http.HttpRequest.newBuilder()
+				.uri(URI.create(uri))
+				.setHeader("Content-Type", contentType)
+				.setHeader("Authorization", "Bearer " + token)
+				.POST(java.net.http.HttpRequest.BodyPublishers.ofString(body))
+				.build();
+
+		try {
+			java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+			return response;
+		} catch (IOException | InterruptedException e) {
+			log.error(e);
+		}
+
+		return null;
+	}
+
 }
