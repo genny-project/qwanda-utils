@@ -2143,7 +2143,8 @@ public class QwandaUtils {
     	kogitoUrl += "/workflows/legacy/processids/"+sourceCode+"/"+internCode;
     	log.info("the GET kogitoUrl is "+kogitoUrl);    	
     	String processId = sendGET(kogitoUrl,"application/text",authToken);
-        return processId;
+    	log.info("The processId returned to getKogitoApplicationProcessId is "+processId)    ;   
+    	return processId;
 
     }
     
