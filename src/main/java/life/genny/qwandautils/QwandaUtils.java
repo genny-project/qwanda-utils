@@ -1,6 +1,10 @@
 package life.genny.qwandautils;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
+
 import life.genny.dto.FileUploadRequest;
 import life.genny.models.GennyToken;
 import life.genny.qwanda.Answer;
@@ -15,6 +19,8 @@ import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.entity.SearchEntity;
 import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.message.*;
+import life.genny.qwandautils.JsonUtils;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.HttpEntity;
@@ -2110,4 +2116,84 @@ public class QwandaUtils {
         return HttpRequest.BodyPublishers.ofByteArrays(byteArrays);
     }
 
+    public static String getKogitoApplicationProcessId(final String internCode, final String sourceCode)
+    {
+    	String graphQL = "query {  Application (where: {      internCode: { like: \""+internCode+"\" }, sourceCode: { like: \""+sourceCode+"\" }, newApplication: { equal: true}}) {   id  }}";
+        Integer httpTimeout = GennySettings.apiPostTimeOut;  // 7 secnds
+
+    
+    	
+    	String postUrl  = System.getenv("GENNY_KOGITO_DATAINDEX_HTTP_URL");
+        if (StringUtils.isBlank(postUrl)) {
+            log.error("Blank url in getKogitoGraphQL");
+            return null;
+        }
+    	log.info("getKogitoApplicationProcessId: "+postUrl+"-->"+graphQL);
+
+        BodyPublisher requestBody = BodyPublishers.ofString(graphQL);
+
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().POST(requestBody).uri(URI.create(postUrl))
+                .setHeader("Content-Type", "application/GraphQL");
+              //  .setHeader("Authorization", "Bearer " + authToken);
+
+
+        if (postUrl.contains("genny.life")) { // Hack for local server not having http2
+            requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
+        }
+
+        HttpRequest request = requestBuilder.build();
+
+        String result = null;
+        Boolean done = false;
+        int count = GennySettings.apiPostRetryTimes;
+        while ((!done) && (count > 0)) {
+            CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
+                    java.net.http.HttpResponse.BodyHandlers.ofString());
+
+            try {
+                result = response.thenApply(java.net.http.HttpResponse::body).get(httpTimeout, TimeUnit.SECONDS);
+                done = true;
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                // TODO Auto-generated catch block
+                log.error("Count:" + count + " , TimeOut value:" + httpTimeout + ", Exception occurred when post to URL: " + postUrl + ",Body is entityString:" + graphQL + ", Exception details:" + e.getCause());
+                // try renewing the httpclient
+                httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
+                        .connectTimeout(Duration.ofSeconds(httpTimeout)).build();
+                if (count <= 0) {
+                    done = true;
+                }
+            } catch (Exception ex) {
+                log.error("Exception : ", ex);
+            }
+            count--;
+        }
+
+        // Now extract the processId
+        if (!result.contains("Error id")) {
+            // isolate the id
+            JsonObject responseJson = JsonUtils.fromJson(result, JsonObject.class);
+            log.info(responseJson);
+            JsonObject json = responseJson.getAsJsonObject("data");
+            JsonArray jsonArray = json.getAsJsonArray("Application");
+            if (jsonArray != null && (jsonArray.size()>0)) {
+            	JsonElement js = jsonArray.get(0);
+                JsonObject firstItem = js.getAsJsonObject();
+                JsonElement idJson = firstItem.get("id");
+                result = idJson.getAsString();
+
+            } else {
+            	  log.error("No processId found");
+                  result = null;
+            }
+        } else {
+            log.error("No processId found");
+            result = null;
+        }
+        
+        
+        return result;
+
+    }
+    
+    
 }
