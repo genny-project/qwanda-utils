@@ -1656,7 +1656,24 @@ public class QwandaUtils {
     
     static public String sendGET(String url, String contentType,String authToken) {
 
-        HttpRequest.Builder requestBuilder = Optional.ofNullable(authToken)
+        HttpRequest.Builder requestBuilder = null;
+        
+        if (authToken == null) {
+        	 requestBuilder = Optional.ofNullable(authToken)
+                     .map(token ->
+                             HttpRequest.newBuilder()
+                                     .GET()
+                                     .uri(URI.create(url))
+                                     .setHeader("Content-Type", contentType)
+                     )
+                     .orElse(
+                             HttpRequest.newBuilder()
+                                     .GET()
+                                     .uri(URI.create(url))
+                                     .setHeader("Content-Type", contentType)
+                     );
+        } else {
+        	requestBuilder = Optional.ofNullable(authToken)
                 .map(token ->
                         HttpRequest.newBuilder()
                                 .GET()
@@ -1668,7 +1685,9 @@ public class QwandaUtils {
                         HttpRequest.newBuilder()
                                 .GET()
                                 .uri(URI.create(url))
+                                .setHeader("Content-Type", contentType)
                 );
+        }
 
         if (url.contains("genny.life")) { // Hack for local server not having http2
             requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
@@ -2142,7 +2161,13 @@ public class QwandaUtils {
     	}
     	kogitoUrl += "/workflows/legacy/processids/"+sourceCode+"/"+internCode;
     	log.info("the GET kogitoUrl is "+kogitoUrl);    	
-    	String processId = sendGET(kogitoUrl,"application/text",authToken);
+    	String processId = null;
+    	try {
+			processId = sendGET(kogitoUrl,"application/text",authToken);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	log.info("The processId returned to getKogitoApplicationProcessId is "+processId)    ;   
     	return processId;
 
