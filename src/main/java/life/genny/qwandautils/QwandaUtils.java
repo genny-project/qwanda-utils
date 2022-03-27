@@ -1651,13 +1651,17 @@ public class QwandaUtils {
     }
 
     static public String sendGET(String url, String authToken) {
+    	return sendGET(url,"application/json",authToken);
+    }
+    
+    static public String sendGET(String url, String contentType,String authToken) {
 
         HttpRequest.Builder requestBuilder = Optional.ofNullable(authToken)
                 .map(token ->
                         HttpRequest.newBuilder()
                                 .GET()
                                 .uri(URI.create(url))
-                                .setHeader("Content-Type", "application/json")
+                                .setHeader("Content-Type", contentType)
                                 .setHeader("Authorization", "Bearer " + token)
                 )
                 .orElse(
@@ -2131,53 +2135,13 @@ public class QwandaUtils {
 
     public static String getKogitoApplicationProcessId(final String internCode, final String sourceCode,final String authToken)
     {
-    	String graphQL = "query {  Application (where: {      internCode: { like: \""+internCode+"\" }, sourceCode: { like: \""+sourceCode+"\" }, newApplication: { equal: true}}) {   id  }}";
-        Integer httpTimeout = GennySettings.apiPostTimeOut;  // 7 secnds
-
-    
-    	
-    	String postUrl  = System.getenv("GENNY_KOGITO_DATAINDEX_HTTP_URL");
-        if (StringUtils.isBlank(postUrl)) {
-            log.error("Blank url in getKogitoGraphQL");
-            return null;
-        }
-    	log.info("getKogitoApplicationProcessId: "+postUrl+"-->"+graphQL);
-    	String result = null;
-    	java.net.http.HttpResponse<String> response = post(postUrl, graphQL, "application/GraphQL", authToken);
-        if (response != null) {
-
-           result = response.body();
-            log.info("responseBody:" + result);
- 
-        } else {
-           log.error("No processId found");
-           return null;
-        }
-        // Now extract the processId
-        log.info("result3="+result);
-        if (!result.contains("Error id")) {
-            // isolate the id
-            JsonObject responseJson = JsonUtils.fromJson(result, JsonObject.class);
-            log.info(responseJson);
-            JsonObject json = responseJson.getAsJsonObject("data");
-            JsonArray jsonArray = json.getAsJsonArray("Application");
-            if (jsonArray != null && (jsonArray.size()>0)) {
-            	JsonElement js = jsonArray.get(0);
-                JsonObject firstItem = js.getAsJsonObject();
-                JsonElement idJson = firstItem.get("id");
-                result = idJson.getAsString();
-
-            } else {
-            	  log.error("No processId found");
-                  result = null;
-            }
-        } else {
-            log.error("No processId found");
-            result = null;
-        }
-        
-        
-        return result;
+    	String kogitoUrl = System.getenv("GENNY_KOGITO_SERVICE_URL");
+    	if (kogitoUrl == null) {
+    		kogitoUrl = "http://alyson2.genny.life:8580";
+    	}
+    	kogitoUrl += "/workflows/legacy/processids/"+sourceCode+"/"+internCode;
+    	String processId = sendGET(kogitoUrl,"application/GraphQL",authToken);
+        return processId;
 
     }
     
