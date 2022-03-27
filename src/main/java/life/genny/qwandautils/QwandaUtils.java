@@ -2144,13 +2144,14 @@ public class QwandaUtils {
         HttpRequest request = requestBuilder.build();
 
         String result = null;
-        Boolean done = false;
+
              CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
                     java.net.http.HttpResponse.BodyHandlers.ofString());
 
             try {
+            	log.info("About to post "+request.toString());
                 result = response.thenApply(java.net.http.HttpResponse::body).get(httpTimeout, TimeUnit.SECONDS);
-                done = true;
+           
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 // TODO Auto-generated catch block
                 // try renewing the httpclient
