@@ -1850,19 +1850,20 @@ public class QwandaUtils {
                 .setHeader("Authorization", "Bearer " + authToken);
 
 
-        if (postUrl.contains("genny.life")) { // Hack for local server not having http2
-            requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
-        }
+//        if (postUrl.contains("genny.life")) { // Hack for local server not having http2
+//            requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
+//        }
 
         HttpRequest request = requestBuilder.build();
 
         String result = null;
         Boolean done = false;
         int count = GennySettings.apiPostRetryTimes;
+        log.info("Loop Post count max ="+count);   
         while ((!done) && (count > 0)) {
             CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
                     java.net.http.HttpResponse.BodyHandlers.ofString());
-
+            log.info("Loop Post "+count);            
             try {
                 result = response.thenApply(java.net.http.HttpResponse::body).get(httpTimeout, TimeUnit.SECONDS);
                 done = true;
@@ -2148,7 +2149,7 @@ public class QwandaUtils {
     	}
 
         // Now extract the processId
-        log.info("result="+result);
+        log.info("result2="+result);
         if (!result.contains("Error id")) {
             // isolate the id
             JsonObject responseJson = JsonUtils.fromJson(result, JsonObject.class);
