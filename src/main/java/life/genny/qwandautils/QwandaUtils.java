@@ -2133,8 +2133,8 @@ public class QwandaUtils {
         BodyPublisher requestBody = BodyPublishers.ofString(graphQL);
 
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().POST(requestBody).uri(URI.create(postUrl))
-                .setHeader("Content-Type", "application/GraphQL");
-              //  .setHeader("Authorization", "Bearer " + authToken);
+                .setHeader("Content-Type", "application/GraphQL")
+                .setHeader("Accept", "application/json");
 
 
         if (postUrl.contains("genny.life")) { // Hack for local server not having http2
@@ -2169,6 +2169,7 @@ public class QwandaUtils {
         }
 
         // Now extract the processId
+        log.info("result="+result);
         if (!result.contains("Error id")) {
             // isolate the id
             JsonObject responseJson = JsonUtils.fromJson(result, JsonObject.class);
