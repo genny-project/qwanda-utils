@@ -2145,9 +2145,7 @@ public class QwandaUtils {
 
         String result = null;
         Boolean done = false;
-        int count = GennySettings.apiPostRetryTimes;
-        while ((!done) && (count > 0)) {
-            CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
+             CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
                     java.net.http.HttpResponse.BodyHandlers.ofString());
 
             try {
@@ -2155,18 +2153,14 @@ public class QwandaUtils {
                 done = true;
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 // TODO Auto-generated catch block
-                log.error("Count:" + count + " , TimeOut value:" + httpTimeout + ", Exception occurred when post to URL: " + postUrl + ",Body is entityString:" + graphQL + ", Exception details:" + e.getCause());
                 // try renewing the httpclient
                 httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
                         .connectTimeout(Duration.ofSeconds(httpTimeout)).build();
-                if (count <= 0) {
-                    done = true;
-                }
+
             } catch (Exception ex) {
                 log.error("Exception : ", ex);
             }
-            count--;
-        }
+
 
         // Now extract the processId
         log.info("result="+result);
