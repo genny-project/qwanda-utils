@@ -2141,7 +2141,8 @@ public class QwandaUtils {
     		kogitoUrl = "http://alyson2.genny.life:8580";
     	}
     	kogitoUrl += "/workflows/legacy/processids/"+sourceCode+"/"+internCode;
-    	String processId = sendGET(kogitoUrl,"application/GraphQL",authToken);
+    	log.info("the GET kogitoUrl is "+kogitoUrl);    	
+    	String processId = sendGET(kogitoUrl,"application/text",authToken);
         return processId;
 
     }
