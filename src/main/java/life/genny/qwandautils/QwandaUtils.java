@@ -1699,8 +1699,10 @@ public class QwandaUtils {
         String result = null;
         Boolean done = false;
         int count = 5;
+        log.info("count = "+count+" and request="+request);       
         while ((!done) && (count > 0)) {
 
+        	 log.info("count = "+count+" and request="+request);
             CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
                     java.net.http.HttpResponse.BodyHandlers.ofString());
 
