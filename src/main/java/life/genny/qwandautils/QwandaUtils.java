@@ -2168,7 +2168,7 @@ public class QwandaUtils {
     	try {
     		// FORCE!!!!!! TEST!
     		kogitoUrl = "http://alyson2.genny.life:8580/workflows/legacy/processids/PER_086CDF1F-A98F-4E73-9825-0A4CFE2BB943/PER_80ECFDAE-2310-4682-A098-7DA61DC48FED";
-			processId = sendGET(kogitoUrl,"application/text",authToken);
+			processId = sendGET(kogitoUrl,"application/text",null);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
