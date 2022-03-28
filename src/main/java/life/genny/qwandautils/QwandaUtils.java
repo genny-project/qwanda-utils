@@ -2167,7 +2167,7 @@ public class QwandaUtils {
     	String processId = null;
     	try {
     		// FORCE!!!!!! TEST!
-    		kogitoUrl = "http://kogitoq-travels:8080/workflows/legacy/processids/PER_086CDF1F-A98F-4E73-9825-0A4CFE2BB943/PER_80ECFDAE-2310-4682-A098-7DA61DC48FED";
+    		//kogitoUrl = "http://kogitoq-travels:8080/workflows/legacy/processids/PER_086CDF1F-A98F-4E73-9825-0A4CFE2BB943/PER_80ECFDAE-2310-4682-A098-7DA61DC48FED";
 			processId = sendGET(kogitoUrl,"application/json",null);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
