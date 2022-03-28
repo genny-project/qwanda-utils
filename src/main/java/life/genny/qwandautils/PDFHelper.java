@@ -110,8 +110,7 @@ public class PDFHelper {
 
         if (objectUuid != null) {
 
-            /* downloadablePdfUrl = GennySettings.mediaProxyUrl + "/" + objectUuid;*/
-            downloadablePdfUrl = "https://internmatch-dev.gada.io/web/public" + "/" + objectUuid;
+            downloadablePdfUrl = GennySettings.mediaProxyUrl + "/" + objectUuid;
             log.info("download url ::" + downloadablePdfUrl);
             return downloadablePdfUrl;
         }
@@ -166,8 +165,7 @@ public class PDFHelper {
                 log.info("linkTokens: {}", linkTokens);
                 if (linkTokens != null && linkTokens.length > 0) {
                     String fileName = linkTokens[linkTokens.length - 1];
-                    /* response = QwandaUtils.postFile(GennySettings.mediaProxyUrl, token, fileName, formData);*/
-                    response = QwandaUtils.postFile("https://internmatch-dev.gada.io/web/public", token, fileName, formData);
+                    response = QwandaUtils.postFile(GennySettings.mediaProxyUrl, token, fileName, formData);
                     log.info("response for attachment ::" + response);
                     if (response != null) {
                         JsonObject mediaProxyResponse = new JsonObject(response);
