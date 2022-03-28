@@ -1,6 +1,10 @@
 package life.genny.qwandautils;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
+
 import life.genny.dto.FileUploadRequest;
 import life.genny.models.GennyToken;
 import life.genny.qwanda.Answer;
@@ -15,6 +19,8 @@ import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.entity.SearchEntity;
 import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.message.*;
+import life.genny.qwandautils.JsonUtils;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.HttpEntity;
@@ -1645,20 +1651,44 @@ public class QwandaUtils {
     }
 
     static public String sendGET(String url, String authToken) {
+    	return sendGET(url,"application/json",authToken);
+    }
+    
+    static public String sendGET(String url, String contentType,String authToken) {
 
-        HttpRequest.Builder requestBuilder = Optional.ofNullable(authToken)
+        HttpRequest.Builder requestBuilder = null;
+        
+        if (authToken == null) {
+        	 requestBuilder = Optional.ofNullable(authToken)
+                     .map(token ->
+                             HttpRequest.newBuilder()
+                                     .GET()
+                                     .uri(URI.create(url))
+                                     .setHeader("Content-Type", contentType)
+                     )
+                     .orElse(
+                             HttpRequest.newBuilder()
+                                     .GET()
+                                     .uri(URI.create(url))
+                                     .setHeader("Content-Type", contentType)
+                     );
+        } else {
+        	requestBuilder = Optional.ofNullable(authToken)
                 .map(token ->
                         HttpRequest.newBuilder()
                                 .GET()
                                 .uri(URI.create(url))
-                                .setHeader("Content-Type", "application/json")
-                                .setHeader("Authorization", "Bearer " + token)
+                                .setHeader("Content-Type", contentType)
+                                .setHeader("Authorization", "Bearer " + authToken)
                 )
                 .orElse(
                         HttpRequest.newBuilder()
                                 .GET()
                                 .uri(URI.create(url))
+                                .setHeader("Content-Type", contentType)
+                                .setHeader("Authorization", "Bearer " + authToken)
                 );
+        }
 
         if (url.contains("genny.life")) { // Hack for local server not having http2
             requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
@@ -1669,8 +1699,10 @@ public class QwandaUtils {
         String result = null;
         Boolean done = false;
         int count = 5;
+        log.info("count = "+count+" and request="+request);       
         while ((!done) && (count > 0)) {
 
+        	 log.info("count = "+count+" and request="+request);
             CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
                     java.net.http.HttpResponse.BodyHandlers.ofString());
 
@@ -1690,7 +1722,7 @@ public class QwandaUtils {
             }
             count--;
         }
-//	        System.out.println(result);
+	        System.out.println(result);
 // can't find
         if (result.equals("<html><head><title>Error</title></head><body>Not Found</body></html>")) {
             log.error("Can't find result for request:" + url + ", set returned result to NULL");
@@ -1821,7 +1853,14 @@ public class QwandaUtils {
         return response;
     }
 
+    
     public static String apiPostEntity2(final String postUrl, final String entityString, final String authToken,
+            final Consumer<String> callback) throws IOException {
+
+    	return apiPostEntity2(postUrl, entityString,"application/json",authToken,callback);
+    }
+    
+    public static String apiPostEntity2(final String postUrl, final String entityString, final String contentType,final String authToken,
                                         final Consumer<String> callback) throws IOException {
 
         Integer httpTimeout = GennySettings.apiPostTimeOut;  // 7 secnds
@@ -1831,9 +1870,9 @@ public class QwandaUtils {
         }
 
         BodyPublisher requestBody = BodyPublishers.ofString(entityString);
-
+        log.info("contentType="+contentType);
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().POST(requestBody).uri(URI.create(postUrl))
-                .setHeader("Content-Type", "application/json")
+                .setHeader("Content-Type", contentType)
                 .setHeader("Authorization", "Bearer " + authToken);
 
 
@@ -1841,18 +1880,24 @@ public class QwandaUtils {
             requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
         }
 
+        log.info("postUrl="+postUrl+"-->"+requestBody);
+        if (authToken != null) {
+        	log.info("authToken="+authToken.substring(0, 10));
+        }
         HttpRequest request = requestBuilder.build();
 
         String result = null;
         Boolean done = false;
         int count = GennySettings.apiPostRetryTimes;
+        log.info("Loop Post count max ="+count);   
         while ((!done) && (count > 0)) {
             CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
                     java.net.http.HttpResponse.BodyHandlers.ofString());
-
+            log.info("Loop Post "+count);            
             try {
                 result = response.thenApply(java.net.http.HttpResponse::body).get(httpTimeout, TimeUnit.SECONDS);
                 done = true;
+                log.info("post result is "+result);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 // TODO Auto-generated catch block
                 log.error("Count:" + count + " , TimeOut value:" + httpTimeout + ", Exception occurred when post to URL: " + postUrl + ",Body is entityString:" + entityString + ", Exception details:" + e.getCause());
@@ -2109,5 +2154,61 @@ public class QwandaUtils {
         // Serializing as byte array
         return HttpRequest.BodyPublishers.ofByteArrays(byteArrays);
     }
+
+    public static String getKogitoApplicationProcessId(final String internCode, final String sourceCode,final String authToken)
+    {
+    	log.info("New kogito processId workaround");   	
+    	String kogitoUrl = System.getenv("GENNY_KOGITO_SERVICE_URL");
+    	if (kogitoUrl == null) {
+    		kogitoUrl = "http://alyson2.genny.life:8580";
+    	}
+    	kogitoUrl += "/workflows/legacy/processids/"+sourceCode+"/"+internCode;
+    	log.info("the GET kogitoUrl is "+kogitoUrl);    	
+    	String processId = null;
+    	try {
+    		// FORCE!!!!!! TEST!
+    		//kogitoUrl = "http://kogitoq-travels:8080/workflows/legacy/processids/PER_086CDF1F-A98F-4E73-9825-0A4CFE2BB943/PER_80ECFDAE-2310-4682-A098-7DA61DC48FED";
+			processId = sendGET(kogitoUrl,"application/json",null);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	log.info("The processId returned to getKogitoApplicationProcessId is "+processId)    ;   
+    	return processId;
+
+    }
+    
+    /**
+	* Create and send a POST  request.
+	*
+	* @param uri The target URI of the request.
+	* @param body The json string to use as the body.
+	* @param contentType The contentType to use in the header. Default: "application/json"
+	* @param token The token to use in authorization.
+	* @return The returned response object.
+	* import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+	 */
+	public static java.net.http.HttpResponse<String> post(String uri, String body, String contentType, String token) {
+
+		HttpClient client = java.net.http.HttpClient.newHttpClient();
+
+		HttpRequest request = java.net.http.HttpRequest.newBuilder()
+				.uri(URI.create(uri))
+				.setHeader("Content-Type", contentType)
+				.setHeader("Authorization", "Bearer " + token)
+				.POST(java.net.http.HttpRequest.BodyPublishers.ofString(body))
+				.build();
+
+		try {
+			java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+			return response;
+		} catch (IOException | InterruptedException e) {
+			log.error(e);
+		}
+
+		return null;
+	}
 
 }
