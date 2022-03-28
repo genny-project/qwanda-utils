@@ -146,16 +146,16 @@ public class VertxUtils {
         }
     }
 
-    static public void putObject(final String realm, final String keyPrefix, final String key, final Object obj) {
-        putObject(realm, keyPrefix, key, obj, DEFAULT_TOKEN);
+    static public JsonObject putObject(final String realm, final String keyPrefix, final String key, final Object obj) {
+        return putObject(realm, keyPrefix, key, obj, DEFAULT_TOKEN);
     }
 
-    static public void putObject(final String realm, final String keyPrefix, final String key, final Object obj,
+    static public JsonObject putObject(final String realm, final String keyPrefix, final String key, final Object obj,
                                  final String token) {
         String data = JsonUtils.toJson(obj);
         String prekey = (StringUtils.isBlank(keyPrefix)) ? "" : (keyPrefix + ":");
 
-        writeCachedJson(realm, prekey + key, data, token);
+        return writeCachedJson(realm, prekey + key, data, token);
     }
 
     static public void clearCache(final String realm, final String token)
@@ -321,6 +321,10 @@ public class VertxUtils {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                JsonObject error = new JsonObject().put("status", "error");
+                error.put("stackTrace", e.getStackTrace());
+                error.put("errorType", e.toString());
+                return error;
             }
         }
 
@@ -526,14 +530,14 @@ public class VertxUtils {
         return Sets.newHashSet(resultArray);
     }
 
-    static public void putSetString(final String realm, final String keyPrefix, final String key, final Set set) {
+    static public JsonObject putSetString(final String realm, final String keyPrefix, final String key, final Set set) {
         String[] strArray = (String[]) FluentIterable.from(set).toArray(String.class);
-        putObject(realm, keyPrefix, key, strArray);
+        return putObject(realm, keyPrefix, key, strArray);
     }
 
-    static public void putStringArray(final String realm, final String keyPrefix, final String key,
+    static public JsonObject putStringArray(final String realm, final String keyPrefix, final String key,
                                       final String[] string) {
-        putObject(realm, keyPrefix, key, string);
+        return putObject(realm, keyPrefix, key, string);
     }
 
     static public String[] getStringArray(final String realm, final String keyPrefix, final String key) {
@@ -545,9 +549,9 @@ public class VertxUtils {
         return resultArray;
     }
 
-    static public void putMap(final String realm, final String keyPrefix, final String key,
+    static public JsonObject putMap(final String realm, final String keyPrefix, final String key,
                               final Map<String, String> map) {
-        putObject(realm, keyPrefix, key, map);
+        return putObject(realm, keyPrefix, key, map);
     }
 
     static public Map<String, String> getMap(final String realm, final String keyPrefix, final String key) {
