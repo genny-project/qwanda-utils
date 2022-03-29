@@ -169,7 +169,7 @@ public class KeycloakUtils {
 		if(refreshToken == null) {
 			postDataParams.put("username", username);
 			postDataParams.put("password", password);
-			log.info("using username");
+			log.info("using username:"+username+" and password "+password);
 			postDataParams.put(OAuth2Constants.GRANT_TYPE, "password");
 		}
 		else {

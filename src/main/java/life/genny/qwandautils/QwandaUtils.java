@@ -1843,6 +1843,7 @@ public class QwandaUtils {
                     response += line;
                 }
             } else {
+            	log.error("responseCode:"+responseCode+":  response:"+response);
                 response = "";
 
             }
