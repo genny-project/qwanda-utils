@@ -123,6 +123,7 @@ public class KeycloakUtils {
 	public static JsonObject getSecureTokenPayload(String keycloakUrl, String realm, String clientId, String secret, String username, String password, String refreshToken) throws IOException {
 
 		JsonObject fullTokenPayload = KeycloakUtils.getToken(keycloakUrl, realm, clientId, secret, username, password, refreshToken);
+		log.info("Got fullTokenPayLoad");
 		JsonObject secureTokenPayload = new JsonObject();
 		secureTokenPayload.put("access_token", fullTokenPayload.getString("access_token"));
 		secureTokenPayload.put("refresh_token", fullTokenPayload.getString("refresh_token"));
@@ -162,6 +163,9 @@ public class KeycloakUtils {
 			}
 		}
 		/* if we don't have a refresh token, we generate a new token using username and password */
+		if (refreshToken == null) {
+			log.info("refreshToken is null");
+		}
 		if(refreshToken == null) {
 			postDataParams.put("username", username);
 			postDataParams.put("password", password);
@@ -176,16 +180,18 @@ public class KeycloakUtils {
 		}
 
 		postDataParams.put(OAuth2Constants.CLIENT_ID, clientId);
+		log.info("using clientId:"+clientId);
 		if (secret != null) {
 			postDataParams.put(OAuth2Constants.CLIENT_SECRET, secret);
+			log.info("using secret:"+secret);
 		}
 
 
 		String requestURL = keycloakUrl+"/auth/realms/"+realm+"/protocol/openid-connect/token";
-
+		log.info("using requestUrl:"+requestURL);
 		String str = QwandaUtils.performPostCall(requestURL,
 	            postDataParams);
-
+		log.info("returned str:"+str);
 
 		JsonObject json = new JsonObject(str);
 		return json;
