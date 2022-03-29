@@ -1882,7 +1882,11 @@ public class QwandaUtils {
 
         log.info("postUrl="+postUrl+"-->"+requestBody);
         if (authToken != null) {
-        	log.info("authToken="+authToken.substring(0, 10));
+//        	log.info("authToken="+authToken.substring(0, 10));
+            // debug token issue
+            if(postUrl.contains("localhost:8080/qwanda/answers")) {
+                log.info("DEBUG, authToken="+authToken);
+            }
         }
         HttpRequest request = requestBuilder.build();
 
