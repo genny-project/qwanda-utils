@@ -43,7 +43,8 @@ public class BridgeSwitch {
 	public static void addActiveBridgeId(GennyToken gennyToken, String bridgeId) {
 
 		String realm = gennyToken.getRealm();
-		Set<String> activeBridgeIds = VertxUtils.getObject(realm, "", BRIDGE_SWITCH_KEY, Set.class);
+		String token = gennyToken.getToken();
+		Set<String> activeBridgeIds = VertxUtils.getObject(realm, "", BRIDGE_SWITCH_KEY, Set.class, token);
 
 		if (activeBridgeIds == null) {
 			activeBridgeIds = new HashSet<String>();
@@ -63,8 +64,9 @@ public class BridgeSwitch {
 	public static String findActiveBridgeId(GennyToken gennyToken) {
 
 		String realm = gennyToken.getRealm();
+		String token = gennyToken.getToken();
 
-		Set<String> activeBridgeIds = VertxUtils.getObject(realm, "", BRIDGE_SWITCH_KEY, Set.class);
+		Set<String> activeBridgeIds = VertxUtils.getObject(realm, "", BRIDGE_SWITCH_KEY, Set.class, token);
 
 		if (activeBridgeIds.iterator().hasNext()) {
 			return activeBridgeIds.iterator().next();
@@ -82,11 +84,12 @@ public class BridgeSwitch {
 	public static void put(GennyToken gennyToken, String bridgeId) {
 
 		String realm = gennyToken.getRealm();
+		String token = gennyToken.getToken();
 		String key = BRIDGE_INFO_PREFIX + "_" + gennyToken.getUserCode();
 		
 		// grab from cache or create if null
 		// BridgeInfo info = CacheUtils.getObject(realm, key, BridgeInfo.class);
-		BridgeInfo info = VertxUtils.getObject(realm, "", key, BridgeInfo.class);
+		BridgeInfo info = VertxUtils.getObject(realm, "", key, BridgeInfo.class, token);
 		
 		if (info == null) {
 			info = new BridgeInfo();
@@ -110,10 +113,11 @@ public class BridgeSwitch {
 	public static String get(GennyToken gennyToken) {
 
 		String realm = gennyToken.getRealm();
+		String token = gennyToken.getToken();
 		String key = BRIDGE_INFO_PREFIX + "_" + gennyToken.getUserCode();
 		
 		// grab from cache
-		BridgeInfo info = VertxUtils.getObject(realm, "", key, BridgeInfo.class);
+		BridgeInfo info = VertxUtils.getObject(realm, "", key, BridgeInfo.class, token);
 		
 		if (info == null) {
 			log.error("No BridgeInfo object found for user " + gennyToken.getUserCode());
