@@ -1699,14 +1699,10 @@ public class QwandaUtils {
         String result = null;
         Boolean done = false;
         int count = 5;
-        log.info("count = "+count+" and request="+request);       
         while ((!done) && (count > 0)) {
-
-        	 log.info("count = "+count+" and request="+request);
+        	 log.debug("count = "+count+" and request="+request);
             CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
                     java.net.http.HttpResponse.BodyHandlers.ofString());
-
-
             try {
                 result = response.thenApply(java.net.http.HttpResponse::body).get(20, TimeUnit.SECONDS);
                 done = true;
@@ -1718,11 +1714,10 @@ public class QwandaUtils {
                 if (count <= 0) {
                     done = true;
                 }
-
             }
             count--;
         }
-	        System.out.println(result);
+//	        System.out.println(result);
 // can't find
         if (result.equals("<html><head><title>Error</title></head><body>Not Found</body></html>")) {
             log.error("Can't find result for request:" + url + ", set returned result to NULL");
