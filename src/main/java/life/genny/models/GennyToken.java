@@ -54,6 +54,8 @@ public class GennyToken implements Serializable {
         // Extracting realm name from iss value
 
         String realm = null;
+        
+       
         if (adecodedTokenMap.get("iss") != null) {
           String[] issArray = adecodedTokenMap.get("iss").toString().split("/");
           realm = issArray[issArray.length - 1];
@@ -309,7 +311,17 @@ public class GennyToken implements Serializable {
   }
 
   public String getRealm() {
-    return realm;
+    String clientId = adecodedTokenMap.get("azp").toString();
+
+    if (clientId.equals("mentormatch")) {
+      return clientId;
+    } else if (clientId.equals("lojing")) {
+      return clientId;
+    } else if (clientId.equals("credmatch")) {
+      return clientId;
+    }
+
+    return "internmatch";
   }
 
   public String getString(final String key) {
