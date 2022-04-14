@@ -1861,7 +1861,7 @@ public class QwandaUtils {
 
        
        
-       java.net.http.HttpResponse<String> response2 = post(postUrl, entityString, contentType, authToken,null);
+       java.net.http.HttpResponse<String> response2 = post(postUrl, entityString, contentType, authToken);
        
        log.info("response2 status="+response2.status());
         log.info("response2="+response2.body());
