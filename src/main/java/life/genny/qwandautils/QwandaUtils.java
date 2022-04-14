@@ -1859,7 +1859,16 @@ public class QwandaUtils {
     public static String apiPostEntity2(final String postUrl, final String entityString, final String contentType,final String authToken,
                                         final Consumer<String> callback) throws IOException {
 
-        Integer httpTimeout = GennySettings.apiPostTimeOut;  // 7 secnds
+       
+       
+       java.net.http.HttpResponse<String> response2 = post(postUrl, entityString, contentType, authToken,null);
+       
+       log.info("response2 status="+response2.getStatus());
+        log.info("response2="+response2.getBody());
+
+        return response2.getBody();
+        
+         Integer httpTimeout = GennySettings.apiPostTimeOut;  // 7 secnds
 
         if (StringUtils.isBlank(postUrl)) {
             log.error("Blank url in apiPostEntity");
@@ -1878,7 +1887,7 @@ public class QwandaUtils {
 
         log.info("postUrl="+postUrl+"-->"+requestBody);
         if (authToken != null) {
-//        	log.info("authToken="+authToken.substring(0, 10));
+        	log.info("postUrl :authToken="+authToken.substring(0, 10));
             // debug token issue
             if(postUrl.contains("localhost:8080/qwanda/answers")) {
                 log.info("DEBUG, authToken="+authToken);
@@ -1889,15 +1898,16 @@ public class QwandaUtils {
         String result = null;
         Boolean done = false;
         int count = GennySettings.apiPostRetryTimes;
-        log.info("Loop Post count max ="+count);   
+        log.info("PostUrl Loop count max ="+count);   
         while ((!done) && (count > 0)) {
             CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
                     java.net.http.HttpResponse.BodyHandlers.ofString());
-            log.info("Loop Post "+count);            
+            log.info("PostUrl Loop Post "+count);            
             try {
                 result = response.thenApply(java.net.http.HttpResponse::body).get(httpTimeout, TimeUnit.SECONDS);
                 done = true;
-                log.info("post result is "+result);
+                  
+                log.info("postUrl result is "+result);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 // TODO Auto-generated catch block
                 log.error("Count:" + count + " , TimeOut value:" + httpTimeout + ", Exception occurred when post to URL: " + postUrl + ",Body is entityString:" + entityString + ", Exception details:" + e.getCause());
