@@ -1863,11 +1863,11 @@ public class QwandaUtils {
        
        java.net.http.HttpResponse<String> response2 = post(postUrl, entityString, contentType, authToken,null);
        
-       log.info("response2 status="+response2.getStatus());
-        log.info("response2="+response2.getBody());
+       log.info("response2 status="+response2.status());
+        log.info("response2="+response2.body());
 
-        return response2.getBody();
-        
+        return response2.body();
+
          Integer httpTimeout = GennySettings.apiPostTimeOut;  // 7 secnds
 
         if (StringUtils.isBlank(postUrl)) {
