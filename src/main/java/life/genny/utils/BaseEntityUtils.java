@@ -227,9 +227,10 @@ public class BaseEntityUtils implements Serializable {
 
 							// Only process mandatory attributes, or defaults
 							Boolean mandatory = ea.getValueBoolean();
-							if (mandatory==null) {
+							if (mandatory == null) {
 								mandatory = false;
-								log.warn("**** DEF attribute ATT_"+attrCode+" has no mandatory boolean set in "+defBE.getCode());
+								log.warn("**** DEF attribute ATT_" + attrCode + " has no mandatory boolean set in "
+										+ defBE.getCode());
 							}
 							// Only process mandatory attributes, or defaults
 							if (mandatory || defaultVal != null) {
@@ -257,7 +258,7 @@ public class BaseEntityUtils implements Serializable {
 		// Force the type of baseentity
 		Attribute attributeDEF = RulesUtils.getAttribute("PRI_IS_" + defBE.getCode().substring("DEF_".length()),
 				this.getServiceToken().getToken());
-		item = saveAnswer(defBE,new Answer(item, item, attributeDEF, "TRUE")); // force the be type
+		item = saveAnswer(defBE, new Answer(item, item, attributeDEF, "TRUE")); // force the be type
 
 		return item;
 	}
@@ -269,11 +270,11 @@ public class BaseEntityUtils implements Serializable {
 		if (uuidEA.isPresent()) {
 
 			if (!StringUtils.isBlank(email)) {
-//                TODO: run a regexp check to see if the email is valid
+				// TODO: run a regexp check to see if the email is valid
 
 				if (!email.startsWith("random+")) {
 					// Check to see if the email exists
-//                    TODO: check to see if the email exists in the database and keycloak
+					// TODO: check to see if the email exists in the database and keycloak
 				}
 			}
 			// this is a user, generate keycloak id
@@ -301,10 +302,17 @@ public class BaseEntityUtils implements Serializable {
 
 					// Add PRI_UUID
 					Attribute uuidAttribute = RulesUtils.getAttribute("PRI_UUID", this.getServiceToken().getToken());
+					if (uuidAttribute == null) {
+						log.error("UUID ATTRIBUTE is NULL " + this.getServiceToken().getToken());
+					}
 					item.addAnswer(new Answer(item, item, uuidAttribute, uuid.toUpperCase()));
 					// Keycloak UUID
 					Attribute keycloakAttribute = RulesUtils.getAttribute("PRI_KEYCLOAK_UUID",
 							this.getServiceToken().getToken());
+					if (uuidAttribute == null) {
+						log.error("KEYCLOAK UUID ATTRIBUTE is NULL " + this.getServiceToken().getToken());
+					}
+
 					item.addAnswer(new Answer(item, item, keycloakAttribute, uuid.toUpperCase()));
 					// Author of the BE
 					// NOTE: Maybe should be moved to run for all BEs
@@ -400,7 +408,8 @@ public class BaseEntityUtils implements Serializable {
 			role = QwandaUtils.createBaseEntityByCode(code, name, qwandaServiceUrl, this.getServiceToken().getToken());
 			this.addAttributes(role);
 
-			VertxUtils.writeCachedJson(role.getRealm(), role.getCode(), JsonUtils.toJson(role),serviceToken.getToken());
+			VertxUtils.writeCachedJson(role.getRealm(), role.getCode(), JsonUtils.toJson(role),
+					serviceToken.getToken());
 		}
 
 		for (String capabilityCode : capabilityCodes) {
@@ -460,7 +469,8 @@ public class BaseEntityUtils implements Serializable {
 				for (EntityAttribute ea : be.getBaseEntityAttributes()) {
 					if (ea != null) {
 						if (!ea.getAttributeCode().startsWith("PRI_APP_")) { // ignore bad attributes
-							Attribute attribute = RulesUtils.getAttribute(ea.getAttributeCode(), this.getServiceToken());
+							Attribute attribute = RulesUtils.getAttribute(ea.getAttributeCode(),
+									this.getServiceToken());
 							if (attribute != null) {
 								ea.setAttribute(attribute);
 							} else {
@@ -492,12 +502,12 @@ public class BaseEntityUtils implements Serializable {
 		if (target == null) {
 			return null;
 		}
-//		String existingString = target.getValueAsString(answer.getAttributeCode());
-//		if (!StringUtils.isBlank(answer.getValue())) {
-//			if (answer.getValue().equals(existingString)) {
-//				return target; // already there, no need to send
-//			}
-//		}
+		// String existingString = target.getValueAsString(answer.getAttributeCode());
+		// if (!StringUtils.isBlank(answer.getValue())) {
+		// if (answer.getValue().equals(existingString)) {
+		// return target; // already there, no need to send
+		// }
+		// }
 
 		// Filter Non-valid answers using DEF
 		if (answerValidForDEF(answer)) {
@@ -507,9 +517,9 @@ public class BaseEntityUtils implements Serializable {
 				String jsonStr = "";
 				if (GennySettings.forceEventBusApi) { // This is to handle junit Answers that need to use the standard
 														// QDataAnswerMessage format
-//					QDataAnswerMessage msg = new QDataAnswerMessage(answer);
-//					msg.setToken( this.getGennyToken().getToken());
-//					jsonStr = JsonUtils.toJson(msg);
+					// QDataAnswerMessage msg = new QDataAnswerMessage(answer);
+					// msg.setToken( this.getGennyToken().getToken());
+					// jsonStr = JsonUtils.toJson(msg);
 					try {
 						QwandaUtils.apiPostEntity2(qwandaServiceUrl + "/qwanda/answers", JsonUtils.toJson(answer),
 								this.getGennyToken().getToken(), null);
@@ -614,8 +624,9 @@ public class BaseEntityUtils implements Serializable {
 					// jsonAnswer.replace("\\\"", "\"");
 
 					if (!VertxUtils.cachedEnabled) { // only post if not in junit
-//							QwandaUtils.apiPostEntity(this.qwandaServiceUrl + "/qwanda/answers/bulk", jsonAnswer,
-//									token);
+						// QwandaUtils.apiPostEntity(this.qwandaServiceUrl + "/qwanda/answers/bulk",
+						// jsonAnswer,
+						// token);
 						for (Answer answer : targetAnswers) {
 							try {
 								JsonObject json = new JsonObject(JsonUtils.toJson(answer));
@@ -669,8 +680,9 @@ public class BaseEntityUtils implements Serializable {
 					// jsonAnswer.replace("\\\"", "\"");
 
 					if (!VertxUtils.cachedEnabled) { // only post if not in junit
-//							QwandaUtils.apiPostEntity(this.qwandaServiceUrl + "/qwanda/answers/bulk", jsonAnswer,
-//									token);
+						// QwandaUtils.apiPostEntity(this.qwandaServiceUrl + "/qwanda/answers/bulk",
+						// jsonAnswer,
+						// token);
 						for (Answer answer : targetAnswers) {
 							try {
 								JsonObject json = new JsonObject(JsonUtils.toJson(answer));
@@ -751,7 +763,8 @@ public class BaseEntityUtils implements Serializable {
 		return null;
 	}
 
-	public BaseEntity updateBaseEntityAttribute(final String sourceCode, final String beCode, final String attributeCode,
+	public BaseEntity updateBaseEntityAttribute(final String sourceCode, final String beCode,
+			final String attributeCode,
 			final String newValue) {
 		List<Answer> answers = new CopyOnWriteArrayList<Answer>();
 		answers.add(new Answer(sourceCode, beCode, attributeCode, newValue));
@@ -762,7 +775,8 @@ public class BaseEntityUtils implements Serializable {
 
 		SearchEntity searchBe = null;
 		try {
-			JsonObject cachedJsonObject = VertxUtils.readCachedJson(this.getRealm(), code, this.getServiceToken().getToken());
+			JsonObject cachedJsonObject = VertxUtils.readCachedJson(this.getRealm(), code,
+					this.getServiceToken().getToken());
 			if (cachedJsonObject != null) {
 				String data = cachedJsonObject.getString("value");
 				// log.info("json recieved :" + data);
@@ -781,7 +795,7 @@ public class BaseEntityUtils implements Serializable {
 
 	public <T extends BaseEntity> T getBaseEntityByCode(final String code) {
 		if (StringUtils.isBlank(code)) {
-					log.error("Cannot retrieve empty BE Code");
+			log.error("Cannot retrieve empty BE Code");
 			return null;
 		}
 		return this.getBaseEntityByCode(code, true);
@@ -907,7 +921,8 @@ public class BaseEntityUtils implements Serializable {
 
 		try {
 			// log.info("Fetching BaseEntityByCode, code="+code);
-			be = Optional.ofNullable(VertxUtils.readFromDDT(getRealm(), code, withAttributes, this.getServiceToken().getToken()));
+			be = Optional.ofNullable(
+					VertxUtils.readFromDDT(getRealm(), code, withAttributes, this.getServiceToken().getToken()));
 			if (be.isPresent()) {
 				this.addAttributes(be.orElse(null));
 			}
@@ -921,7 +936,8 @@ public class BaseEntityUtils implements Serializable {
 	public BaseEntity getBaseEntityByAttributeAndValue(final String attributeCode, final String value) {
 
 		BaseEntity be = null;
-		be = RulesUtils.getBaseEntityByAttributeAndValue(this.qwandaServiceUrl, this.decodedMapToken, this.getServiceToken().getToken(),
+		be = RulesUtils.getBaseEntityByAttributeAndValue(this.qwandaServiceUrl, this.decodedMapToken,
+				this.getServiceToken().getToken(),
 				attributeCode, value);
 		if (be != null) {
 			this.addAttributes(be);
@@ -932,7 +948,8 @@ public class BaseEntityUtils implements Serializable {
 	public List<BaseEntity> getBaseEntitysByAttributeAndValue(final String attributeCode, final String value) {
 
 		List<BaseEntity> bes = null;
-		bes = RulesUtils.getBaseEntitysByAttributeAndValue(this.qwandaServiceUrl, this.decodedMapToken, this.getServiceToken().getToken(),
+		bes = RulesUtils.getBaseEntitysByAttributeAndValue(this.qwandaServiceUrl, this.decodedMapToken,
+				this.getServiceToken().getToken(),
 				attributeCode, value);
 		return bes;
 	}
@@ -1018,7 +1035,8 @@ public class BaseEntityUtils implements Serializable {
 		List<BaseEntity> bes = null;
 
 		bes = RulesUtils.getBaseEntitysByParentAndLinkCodeAndLinkValueWithAttributes(qwandaServiceUrl,
-				this.decodedMapToken, this.getServiceToken().getToken(), parentCode, linkCode, linkValue, pageStart, pageSize);
+				this.decodedMapToken, this.getServiceToken().getToken(), parentCode, linkCode, linkValue, pageStart,
+				pageSize);
 		return bes;
 	}
 
@@ -1052,7 +1070,7 @@ public class BaseEntityUtils implements Serializable {
 
 			/* we call the api */
 			QwandaUtils.apiPostEntity(qwandaServiceUrl + "/qwanda/baseentitys/move/" + targetCode,
-					JsonUtils.toJson(link),this.getServiceToken().getToken());
+					JsonUtils.toJson(link), this.getServiceToken().getToken());
 		} catch (IOException e) {
 			log.error(e.getMessage());
 		}
@@ -1463,7 +1481,8 @@ public class BaseEntityUtils implements Serializable {
 	public Boolean checkIfLinkExists(String parentCode, String linkCode, String childCode) {
 
 		Boolean isLinkExists = false;
-		QDataBaseEntityMessage dataBEMessage = QwandaUtils.getDataBEMessage(parentCode, linkCode, this.getServiceToken().getToken());
+		QDataBaseEntityMessage dataBEMessage = QwandaUtils.getDataBEMessage(parentCode, linkCode,
+				this.getServiceToken().getToken());
 
 		if (dataBEMessage != null) {
 			BaseEntity[] beArr = dataBEMessage.getItems();
@@ -1563,8 +1582,9 @@ public class BaseEntityUtils implements Serializable {
 						new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(), targetBe.getCode()));
 			} else {
 				// ignore if new value is empty
-				if(!StringUtils.isBlank(ea.getAsString()))
-					duplicateAnswerList.add( new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(), ea.getAsString()));
+				if (!StringUtils.isBlank(ea.getAsString()))
+					duplicateAnswerList.add(new Answer(targetBe.getCode(), targetBe.getCode(), ea.getAttributeCode(),
+							ea.getAsString()));
 			}
 		}
 
@@ -1665,24 +1685,24 @@ public class BaseEntityUtils implements Serializable {
 
 		/* new status for v3 */
 		switch (status) {
-		case "green":
-		case "red":
-		case "orange":
-		case "yellow": {
+			case "green":
+			case "red":
+			case "orange":
+			case "yellow": {
 
-			BaseEntity be = this.getBaseEntityByCode(beCode);
-			if (be != null) {
+				BaseEntity be = this.getBaseEntityByCode(beCode);
+				if (be != null) {
 
-				String attributeCodeStatus = "STA_" + status.toUpperCase();
-				String existingValueArray = be.getValue(attributeCodeStatus, "[]");
-				JsonParser jsonParser = new JsonParser();
-				JsonArray existingValues = jsonParser.parse(existingValueArray).getAsJsonArray();
-				existingValues.add(userCode);
-				this.saveAnswer(new Answer(beCode, beCode, attributeCodeStatus, JsonUtils.toJson(existingValues)));
+					String attributeCodeStatus = "STA_" + status.toUpperCase();
+					String existingValueArray = be.getValue(attributeCodeStatus, "[]");
+					JsonParser jsonParser = new JsonParser();
+					JsonArray existingValues = jsonParser.parse(existingValueArray).getAsJsonArray();
+					existingValues.add(userCode);
+					this.saveAnswer(new Answer(beCode, beCode, attributeCodeStatus, JsonUtils.toJson(existingValues)));
+				}
 			}
-		}
-		default: {
-		}
+			default: {
+			}
 		}
 	}
 
@@ -1698,14 +1718,15 @@ public class BaseEntityUtils implements Serializable {
 	}
 
 	public List<Link> getLinks(final String parentCode, final String linkCode) {
-		List<Link> links = RulesUtils.getLinks(this.qwandaServiceUrl, this.decodedMapToken, this.getServiceToken().getToken(), parentCode,
+		List<Link> links = RulesUtils.getLinks(this.qwandaServiceUrl, this.decodedMapToken,
+				this.getServiceToken().getToken(), parentCode,
 				linkCode);
 		return links;
 	}
 
 	public String updateBaseEntity(BaseEntity be) {
 		try {
-			VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),serviceToken.getToken());
+			VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be), serviceToken.getToken());
 			return QwandaUtils.apiPutEntity(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
 					this.getServiceToken().getToken());
 		} catch (Exception e) {
@@ -1722,12 +1743,13 @@ public class BaseEntityUtils implements Serializable {
 					log.error("ERROR! searchEntity se has no code!");
 				}
 				if (se.getId() == null) {
-					BaseEntity existing = VertxUtils.readFromDDT(getRealm(), se.getCode(), this.getServiceToken().getToken());
+					BaseEntity existing = VertxUtils.readFromDDT(getRealm(), se.getCode(),
+							this.getServiceToken().getToken());
 					if (existing != null) {
 						se.setId(existing.getId());
 					}
 				}
-				VertxUtils.writeCachedJson(getRealm(), se.getCode(), JsonUtils.toJson(se),serviceToken.getToken());
+				VertxUtils.writeCachedJson(getRealm(), se.getCode(), JsonUtils.toJson(se), serviceToken.getToken());
 				if (se.getId() != null) {
 					ret = QwandaUtils.apiPutEntity(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(se),
 							this.getServiceToken().getToken());
@@ -1770,14 +1792,15 @@ public class BaseEntityUtils implements Serializable {
 					log.error("ERROR! BaseEntity se has no code!");
 				}
 				if (be.getId() == null) {
-					BaseEntity existing = VertxUtils.readFromDDT(getRealm(), be.getCode(), this.getServiceToken().getToken());
+					BaseEntity existing = VertxUtils.readFromDDT(getRealm(), be.getCode(),
+							this.getServiceToken().getToken());
 					if (existing != null) {
 						be.setId(existing.getId());
 					}
 				}
 
-				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),this.getServiceToken().getToken());
-
+				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),
+						this.getServiceToken().getToken());
 
 				String endpointUrl = null;
 				if (be.getId() != null) {
@@ -1828,7 +1851,8 @@ public class BaseEntityUtils implements Serializable {
 					log.error("ERROR! BaseEntity se has no code!");
 				}
 				if (be.getId() == null) {
-					BaseEntity existing = VertxUtils.readFromDDT(getRealm(), be.getCode(), this.getServiceToken().getToken());
+					BaseEntity existing = VertxUtils.readFromDDT(getRealm(), be.getCode(),
+							this.getServiceToken().getToken());
 					if (existing != null) {
 						be.setId(existing.getId());
 						// copy ea from existing
@@ -1837,7 +1861,8 @@ public class BaseEntityUtils implements Serializable {
 				}
 				if (be.getId() != null) {
 					log.info("Updating baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
-					retStr = QwandaUtils.apiPutEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys", JsonUtils.toJson(be),
+					retStr = QwandaUtils.apiPutEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys",
+							JsonUtils.toJson(be),
 							this.getServiceToken().getToken(), null);
 
 				} else {
@@ -1848,7 +1873,8 @@ public class BaseEntityUtils implements Serializable {
 				}
 
 				ret = saveBaseEntityAttributes(defBe, be);
-				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),this.getServiceToken().getToken());
+				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),
+						this.getServiceToken().getToken());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1861,17 +1887,17 @@ public class BaseEntityUtils implements Serializable {
 		if ((be == null) || (be.getCode() == null)) {
 			throw new NullPointerException("Cannot save be because be is null or be.getCode is null");
 		}
-	//	List<Answer> answers = new CopyOnWriteArrayList<Answer>();
+		// List<Answer> answers = new CopyOnWriteArrayList<Answer>();
 
 		if (be.getBaseEntityAttributes() != null) {
 			for (EntityAttribute ea : be.getBaseEntityAttributes()) {
 				Answer attributeAnswer = new Answer(be.getCode(), be.getCode(), ea.getAttributeCode(),
 						ea.getAsString());
 				attributeAnswer.setChangeEvent(false);
-			//	answers.add(attributeAnswer);
+				// answers.add(attributeAnswer);
 				be = this.saveAnswer(attributeAnswer);
 			}
-			//this.saveAnswers(answers);
+			// this.saveAnswers(answers);
 		}
 		return be;
 	}
@@ -1918,7 +1944,7 @@ public class BaseEntityUtils implements Serializable {
 					} else {
 						cachedBe.addAnswer(answer);
 					}
-					if (this.getServiceToken()==null) {
+					if (this.getServiceToken() == null) {
 						log.error("NO SERVICE TOKEN IN beUTILS");
 						this.setServiceToken(this.getGennyToken());
 					}
@@ -1987,7 +2013,8 @@ public class BaseEntityUtils implements Serializable {
 								|| answer.getAttributeCode().startsWith("SRT_")) {
 							attribute = new AttributeText(answer.getAttributeCode(), answer.getValue());
 						} else {
-							attribute = RulesUtils.getAttribute(answer.getAttributeCode(), this.getServiceToken().getToken());
+							attribute = RulesUtils.getAttribute(answer.getAttributeCode(),
+									this.getServiceToken().getToken());
 						}
 
 						if (attribute != null) {
@@ -2004,7 +2031,8 @@ public class BaseEntityUtils implements Serializable {
 			}
 		}
 
-		VertxUtils.writeCachedJson(getRealm(), cachedBe.getCode(), JsonUtils.toJson(cachedBe), this.getServiceToken().getToken());
+		VertxUtils.writeCachedJson(getRealm(), cachedBe.getCode(), JsonUtils.toJson(cachedBe),
+				this.getServiceToken().getToken());
 
 		return cachedBe;
 	}
@@ -2048,7 +2076,8 @@ public class BaseEntityUtils implements Serializable {
 			source.addTarget(target, linkAttribute, weight, linkValue);
 
 			this.updateBaseEntity(source);
-			QwandaUtils.apiPutEntity(qwandaServiceUrl + "/qwanda/links", JsonUtils.toJson(link), this.getServiceToken().getToken());
+			QwandaUtils.apiPutEntity(qwandaServiceUrl + "/qwanda/links", JsonUtils.toJson(link),
+					this.getServiceToken().getToken());
 		} catch (IOException | BadDataException e) {
 			e.printStackTrace();
 		}
@@ -2061,7 +2090,8 @@ public class BaseEntityUtils implements Serializable {
 		Link link = new Link(groupCode, targetCode, linkCode);
 		link.setWeight(weight);
 		try {
-			QwandaUtils.apiPutEntity(qwandaServiceUrl + "/qwanda/links", JsonUtils.toJson(link), this.getServiceToken().getToken());
+			QwandaUtils.apiPutEntity(qwandaServiceUrl + "/qwanda/links", JsonUtils.toJson(link),
+					this.getServiceToken().getToken());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -2553,7 +2583,8 @@ public class BaseEntityUtils implements Serializable {
 						+ searchBE.getPageSize(GennySettings.defaultPageSize), serviceToken.getToken(), 120);
 			} else {
 
-				Boolean useFyodor = (System.getenv("USE_FYODOR") != null && "TRUE".equalsIgnoreCase(System.getenv("USE_FYODOR"))) ? true : false;
+				Boolean useFyodor = (System.getenv("USE_FYODOR") != null
+						&& "TRUE".equalsIgnoreCase(System.getenv("USE_FYODOR"))) ? true : false;
 				// Set to FALSE to use regular search
 				if (useFyodor) {
 					log.info("FYODOR URL = " + GennySettings.fyodorServiceUrl);
@@ -2562,7 +2593,8 @@ public class BaseEntityUtils implements Serializable {
 							JsonUtils.toJson(searchBE), serviceToken.getToken(), null);
 				} else {
 					resultJsonStr = QwandaUtils.apiPostEntity2(
-							GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/search25/", JsonUtils.toJson(searchBE),
+							GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/search25/",
+							JsonUtils.toJson(searchBE),
 							serviceToken.getToken(), null);
 				}
 			}
@@ -2576,7 +2608,7 @@ public class BaseEntityUtils implements Serializable {
 				for (int i = 0; i < size; i++) {
 					String code = result.getString(i);
 					BaseEntity be = getBaseEntityByCode(code);
-//					System.out.println("code:" + code + ",index:" + (i+1) + "/" + size);
+					// System.out.println("code:" + code + ",index:" + (i+1) + "/" + size);
 
 					be.setIndex(i);
 					results.add(be);
@@ -3359,35 +3391,35 @@ public class BaseEntityUtils implements Serializable {
 				i.remove();
 			} else {
 				switch (ea.getAttributeCode()) {
-				case "PRI_IS_DELETED":
-				case "PRI_IS_EXPANDABLE":
-				case "PRI_IS_FULL":
-				case "PRI_IS_INHERITABLE":
-				case "PRI_IS_PHONE":
-				case "PRI_IS_AGENT_PROFILE_GRP":
-				case "PRI_IS_BUYER_PROFILE_GRP":
-				case "PRI_IS_EDU_PROVIDER_STAFF_PROFILE_GRP":
-				case "PRI_IS_REFERRER_PROFILE_GRP":
-				case "PRI_IS_SELLER_PROFILE_GRP":
-				case "PRI_IS SKILLS":
-					log.warn("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
-					i.remove();
-					break;
-				case "PRI_IS_DISABLED":
-					log.warn("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
-					// don't remove until we work it out...
-					try {
-						throw new DebugException("Bad DEF " + ea.getAttributeCode());
-					} catch (DebugException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					break;
-				case "PRI_IS_LOGBOOK":
-					log.debug("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
-					i.remove();
+					case "PRI_IS_DELETED":
+					case "PRI_IS_EXPANDABLE":
+					case "PRI_IS_FULL":
+					case "PRI_IS_INHERITABLE":
+					case "PRI_IS_PHONE":
+					case "PRI_IS_AGENT_PROFILE_GRP":
+					case "PRI_IS_BUYER_PROFILE_GRP":
+					case "PRI_IS_EDU_PROVIDER_STAFF_PROFILE_GRP":
+					case "PRI_IS_REFERRER_PROFILE_GRP":
+					case "PRI_IS_SELLER_PROFILE_GRP":
+					case "PRI_IS SKILLS":
+						log.warn("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
+						i.remove();
+						break;
+					case "PRI_IS_DISABLED":
+						log.warn("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
+						// don't remove until we work it out...
+						try {
+							throw new DebugException("Bad DEF " + ea.getAttributeCode());
+						} catch (DebugException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						break;
+					case "PRI_IS_LOGBOOK":
+						log.debug("getDEF -> detected non DEFy attributeCode " + ea.getAttributeCode());
+						i.remove();
 
-				default:
+					default:
 
 				}
 			}
@@ -3402,8 +3434,8 @@ public class BaseEntityUtils implements Serializable {
 
 			BaseEntity defBe = beMapping.get("DEF_" + trimedAttrCode);
 
-//			BaseEntity defBe = RulesUtils.defs.get(be.getRealm())
-//					.get("DEF_" + isAs.get(0).getAttributeCode().substring("PRI_IS_".length()));
+			// BaseEntity defBe = RulesUtils.defs.get(be.getRealm())
+			// .get("DEF_" + isAs.get(0).getAttributeCode().substring("PRI_IS_".length()));
 			if (defBe == null) {
 				log.error(
 						"No such DEF called " + "DEF_" + isAs.get(0).getAttributeCode().substring("PRI_IS_".length()));
@@ -3729,7 +3761,8 @@ public class BaseEntityUtils implements Serializable {
 			// putBe.setBaseEntityAttributes(null);
 			be.setName(name);
 			be.setStatus(status);
-			VertxUtils.writeCachedJson(this.gennyToken.getRealm(), be.getCode(), JsonUtils.toJson(be),serviceToken.getToken());
+			VertxUtils.writeCachedJson(this.gennyToken.getRealm(), be.getCode(), JsonUtils.toJson(be),
+					serviceToken.getToken());
 			saveBaseEntity(putBe);
 		}
 		return be;
@@ -3755,9 +3788,9 @@ public class BaseEntityUtils implements Serializable {
 					addNew = overwrite;
 				}
 
-				if(addNew){
+				if (addNew) {
 					// Make sure Attribute in ea is not null
-					if(ea.getAttribute() == null)
+					if (ea.getAttribute() == null)
 						ea.setAttribute(RulesUtils.getAttribute(ea.getAttributeCode(), this.getServiceToken()));
 					targetBe.addAttribute(ea);
 				}
@@ -3777,21 +3810,23 @@ public class BaseEntityUtils implements Serializable {
 		return targetBe;
 	}
 
-	/* Creates PCM with the attributeMap
+	/*
+	 * Creates PCM with the attributeMap
 	 */
-	public BaseEntity addPCMAttributes(String PCMName, String PCMCode, String PCMTemplateCode, Map<String,String> attributeMap) throws Exception
-	{
+	public BaseEntity addPCMAttributes(String PCMName, String PCMCode, String PCMTemplateCode,
+			Map<String, String> attributeMap) throws Exception {
 		BaseEntity defBe = this.getDEFByCode("DEF_PCM");
-		BaseEntity pcmBe = this.create(defBe,PCMCode,PCMName);
+		BaseEntity pcmBe = this.create(defBe, PCMCode, PCMName);
 
-		Answer answer =  new Answer(serviceToken.getUserCode(), pcmBe.getCode(), "PRI_TEMPLATE_CODE", PCMTemplateCode ,false,true);
+		Answer answer = new Answer(serviceToken.getUserCode(), pcmBe.getCode(), "PRI_TEMPLATE_CODE", PCMTemplateCode,
+				false, true);
 		Attribute attribute = RulesUtils.getAttribute("PRI_TEMPLATE_CODE", serviceToken);
 		answer.setAttribute(attribute);
 		pcmBe.addAnswer(answer);
 
-		for(Map.Entry<String, String> entry : attributeMap.entrySet())
-		{
-			answer =  new Answer(serviceToken.getUserCode(), pcmBe.getCode(), entry.getKey(), entry.getValue() ,false,true);
+		for (Map.Entry<String, String> entry : attributeMap.entrySet()) {
+			answer = new Answer(serviceToken.getUserCode(), pcmBe.getCode(), entry.getKey(), entry.getValue(), false,
+					true);
 			attribute = RulesUtils.getAttribute(entry.getKey(), serviceToken);
 			answer.setAttribute(attribute);
 			pcmBe.addAnswer(answer);
