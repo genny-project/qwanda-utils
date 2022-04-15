@@ -576,6 +576,9 @@ public class BaseEntityUtils implements Serializable {
 		T be2 = this.updateCachedBaseEntity(answer, clazz);
 		try {
 			Attribute attr = RulesUtils.getAttribute(answer.getAttributeCode(), this.getServiceToken().getToken());
+			if (attr == null) {
+				log.error("UPDATE BASEENTITY -> Attribute is NULL");
+			}
 			be.setValue(attr, answer.getValue());
 		} catch (BadDataException e) {
 			// TODO Auto-generated catch block
@@ -590,7 +593,6 @@ public class BaseEntityUtils implements Serializable {
 	}
 
 	public <T extends BaseEntity> T updateBaseEntity(T be, Answer answer) {
-
 		return updateBaseEntity(be, answer, BaseEntity.class);
 	}
 
