@@ -762,7 +762,7 @@ public class BaseEntityUtils implements Serializable {
 
 		SearchEntity searchBe = null;
 		try {
-			JsonObject cachedJsonObject = VertxUtils.readCachedJson(this.realm, code, this.getServiceToken().getToken());
+			JsonObject cachedJsonObject = VertxUtils.readCachedJson(this.getRealm(), code, this.getServiceToken().getToken());
 			if (cachedJsonObject != null) {
 				String data = cachedJsonObject.getString("value");
 				// log.info("json recieved :" + data);
@@ -941,7 +941,7 @@ public class BaseEntityUtils implements Serializable {
 			Integer pageSize) {
 
 		String key = parentCode + linkCode + "-" + pageStart + "-" + pageSize;
-		VertxUtils.putObject(this.realm, "LIST", key, null);
+		VertxUtils.putObject(this.getRealm(), "LIST", key, null);
 	}
 
 	public List<BaseEntity> getBaseEntitysByParentAndLinkCode(final String parentCode, final String linkCode,
@@ -952,16 +952,16 @@ public class BaseEntityUtils implements Serializable {
 		if (cache) {
 			Type listType = new TypeToken<List<BaseEntity>>() {
 			}.getType();
-			List<String> beCodes = VertxUtils.getObject(this.realm, "LIST", key, (Class) listType);
+			List<String> beCodes = VertxUtils.getObject(this.getRealm(), "LIST", key, (Class) listType);
 			if (beCodes == null) {
 				bes = RulesUtils.getBaseEntitysByParentAndLinkCodeWithAttributes(qwandaServiceUrl, this.decodedMapToken,
 						this.getServiceToken().getToken(), parentCode, linkCode, pageStart, pageSize);
 				beCodes = new CopyOnWriteArrayList<String>();
 				for (BaseEntity be : bes) {
-					VertxUtils.putObject(this.realm, "", be.getCode(), JsonUtils.toJson(be));
+					VertxUtils.putObject(this.getRealm(), "", be.getCode(), JsonUtils.toJson(be));
 					beCodes.add(be.getCode());
 				}
-				VertxUtils.putObject(this.realm, "LIST", key, beCodes);
+				VertxUtils.putObject(this.getRealm(), "LIST", key, beCodes);
 			} else {
 				for (String beCode : beCodes) {
 					BaseEntity be = getBaseEntityByCode(beCode);

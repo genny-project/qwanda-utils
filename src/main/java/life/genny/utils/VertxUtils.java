@@ -154,7 +154,7 @@ public class VertxUtils {
                                  final String token) {
         String data = JsonUtils.toJson(obj);
         String prekey = (StringUtils.isBlank(keyPrefix)) ? "" : (keyPrefix + ":");
-
+        log.info("cachedUtils PUT realm="+realm);
         writeCachedJson(realm, prekey + key, data, token);
     }
 
