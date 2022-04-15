@@ -309,7 +309,7 @@ public class BaseEntityUtils implements Serializable {
 					// Keycloak UUID
 					Attribute keycloakAttribute = RulesUtils.getAttribute("PRI_KEYCLOAK_UUID",
 							this.getServiceToken().getToken());
-					if (uuidAttribute == null) {
+					if (keycloakAttribute == null) {
 						log.error("KEYCLOAK UUID ATTRIBUTE is NULL " + this.getServiceToken().getToken());
 					}
 
