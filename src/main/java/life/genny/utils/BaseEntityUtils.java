@@ -437,17 +437,17 @@ public class BaseEntityUtils implements Serializable {
 	public Attribute saveAttribute(Attribute attribute, final String token) throws IOException {
 		GennyToken gennyToken = new GennyToken(token);
 		RulesUtils.realmAttributeMap.get(gennyToken.getRealm()).put(attribute.getCode(), attribute);
-		try {
+//		try {
 			if (!VertxUtils.cachedEnabled) { // only post if not in junit
-
-				String result = QwandaUtils.apiPostEntity(this.qwandaServiceUrl + "/qwanda/attributes",
-						JsonUtils.toJson(attribute), token);
+// TODO: Don't save attribute here
+//				String result = QwandaUtils.apiPostEntity(this.qwandaServiceUrl + "/qwanda/attributes",
+//						JsonUtils.toJson(attribute), token);
 			}
 			return attribute;
-		} catch (IOException e) {
-			log.error("Socket error trying to post attribute");
-			throw new IOException("Cannot save attribute");
-		}
+//		} catch (IOException e) {
+//			log.error("Socket error trying to post attribute");
+//			throw new IOException("Cannot save attribute");
+//		}
 
 	}
 

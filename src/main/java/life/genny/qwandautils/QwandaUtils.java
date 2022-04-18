@@ -1524,7 +1524,7 @@ public class QwandaUtils {
 
         try {
 
-            String response = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/attributes/", token);
+            String response = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/attribute", token);
             QDataAttributeMessage attributeMessage = JsonUtils.fromJson(response, QDataAttributeMessage.class);
             for (Attribute attribute : attributeMessage.getItems()) {
                 if (attribute.getCode().equals(attributeCode)) {
@@ -1822,6 +1822,25 @@ public class QwandaUtils {
     public static String apiPostEntity2(final String postUrl, final String entityString, final String authToken,
                                         final Consumer<String> callback) throws IOException {
 
+    	String result = null;
+    	
+    	// TODO: Hack of 2022
+    	// replace all api-service searches with fyodor...
+    	if (postUrl.contains("/qwanda/baseentitys/search")) {
+    		// Convert to fyodor search
+				log.info("FYODOR URL = " + GennySettings.fyodorServiceUrl);
+				result = QwandaUtils.apiPostEntity2(
+						GennySettings.fyodorServiceUrl + "/api/search",
+						entityString, authToken, null);
+				return result;
+    		
+    	}
+    	
+    	if (postUrl.contains("/qwanda/attributes")) {
+    		
+    	}
+    	
+    	
         Integer httpTimeout = GennySettings.apiPostTimeOut;  // 7 secnds
 
         if (StringUtils.isBlank(postUrl)) {
@@ -1841,7 +1860,7 @@ public class QwandaUtils {
 
         HttpRequest request = requestBuilder.build();
 
-        String result = null;
+
         Boolean done = false;
         int count = GennySettings.apiPostRetryTimes;
         while ((!done) && (count > 0)) {

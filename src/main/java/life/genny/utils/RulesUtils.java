@@ -848,7 +848,7 @@ public class RulesUtils {
                 println("All the attributes have been loaded in "+attributeMap.size()+" attributes");
             } else {
                 println("LOADING ATTRIBUTES FROM API");
-                String jsonString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/attributes", token.getToken());
+                String jsonString = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/attribute", token.getToken());
                 if (!StringUtils.isBlank(jsonString)) {
 
                 	 VertxUtils.writeCachedJson(token.getRealm(), "attributes", jsonString, token.getToken());
