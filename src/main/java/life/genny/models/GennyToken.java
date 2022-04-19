@@ -309,7 +309,14 @@ public class GennyToken implements Serializable {
   }
 
   public String getRealm() {
-    return realm;
+		String clientId = adecodedTokenMap.get("azp").toString();
+
+		if ((clientId.equals("internmatch"))||(clientId.equals("alyson"))) {
+			return "internmatch";
+		} 
+		else {
+			return clientId;
+		}
   }
 
   public String getString(final String key) {

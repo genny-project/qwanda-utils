@@ -674,7 +674,7 @@ public class BaseEntityUtils implements Serializable {
 						for (Answer answer : targetAnswers) {
 							try {
 								JsonObject json = new JsonObject(JsonUtils.toJson(answer));
-								json.put("token", this.getServiceToken().getToken());
+								json.put("token", this.getGennyToken().getToken());
 								log.debug("Saving answer");
 								VertxUtils.eb.write("answer", json);
 								log.debug("Finished saving answer");

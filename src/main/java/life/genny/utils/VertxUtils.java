@@ -1013,7 +1013,7 @@ public class VertxUtils {
 
         if (ars == null) {
             try {
-                ars = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/utils/realms", "NOTREQUIRED");
+                ars = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/utils/realms", "NOTREQUIRED");
             } catch (ClientProtocolException e) {
                 e.printStackTrace();
             } catch (IOException e) {
