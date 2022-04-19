@@ -2560,6 +2560,7 @@ public class BaseEntityUtils implements Serializable {
 					resultJsonStr = QwandaUtils.apiPostEntity2(
 							GennySettings.fyodorServiceUrl + "/api/search",
 							JsonUtils.toJson(searchBE), serviceToken.getToken(), null);
+					log.info("[!] Got response back from fyodor");
 				} else {
 					resultJsonStr = QwandaUtils.apiPostEntity2(
 							GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/search25/", JsonUtils.toJson(searchBE),
@@ -2575,9 +2576,13 @@ public class BaseEntityUtils implements Serializable {
 				int size = result.size();
 				for (int i = 0; i < size; i++) {
 					String code = result.getString(i);
+					System.out.print("[!] code:" + code + ",index:" + (i+1) + "/" + size);
 					BaseEntity be = getBaseEntityByCode(code);
-//					System.out.println("code:" + code + ",index:" + (i+1) + "/" + size);
-
+					if(be != null) {
+						System.out.println(".. Success!");
+					} else {
+						System.err.println(".. Failure!! BaseEntity is null for code: " + code);
+					}
 					be.setIndex(i);
 					results.add(be);
 				}

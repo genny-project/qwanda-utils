@@ -924,6 +924,7 @@ public class RulesUtils {
     		//loadAllAttributesIntoCache(gennyToken);
     	}
     	if (realmAttributeMap.get(gennyToken.getRealm())==null) {
+            log.error("Cache is null for realm: " + gennyToken.getRealm() + "! Has it been initialized?");
     		loadAllAttributesIntoCache(gennyToken);
     	}
         Attribute ret = realmAttributeMap.get(gennyToken.getRealm()).get(attributeCode);
