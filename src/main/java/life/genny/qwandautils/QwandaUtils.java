@@ -702,8 +702,11 @@ public class QwandaUtils {
         String attributeString = null;
         T be = null;
         try {
-            attributeString = QwandaUtils
-                    .apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" + baseEntAttributeCode, token);
+        	
+        	attributeString = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/entity/"+ baseEntAttributeCode, token);
+        	
+//            attributeString = QwandaUtils
+//                    .apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" + baseEntAttributeCode, token);
             be = JsonUtils.fromJson(attributeString, BaseEntity.class);
             if (be == null) {
                 throw new IOException("Cannot find BE " + baseEntAttributeCode);
@@ -725,22 +728,24 @@ public class QwandaUtils {
      */
     public static <T extends BaseEntity> T getBaseEntityByCodeWithAttributes(String baseEntAttributeCode, String token)
             throws IOException {
-        String attributeString = null;
-        T be = null;
-        if (StringUtils.isBlank(baseEntAttributeCode)) {
-            log.error("baseEntAttributeCode is NULL");
-            return null;
-        }
-
-        attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/"
-                + baseEntAttributeCode.toUpperCase() + "/attributes", token);
-        if (!StringUtils.isBlank(attributeString)) {
-            be = JsonUtils.fromJson(attributeString, BaseEntity.class);
-        } else {
-            throw new IOException("Cannot find BE " + baseEntAttributeCode);
-        }
-
-        return be;
+    	return getBaseEntityByCode(baseEntAttributeCode,token);
+    	
+//        String attributeString = null;
+//        T be = null;
+//        if (StringUtils.isBlank(baseEntAttributeCode)) {
+//            log.error("baseEntAttributeCode is NULL");
+//            return null;
+//        }
+//
+//        attributeString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/"
+//                + baseEntAttributeCode.toUpperCase() + "/attributes", token);
+//        if (!StringUtils.isBlank(attributeString)) {
+//            be = JsonUtils.fromJson(attributeString, BaseEntity.class);
+//        } else {
+//            throw new IOException("Cannot find BE " + baseEntAttributeCode);
+//        }
+//
+//        return be;
     }
 
     /**
