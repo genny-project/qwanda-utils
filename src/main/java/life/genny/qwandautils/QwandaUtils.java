@@ -1724,8 +1724,9 @@ public class QwandaUtils {
                 }
             }
             count--;
+            System.out.println("count = " + count + " and request=" + request);
+            System.out.println(result);
         }
-        // System.out.println(result);
         // can't find
         if (result.equals("<html><head><title>Error</title></head><body>Not Found</body></html>")) {
             log.error("Can't find result for request:" + url + ", set returned result to NULL");
