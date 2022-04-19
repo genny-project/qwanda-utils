@@ -820,7 +820,7 @@ public class RulesUtils {
             String realm = token.getRealm();
             println("All the attributes about to become loaded ... for realm "+realm);
             JsonObject json = VertxUtils.readCachedJson(realm,"attributes",token.getToken());
-            if ("ok".equals(json.getString("status"))) {
+            if ("ok".equals(json.getString("status")) && false) {
                 //	println("LOADING ATTRIBUTES FROM CACHE!");
                 QDataAttributeMessage attMsg = JsonUtils.fromJson(json.getString("value"), QDataAttributeMessage.class);
                 ret = attMsg;
@@ -848,7 +848,7 @@ public class RulesUtils {
                 println("All the attributes have been loaded in "+attributeMap.size()+" attributes");
             } else {
                 println("LOADING ATTRIBUTES FROM API");
-                String jsonString = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/attributes", token.getToken());
+                String jsonString = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/attribute", token.getToken());
                 if (!StringUtils.isBlank(jsonString)) {
 
                 	 VertxUtils.writeCachedJson(token.getRealm(), "attributes", jsonString, token.getToken());
