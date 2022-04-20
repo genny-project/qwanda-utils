@@ -87,7 +87,8 @@ public class QwandaUtils {
 
     public static String apiGet(String getUrl, final String authToken, final int timeout) {
 
-        // log.debug("GET:" + getUrl + ":");
+         log.info("GET URL: " + getUrl);
+         log.info("GET TOKEN: " + authToken);
 
         return sendGET(getUrl, authToken);
 
