@@ -1713,6 +1713,7 @@ public class QwandaUtils {
                     java.net.http.HttpResponse.BodyHandlers.ofString());
             try {
                 result = response.thenApply(java.net.http.HttpResponse::body).get(20, TimeUnit.SECONDS);
+                log.info("[!] Attempt " + count + ": " + result);
                 done = true;
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 // TODO Auto-generated catch block
