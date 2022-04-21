@@ -589,12 +589,12 @@ public class VertxUtils {
         eb.publish(user, channel, msg, null);
     }
 
-    static public void publish(BaseEntity user, String channel, Object be, String aliasCode, String token) {
+    /*static public void publish(BaseEntity user, String channel, Object be, String aliasCode, String token) {
 
         QDataBaseEntityMessage msg = new QDataBaseEntityMessage(be, aliasCode);
         msg.setToken(token);
         eb.publish(user, channel, msg, null);
-    }
+    }*/
 
     static public JsonObject writeMsg(String channel, Object payload) {
         JsonObject result = null;
