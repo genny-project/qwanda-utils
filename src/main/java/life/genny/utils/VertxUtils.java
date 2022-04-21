@@ -589,6 +589,13 @@ public class VertxUtils {
         eb.publish(user, channel, msg, null);
     }
 
+    static public void publish(BaseEntity user, String channel, Object be, String aliasCode, String token) {
+
+        QDataBaseEntityMessage msg = new QDataBaseEntityMessage(be, aliasCode);
+        msg.setToken(token);
+        eb.publish(user, channel, msg, null);
+    }
+
     static public JsonObject writeMsg(String channel, Object payload) {
         JsonObject result = null;
         Set<String> rxList = new HashSet<String>();
@@ -618,7 +625,7 @@ public class VertxUtils {
 				log.info("payload after eventbus removal  is String JsonObject j ="+js);
 				pl = js;
 				System.out.println("Sending to Messages from Wildfly-Qwanda-Service junit rx :"+pl);
-				
+
 			} else {
 				log.info("payload is QMessageGennyMSG  j ="+((QMessageGennyMSG)payload));
 
@@ -1126,26 +1133,26 @@ public class VertxUtils {
 
     }
 
-	static public void sendCmdMsg(BaseEntityUtils beUtils, String msgType, String code) 
+	static public void sendCmdMsg(BaseEntityUtils beUtils, String msgType, String code)
 	{
 		sendCmdMsg(beUtils, msgType, code, null, null);
 	}
 
-	static public void sendCmdMsg(BaseEntityUtils beUtils, String msgType, String code, List<String> targetCodes) 
+	static public void sendCmdMsg(BaseEntityUtils beUtils, String msgType, String code, List<String> targetCodes)
 	{
 		sendCmdMsg(beUtils, msgType, code, null, targetCodes);
 	}
 
-	static public void sendCmdMsg(BaseEntityUtils beUtils, String msgType, String code, String message) 
+	static public void sendCmdMsg(BaseEntityUtils beUtils, String msgType, String code, String message)
 	{
 		sendCmdMsg(beUtils, msgType, code, message, null);
 	}
 
-	static public void sendCmdMsg(BaseEntityUtils beUtils, String msgType, String code, String message, List<String> targetCodes) 
+	static public void sendCmdMsg(BaseEntityUtils beUtils, String msgType, String code, String message, List<String> targetCodes)
 	{
 		QCmdMessage msg = new QCmdMessage(msgType, code);
 		msg.setToken(beUtils.getGennyToken().getToken());
-		msg.setSend(true);  		
+		msg.setSend(true);
 		if (message != null) {
 			msg.setMessage(message);
 		}
@@ -1155,7 +1162,7 @@ public class VertxUtils {
 		VertxUtils.writeMsg("webcmds",msg);
 	}
 
-	static public void sendAskMsg(BaseEntityUtils beUtils, Ask ask) 
+	static public void sendAskMsg(BaseEntityUtils beUtils, Ask ask)
 	{
 		QDataAskMessage msg = new QDataAskMessage(ask);
 		msg.setToken(beUtils.getGennyToken().getToken());
@@ -1163,7 +1170,7 @@ public class VertxUtils {
 		VertxUtils.writeMsg("webcmds", JsonUtils.toJson(msg));
 	}
 
-	static public void sendBaseEntityMsg(BaseEntityUtils beUtils, BaseEntity be) 
+	static public void sendBaseEntityMsg(BaseEntityUtils beUtils, BaseEntity be)
 	{
 		QDataBaseEntityMessage msg = new QDataBaseEntityMessage(be);
 		msg.setToken(beUtils.getGennyToken().getToken());
@@ -1171,7 +1178,7 @@ public class VertxUtils {
 		VertxUtils.writeMsg("webcmds", JsonUtils.toJson(msg));
 	}
 
-	static public void sendBaseEntityMsg(BaseEntityUtils beUtils, BaseEntity[] beArray) 
+	static public void sendBaseEntityMsg(BaseEntityUtils beUtils, BaseEntity[] beArray)
 	{
 		QDataBaseEntityMessage msg = new QDataBaseEntityMessage(beArray);
 		msg.setToken(beUtils.getGennyToken().getToken());
