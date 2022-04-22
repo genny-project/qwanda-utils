@@ -817,6 +817,7 @@ public class RulesUtils {
         try {
             boolean cacheWorked = false;
             QDataAttributeMessage ret = null;
+            log.info("Token: " + token.getToken());
             String realm = token.getRealm();
             println("All the attributes about to become loaded ... for realm "+realm);
             JsonObject json = VertxUtils.readCachedJson(realm,"attributes",token.getToken());
