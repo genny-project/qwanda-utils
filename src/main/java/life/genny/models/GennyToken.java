@@ -54,6 +54,8 @@ public class GennyToken implements Serializable {
         // Extracting realm name from iss value
 
         String realm = null;
+        
+       
         if (adecodedTokenMap.get("iss") != null) {
           String[] issArray = adecodedTokenMap.get("iss").toString().split("/");
           realm = issArray[issArray.length - 1];
