@@ -1713,6 +1713,7 @@ public class QwandaUtils {
                     java.net.http.HttpResponse.BodyHandlers.ofString());
             try {
                 result = response.thenApply(java.net.http.HttpResponse::body).get(20, TimeUnit.SECONDS);
+                // Note: don't print result in production due to its huge size
                 log.info("[!] Attempt " + count + ": " + result);
                 done = true;
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -1726,8 +1727,7 @@ public class QwandaUtils {
                 }
             }
             count--;
-            System.out.println("count = " + count + " and request=" + request);
-            System.out.println(result);
+            log.info("count = " + count + " and request=" + request + ", Done value:" + done);
         }
         // can't find
         if (result.equals("<html><head><title>Error</title></head><body>Not Found</body></html>")) {
