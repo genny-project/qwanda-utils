@@ -200,7 +200,7 @@ public class KeycloakUtils {
 
 		postDataParams.put(OAuth2Constants.CLIENT_ID, clientId);
 		log.info("using clientId:" + clientId);
-		if (!StringUtils.isBlank(secret)) {
+		if (!"nosecret".equals(secret) && !StringUtils.isBlank(secret)) {
 			postDataParams.put(OAuth2Constants.CLIENT_SECRET, secret);
 			log.info("using secret:" + secret);
 		}
