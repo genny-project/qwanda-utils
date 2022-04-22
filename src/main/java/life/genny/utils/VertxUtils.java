@@ -101,11 +101,11 @@ public class VertxUtils {
         }
     }
 
-    static public <T> T getObject(final String realm, final String keyPrefix, final String key, final Class clazz) {
+    static public <T> T getObject(final String realm, final String keyPrefix, final String key, final Class<?> clazz) {
         return getObject(realm, keyPrefix, key, clazz, DEFAULT_TOKEN);
     }
 
-    static public <T> T getObject(final String realm, final String keyPrefix, final String key, final Class clazz,
+    static public <T> T getObject(final String realm, final String keyPrefix, final String key, final Class<?> clazz,
                                   final String token) {
         T item = null;
         String prekey = (StringUtils.isBlank(keyPrefix)) ? "" : (keyPrefix + ":");
