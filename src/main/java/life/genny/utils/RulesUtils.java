@@ -813,12 +813,24 @@ public class RulesUtils {
         return linkList;
     }
 
+    private static String getEnv(String env) {
+        String result = System.getenv(env);
+        if(result == null) {
+            log.error("Cannot get environment variable " + env + ". Is it set?");
+        }
+
+        return result;
+    }
+
     public static QDataAttributeMessage loadAllAttributesIntoCache(final GennyToken token) {
         try {
             boolean cacheWorked = false;
             QDataAttributeMessage ret = null;
             log.info("Token: " + token.getToken());
             String realm = token.getRealm();
+            if(getEnv("PROJECT_REALM") != null) {
+                realm = getEnv("PROJECT_REALM");
+            }
             println("All the attributes about to become loaded ... for realm "+realm);
             JsonObject json = VertxUtils.readCachedJson(realm,"attributes",token.getToken());
             if ("ok".equals(json.getString("status"))) {
