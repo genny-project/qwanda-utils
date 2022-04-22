@@ -1,6 +1,26 @@
 package life.genny.qwandautils;
 
 import com.google.gson.JsonObject;
+import java.io.*;
+import java.lang.invoke.MethodHandles;
+import java.net.*;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublisher;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+import javax.net.ssl.HttpsURLConnection;
+import life.genny.dto.FileUploadRequest;
 import life.genny.models.GennyToken;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.Ask;
@@ -14,6 +34,7 @@ import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.entity.SearchEntity;
 import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.message.*;
+import life.genny.qwandautils.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.HttpEntity;
@@ -37,25 +58,8 @@ import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.*;
-import java.lang.invoke.MethodHandles;
-import java.net.*;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpRequest.BodyPublisher;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
+
+
 
 public class QwandaUtils {
 
@@ -84,59 +88,61 @@ public class QwandaUtils {
 
         return sendGET(getUrl, authToken);
 
-//		RequestConfig config = RequestConfig.custom()
-//				.setConnectTimeout(timeout * 1000)
-//				.setConnectionRequestTimeout(timeout * 1000)
-//				.setSocketTimeout(timeout * 1000).build();
-//		CloseableHttpClient httpclient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-//		HttpGet request = new HttpGet(getUrl);
-//		if (authToken != null) {
-//			request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
-//		}
-//
-//		CloseableHttpResponse response =null;
-//		try {
-//			response = httpclient.execute(request);
-//			// The underlying HTTP connection is still held by the response object
-//			// to allow the response content to be streamed directly from the network
-//			// socket.
-//			// In order to ensure correct deallocation of system resources
-//			// the user MUST call CloseableHttpResponse#close() from a finally clause.
-//			// Please note that if response content is not fully consumed the underlying
-//			// connection cannot be safely re-used and will be shut down and discarded
-//			// by the connection manager.
-//
-//			HttpEntity entity1 = response.getEntity();
-//			if (entity1 == null) {
-//				return ""; 
-//			}
-//			String responseString = EntityUtils.toString(entity1);
-//			
-//			if (StringUtils.isBlank(responseString)) {
-//				return "";
-//			}
-//
-//			EntityUtils.consume(entity1);
-//
-//			return responseString;
-//		}
-//		catch (java.net.SocketTimeoutException e) {
-//			log.error("API Get call timeout - "+timeout+" secs to "+getUrl);
-//			return null;
-//		}
-//		catch (Exception e) {
-//			log.error("API Get exception -for  "+getUrl+" :");
-//			return "";
-//		}
-//
-//		finally {
-//			if (response != null) {
-//				response.close();
-//			}
-//			httpclient.close();
-//			//IOUtils.closeQuietly(response);  removed commons-io
-//			//IOUtils.closeQuietly(httpclient);
-//		}
+        // RequestConfig config = RequestConfig.custom()
+        // .setConnectTimeout(timeout * 1000)
+        // .setConnectionRequestTimeout(timeout * 1000)
+        // .setSocketTimeout(timeout * 1000).build();
+        // CloseableHttpClient httpclient =
+        // HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+        // HttpGet request = new HttpGet(getUrl);
+        // if (authToken != null) {
+        // request.addHeader("Authorization", "Bearer " + authToken); // Authorization":
+        // `Bearer
+        // }
+        //
+        // CloseableHttpResponse response =null;
+        // try {
+        // response = httpclient.execute(request);
+        // // The underlying HTTP connection is still held by the response object
+        // // to allow the response content to be streamed directly from the network
+        // // socket.
+        // // In order to ensure correct deallocation of system resources
+        // // the user MUST call CloseableHttpResponse#close() from a finally clause.
+        // // Please note that if response content is not fully consumed the underlying
+        // // connection cannot be safely re-used and will be shut down and discarded
+        // // by the connection manager.
+        //
+        // HttpEntity entity1 = response.getEntity();
+        // if (entity1 == null) {
+        // return "";
+        // }
+        // String responseString = EntityUtils.toString(entity1);
+        //
+        // if (StringUtils.isBlank(responseString)) {
+        // return "";
+        // }
+        //
+        // EntityUtils.consume(entity1);
+        //
+        // return responseString;
+        // }
+        // catch (java.net.SocketTimeoutException e) {
+        // log.error("API Get call timeout - "+timeout+" secs to "+getUrl);
+        // return null;
+        // }
+        // catch (Exception e) {
+        // log.error("API Get exception -for "+getUrl+" :");
+        // return "";
+        // }
+        //
+        // finally {
+        // if (response != null) {
+        // response.close();
+        // }
+        // httpclient.close();
+        // //IOUtils.closeQuietly(response); removed commons-io
+        // //IOUtils.closeQuietly(httpclient);
+        // }
 
     }
 
@@ -146,50 +152,53 @@ public class QwandaUtils {
     }
 
     public static String apiPostEntity(final String postUrl, final String entityString, final String authToken,
-                                       final Consumer<String> callback) throws IOException {
+            final Consumer<String> callback) throws IOException {
         return apiPostEntity2(postUrl, entityString, authToken, null);
-//		String responseString = null;
-//		if (StringUtils.isBlank(postUrl)) {
-//			log.error("Blank url in apiPostEntity");
-//		}
-//		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
-//		CloseableHttpResponse response = null;
-//		try {
-//
-//			HttpPost post = new HttpPost(postUrl);
-//
-//			StringEntity postEntity = new StringEntity(entityString, "UTF-8");
-//
-//			post.setEntity(postEntity);
-//			post.setHeader("Content-Type", "application/json; charset=UTF-8");
-//			if (authToken != null) {
-//				post.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
-//			}
-//
-//			response = httpclient.execute(post);
-//			HttpEntity entity = response.getEntity();
-//			responseString = EntityUtils.toString(entity);
-//			if (callback != null) {
-//				callback.accept(responseString);
-//			}
-//			return responseString;
-//		} catch (Exception e) {
-//			log.error(e.getMessage());
-//		} finally {
-//			if (response != null) {
-//				response.close();
-//			} else {
-//				log.error("postApi response was null");
-//			}
-//			httpclient.close();
-//			// IOUtils.closeQuietly(response);
-//			// IOUtils.closeQuietly(httpclient);
-//		}
-//		return responseString;
+        // String responseString = null;
+        // if (StringUtils.isBlank(postUrl)) {
+        // log.error("Blank url in apiPostEntity");
+        // }
+        // CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+        // CloseableHttpResponse response = null;
+        // try {
+        //
+        // HttpPost post = new HttpPost(postUrl);
+        //
+        // StringEntity postEntity = new StringEntity(entityString, "UTF-8");
+        //
+        // post.setEntity(postEntity);
+        // post.setHeader("Content-Type", "application/json; charset=UTF-8");
+        // if (authToken != null) {
+        // post.addHeader("Authorization", "Bearer " + authToken); // Authorization":
+        // `Bearer
+        // }
+        //
+        // response = httpclient.execute(post);
+        // HttpEntity entity = response.getEntity();
+        // responseString = EntityUtils.toString(entity);
+        // if (callback != null) {
+        // callback.accept(responseString);
+        // }
+        // return responseString;
+        // } catch (Exception e) {
+        // log.error(e.getMessage());
+        // } finally {
+        // if (response != null) {
+        // response.close();
+        // } else {
+        // log.error("postApi response was null");
+        // }
+        // httpclient.close();
+        // // IOUtils.closeQuietly(response);
+        // // IOUtils.closeQuietly(httpclient);
+        // }
+        // return responseString;
     }
 
-    public static String apiPostNote(final String postUrl, final String sourceCode, final String targetCode, final String tag,
-                                     final String userName, final String userImage, final String content, final String authToken, final Consumer<String> callback)
+    public static String apiPostNote(final String postUrl, final String sourceCode, final String targetCode,
+            final String tag,
+            final String userName, final String userImage, final String content, final String authToken,
+            final Consumer<String> callback)
             throws IOException {
         String responseString = null;
         if (StringUtils.isBlank(postUrl)) {
@@ -202,14 +211,20 @@ public class QwandaUtils {
             HttpPost post = new HttpPost(postUrl);
             log.error("HMMMMM 237");
 
-            /*String jsonString = String.format("{\"id\":0,\"content\":\"" + content + "\",\"sourceCode\":\"" + sourceCode + "\",\"targetCode\":\"" + targetCode + "\"tags\":[{\"name\":\"" + sourceCode + "\",\"value\":0}, {\"name\":\"" + tag + "\",\"value\":0}],\"targetCode\":\"" + targetCode + "\"}");*/
+            /*
+             * String jsonString = String.format("{\"id\":0,\"content\":\"" + content +
+             * "\",\"sourceCode\":\"" + sourceCode + "\",\"targetCode\":\"" + targetCode +
+             * "\"tags\":[{\"name\":\"" + sourceCode + "\",\"value\":0}, {\"name\":\"" + tag
+             * + "\",\"value\":0}],\"targetCode\":\"" + targetCode + "\"}");
+             */
 
             String jsonString = String.format("{\"id\":0,\"content\":\"" + content +
                     "\",\"sourceCode\":\"" + sourceCode +
                     "\",\"targetCode\":\"" + targetCode +
                     "\",\"userName\":\"" + userName +
                     "\",\"userImage\":\"" + userImage +
-                    "\",\"tags\":[{\"name\":\"" + sourceCode + "\",\"value\":0}, {\"name\":\"" + tag + "\",\"value\":0}]}");
+                    "\",\"tags\":[{\"name\":\"" + sourceCode + "\",\"value\":0}, {\"name\":\"" + tag
+                    + "\",\"value\":0}]}");
 
             log.info("jsonString = " + jsonString);
 
@@ -253,16 +268,19 @@ public class QwandaUtils {
      * Date(), targetCode: ‘PER_USER1’,
      */
 
-    public static String apiPostNote(final String postUrl, final String sourceCode, final String targetCode, final String tag,
-                                     final String userName, final String userImage, final String content, final String authToken) throws IOException {
+    public static String apiPostNote(final String postUrl, final String sourceCode, final String targetCode,
+            final String tag,
+            final String userName, final String userImage, final String content, final String authToken)
+            throws IOException {
         String user = "System";
         String image = "";
         log.error("HMMMMM 290");
         return apiPostNote(postUrl, sourceCode, targetCode, tag, user, image, content, authToken, null);
     }
 
-    public static String apiPostNote(final String postUrl, final String sourceCode, final String targetCode, final String tag,
-                                     final String content, final String authToken) throws IOException {
+    public static String apiPostNote(final String postUrl, final String sourceCode, final String targetCode,
+            final String tag,
+            final String content, final String authToken) throws IOException {
         String userName = "System";
         String userImage = "abc";
         log.error("HMMMMM 302");
@@ -270,7 +288,7 @@ public class QwandaUtils {
     }
 
     public static String apiPost(final String postUrl, final List<BasicNameValuePair> nameValuePairs,
-                                 final String authToken) throws IOException {
+            final String authToken) throws IOException {
         return apiPostEntity(postUrl, new UrlEncodedFormEntity(nameValuePairs).toString(), authToken, null);
     }
 
@@ -379,7 +397,7 @@ public class QwandaUtils {
     }
 
     public static BaseEntity createUserFromToken(final String qwandaUrl, final String serviceToken,
-                                                 final String userToken) throws IOException {
+            final String userToken) throws IOException {
         JSONObject decodedToken = KeycloakUtils.getDecodedToken(userToken);
 
         String username = decodedToken.getString("preferred_username");
@@ -444,38 +462,38 @@ public class QwandaUtils {
     }
 
     public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
-                                        final String firstname, final String lastname, final String email) throws IOException {
+            final String firstname, final String lastname, final String email) throws IOException {
 
         return createUser(qwandaUrl, token, username, firstname, lastname, email, "genny", firstname + " " + lastname,
                 null, null);
     }
 
     public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
-                                        final String firstname, final String lastname, final String email, String keycloakId) throws IOException {
+            final String firstname, final String lastname, final String email, String keycloakId) throws IOException {
 
         return createUser(qwandaUrl, token, username, firstname, lastname, email, "genny", firstname + " " + lastname,
                 null, null);
     }
 
     public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
-                                        final String firstname, final String lastname, final String email, final String realm, final String name,
-                                        final String keycloakId) throws IOException {
+            final String firstname, final String lastname, final String email, final String realm, final String name,
+            final String keycloakId) throws IOException {
 
         return QwandaUtils.createUser(qwandaUrl, token, username, firstname, lastname, email, realm, name, keycloakId,
                 null);
     }
 
     public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
-                                        final String firstname, final String lastname, final String email, final String realm, final String name,
-                                        final String keycloakId, HashMap<String, String> attributes) throws IOException {
+            final String firstname, final String lastname, final String email, final String realm, final String name,
+            final String keycloakId, HashMap<String, String> attributes) throws IOException {
 
         return QwandaUtils.createUser(qwandaUrl, token, username, firstname, lastname, email, realm, name, keycloakId,
                 attributes, null);
     }
 
     public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
-                                        final String firstname, final String lastname, final String email, final String realm, final String name,
-                                        final String keycloakId, HashMap<String, String> attributes, Link[] links) throws IOException {
+            final String firstname, final String lastname, final String email, final String realm, final String name,
+            final String keycloakId, HashMap<String, String> attributes, Link[] links) throws IOException {
 
         String uname = getNormalisedUsername(username);
         String code = "PER_" + keycloakId.toUpperCase();
@@ -611,16 +629,16 @@ public class QwandaUtils {
      * @param questionCode
      * @param token
      * @return if mandatory fields of the form has been completed
-     * <p>
-     * For sourceBaseEntityCode : PER_USERXX, targetBaseEntityCode :
-     * BEG_XXX/LOD_XXXX, questionCode : Question grpCode, method checks if
-     * all the mandatory fields in the Question Group has been entered
-     * </p>
+     *         <p>
+     *         For sourceBaseEntityCode : PER_USERXX, targetBaseEntityCode :
+     *         BEG_XXX/LOD_XXXX, questionCode : Question grpCode, method checks if
+     *         all the mandatory fields in the Question Group has been entered
+     *         </p>
      */
     static Map<String, String> askMap = new ConcurrentHashMap<>();
 
     public static Boolean isMandatoryFieldsEntered(String sourceBaseEntityCode, String targetBaseEntityCode,
-                                                   String questionCode, final String userToken) {
+            String questionCode, final String userToken) {
 
         try {
             String attributeString = null;
@@ -693,7 +711,7 @@ public class QwandaUtils {
      * @param baseEntAttributeCode
      * @param token
      * @return Deserialized BaseEntity model object with values for a BaseEntity
-     * code that is passed
+     *         code that is passed
      * @throws IOException
      */
     public static <T extends BaseEntity> T getBaseEntityByCode(String baseEntAttributeCode, String token)
@@ -723,7 +741,7 @@ public class QwandaUtils {
      * @param baseEntAttributeCode
      * @param token
      * @return Deserialized BaseEntity model object with values for a BaseEntity
-     * code that is passed
+     *         code that is passed
      * @throws IOException
      */
     public static <T extends BaseEntity> T getBaseEntityByCodeWithAttributes(String baseEntAttributeCode, String token)
@@ -827,7 +845,7 @@ public class QwandaUtils {
      * @param attributeCode
      * @param token
      * @return BaseEntity with children (alias code, code of the attributes for the
-     * BaseEntity) for the BaseEntity code
+     *         BaseEntity) for the BaseEntity code
      */
     @SuppressWarnings("unchecked")
     public static Map<String, BaseEntity> getBaseEntWithChildrenForAttributeCode(String attributeCode, String token) {
@@ -992,14 +1010,14 @@ public class QwandaUtils {
      * @param childLinkCode
      * @param token
      * @return if links exists for childLinkCode and parentCode
-     * <p>
-     * For parentCode : PER_USER, parentLinkCode : LNK_CODE, childLinkCode :
-     * OFFER_CODE, this API checks if there is a link LNK_CODE between
-     * PER_USER and OFFER_CODE.
-     * </p>
+     *         <p>
+     *         For parentCode : PER_USER, parentLinkCode : LNK_CODE, childLinkCode :
+     *         OFFER_CODE, this API checks if there is a link LNK_CODE between
+     *         PER_USER and OFFER_CODE.
+     *         </p>
      */
     public static Boolean checkIfLinkExistsForTarget(String parentCode, String linkCode, String childCode,
-                                                     String token) {
+            String token) {
 
         Boolean isLinkExists = false;
         QDataBaseEntityMessage dataBEMessage = getDataBEMessage(parentCode, linkCode, token);
@@ -1036,7 +1054,7 @@ public class QwandaUtils {
      * @return sourceCode/targetCode if the link values match the input given
      */
     public static String getSourceOrTargetForGroupLink(String groupCode, String attributeCode, String sourceOrTarget,
-                                                       String linkValue, Boolean isSource, String token) {
+            String linkValue, Boolean isSource, String token) {
 
         QDataBaseEntityMessage dataBEMessage = getDataBEMessage(groupCode, "LNK_CORE", token);
         String code = null;
@@ -1121,11 +1139,11 @@ public class QwandaUtils {
      * @param linkValue
      * @param token
      * @return if the link exists between parent groupCode and a child for a given
-     * linkCode, linkValue
+     *         linkCode, linkValue
      */
     @SuppressWarnings("unchecked")
     public static Boolean checkIfLinkExists(String groupCode, String linkCode, String targetCode, String linkValue,
-                                            String token) {
+            String token) {
 
         // gets all the children of a groupcode with their linkCode,linkValue and code
         // as a list
@@ -1193,7 +1211,7 @@ public class QwandaUtils {
      * @return response string after creating a link in the DataBase
      */
     public static Link createLink(String groupCode, String targetCode, String linkCode, String linkValue, Double weight,
-                                  String token) {
+            String token) {
 
         log.info("CREATING LINK between " + groupCode + "and" + targetCode + "with LINK VALUE = " + linkValue);
 
@@ -1210,7 +1228,7 @@ public class QwandaUtils {
     }
 
     public static BaseEntity getBaseEntityForAttribute(String groupCode, String linkCode, String attributeCode,
-                                                       String attributeValue, String tokenString) {
+            String attributeValue, String tokenString) {
         QDataBaseEntityMessage entityMessage = getDataBEMessage(groupCode, linkCode, tokenString);
 
         BaseEntity[] beArr = entityMessage.getItems();
@@ -1549,7 +1567,7 @@ public class QwandaUtils {
     }
 
     public static QDataBaseEntityMessage findBaseEntityByAttributeCodeLikeValue(String realm, String token,
-                                                                                String attributeCode, String likeValue) {
+            String attributeCode, String likeValue) {
         SearchEntity searchBE = new SearchEntity("SBE_FIND_LIKE", "AttributeLink")
                 .addSort("PRI_NAME", "Created", SearchEntity.Sort.ASC)
                 .addFilter(attributeCode, SearchEntity.StringFilter.LIKE, likeValue).addColumn("PRI_NAME", "Name")
@@ -1576,7 +1594,7 @@ public class QwandaUtils {
         if (NumberUtils.isDigits(abn) && abn.length() != 11) {
             return false;
         }
-        final int[] weights = {10, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19};
+        final int[] weights = { 10, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19 };
         // split abn number string by digits to get int array
         int[] abnDigits = Stream.of(abn.split("\\B")).mapToInt(Integer::parseInt).toArray();
         // reduce by applying weight[index] * abnDigits[index] (NOTE: substract 1 for
@@ -1648,20 +1666,38 @@ public class QwandaUtils {
     }
 
     static public String sendGET(String url, String authToken) {
+        return sendGET(url, "application/json", authToken);
+    }
 
-        HttpRequest.Builder requestBuilder = Optional.ofNullable(authToken)
-                .map(token ->
-                        HttpRequest.newBuilder()
-                                .GET()
-                                .uri(URI.create(url))
-                                .setHeader("Content-Type", "application/json")
-                                .setHeader("Authorization", "Bearer " + token)
-                )
-                .orElse(
-                        HttpRequest.newBuilder()
-                                .GET()
-                                .uri(URI.create(url))
-                );
+    static public String sendGET(String url, String contentType, String authToken) {
+
+        HttpRequest.Builder requestBuilder = null;
+
+        if (authToken == null) {
+            requestBuilder = Optional.ofNullable(authToken)
+                    .map(token -> HttpRequest.newBuilder()
+                            .GET()
+                            .uri(URI.create(url))
+                            .setHeader("Content-Type", contentType))
+                    .orElse(
+                            HttpRequest.newBuilder()
+                                    .GET()
+                                    .uri(URI.create(url))
+                                    .setHeader("Content-Type", contentType));
+        } else {
+            requestBuilder = Optional.ofNullable(authToken)
+                    .map(token -> HttpRequest.newBuilder()
+                            .GET()
+                            .uri(URI.create(url))
+                            .setHeader("Content-Type", contentType)
+                            .setHeader("Authorization", "Bearer " + authToken))
+                    .orElse(
+                            HttpRequest.newBuilder()
+                                    .GET()
+                                    .uri(URI.create(url))
+                                    .setHeader("Content-Type", contentType)
+                                    .setHeader("Authorization", "Bearer " + authToken));
+        }
 
         if (url.contains("genny.life")) { // Hack for local server not having http2
             requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
@@ -1673,66 +1709,66 @@ public class QwandaUtils {
         Boolean done = false;
         int count = 5;
         while ((!done) && (count > 0)) {
-
+            log.debug("count = " + count + " and request=" + request);
             CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
                     java.net.http.HttpResponse.BodyHandlers.ofString());
-
-
             try {
                 result = response.thenApply(java.net.http.HttpResponse::body).get(20, TimeUnit.SECONDS);
                 done = true;
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 // TODO Auto-generated catch block
-                log.error("Count:" + count + ", Exception occurred when post to URL: " + url + ",Body is authToken:" + authToken + ", Exception details:" + e.getCause());
+                log.error("Count:" + count + ", Exception occurred when post to URL: " + url + ",Body is authToken:"
+                        + authToken + ", Exception details:" + e.getCause());
                 httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
                         .connectTimeout(Duration.ofSeconds(20)).build();
                 if (count <= 0) {
                     done = true;
                 }
-
             }
             count--;
         }
-//	        System.out.println(result);
-// can't find
+        // System.out.println(result);
+        // can't find
         if (result.equals("<html><head><title>Error</title></head><body>Not Found</body></html>")) {
             log.error("Can't find result for request:" + url + ", set returned result to NULL");
             result = null;
         }
 
         return result;
-//		
-//		
-//		
-//		
-//		URL obj = new URL(url);
-//		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-//		con.setRequestMethod("GET");
-//		con.addRequestProperty("Content-Type", "application/json");
-//		
-//		if (authToken != null) {
-//			con.addRequestProperty("Authorization", "Bearer " + authToken); // Authorization": `Bearer
-//		}
-//
-//
-//		// con.setRequestProperty("NestUser-Agent", USER_AGENT);
-//		int responseCode = con.getResponseCode();
-//		// System.out.println("GET Response Code :: " + responseCode);
-//		if (responseCode == HttpURLConnection.HTTP_OK) { // success
-//			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-//			String inputLine;
-//			StringBuffer response = new StringBuffer();
-//
-//			while ((inputLine = in.readLine()) != null) {
-//				response.append(inputLine);
-//			}
-//			in.close();
-//
-//			// print result
-//			return response.toString();
-//		} else {
-//			return null;
-//		}
+        //
+        //
+        //
+        //
+        // URL obj = new URL(url);
+        // HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+        // con.setRequestMethod("GET");
+        // con.addRequestProperty("Content-Type", "application/json");
+        //
+        // if (authToken != null) {
+        // con.addRequestProperty("Authorization", "Bearer " + authToken); //
+        // Authorization": `Bearer
+        // }
+        //
+        //
+        // // con.setRequestProperty("NestUser-Agent", USER_AGENT);
+        // int responseCode = con.getResponseCode();
+        // // System.out.println("GET Response Code :: " + responseCode);
+        // if (responseCode == HttpURLConnection.HTTP_OK) { // success
+        // BufferedReader in = new BufferedReader(new
+        // InputStreamReader(con.getInputStream()));
+        // String inputLine;
+        // StringBuffer response = new StringBuffer();
+        //
+        // while ((inputLine = in.readLine()) != null) {
+        // response.append(inputLine);
+        // }
+        // in.close();
+        //
+        // // print result
+        // return response.toString();
+        // } else {
+        // return null;
+        // }
 
     }
 
@@ -1814,6 +1850,7 @@ public class QwandaUtils {
                     response += line;
                 }
             } else {
+                log.error("responseCode:" + responseCode + ":  response:" + response);
                 response = "";
 
             }
@@ -1825,129 +1862,162 @@ public class QwandaUtils {
     }
 
     public static String apiPostEntity2(final String postUrl, final String entityString, final String authToken,
-                                        final Consumer<String> callback) throws IOException {
+            final Consumer<String> callback) throws IOException {
 
-    	String result = null;
-    	
-    	// TODO: Hack of 2022
-    	// replace all api-service searches with fyodor...
-    	if (postUrl.contains("/qwanda/baseentitys/search")) {
-    		// Convert to fyodor search
-				log.info("FYODOR URL = " + GennySettings.fyodorServiceUrl);
-				result = QwandaUtils.apiPostEntity2(
-						GennySettings.fyodorServiceUrl + "/api/search",
-						entityString, authToken, null);
-				return result;
-    		
-    	}
-    	
-    	if (postUrl.contains("/qwanda/attributes")) {
-    		
-    	}
-    	
-    	
-        Integer httpTimeout = GennySettings.apiPostTimeOut;  // 7 secnds
+        String result = null;
 
-        if (StringUtils.isBlank(postUrl)) {
-            log.error("Blank url in apiPostEntity");
+        // TODO: Hack of 2022
+        // replace all api-service searches with fyodor...
+        if (postUrl.contains("/qwanda/baseentitys/search")) {
+            // Convert to fyodor search
+            log.info("FYODOR URL = " + GennySettings.fyodorServiceUrl);
+            result = QwandaUtils.apiPostEntity2(
+                    GennySettings.fyodorServiceUrl + "/api/search",
+                    entityString, authToken, null);
+            return result;
+
         }
 
-        BodyPublisher requestBody = BodyPublishers.ofString(entityString);
+        if (postUrl.contains("/qwanda/attributes")) {
 
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().POST(requestBody).uri(URI.create(postUrl))
-                .setHeader("Content-Type", "application/json")
-                .setHeader("Authorization", "Bearer " + authToken);
-
-
-        if (postUrl.contains("genny.life")) { // Hack for local server not having http2
-            requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
         }
 
-        HttpRequest request = requestBuilder.build();
+        return apiPostEntity2(postUrl, entityString, "application/json", authToken, callback);
+    }
 
+    public static String apiPostEntity2(final String postUrl, final String entityString, final String contentType,
+            final String authToken,
+            final Consumer<String> callback) throws IOException {
 
-        Boolean done = false;
-        int count = GennySettings.apiPostRetryTimes;
-        while ((!done) && (count > 0)) {
-            CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
-                    java.net.http.HttpResponse.BodyHandlers.ofString());
+        java.net.http.HttpResponse<String> response2 = post(postUrl, entityString, contentType, authToken);
 
-            try {
-                result = response.thenApply(java.net.http.HttpResponse::body).get(httpTimeout, TimeUnit.SECONDS);
-                done = true;
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                // TODO Auto-generated catch block
-                log.error("Count:" + count + " , TimeOut value:" + httpTimeout + ", Exception occurred when post to URL: " + postUrl + ",Body is entityString:" + entityString + ", Exception details:" + e.getCause());
-                // try renewing the httpclient
-                httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
-                        .connectTimeout(Duration.ofSeconds(httpTimeout)).build();
-                if (count <= 0) {
-                    done = true;
-                }
-            } catch (Exception ex) {
-                log.error("Exception : ", ex);
-            }
-            count--;
-        }
-//	        System.out.println(result);
+        log.info("response2 status=" + response2.statusCode());
+        log.info("response2=" + response2.body());
 
-        return result;
+        return response2.body();
 
-//        URL url;
-//        String response = "";
-//        try {
-//            url = new URL(postUrl);
-//
-//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-//            conn.setReadTimeout(15000);
-//            conn.setConnectTimeout(15000);
-//            conn.setRequestMethod("POST");
-//            conn.setDoInput(true);
-//            conn.setDoOutput(true);
-//            
-//    		conn.addRequestProperty("Content-Type", "application/json; charset=UTF-8");
-//    		
-//    		if (authToken != null) {
-//    			conn.addRequestProperty("Authorization", "Bearer " + authToken); // Authorization": `Bearer
-//    		}
-//
-//			StringEntity postEntity = new StringEntity(entityString, "UTF-8");
-////			getPostDataString(postDataParams)
-//    		
-//            OutputStream os = conn.getOutputStream();
-//            BufferedWriter writer = new BufferedWriter(
-//                    new OutputStreamWriter(os, "UTF-8"));
-//            //getPostDataString(postDataParams)
-//            writer.write(postEntity.toString());
-//
-//            writer.flush();
-//            writer.close();
-//            os.close();
-//            int responseCode=conn.getResponseCode();
-//
-//            if (responseCode == HttpsURLConnection.HTTP_OK) {
-//                String line;
-//                BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                while ((line=br.readLine()) != null) {
-//                    response+=line;
-//                }
-//            }
-//            else {
-//                response="";
-//
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        return response;
+        // Integer httpTimeout = GennySettings.apiPostTimeOut; // 7 secnds
+
+        // if (StringUtils.isBlank(postUrl)) {
+        // log.error("Blank url in apiPostEntity");
+        // }
+
+        // BodyPublisher requestBody = BodyPublishers.ofString(entityString);
+        // log.info("contentType="+contentType);
+        // HttpRequest.Builder requestBuilder =
+        // HttpRequest.newBuilder().POST(requestBody).uri(URI.create(postUrl))
+        // .setHeader("Content-Type", contentType)
+        // .setHeader("Authorization", "Bearer " + authToken);
+
+        // if (postUrl.contains("genny.life")) { // Hack for local server not having
+        // http2
+        // requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
+        // }
+
+        // log.info("postUrl="+postUrl+"-->"+requestBody);
+        // if (authToken != null) {
+        // log.info("postUrl :authToken="+authToken.substring(0, 10));
+        // // debug token issue
+        // if(postUrl.contains("localhost:8080/qwanda/answers")) {
+        // log.info("DEBUG, authToken="+authToken);
+        // }
+        // }
+        // HttpRequest request = requestBuilder.build();
+
+        // String result = null;
+        // Boolean done = false;
+        // int count = GennySettings.apiPostRetryTimes;
+        // log.info("PostUrl Loop count max ="+count);
+        // while ((!done) && (count > 0)) {
+        // CompletableFuture<java.net.http.HttpResponse<String>> response =
+        // httpClient.sendAsync(request,
+        // java.net.http.HttpResponse.BodyHandlers.ofString());
+        // log.info("PostUrl Loop Post "+count);
+        // try {
+        // result =
+        // response.thenApply(java.net.http.HttpResponse::body).get(httpTimeout,
+        // TimeUnit.SECONDS);
+        // done = true;
+
+        // log.info("postUrl result is "+result);
+        // } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        // // TODO Auto-generated catch block
+        // log.error("Count:" + count + " , TimeOut value:" + httpTimeout + ", Exception
+        // occurred when post to URL: " + postUrl + ",Body is entityString:" +
+        // entityString + ", Exception details:" + e.getCause());
+        // // try renewing the httpclient
+        // httpClient =
+        // HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
+        // .connectTimeout(Duration.ofSeconds(httpTimeout)).build();
+        // if (count <= 0) {
+        // done = true;
+        // }
+        // } catch (Exception ex) {
+        // log.error("Exception : ", ex);
+        // }
+        // count--;
+        // }
+        // // System.out.println(result);
+
+        // return result;
+
+        // URL url;
+        // String response = "";
+        // try {
+        // url = new URL(postUrl);
+        //
+        // HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        // conn.setReadTimeout(15000);
+        // conn.setConnectTimeout(15000);
+        // conn.setRequestMethod("POST");
+        // conn.setDoInput(true);
+        // conn.setDoOutput(true);
+        //
+        // conn.addRequestProperty("Content-Type", "application/json; charset=UTF-8");
+        //
+        // if (authToken != null) {
+        // conn.addRequestProperty("Authorization", "Bearer " + authToken); //
+        // Authorization": `Bearer
+        // }
+        //
+        // StringEntity postEntity = new StringEntity(entityString, "UTF-8");
+        //// getPostDataString(postDataParams)
+        //
+        // OutputStream os = conn.getOutputStream();
+        // BufferedWriter writer = new BufferedWriter(
+        // new OutputStreamWriter(os, "UTF-8"));
+        // //getPostDataString(postDataParams)
+        // writer.write(postEntity.toString());
+        //
+        // writer.flush();
+        // writer.close();
+        // os.close();
+        // int responseCode=conn.getResponseCode();
+        //
+        // if (responseCode == HttpsURLConnection.HTTP_OK) {
+        // String line;
+        // BufferedReader br=new BufferedReader(new
+        // InputStreamReader(conn.getInputStream()));
+        // while ((line=br.readLine()) != null) {
+        // response+=line;
+        // }
+        // }
+        // else {
+        // response="";
+        //
+        // }
+        // } catch (Exception e) {
+        // e.printStackTrace();
+        // }
+        //
+        // return response;
 
     }
 
     public static String apiPutEntity2(final String putUrl, final String entityString, final String authToken,
-                                       final Consumer<String> callback) throws IOException {
+            final Consumer<String> callback) throws IOException {
 
-        Integer httpTimeout = 7;  // 7 secnds
+        Integer httpTimeout = 7; // 7 secnds
 
         if (StringUtils.isBlank(putUrl)) {
             log.error("Blank url in apiPutEntity");
@@ -1959,14 +2029,13 @@ public class QwandaUtils {
                 .setHeader("Content-Type", "application/json")
                 .setHeader("Authorization", "Bearer " + authToken);
 
-
         if (putUrl.contains("genny.life")) { // Hack for local server not having http2
             requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
         }
 
         HttpRequest request = requestBuilder.build();
 
-        String result = null;
+
         Boolean done = false;
         int count = 5;
         while ((!done) && (count > 0)) {
@@ -1978,7 +2047,8 @@ public class QwandaUtils {
                 done = true;
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 // TODO Auto-generated catch block
-                log.error("Count:" + count + ", Exception occurred when post to URL: " + putUrl + ",Body is entityString:" + entityString + ", Exception details:" + e.getCause());
+                log.error("Count:" + count + ", Exception occurred when post to URL: " + putUrl
+                        + ",Body is entityString:" + entityString + ", Exception details:" + e.getCause());
                 // try renewing the httpclient
                 httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
                         .connectTimeout(Duration.ofSeconds(httpTimeout)).build();
@@ -1989,8 +2059,210 @@ public class QwandaUtils {
             count--;
         }
         return result;
+    }
 
+    /**
+     * Use this to get file from a url
+     * 
+     * @param url
+     * @return
+     */
+    public static byte[] getForByteArray(final String url) {
 
+        Integer httpTimeout = GennySettings.apiPostTimeOut;
+
+        HttpRequest.Builder requestBuilder = HttpRequest
+                .newBuilder()
+                .version(httpClient.version())
+                .uri(URI.create(url))
+                .GET();
+
+        HttpRequest request = requestBuilder.build();
+
+        byte[] result = null;
+        Boolean done = false;
+        int count = 5;
+        while ((!done) && (count > 0)) {
+
+            CompletableFuture<java.net.http.HttpResponse<byte[]>> response = httpClient.sendAsync(
+                    request,
+                    java.net.http.HttpResponse.BodyHandlers.ofByteArray());
+            try {
+                result = response.thenApply(java.net.http.HttpResponse::body).get(httpTimeout, TimeUnit.SECONDS);
+                done = true;
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                log.error("Count:" + count + ", Exception occurred when post to URL: " + ", Exception details:"
+                        + e.getCause());
+                // try renewing the httpclient
+                httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
+                        .connectTimeout(Duration.ofSeconds(httpTimeout)).build();
+                if (count <= 0) {
+                    done = true;
+                }
+            }
+            count--;
+        }
+        if (result.equals("<html><head><title>Error</title></head><body>Not Found</body></html>")) {
+            log.error("Can't find result for request:" + url + ", set returned result to NULL");
+            result = null;
+        }
+        return result;
+    }
+
+    public static String postFile(final String postUrl, final String authToken, String fileName,
+            Map<Object, Object> data) throws IOException {
+        return postFile(postUrl, authToken, new FileUploadRequest(fileName, "application/octet-stream", data));
+    }
+
+    public static String postFile(final String postUrl, final String authToken, FileUploadRequest fileUploadRequest)
+            throws IOException {
+        String boundary = UUID.randomUUID().toString();
+
+        Integer httpTimeout = GennySettings.apiPostTimeOut;
+
+        if (StringUtils.isBlank(postUrl)) {
+            log.info("Blank url in apiPostEntity");
+        }
+
+        HttpRequest.BodyPublisher bodyPublisher = ofMimeMultipartData(
+                fileUploadRequest.getData(),
+                boundary,
+                fileUploadRequest.getName(),
+                fileUploadRequest.getType());
+        String contentType = "multipart/form-data;boundary=" + boundary;
+        String authorization = "Bearer " + authToken;
+        log.info("contentType: {}", contentType);
+        HttpRequest.Builder requestBuilder = Optional.ofNullable(authToken)
+                .map(token -> HttpRequest.newBuilder()
+                        .POST(bodyPublisher)
+                        .uri(URI.create(postUrl))
+                        .setHeader("Content-Type", contentType)
+                        .setHeader("Authorization", authorization))
+                .orElse(
+                        HttpRequest.newBuilder()
+                                .POST(bodyPublisher)
+                                .uri(URI.create(postUrl)));
+
+        if (postUrl.contains("genny.life")) { // Hack for local server not having http2
+            requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
+        }
+
+        HttpRequest request = requestBuilder.build();
+        String result = null;
+        Boolean done = false;
+        int count = 5;
+        while ((!done) && (count > 0)) {
+            CompletableFuture<java.net.http.HttpResponse<String>> response = httpClient.sendAsync(request,
+                    java.net.http.HttpResponse.BodyHandlers.ofString());
+            try {
+                result = response.thenApply(java.net.http.HttpResponse::body).get(httpTimeout, TimeUnit.SECONDS);
+                done = true;
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                log.error("Count:" + count + " , TimeOut value:" + httpTimeout
+                        + ", Exception occurred when post to URL: " + postUrl + ", Exception details:" + e.getCause());
+                // try renewing the httpclient
+                httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
+                        .connectTimeout(Duration.ofSeconds(httpTimeout)).build();
+                if (count <= 0) {
+                    done = true;
+                }
+            } catch (Exception ex) {
+                log.error("Exception : " + ex);
+            }
+            count--;
+        }
+        log.info("result: String: {}", result);
+        return result;
+    }
+
+    public static HttpRequest.BodyPublisher ofMimeMultipartData(Map<Object, Object> data,
+            String boundary, String fileName, String contentType) throws IOException {
+        // Result request body
+        List<byte[]> byteArrays = new ArrayList<>();
+
+        // Separator with boundary
+        byte[] separator = ("--" + boundary + "\r\nContent-Disposition: form-data; name=")
+                .getBytes(StandardCharsets.UTF_8);
+
+        // Iterating over data parts
+        for (Map.Entry<Object, Object> entry : data.entrySet()) {
+
+            // Opening boundary
+            byteArrays.add(separator);
+
+            // If value is type of Path (file) append content type with file name and file
+            // binaries, otherwise simply append key=value
+            byteArrays.add(("\"" + entry.getKey() + "\"; filename=\"" + fileName
+                    + "\"\r\nContent-Type: " + contentType + "\r\n\r\n").getBytes(StandardCharsets.UTF_8));
+
+            byteArrays.add("\r\n".getBytes(StandardCharsets.UTF_8));
+
+        }
+
+        // Closing boundary
+        byteArrays.add(("--" + boundary + "--").getBytes(StandardCharsets.UTF_8));
+
+        // Serializing as byte array
+        return HttpRequest.BodyPublishers.ofByteArrays(byteArrays);
+    }
+
+    public static String getKogitoApplicationProcessId(final String internCode, final String sourceCode,
+            final String authToken) {
+        log.info("New kogito processId workaround");
+        String kogitoUrl = System.getenv("GENNY_KOGITO_SERVICE_URL");
+        if (kogitoUrl == null) {
+            kogitoUrl = "http://alyson2.genny.life:8580";
+        }
+        kogitoUrl += "/workflows/legacy/processids/" + sourceCode + "/" + internCode;
+        log.info("the GET kogitoUrl is " + kogitoUrl);
+        String processId = null;
+        try {
+            // FORCE!!!!!! TEST!
+            // kogitoUrl =
+            // "http://kogitoq-travels:8080/workflows/legacy/processids/PER_086CDF1F-A98F-4E73-9825-0A4CFE2BB943/PER_80ECFDAE-2310-4682-A098-7DA61DC48FED";
+            processId = sendGET(kogitoUrl, "application/json", null);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        log.info("The processId returned to getKogitoApplicationProcessId is " + processId);
+        return processId;
+
+    }
+
+    /**
+     * Create and send a POST request.
+     *
+     * @param uri         The target URI of the request.
+     * @param body        The json string to use as the body.
+     * @param contentType The contentType to use in the header. Default:
+     *                    "application/json"
+     * @param token       The token to use in authorization.
+     * @return The returned response object.
+     *         import java.net.http.HttpClient;
+     *         import java.net.http.HttpRequest;
+     *         import java.net.http.HttpResponse;
+     */
+    public static java.net.http.HttpResponse<String> post(String uri, String body, String contentType, String token) {
+
+        HttpClient client = java.net.http.HttpClient.newHttpClient();
+
+        HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                .uri(URI.create(uri))
+                .setHeader("Content-Type", contentType)
+                .setHeader("Authorization", "Bearer " + token)
+                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(body))
+                .build();
+
+        try {
+            java.net.http.HttpResponse<String> response = client.send(request,
+                    java.net.http.HttpResponse.BodyHandlers.ofString());
+            return response;
+        } catch (IOException | InterruptedException e) {
+            log.error(e);
+        }
+
+        return null;
     }
 
 }
