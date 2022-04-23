@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import java.io.*;
 import java.lang.invoke.MethodHandles;
 import java.net.*;
+import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
@@ -2016,7 +2017,7 @@ public class QwandaUtils {
 
     public static String apiPutEntity2(final String putUrl, final String entityString, final String authToken,
             final Consumer<String> callback) throws IOException {
-
+        String result = null;
         Integer httpTimeout = 7; // 7 secnds
 
         if (StringUtils.isBlank(putUrl)) {
