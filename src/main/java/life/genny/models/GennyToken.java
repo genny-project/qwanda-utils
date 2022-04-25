@@ -23,6 +23,8 @@ import javax.xml.bind.annotation.XmlTransient;
 import life.genny.qwandautils.KeycloakUtils;
 import life.genny.qwandautils.QwandaUtils;
 import life.genny.qwandautils.SecurityUtils;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 
 public class GennyToken implements Serializable {
@@ -40,6 +42,7 @@ public class GennyToken implements Serializable {
   String username;
   Map<String, Object> adecodedTokenMap = null;
   String realm = null;
+  String projectCode = null;
   Set<String> userRoles = new HashSet<String>();
 
   public GennyToken(final String token) {
@@ -311,6 +314,9 @@ public class GennyToken implements Serializable {
   }
 
   public String getRealm() {
+	  if (!StringUtils.isBlank(projectCode)) {
+		  return projectCode;
+	  }
 		String clientId = adecodedTokenMap.get("azp").toString();
 
 		if ((clientId.equals("internmatch"))||(clientId.equals("alyson"))) {
@@ -337,7 +343,17 @@ public class GennyToken implements Serializable {
 	    return getString("jti");
 	  }
 
-  public String getUsername() {
+  
+  
+  public String getProjectCode() {
+	return projectCode;
+}
+
+public void setProjectCode(String projectCode) {
+	this.projectCode = projectCode;
+}
+
+public String getUsername() {
     return this.username;
     // return getString("preferred_username");
   }

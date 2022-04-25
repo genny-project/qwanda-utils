@@ -1006,26 +1006,39 @@ public class VertxUtils {
     }
 
     public static Set<String> fetchRealmsFromApi() {
-        List<String> activeRealms = new ArrayList<String>();
-        JsonObject ar = VertxUtils.readCachedJson(GennySettings.GENNY_REALM, "REALMS");
-        String ars = ar.getString("value");
-
-        if (ars == null) {
-            try {
-                ars = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/utils/realms", "NOTREQUIRED");
-            } catch (ClientProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//        List<String> activeRealms = new ArrayList<String>();
+//        JsonObject ar = VertxUtils.readCachedJson(GennySettings.GENNY_REALM, "REALMS");
+//        String ars = ar.getString("value");
+//
+//        if (ars == null) {
+//            try {
+//                ars = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/utils/realms", "NOTREQUIRED");
+//            } catch (ClientProtocolException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        Type listType = new TypeToken<List<String>>() {
+//        }.getType();
+//        ars = ars.replaceAll("\\\"", "\"");
+//        activeRealms = JsonUtils.fromJson(ars, listType);
+        Set<String> activeRealms = new HashSet<>();
+        String projectRealm = System.getenv("PROJECT_REALM");
+        if (!StringUtils.isBlank(projectRealm)) {
+        	activeRealms.add(projectRealm);
         }
-
-        Type listType = new TypeToken<List<String>>() {
-        }.getType();
-        ars = ars.replaceAll("\\\"", "\"");
-        activeRealms = JsonUtils.fromJson(ars, listType);
-        Set<String> realms = new HashSet<>(activeRealms);
-        return realms;
+        String projectRealms = System.getenv("PROJECT_REALMS");
+        if (!StringUtils.isBlank(projectRealms)) {
+        	String[] projectCodes = projectRealms.split(":");
+        	for (String projectCode : projectCodes) {
+        		log.info("Adding "+projectCode+" to realms");
+        		activeRealms.add(projectCode);
+        	}
+        }
+        log.info("Realms found = "+activeRealms);
+        return activeRealms;
     }
 
     static public String fixJson(String resultStr)
@@ -1081,7 +1094,7 @@ public class VertxUtils {
         BaseEntity sendBe = new BaseEntity(be.getCode(),be.getName());
         sendBe.setRealm(userToken.getRealm());
         try {
-            Attribute att = RulesUtils.getAttribute(answer.getAttributeCode(), userToken.getToken());
+            Attribute att = RulesUtils.getAttribute(answer.getAttributeCode(), userToken);
             sendBe.addAttribute(att);
             sendBe.setValue(att, answer.getValue());
             Optional<EntityAttribute> ea =sendBe.findEntityAttribute(answer.getAttributeCode());
@@ -1112,7 +1125,7 @@ public class VertxUtils {
                 for (Answer answer : answers) {
 
                     try {
-                        Attribute att = RulesUtils.getAttribute(answer.getAttributeCode(), userToken.getToken());
+                        Attribute att = RulesUtils.getAttribute(answer.getAttributeCode(), userToken);
                         newBe.addAttribute(att);
                         newBe.setValue(att, answer.getValue());
                     } catch (BadDataException e) {

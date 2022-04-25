@@ -215,7 +215,7 @@ public class BaseEntityUtils implements Serializable {
 				if (ea.getAttributeCode().startsWith("ATT_")) {
 
 					String attrCode = ea.getAttributeCode().substring("ATT_".length());
-					Attribute attribute = RulesUtils.getAttribute(attrCode, this.getGennyToken().getToken());
+					Attribute attribute = RulesUtils.getAttribute(attrCode, this.getGennyToken());
 
 					if (attribute != null) {
 
@@ -257,7 +257,7 @@ public class BaseEntityUtils implements Serializable {
 		item = this.saveBaseEntity(defBE, item);
 		// Force the type of baseentity
 		Attribute attributeDEF = RulesUtils.getAttribute("PRI_IS_" + defBE.getCode().substring("DEF_".length()),
-				this.getServiceToken().getToken());
+				this.getServiceToken());
 		item = saveAnswer(defBE, new Answer(item, item, attributeDEF, "TRUE")); // force the be type
 
 		return item;
@@ -293,22 +293,22 @@ public class BaseEntityUtils implements Serializable {
 						// Check to see if the email exists
 						// TODO: check to see if the email exists in the database and keycloak
 						Attribute emailAttribute = RulesUtils.getAttribute("PRI_EMAIL",
-								this.getServiceToken().getToken());
+								this.getServiceToken());
 						item.addAnswer(new Answer(item, item, emailAttribute, email));
 						Attribute usernameAttribute = RulesUtils.getAttribute("PRI_USERNAME",
-								this.getServiceToken().getToken());
+								this.getServiceToken());
 						item.addAnswer(new Answer(item, item, usernameAttribute, email));
 					}
 
 					// Add PRI_UUID
-					Attribute uuidAttribute = RulesUtils.getAttribute("PRI_UUID", this.getServiceToken().getToken());
+					Attribute uuidAttribute = RulesUtils.getAttribute("PRI_UUID", this.getServiceToken());
 					if (uuidAttribute == null) {
 						log.error("UUID ATTRIBUTE is NULL " + this.getServiceToken().getToken());
 					}
 					item.addAnswer(new Answer(item, item, uuidAttribute, uuid.toUpperCase()));
 					// Keycloak UUID
 					Attribute keycloakAttribute = RulesUtils.getAttribute("PRI_KEYCLOAK_UUID",
-							this.getServiceToken().getToken());
+							this.getServiceToken());
 					if (keycloakAttribute == null) {
 						log.error("KEYCLOAK UUID ATTRIBUTE is NULL " + this.getServiceToken().getToken());
 					}
@@ -316,7 +316,7 @@ public class BaseEntityUtils implements Serializable {
 					item.addAnswer(new Answer(item, item, keycloakAttribute, uuid.toUpperCase()));
 					// Author of the BE
 					// NOTE: Maybe should be moved to run for all BEs
-					Attribute lnkAuthorAttr = RulesUtils.getAttribute("LNK_AUTHOR", this.getServiceToken().getToken());
+					Attribute lnkAuthorAttr = RulesUtils.getAttribute("LNK_AUTHOR", this.getServiceToken());
 					item.addAnswer(
 							new Answer(item, item, lnkAuthorAttr, "[\"" + getGennyToken().getUserCode() + "\"]"));
 				} else {
@@ -575,7 +575,7 @@ public class BaseEntityUtils implements Serializable {
 
 		T be2 = this.updateCachedBaseEntity(answer, clazz);
 		try {
-			Attribute attr = RulesUtils.getAttribute(answer.getAttributeCode(), this.getServiceToken().getToken());
+			Attribute attr = RulesUtils.getAttribute(answer.getAttributeCode(), this.getServiceToken());
 			if (attr == null) {
 				log.error("UPDATE BASEENTITY -> Attribute is NULL");
 			}
@@ -2016,7 +2016,7 @@ public class BaseEntityUtils implements Serializable {
 							attribute = new AttributeText(answer.getAttributeCode(), answer.getValue());
 						} else {
 							attribute = RulesUtils.getAttribute(answer.getAttributeCode(),
-									this.getServiceToken().getToken());
+									this.getServiceToken());
 						}
 
 						if (attribute != null) {
@@ -2220,7 +2220,7 @@ public class BaseEntityUtils implements Serializable {
 			return null;
 		}
 
-		String serviceToken = RulesUtils.generateServiceToken(realm, token);
+		GennyToken serviceToken = RulesUtils.generateServiceToken(realm, token);
 		if (serviceToken != null) {
 
 			BaseEntity beLayout = null;
@@ -2238,7 +2238,7 @@ public class BaseEntityUtils implements Serializable {
 			log.info("Layout - Handling " + layoutCode);
 			// try {
 			// Check if in cache first to save time.
-			beLayout = VertxUtils.readFromDDT(realm, layoutCode, serviceToken);
+			beLayout = VertxUtils.readFromDDT(realm, layoutCode, serviceToken.getToken());
 			// if (beLayout==null) {
 			// beLayout = QwandaUtils.getBaseEntityByCode(layoutCode, serviceToken);
 			// if (beLayout != null) {
@@ -2608,6 +2608,7 @@ public class BaseEntityUtils implements Serializable {
 				resultJson = new JsonObject(resultJsonStr);
 				io.vertx.core.json.JsonArray result = resultJson.getJsonArray("codes");
 				int size = result.size();
+				log.info("Number of codes found = "+size);
 				for (int i = 0; i < size; i++) {
 					String code = result.getString(i);
 					System.out.print("[!] code:" + code + ",index:" + (i+1) + "/" + size);
@@ -2678,7 +2679,7 @@ public class BaseEntityUtils implements Serializable {
 
 				else {
 					sortCode = (attributeCode.substring("SRT_".length()));
-					Attribute attr = RulesUtils.getAttribute(sortCode, this.getServiceToken().getToken());
+					Attribute attr = RulesUtils.getAttribute(sortCode, this.getServiceToken());
 					String dtt = attr.getDataType().getClassName();
 					Object sortValue = ea.getValue();
 					if (dtt.equals("Text")) {
