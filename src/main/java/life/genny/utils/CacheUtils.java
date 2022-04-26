@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
+import life.genny.models.GennyToken;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.entity.EntityEntity;
 import life.genny.qwanda.entity.SearchEntity;
@@ -78,7 +79,7 @@ public class CacheUtils implements Serializable {
         //this.isReloadingCache = true; // THIS HAS BEEN VOLUNTARELY COMMENTED OUT. DO NOT PUT BACK
 
         /* we generate a service token */
-        String serviceToken = RulesUtils.generateServiceToken(realm,token);
+        GennyToken serviceToken = RulesUtils.generateServiceToken(realm,token);
 
         log.info("Generating message for cached item: " + cachedItemKey);
 
@@ -240,10 +241,10 @@ public class CacheUtils implements Serializable {
         }
 
         /* we re-generate the target */
-        String token = RulesUtils.generateServiceToken(this.realm,this.token);
+        GennyToken token = RulesUtils.generateServiceToken(this.realm,this.token);
         try {
 
-            BaseEntity targetEntity = QwandaUtils.getBaseEntityByCode(targetCode, token);
+            BaseEntity targetEntity = QwandaUtils.getBaseEntityByCode(targetCode, token.getToken());
             if(targetEntity != null) {
 
                 String json = JsonUtils.toJson(targetEntity);
@@ -462,7 +463,7 @@ public class CacheUtils implements Serializable {
     public QBulkMessage fetchAndSubscribeCachedItemsForStakeholder(String realm, String cachedItemKey, BaseEntity stakeholder, Map<String, List<String>> subscriptions, Map<String, List<String>> allowedBuckets) {
 
         QBulkMessage bulk = new QBulkMessage();
-        String token = RulesUtils.generateServiceToken(realm,this.token);
+         GennyToken token = RulesUtils.generateServiceToken(realm,this.token);
 
         QDataBaseEntityMessage cachedItemMessages = VertxUtils.getObject(realm, cachedItemKey, realm, QDataBaseEntityMessage.class,this.token);
 
@@ -480,7 +481,7 @@ public class CacheUtils implements Serializable {
                     List<QDataBaseEntityMessage> messages = new ArrayList<>();
                     messages.addAll(Arrays.asList(currentItemMessages.getMessages()));
 
-                    BaseEntity parentMessage = VertxUtils.readFromDDT(realm,message.getCode(), true, token);
+                    BaseEntity parentMessage = VertxUtils.readFromDDT(realm,message.getCode(), true, token.getToken());
                     QDataBaseEntityMessage currentMessageParent = new QDataBaseEntityMessage(parentMessage);
                     messages.add(currentMessageParent);
 
@@ -617,7 +618,7 @@ public class CacheUtils implements Serializable {
         QBulkMessage ret = new QBulkMessage();
         HashMap<String, List<BaseEntity>> baseEntityMap = new HashMap<String, List<BaseEntity>>();
         HashMap<String, Boolean> excludedBes = new HashMap<String, Boolean>();
-        String token = RulesUtils.generateServiceToken(this.realm,this.token);
+        GennyToken token = RulesUtils.generateServiceToken(this.realm,this.token);
 
         /* we loop through every single messages in the bulk message */
         for (QDataBaseEntityMessage message : newItems.getMessages()) {
@@ -634,7 +635,7 @@ public class CacheUtils implements Serializable {
                     for (int i = 0; i < message.getItems().length; i++) {
 
                         BaseEntity item = message.getItems()[i];
-                        BaseEntity be = VertxUtils.readFromDDT(this.realm,item.getCode(), true, token);
+                        BaseEntity be = VertxUtils.readFromDDT(this.realm,item.getCode(), true, token.getToken());
                         String itemCode = be.getCode();
 
                         /* if the BE is a user */
@@ -707,7 +708,7 @@ public class CacheUtils implements Serializable {
 
                             if(begCode != null) {
 
-                                BaseEntity beg = VertxUtils.readFromDDT(this.realm,begCode, true, token);
+                                BaseEntity beg = VertxUtils.readFromDDT(this.realm,begCode, true, token.getToken());
 
                                 if(beg != null) {
 
