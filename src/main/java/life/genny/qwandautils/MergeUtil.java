@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.Logger;
 import org.javamoney.moneta.Money;
 
+import life.genny.models.GennyToken;
 import life.genny.qwanda.Link;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.entity.BaseEntity;
@@ -264,7 +265,7 @@ public class MergeUtil {
 	 * @param token
 	 * @return Deserialized BaseEntity model object with values for a BaseEntity code that is passed
 	 */
-	public static BaseEntity getBaseEntityForAttr(String baseEntAttributeCode, String token) {
+	public static BaseEntity getBaseEntityForAttr(String baseEntAttributeCode, GennyToken token) {
 		
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");
 		String attributeString = null;
@@ -308,7 +309,7 @@ public class MergeUtil {
 	 * @param token
 	 * @return attribute value
 	 */
-	public static String getAttrValue(String baseEntityCode, String attributeCode, String token) {
+	public static String getAttrValue(String baseEntityCode, String attributeCode, GennyToken token) {
 		
 		String attrValue = null;
 		
@@ -321,7 +322,7 @@ public class MergeUtil {
 		return attrValue;
 	}
 	
-	public static String getFullName(String baseEntityCode, String token) {
+	public static String getFullName(String baseEntityCode, GennyToken token) {
 		
 		String fullName = null;
 
@@ -336,7 +337,7 @@ public class MergeUtil {
 		return fullName;
 	}
 
-	public static boolean createBaseEntity(String sourceCode, String linkCode, String targetCode, String name, Long id, String token) {
+	public static boolean createBaseEntity(String sourceCode, String linkCode, String targetCode, String name, Long id, GennyToken token) {
 		
 		BaseEntity be = new BaseEntity(targetCode, name);
 		String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL");

@@ -29,12 +29,12 @@ public class CacheUtils implements Serializable {
 
 
     private String realm;
-    private String token;
+    private GennyToken token;
 
     private BaseEntityUtils baseEntityUtils;
     private Boolean isReloadingCache = false;
 
-    public CacheUtils(String qwandaServiceUrl, String token, Map<String, Object> decodedMapToken, String realm) {
+    public CacheUtils(String qwandaServiceUrl, GennyToken token, Map<String, Object> decodedMapToken, String realm) {
         this.realm = realm;
         this.token = token;
     }
@@ -84,7 +84,7 @@ public class CacheUtils implements Serializable {
         log.info("Generating message for cached item: " + cachedItemKey);
 
         /* we grab the cached Item */
-        QDataBaseEntityMessage cachedItemMessages = VertxUtils.getObject(realm, cachedItemKey, realm, QDataBaseEntityMessage.class,token);
+        QDataBaseEntityMessage cachedItemMessages = VertxUtils.getObject(realm, cachedItemKey, realm, QDataBaseEntityMessage.class, token);
 
         if (cachedItemMessages != null) {
 
@@ -115,7 +115,7 @@ public class CacheUtils implements Serializable {
         this.isReloadingCache = false;
     }
 
-    private void generateCachedItem(String cachedItemKey, BaseEntity cachedItem, String token) {
+    private void generateCachedItem(String cachedItemKey, BaseEntity cachedItem, GennyToken token) {
 
         List<QDataBaseEntityMessage> bulkmsg = new ArrayList<QDataBaseEntityMessage>();
 
@@ -244,11 +244,11 @@ public class CacheUtils implements Serializable {
         GennyToken token = RulesUtils.generateServiceToken(this.realm,this.token);
         try {
 
-            BaseEntity targetEntity = QwandaUtils.getBaseEntityByCode(targetCode, token.getToken());
+            BaseEntity targetEntity = QwandaUtils.getBaseEntityByCode(targetCode, token);
             if(targetEntity != null) {
 
                 String json = JsonUtils.toJson(targetEntity);
-                VertxUtils.writeCachedJson(this.realm,targetCode, json,this.baseEntityUtils.getServiceToken().getToken());
+                VertxUtils.writeCachedJson(this.realm,targetCode, json,this.baseEntityUtils.getServiceToken());
             }
         }
         catch (IOException e) {
@@ -481,7 +481,7 @@ public class CacheUtils implements Serializable {
                     List<QDataBaseEntityMessage> messages = new ArrayList<>();
                     messages.addAll(Arrays.asList(currentItemMessages.getMessages()));
 
-                    BaseEntity parentMessage = VertxUtils.readFromDDT(realm,message.getCode(), true, token.getToken());
+                    BaseEntity parentMessage = VertxUtils.readFromDDT(realm,message.getCode(), true, token);
                     QDataBaseEntityMessage currentMessageParent = new QDataBaseEntityMessage(parentMessage);
                     messages.add(currentMessageParent);
 
@@ -635,7 +635,7 @@ public class CacheUtils implements Serializable {
                     for (int i = 0; i < message.getItems().length; i++) {
 
                         BaseEntity item = message.getItems()[i];
-                        BaseEntity be = VertxUtils.readFromDDT(this.realm,item.getCode(), true, token.getToken());
+                        BaseEntity be = VertxUtils.readFromDDT(this.realm,item.getCode(), true, token);
                         String itemCode = be.getCode();
 
                         /* if the BE is a user */
@@ -708,7 +708,7 @@ public class CacheUtils implements Serializable {
 
                             if(begCode != null) {
 
-                                BaseEntity beg = VertxUtils.readFromDDT(this.realm,begCode, true, token.getToken());
+                                BaseEntity beg = VertxUtils.readFromDDT(this.realm,begCode, true, token);
 
                                 if(beg != null) {
 
@@ -786,7 +786,7 @@ public class CacheUtils implements Serializable {
         return ret;
     }
 
-    public static BaseEntity getBaseEntity(String beCode, String token) {
+    public static BaseEntity getBaseEntity(String beCode, GennyToken token) {
 
         /* get realm from token */
         final String realm = KeycloakUtils.getRealmFromToken(token);
@@ -798,7 +798,7 @@ public class CacheUtils implements Serializable {
         return parent;
     }
 
-    public static List<BaseEntity> getBaseEntityWithChildren(String beCode, Integer level, String token) {
+    public static List<BaseEntity> getBaseEntityWithChildren(String beCode, Integer level, GennyToken token) {
 
         if (level == 0) {
             return null; // exit point;
@@ -820,7 +820,7 @@ public class CacheUtils implements Serializable {
         return result;
     }
 
-    public static List<BaseEntity> getChildren(String beCode, Integer level, String token) {
+    public static List<BaseEntity> getChildren(String beCode, Integer level, GennyToken token) {
 
         if (level == 0) {
             return null; // exit point;

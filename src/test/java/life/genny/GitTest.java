@@ -11,6 +11,7 @@ import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.junit.Test;
 
+import life.genny.models.GennyToken;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwandautils.GitUtils;
@@ -36,9 +37,11 @@ public void gitTest() throws MissingObjectException, IOException, InvalidRemoteE
 
 	  String url = "https://api-internmatch.outcome-hub.com/qwanda/baseentitys/";
 	  
-	  String token = KeycloakUtils.getAccessToken(System.getenv("TEST_KEYCLOAKURL"), System.getenv("TEST_REALM"), System.getenv("TEST_CLIENTID"), System.getenv("TEST_USER_SECRET"), System.getenv("TEST_USER"), System.getenv("TEST_USER_PASSWORD"));
+	  String tokenStr = KeycloakUtils.getAccessToken(System.getenv("TEST_KEYCLOAKURL"), System.getenv("TEST_REALM"), System.getenv("TEST_CLIENTID"), System.getenv("TEST_USER_SECRET"), System.getenv("TEST_USER"), System.getenv("TEST_USER_PASSWORD"));
 	  
-	  log.info("token="+token);
+	  GennyToken token = new GennyToken(tokenStr);
+
+	  log.info("token="+tokenStr);
 	  log.info("Layouts loaded = "+layouts.size());
 	  for (BaseEntity layout : layouts) {
 		 String layoutCode = layout.getCode();

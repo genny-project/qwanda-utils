@@ -308,9 +308,15 @@ public class GennyToken implements Serializable {
     return userRoles.contains(role);
   }
 
+  public String toString(Boolean decoded) {
+    if(decoded) {
+      return getRealm() + ": " + getCode() + ": " + getUserCode() + ": " + this.userRoles;
+    } else return getToken();
+  }
+
   @Override
   public String toString() {
-    return getRealm() + ": " + getCode() + ": " + getUserCode() + ": " + this.userRoles;
+    return toString(false);
   }
 
   public String getRealm() {

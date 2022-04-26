@@ -25,6 +25,7 @@ import com.google.gson.reflect.TypeToken;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import life.genny.models.GennyToken;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.Layout;
 import life.genny.qwanda.Link;
@@ -60,12 +61,12 @@ public class LayoutUtils implements Serializable {
             .getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
     private Map<String, Object> decodedMapToken;
-    private String token;
+    private GennyToken token;
     private String realm;
     private String qwandaServiceUrl;
     public BaseEntityUtils baseEntityUtils;
 
-    public LayoutUtils(String qwandaServiceUrl, String token, Map<String, Object> decodedMapToken, String realm) {
+    public LayoutUtils(String qwandaServiceUrl, GennyToken token, Map<String, Object> decodedMapToken, String realm) {
 
         this.decodedMapToken = decodedMapToken;
         this.qwandaServiceUrl = qwandaServiceUrl;
@@ -78,7 +79,7 @@ public class LayoutUtils implements Serializable {
     public List<BaseEntity> getAllLayouts() {
 
         String realmCode = this.realm;
-        String token = this.token;
+        GennyToken token = this.token;
 
         if (realmCode == null) {
             log.error("No realm code was provided. Not getting layouts. ");

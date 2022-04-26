@@ -190,15 +190,15 @@ public class RulesUtils {
         return null;
     }
 
-    public static JsonObject createDataAnswerObj(Answer answer, String token) {
+    public static JsonObject createDataAnswerObj(Answer answer, GennyToken token) {
 
         QDataAnswerMessage msg = new QDataAnswerMessage(answer);
-        msg.setToken(token);
+        msg.setToken(token.getToken());
 
         return toJsonObject(msg);
     }
 
-    public static GennyToken generateServiceToken(String realm, String token) {
+    public static GennyToken generateServiceToken(String realm, GennyToken token) {
 
         /* we get the service token currently stored in the cache */
         String serviceTokenStr = VertxUtils.getObject(realm, "CACHE", "SERVICE_TOKEN", String.class, token);
@@ -216,7 +216,7 @@ public class RulesUtils {
      * @return baseEntity user for the decodedToken passed
      */
     public static BaseEntity getUser(final String qwandaServiceUrl, Map<String, Object> decodedToken,
-                                     final String token) {
+                                     final GennyToken token) {
 
         // try {
         String beJson = null;
@@ -238,7 +238,7 @@ public class RulesUtils {
      * @return baseEntity user for the decodedToken passed
      */
     public static String getBaseEntityJsonByCode(final String qwandaServiceUrl, Map<String, Object> decodedToken,
-                                                 final String token, final String code) {
+                                                 final GennyToken token, final String code) {
         return getBaseEntityJsonByCode(qwandaServiceUrl, decodedToken, token, code, true);
     }
 
@@ -250,7 +250,7 @@ public class RulesUtils {
      * @return baseEntity user for the decodedToken passed
      */
     public static String getBaseEntityJsonByCode(final String qwandaServiceUrl, Map<String, Object> decodedToken,
-                                                 final String token, final String code, Boolean includeAttributes) {
+                                                 final GennyToken token, final String code, Boolean includeAttributes) {
 
         try {
             String beJson = null;
@@ -276,7 +276,7 @@ public class RulesUtils {
      * @return baseEntity user for the decodedToken passed
      */
     public static String getBaseEntityJsonByAttributeAndValue(final String qwandaServiceUrl,
-                                                              Map<String, Object> decodedToken, final String token, final String attributeCode, final String value) {
+                                                              Map<String, Object> decodedToken, final GennyToken token, final String attributeCode, final String value) {
 
         return getBaseEntityJsonByAttributeAndValue(qwandaServiceUrl, decodedToken, token, attributeCode, value, 1);
 
@@ -290,7 +290,7 @@ public class RulesUtils {
      * @return baseEntity user for the decodedToken passed
      */
     public static String getBaseEntityJsonByAttributeAndValue(final String qwandaServiceUrl,
-                                                              Map<String, Object> decodedToken, final String token, final String attributeCode, final String value,
+                                                              Map<String, Object> decodedToken, final GennyToken token, final String attributeCode, final String value,
                                                               final Integer pageSize) {
 
         try {
@@ -315,7 +315,7 @@ public class RulesUtils {
      * @return baseEntity user for the decodedToken passed
      */
     public static List<BaseEntity> getBaseEntitysByAttributeAndValue(final String qwandaServiceUrl,
-                                                                     Map<String, Object> decodedToken, final String token, final String attributeCode, final String value) {
+                                                                     Map<String, Object> decodedToken, final GennyToken token, final String attributeCode, final String value) {
 
         String beJson = getBaseEntityJsonByAttributeAndValue(qwandaServiceUrl, decodedToken, token, attributeCode,
                 value, 1000);
@@ -345,7 +345,7 @@ public class RulesUtils {
      * @return baseEntity user for the decodedToken passed
      */
     public static BaseEntity getBaseEntityByAttributeAndValue(final String qwandaServiceUrl,
-                                                              Map<String, Object> decodedToken, final String token, final String attributeCode, final String value) {
+                                                              Map<String, Object> decodedToken, final GennyToken token, final String attributeCode, final String value) {
 
         List<BaseEntity> items = getBaseEntitysByAttributeAndValue(qwandaServiceUrl, decodedToken, token, attributeCode,
                 value);
@@ -367,7 +367,7 @@ public class RulesUtils {
      * @return baseEntity user for the decodedToken passed
      */
     public static BaseEntity getBaseEntityByCode(final String qwandaServiceUrl, Map<String, Object> decodedToken,
-                                                 final String token, final String code) {
+                                                 final GennyToken token, final String code) {
 
         // String beJson = getBaseEntityJsonByCode(qwandaServiceUrl, decodedToken,
         // token, code, true);
@@ -388,7 +388,7 @@ public class RulesUtils {
      * @return baseEntity user for the decodedToken passed
      */
     public static BaseEntity getBaseEntityByCode(final String qwandaServiceUrl, Map<String, Object> decodedToken,
-                                                 final String token, final String code, Boolean includeAttributes) {
+                                                 final GennyToken token, final String code, Boolean includeAttributes) {
 
         return getBaseEntityByCode(qwandaServiceUrl, decodedToken, token, code);
     }
@@ -416,7 +416,7 @@ public class RulesUtils {
     }
 
     public static String getBaseEntitysJsonByParentAndLinkCode(final String qwandaServiceUrl,
-                                                               Map<String, Object> decodedToken, final String token, final String parentCode, final String linkCode) {
+                                                               Map<String, Object> decodedToken, final GennyToken token, final String parentCode, final String linkCode) {
 
         try {
             String beJson = null;
@@ -433,7 +433,7 @@ public class RulesUtils {
     }
 
     public static String getBaseEntitysJsonByParentAndLinkCode(final String qwandaServiceUrl,
-                                                               Map<String, Object> decodedToken, final String token, final String parentCode, final String linkCode,
+                                                               Map<String, Object> decodedToken, final GennyToken token, final String parentCode, final String linkCode,
                                                                final Integer pageStart, final Integer pageSize) {
 
         try {
@@ -451,7 +451,7 @@ public class RulesUtils {
 
     /* added because of the bug */
     public static String getBaseEntitysJsonByParentAndLinkCode2(final String qwandaServiceUrl,
-                                                                Map<String, Object> decodedToken, final String token, final String parentCode, final String linkCode,
+                                                                Map<String, Object> decodedToken, final GennyToken token, final String parentCode, final String linkCode,
                                                                 final Integer pageStart, final Integer pageSize) {
 
         try {
@@ -468,7 +468,7 @@ public class RulesUtils {
     }
 
     public static String getBaseEntitysJsonByParentAndLinkCodeAndLinkValue(final String qwandaServiceUrl,
-                                                                           Map<String, Object> decodedToken, final String token, final String parentCode, final String linkCode,
+                                                                           Map<String, Object> decodedToken, final GennyToken token, final String parentCode, final String linkCode,
                                                                            final String linkValue, final Integer pageStart, final Integer pageSize) {
 
         try {
@@ -487,7 +487,7 @@ public class RulesUtils {
     }
 
     public static String getBaseEntitysJsonByParentAndLinkCodeWithAttributes(final String qwandaServiceUrl,
-                                                                             Map<String, Object> decodedToken, final String token, final String parentCode, final String linkCode) {
+                                                                             Map<String, Object> decodedToken, final GennyToken token, final String parentCode, final String linkCode) {
 
         try {
             String beJson = null;
@@ -504,7 +504,7 @@ public class RulesUtils {
     }
 
     public static String getBaseEntitysJsonByChildAndLinkCodeWithAttributes(final String qwandaServiceUrl,
-                                                                            Map<String, Object> decodedToken, final String token, final String childCode, final String linkCode) {
+                                                                            Map<String, Object> decodedToken, final GennyToken token, final String childCode, final String linkCode) {
 
         try {
             String beJson = null;
@@ -520,7 +520,7 @@ public class RulesUtils {
     }
 
     public static String getBaseEntitysJsonByParentAndLinkCodeWithAttributesAndStakeholderCode(
-            final String qwandaServiceUrl, Map<String, Object> decodedToken, final String token,
+            final String qwandaServiceUrl, Map<String, Object> decodedToken, final GennyToken token,
             final String parentCode, final String linkCode, final String stakeholderCode) {
 
         try {
@@ -547,7 +547,7 @@ public class RulesUtils {
      * @return baseEntitys
      */
     public static BaseEntity[] getBaseEntitysArrayByParentAndLinkCodeWithAttributes(final String qwandaServiceUrl,
-                                                                                    Map<String, Object> decodedToken, final String token, final String parentCode, final String linkCode) {
+                                                                                    Map<String, Object> decodedToken, final GennyToken token, final String parentCode, final String linkCode) {
 
         String beJson = getBaseEntitysJsonByParentAndLinkCode(qwandaServiceUrl, decodedToken, token, parentCode,
                 linkCode);
@@ -568,7 +568,7 @@ public class RulesUtils {
      * @return baseEntitys
      */
     public static BaseEntity[] getBaseEntitysArrayByParentAndLinkCodeWithAttributes(final String qwandaServiceUrl,
-                                                                                    Map<String, Object> decodedToken, final String token, final String parentCode, final String linkCode,
+                                                                                    Map<String, Object> decodedToken, final GennyToken token, final String parentCode, final String linkCode,
                                                                                     final Integer pageStart, final Integer pageSize) {
 
         String beJson = getBaseEntitysJsonByParentAndLinkCode(qwandaServiceUrl, decodedToken, token, parentCode,
@@ -603,7 +603,7 @@ public class RulesUtils {
      * @return baseEntitys
      */
     public static BaseEntity[] getBaseEntitysArrayByParentAndLinkCodeWithAttributes2(final String qwandaServiceUrl,
-                                                                                     Map<String, Object> decodedToken, final String token, final String parentCode, final String linkCode,
+                                                                                     Map<String, Object> decodedToken, final GennyToken token, final String parentCode, final String linkCode,
                                                                                      final Integer pageStart, final Integer pageSize) {
 
         String beJson = getBaseEntitysJsonByParentAndLinkCode2(qwandaServiceUrl, decodedToken, token, parentCode,
@@ -626,7 +626,7 @@ public class RulesUtils {
      * @return baseEntitys
      */
     public static BaseEntity[] getBaseEntitysArrayByParentAndLinkCodeAndLinkValueWithAttributes(
-            final String qwandaServiceUrl, Map<String, Object> decodedToken, final String token,
+            final String qwandaServiceUrl, Map<String, Object> decodedToken, final GennyToken token,
             final String parentCode, final String linkCode, final String linkValue, final Integer pageStart,
             final Integer pageSize) {
 
@@ -647,7 +647,7 @@ public class RulesUtils {
      * @return baseEntitys
      */
     public static List<BaseEntity> getBaseEntitysByParentAndLinkCodeWithAttributes(final String qwandaServiceUrl,
-                                                                                   Map<String, Object> decodedToken, final String token, final String parentCode, final String linkCode) {
+                                                                                   Map<String, Object> decodedToken, final GennyToken token, final String parentCode, final String linkCode) {
 
         BaseEntity[] beArray = getBaseEntitysArrayByParentAndLinkCodeWithAttributes(qwandaServiceUrl, decodedToken,
                 token, parentCode, linkCode);
@@ -668,7 +668,7 @@ public class RulesUtils {
      * @return baseEntitys
      */
     public static List<BaseEntity> getBaseEntitysByParentAndLinkCodeWithAttributes(final String qwandaServiceUrl,
-                                                                                   Map<String, Object> decodedToken, final String token, final String parentCode, final String linkCode,
+                                                                                   Map<String, Object> decodedToken, final GennyToken token, final String parentCode, final String linkCode,
                                                                                    final Integer pageStart, final Integer pageSize) {
 
         BaseEntity[] beArray = getBaseEntitysArrayByParentAndLinkCodeWithAttributes(qwandaServiceUrl, decodedToken,
@@ -692,7 +692,7 @@ public class RulesUtils {
 
     /* added because of bug */
     public static List<BaseEntity> getBaseEntitysByParentAndLinkCodeWithAttributes2(final String qwandaServiceUrl,
-                                                                                    Map<String, Object> decodedToken, final String token, final String parentCode, final String linkCode,
+                                                                                    Map<String, Object> decodedToken, final GennyToken token, final String parentCode, final String linkCode,
                                                                                     final Integer pageStart, final Integer pageSize) {
 
         BaseEntity[] beArray = getBaseEntitysArrayByParentAndLinkCodeWithAttributes2(qwandaServiceUrl, decodedToken,
@@ -715,7 +715,7 @@ public class RulesUtils {
      * @return baseEntitys
      */
     public static List<BaseEntity> getBaseEntitysByParentAndLinkCodeAndLinkValueWithAttributes(
-            final String qwandaServiceUrl, Map<String, Object> decodedToken, final String token,
+            final String qwandaServiceUrl, Map<String, Object> decodedToken, final GennyToken token,
             final String parentCode, final String linkCode, final String linkValue, final Integer pageStart,
             final Integer pageSize) {
 
@@ -736,7 +736,7 @@ public class RulesUtils {
      * @return baseEntitys
      */
     public static List<BaseEntity> getBaseEntitysByChildAndLinkCodeWithAttributes(final String qwandaServiceUrl,
-                                                                                  Map<String, Object> decodedToken, final String token, final String childCode, final String linkCode) {
+                                                                                  Map<String, Object> decodedToken, final GennyToken token, final String childCode, final String linkCode) {
 
         String beJson = getBaseEntitysJsonByChildAndLinkCodeWithAttributes(qwandaServiceUrl, decodedToken, token,
                 childCode, linkCode);
@@ -758,7 +758,7 @@ public class RulesUtils {
      * @return baseEntitys
      */
     public static List<BaseEntity> getBaseEntitysByParentAndLinkCodeWithAttributesAndStakeholderCode(
-            final String qwandaServiceUrl, Map<String, Object> decodedToken, final String token,
+            final String qwandaServiceUrl, Map<String, Object> decodedToken, final GennyToken token,
             final String parentCode, final String linkCode, final String stakeholderCode) {
         if (parentCode.equalsIgnoreCase("GRP_NEW_ITEMS")) {
             println("Group New Items Debug");
@@ -789,7 +789,7 @@ public class RulesUtils {
      * @return baseEntitys
      */
     public static List<Link> getLinks(final String qwandaServiceUrl, Map<String, Object> decodedToken,
-                                      final String token, final String parentCode, final String linkCode) {
+                                      final GennyToken token, final String parentCode, final String linkCode) {
 
         String linkJson = null;
         List<Link> linkList = null;
@@ -821,7 +821,7 @@ public class RulesUtils {
             String realm = token.getRealm();
      
             println("All the attributes about to become loaded ... for realm "+realm);
-            JsonObject json = VertxUtils.readCachedJson(realm,"attributes",token.getToken());
+            JsonObject json = VertxUtils.readCachedJson(realm,"attributes",token);
             log.info("json fetched from cache:"+json);
             if ("ok".equals(json.getString("status")) ) {
                 //	println("LOADING ATTRIBUTES FROM CACHE!");
@@ -852,10 +852,10 @@ public class RulesUtils {
                 println("All the attributes have been loaded in "+attributeMap.size()+" attributes");
             } else {
                 println("LOADING ATTRIBUTES FROM API");
-                String jsonString = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/attributes/realms/"+token.getRealm(), token.getToken());
+                String jsonString = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/attributes/realms/"+token.getRealm(), token);
                 if (!StringUtils.isBlank(jsonString)) {
 
-                	 VertxUtils.writeCachedJson(token.getRealm(), "attributes", jsonString, token.getToken());
+                	 VertxUtils.writeCachedJson(token.getRealm(), "attributes", jsonString, token);
                 	 
                 	 QDataAttributeMessage attMsg  = JsonUtils.fromJson(jsonString, QDataAttributeMessage.class);
                 	 attMsg.setToken(token.getToken());
@@ -898,9 +898,6 @@ public class RulesUtils {
         }
         return null;
     }
-    public static QDataAttributeMessage loadAllAttributesIntoCache(final String token) {
-        return loadAllAttributesIntoCache(new GennyToken(token));
-    }
 
     public static Map<String,BaseEntity> getDefMap(final GennyToken userToken) {
     	if ((defs == null) || (defs.isEmpty())) {
@@ -922,7 +919,7 @@ public class RulesUtils {
     }
     
  
-//    public static Attribute getAttribute(final String attributeCode, final String token) {
+//    public static Attribute getAttribute(final String attributeCode, final GennyToken token) {
 //    	GennyToken gennyToken = new GennyToken(token);
 //    	
 //    	return getAttribute(attributeCode, gennyToken);
@@ -958,7 +955,7 @@ public class RulesUtils {
 
 
     public static String getChildren(final String sourceCode, final String linkCode, final String linkValue,
-                                     String token) {
+    GennyToken token) {
 
         try {
             String beJson = QwandaUtils.apiGet(GennySettings.qwandaServiceUrl + "/qwanda/entityentitys/" + sourceCode
@@ -978,7 +975,7 @@ public class RulesUtils {
     }
 
     public static BaseEntity duplicateBaseEntity(BaseEntity oldBe, String prefix, String name, String qwandaUrl,
-                                                 String token) {
+                                                 GennyToken token) {
 
         BaseEntity newBe = new BaseEntity(QwandaUtils.getUniqueId(prefix, oldBe.getCode()), name);
 

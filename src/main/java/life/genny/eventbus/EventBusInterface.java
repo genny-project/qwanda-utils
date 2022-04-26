@@ -65,7 +65,8 @@ public interface EventBusInterface {
             if (be.getCode().equals(msg.getParentCode())) {
               // get the latest parent code from api to ensure links are ok?
               try {
-                be = QwandaUtils.getBaseEntityByCode(be.getCode(), msg.getToken());
+                GennyToken token = new GennyToken(msg.getToken());
+                be = QwandaUtils.getBaseEntityByCode(be.getCode(), token);
               } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -230,10 +231,11 @@ public interface EventBusInterface {
         //				com.google.gson.JsonObject event = parser.parse(json).getAsJsonObject();
         //				event.addProperty("eventbus", "WRITE");
         json = event.toString();
+        GennyToken token = new GennyToken(event.getString("token"));
         QwandaUtils.apiPostEntity2(
             GennySettings.qwandaServiceUrl + "/service/messages/" + channel,
             json,
-            event.getString("token"),
+            token,
             null);
       } catch (Exception e) {
         String json2 = msg.toString();
@@ -252,7 +254,7 @@ public interface EventBusInterface {
           String sourceAddress =
               (String)
                   VertxUtils.getCacheInterface()
-                      .readCache(gToken.getRealm(), gToken.getJTI(), token);
+                      .readCache(gToken.getRealm(), gToken.getJTI(), gToken);
           log.info("Sending to bridge at " + sourceAddress);
           write(sourceAddress, msg);
         } else {
@@ -313,10 +315,11 @@ public interface EventBusInterface {
     JsonObject event = new JsonObject(json);
 
     if (GennySettings.forceEventBusApi) {
+      GennyToken token = new GennyToken(event.getString("token"));
       try {
         event.put("eventbus", "SEND");
         QwandaUtils.apiPostEntity(
-            GennySettings.bridgeServiceUrl + "?channel=" + channel, json, event.getString("token"));
+            GennySettings.bridgeServiceUrl + "?channel=" + channel, json, token);
       } catch (Exception e) {
         log.error("Error in posting message to bridge eventbus:" + event);
       }
@@ -329,7 +332,7 @@ public interface EventBusInterface {
         GennyToken gToken = new GennyToken(token); // This is costly
         String sourceAddress =
             (String)
-                VertxUtils.getCacheInterface().readCache(gToken.getRealm(), gToken.getJTI(), token);
+                VertxUtils.getCacheInterface().readCache(gToken.getRealm(), gToken.getJTI(), gToken);
         log.info("Sending to bridge at " + sourceAddress);
         send(sourceAddress, msg);
       } else {

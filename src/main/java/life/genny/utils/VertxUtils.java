@@ -100,12 +100,12 @@ public class VertxUtils {
         }
     }
 
-    static public <T> T getObject(final String realm, final String keyPrefix, final String key, final Class clazz) {
-        return getObject(realm, keyPrefix, key, clazz, DEFAULT_TOKEN);
+    static public <T> T getObject(final String realm, final String keyPrefix, final String key, final Class<?> clazz) {
+        return getObject(realm, keyPrefix, key, clazz, null);
     }
 
-    static public <T> T getObject(final String realm, final String keyPrefix, final String key, final Class clazz,
-                                  final String token) {
+    static public <T> T getObject(final String realm, final String keyPrefix, final String key, final Class<?> clazz,
+                                  final GennyToken token) {
         T item = null;
         String prekey = (StringUtils.isBlank(keyPrefix)) ? "" : (keyPrefix + ":");
         JsonObject json = readCachedJson(realm, prekey + key, token);
@@ -123,12 +123,13 @@ public class VertxUtils {
 
     }
 
+    @Deprecated
     static public <T> T getObject(final String realm, final String keyPrefix, final String key, final Type clazz) {
-        return getObject(realm, keyPrefix, key, clazz, DEFAULT_TOKEN);
+        return getObject(realm, keyPrefix, key, clazz, null);
     }
 
     static public <T> T getObject(final String realm, final String keyPrefix, final String key, final Type clazz,
-                                  final String token) {
+                                  final GennyToken token) {
         T item = null;
         String prekey = (StringUtils.isBlank(keyPrefix)) ? "" : (keyPrefix + ":");
         JsonObject json = readCachedJson(realm, prekey + key, token);
@@ -145,19 +146,20 @@ public class VertxUtils {
         }
     }
 
+    @Deprecated
     static public JsonObject putObject(final String realm, final String keyPrefix, final String key, final Object obj) {
-        return putObject(realm, keyPrefix, key, obj, DEFAULT_TOKEN);
+        return putObject(realm, keyPrefix, key, obj, null);
     }
 
     static public JsonObject putObject(final String realm, final String keyPrefix, final String key, final Object obj,
-                                 final String token) {
+                                 final GennyToken token) {
         String data = JsonUtils.toJson(obj);
         String prekey = (StringUtils.isBlank(keyPrefix)) ? "" : (keyPrefix + ":");
 
         return writeCachedJson(realm, prekey + key, data, token);
     }
 
-    static public void clearCache(final String realm, final String token)
+    static public void clearCache(final String realm, final GennyToken token)
     {
         if (!GennySettings.forceCacheApi) {
             cacheInterface.clear(realm);
@@ -175,11 +177,13 @@ public class VertxUtils {
         }
     }
 
+    // TODO: Consider why we aren't using a token to read json
+    @Deprecated
     static public JsonObject readCachedJson(final String realm, final String key) {
-        return readCachedJson(realm, key, DEFAULT_TOKEN);
+        return readCachedJson(realm, key, null);
     }
 
-    static public JsonObject readCachedJson(String realm, final String key, final String token) {
+    static public JsonObject readCachedJson(String realm, final String key, final GennyToken token) {
         JsonObject result = null;
 
         if (!GennySettings.forceCacheApi) {
@@ -210,7 +214,8 @@ public class VertxUtils {
                     if ("DUMMY".equals(token)) {
                         // leave realm as it
                     } else {
-                        GennyToken temp = new GennyToken(token);
+                        // TODO: Figure out what do here
+                        GennyToken temp = token;
                         realm = temp.getRealm();
                     }
 
@@ -281,12 +286,12 @@ public class VertxUtils {
 //    }
 
     static public JsonObject writeCachedJson(final String realm, final String key, final String value,
-                                             final String token) {
+                                             final GennyToken token) {
         log.debug("The realm provided to writeCachedJson is :::" + realm);
         return writeCachedJson(realm, key, value, token, 0L);
     }
 
-    static public JsonObject writeCachedJson(String realm, final String key, String value, final String token,
+    static public JsonObject writeCachedJson(String realm, final String key, String value, final GennyToken token,
                                              long ttl_seconds) {
         log.debug("The realm provided to writeCachedJson is :::" + realm);
         if (!GennySettings.forceCacheApi) {
@@ -298,7 +303,8 @@ public class VertxUtils {
                     if ("DUMMY".equals(token)) {
 
                     } else {
-                        GennyToken temp = new GennyToken(token);
+                        // We need to talk about this
+                        GennyToken temp = new GennyToken(token.getToken());
                         realm = temp.getRealm();
                         log.info("A temporal realm was provided :::" + realm + "::: realm is within the colons");
                     }
@@ -339,9 +345,9 @@ public class VertxUtils {
 
 
     static public <T extends BaseEntity> T  readFromDDT(String realm, final String code, final boolean withAttributes,
-                                                        final String token, Class clazz) {
+                                                        final GennyToken token, Class<?> clazz) {
         T be = null;
-        if (StringUtils.isBlank(token)) {
+        if (StringUtils.isBlank(token.getToken())) {
         	log.error("TOKEN is null for "+code);
         	return null;
         }
@@ -371,7 +377,7 @@ public class VertxUtils {
             if (cachedEnabled) {
                 log.debug("Local Cache being used.. this is NOT production");
                 // force
-                GennyToken temp = new GennyToken(token);
+                GennyToken temp = token;
                 realm = temp.getRealm();
                 String ddtvalue = localCache.get(realm + ":" + code);
                 if (ddtvalue == null) {
@@ -408,13 +414,13 @@ public class VertxUtils {
 
 
     static public <T extends BaseEntity> T  readFromDDT(String realm, final String code, final boolean withAttributes,
-                                                        final String token) {
+                                                        final GennyToken token) {
         return readFromDDT(realm, code, withAttributes,token,BaseEntity.class);
     }
 
     static boolean cacheDisabled = GennySettings.noCache;
 
-    static public <T extends BaseEntity> T readFromDDT(final String realm, final String code, final String token) {
+    static public <T extends BaseEntity> T readFromDDT(final String realm, final String code, final GennyToken token) {
         // if ("PER_SHARONCROW66_AT_GMAILCOM".equals(code)) {
         // log.info("DEBUG");
         // }
@@ -1089,7 +1095,7 @@ public class VertxUtils {
     {
         // find the baseentity
         BaseEntity be = VertxUtils.getObject(userToken.getRealm(), "", answer.getTargetCode(), BaseEntity.class,
-                userToken.getToken());
+                userToken);
 
         BaseEntity sendBe = new BaseEntity(be.getCode(),be.getName());
         sendBe.setRealm(userToken.getRealm());
@@ -1116,7 +1122,7 @@ public class VertxUtils {
         if ((answers.length > 0)) {
             // find the baseentity
             BaseEntity be = VertxUtils.getObject(userToken.getRealm(), "", answers[0].getTargetCode(), BaseEntity.class,
-                    userToken.getToken());
+                    userToken);
             if (be != null) {
 
                 BaseEntity newBe = new BaseEntity(be.getCode(), be.getName());

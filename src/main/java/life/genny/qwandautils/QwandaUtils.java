@@ -83,7 +83,7 @@ public class QwandaUtils {
     private static HttpClient httpClient = HttpClient.newBuilder().executor(executorService)
             .version(HttpClient.Version.HTTP_2).connectTimeout(Duration.ofSeconds(20)).build();
 
-    public static String apiGet(String getUrl, final String authToken, final int timeout) {
+    public static String apiGet(String getUrl, final GennyToken authToken, final int timeout) {
 
         // log.debug("GET:" + getUrl + ":");
 
@@ -147,12 +147,12 @@ public class QwandaUtils {
 
     }
 
-    public static String apiGet(String getUrl, final String authToken) throws ClientProtocolException, IOException {
+    public static String apiGet(String getUrl, final GennyToken authToken) throws ClientProtocolException, IOException {
 
         return apiGet(getUrl, authToken, GennySettings.timeoutInSecs);
     }
 
-    public static String apiPostEntity(final String postUrl, final String entityString, final String authToken,
+    public static String apiPostEntity(final String postUrl, final String entityString, final GennyToken authToken,
             final Consumer<String> callback) throws IOException {
         return apiPostEntity2(postUrl, entityString, authToken, null);
         // String responseString = null;
@@ -198,7 +198,7 @@ public class QwandaUtils {
 
     public static String apiPostNote(final String postUrl, final String sourceCode, final String targetCode,
             final String tag,
-            final String userName, final String userImage, final String content, final String authToken,
+            final String userName, final String userImage, final String content, final GennyToken authToken,
             final Consumer<String> callback)
             throws IOException {
         String responseString = null;
@@ -259,7 +259,7 @@ public class QwandaUtils {
         return responseString;
     }
 
-    public static String apiPostEntity(final String postUrl, final String entityString, final String authToken)
+    public static String apiPostEntity(final String postUrl, final String entityString, final GennyToken authToken)
             throws IOException {
         return apiPostEntity(postUrl, entityString, authToken, null);
     }
@@ -271,7 +271,7 @@ public class QwandaUtils {
 
     public static String apiPostNote(final String postUrl, final String sourceCode, final String targetCode,
             final String tag,
-            final String userName, final String userImage, final String content, final String authToken)
+            final String userName, final String userImage, final String content, final GennyToken authToken)
             throws IOException {
         String user = "System";
         String image = "";
@@ -281,7 +281,7 @@ public class QwandaUtils {
 
     public static String apiPostNote(final String postUrl, final String sourceCode, final String targetCode,
             final String tag,
-            final String content, final String authToken) throws IOException {
+            final String content, final GennyToken authToken) throws IOException {
         String userName = "System";
         String userImage = "abc";
         log.error("HMMMMM 302");
@@ -289,17 +289,17 @@ public class QwandaUtils {
     }
 
     public static String apiPost(final String postUrl, final List<BasicNameValuePair> nameValuePairs,
-            final String authToken) throws IOException {
+            final GennyToken authToken) throws IOException {
         return apiPostEntity(postUrl, new UrlEncodedFormEntity(nameValuePairs).toString(), authToken, null);
     }
 
-    public static String apiDelete(final String deleteUrl, final String authToken) throws IOException {
+    public static String apiDelete(final String deleteUrl, final GennyToken authToken) throws IOException {
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpDeleteWithBody request = new HttpDeleteWithBody(deleteUrl);
         request.setHeader("Content-Type", "application/json; charset=UTF-8");
         if (authToken != null) {
-            request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+            request.addHeader("Authorization", "Bearer " + authToken.getToken()); // Authorization": `Bearer
         }
         request.setHeader("Content-Type", "application/json; charset=UTF-8");
 
@@ -327,7 +327,7 @@ public class QwandaUtils {
         }
     }
 
-    public static String apiDelete(final String deleteUrl, final String entityString, final String authToken)
+    public static String apiDelete(final String deleteUrl, final String entityString, final GennyToken authToken)
             throws IOException {
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -338,7 +338,7 @@ public class QwandaUtils {
             request.setEntity(deleteEntity);
         }
         if (authToken != null) {
-            request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+            request.addHeader("Authorization", "Bearer " + authToken.getToken()); // Authorization": `Bearer
         }
         request.setHeader("Content-Type", "application/json; charset=UTF-8");
 
@@ -368,7 +368,7 @@ public class QwandaUtils {
         }
     }
 
-    public static String apiPutEntity(final String postUrl, final String entityString, final String authToken)
+    public static String apiPutEntity(final String postUrl, final String entityString, final GennyToken authToken)
             throws IOException {
         CloseableHttpClient httpclient = HttpClientBuilder.create().build();
         CloseableHttpResponse response = null;
@@ -381,7 +381,7 @@ public class QwandaUtils {
             post.setEntity(postEntity);
             post.setHeader("Content-Type", "application/json; charset=UTF-8");
             if (authToken != null) {
-                post.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+                post.addHeader("Authorization", "Bearer " + authToken.getToken()); // Authorization": `Bearer
             }
 
             response = httpclient.execute(post);
@@ -397,7 +397,7 @@ public class QwandaUtils {
 
     }
 
-    public static BaseEntity createUserFromToken(final String qwandaUrl, final String serviceToken,
+    public static BaseEntity createUserFromToken(final String qwandaUrl, final GennyToken serviceToken,
             final String userToken) throws IOException {
         JSONObject decodedToken = KeycloakUtils.getDecodedToken(userToken);
 
@@ -411,7 +411,7 @@ public class QwandaUtils {
         return be;
     }
 
-    public static Long postBaseEntity(final String qwandaUrl, final String token, final BaseEntity be)
+    public static Long postBaseEntity(final String qwandaUrl, final GennyToken token, final BaseEntity be)
             throws IOException {
 
         String jsonBE = JsonUtils.toJson(be);
@@ -432,7 +432,7 @@ public class QwandaUtils {
         }
     }
 
-    public static Answer postAnswer(final String qwandaUrl, final String token, final Answer answer)
+    public static Answer postAnswer(final String qwandaUrl, final GennyToken token, final Answer answer)
             throws IOException {
         if (answer.getValue() != null) {
 
@@ -443,7 +443,7 @@ public class QwandaUtils {
         return answer;
     }
 
-    public static Link postLink(final String qwandaUrl, final String token, final Link link) throws IOException {
+    public static Link postLink(final String qwandaUrl, final GennyToken token, final Link link) throws IOException {
 
         QwandaUtils.apiPostEntity(qwandaUrl + "/qwanda/entityentitys", JsonUtils.toJson(link), token);
 
@@ -462,21 +462,21 @@ public class QwandaUtils {
 
     }
 
-    public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
+    public static BaseEntity createUser(final String qwandaUrl, final GennyToken token, final String username,
             final String firstname, final String lastname, final String email) throws IOException {
 
         return createUser(qwandaUrl, token, username, firstname, lastname, email, "genny", firstname + " " + lastname,
                 null, null);
     }
 
-    public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
+    public static BaseEntity createUser(final String qwandaUrl, final GennyToken token, final String username,
             final String firstname, final String lastname, final String email, String keycloakId) throws IOException {
 
         return createUser(qwandaUrl, token, username, firstname, lastname, email, "genny", firstname + " " + lastname,
                 null, null);
     }
 
-    public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
+    public static BaseEntity createUser(final String qwandaUrl, final GennyToken token, final String username,
             final String firstname, final String lastname, final String email, final String realm, final String name,
             final String keycloakId) throws IOException {
 
@@ -484,7 +484,7 @@ public class QwandaUtils {
                 null);
     }
 
-    public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
+    public static BaseEntity createUser(final String qwandaUrl, final GennyToken token, final String username,
             final String firstname, final String lastname, final String email, final String realm, final String name,
             final String keycloakId, HashMap<String, String> attributes) throws IOException {
 
@@ -492,7 +492,7 @@ public class QwandaUtils {
                 attributes, null);
     }
 
-    public static BaseEntity createUser(final String qwandaUrl, final String token, final String username,
+    public static BaseEntity createUser(final String qwandaUrl, final GennyToken token, final String username,
             final String firstname, final String lastname, final String email, final String realm, final String name,
             final String keycloakId, HashMap<String, String> attributes, Link[] links) throws IOException {
 
@@ -581,7 +581,7 @@ public class QwandaUtils {
         return person;
     }
 
-    public static Boolean checkUserTokenExists(final String qwandaUrl, final String userToken) throws IOException {
+    public static Boolean checkUserTokenExists(final String qwandaUrl, final GennyToken userToken) throws IOException {
         JSONObject decodedToken = KeycloakUtils.getDecodedToken(userToken);
         String tokenSub = decodedToken.getString("sub");
         log.info("sub token::" + tokenSub);
@@ -639,12 +639,12 @@ public class QwandaUtils {
     static Map<String, String> askMap = new ConcurrentHashMap<>();
 
     public static Boolean isMandatoryFieldsEntered(String sourceBaseEntityCode, String targetBaseEntityCode,
-            String questionCode, final String userToken) {
+            String questionCode, final GennyToken userToken) {
 
         try {
             String attributeString = null;
             String key = sourceBaseEntityCode + ":" + questionCode + ":" + targetBaseEntityCode
-                    + userToken.substring(0, 8); // get first 8 chars
+                    + userToken.getToken().substring(0, 8); // get first 8 chars
             // if (askMap.containsKey(key)) {
             // attributeString = askMap.get(key);
             // } else {
@@ -715,7 +715,7 @@ public class QwandaUtils {
      *         code that is passed
      * @throws IOException
      */
-    public static <T extends BaseEntity> T getBaseEntityByCode(String baseEntAttributeCode, String token)
+    public static <T extends BaseEntity> T getBaseEntityByCode(String baseEntAttributeCode, GennyToken token)
             throws IOException {
 
         String attributeString = null;
@@ -745,7 +745,7 @@ public class QwandaUtils {
      *         code that is passed
      * @throws IOException
      */
-    public static <T extends BaseEntity> T getBaseEntityByCodeWithAttributes(String baseEntAttributeCode, String token)
+    public static <T extends BaseEntity> T getBaseEntityByCodeWithAttributes(String baseEntAttributeCode, GennyToken token)
             throws IOException {
     	return getBaseEntityByCode(baseEntAttributeCode,token);
     	
@@ -771,7 +771,7 @@ public class QwandaUtils {
      * @param username
      * @return baseEntity code for the userName passed
      */
-    public static String getBaseEntityCodeForUserName(String username, String userToken) {
+    public static String getBaseEntityCodeForUserName(String username, GennyToken userToken) {
 
         String baseEntityCode = null;
         try {
@@ -801,7 +801,7 @@ public class QwandaUtils {
      * @param token
      * @return template
      */
-    public static QBaseMSGMessageTemplate getTemplate(String templateCode, String token) {
+    public static QBaseMSGMessageTemplate getTemplate(String templateCode, GennyToken token) {
 
         String attributeString;
         QBaseMSGMessageTemplate template = null;
@@ -823,7 +823,7 @@ public class QwandaUtils {
      * @param token
      * @return all the children links for a given groupCode
      */
-    public static List getLinkList(String groupCode, String token) {
+    public static List getLinkList(String groupCode, GennyToken token) {
 
         List linkList = null;
 
@@ -849,7 +849,7 @@ public class QwandaUtils {
      *         BaseEntity) for the BaseEntity code
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, BaseEntity> getBaseEntWithChildrenForAttributeCode(String attributeCode, String token) {
+    public static Map<String, BaseEntity> getBaseEntWithChildrenForAttributeCode(String attributeCode, GennyToken token) {
 
         Map<String, BaseEntity> entityTemplateContextMap = new HashMap<>();
 
@@ -915,7 +915,7 @@ public class QwandaUtils {
         return initials.toUpperCase();
     }
 
-    public static QDataBaseEntityMessage getDataBEMessage(String groupCode, String linkCode, String token) {
+    public static QDataBaseEntityMessage getDataBEMessage(String groupCode, String linkCode, GennyToken token) {
 
         QDataBaseEntityMessage dataBEMessage = null;
 
@@ -932,7 +932,7 @@ public class QwandaUtils {
 
     }
 
-    public static String getCompleteAddress(String code, String targetAttributeCode, String token) {
+    public static String getCompleteAddress(String code, String targetAttributeCode, GennyToken token) {
 
         BaseEntity be = MergeUtil.getBaseEntityForAttr(code, token);
 
@@ -986,10 +986,9 @@ public class QwandaUtils {
     }
 
     // creating new BaseEntity by only baseentityCode
-    public static BaseEntity createBaseEntityByCode(String entityCode, String name, String qwandaUrl, String token) {
+    public static BaseEntity createBaseEntityByCode(String entityCode, String name, String qwandaUrl, GennyToken token) {
         BaseEntity beg = new BaseEntity(entityCode, name);
-        GennyToken userToken = new GennyToken(token);
-        beg.setRealm(userToken.getRealm());
+        beg.setRealm(token.getRealm());
 
         String jsonBE = JsonUtils.toJson(beg);
         try {
@@ -1018,7 +1017,7 @@ public class QwandaUtils {
      *         </p>
      */
     public static Boolean checkIfLinkExistsForTarget(String parentCode, String linkCode, String childCode,
-            String token) {
+    GennyToken token) {
 
         Boolean isLinkExists = false;
         QDataBaseEntityMessage dataBEMessage = getDataBEMessage(parentCode, linkCode, token);
@@ -1055,7 +1054,7 @@ public class QwandaUtils {
      * @return sourceCode/targetCode if the link values match the input given
      */
     public static String getSourceOrTargetForGroupLink(String groupCode, String attributeCode, String sourceOrTarget,
-            String linkValue, Boolean isSource, String token) {
+            String linkValue, Boolean isSource, GennyToken token) {
 
         QDataBaseEntityMessage dataBEMessage = getDataBEMessage(groupCode, "LNK_CORE", token);
         String code = null;
@@ -1144,7 +1143,7 @@ public class QwandaUtils {
      */
     @SuppressWarnings("unchecked")
     public static Boolean checkIfLinkExists(String groupCode, String linkCode, String targetCode, String linkValue,
-            String token) {
+    GennyToken token) {
 
         // gets all the children of a groupcode with their linkCode,linkValue and code
         // as a list
@@ -1212,7 +1211,7 @@ public class QwandaUtils {
      * @return response string after creating a link in the DataBase
      */
     public static Link createLink(String groupCode, String targetCode, String linkCode, String linkValue, Double weight,
-            String token) {
+    GennyToken token) {
 
         log.info("CREATING LINK between " + groupCode + "and" + targetCode + "with LINK VALUE = " + linkValue);
 
@@ -1229,8 +1228,8 @@ public class QwandaUtils {
     }
 
     public static BaseEntity getBaseEntityForAttribute(String groupCode, String linkCode, String attributeCode,
-            String attributeValue, String tokenString) {
-        QDataBaseEntityMessage entityMessage = getDataBEMessage(groupCode, linkCode, tokenString);
+            String attributeValue, GennyToken token) {
+        QDataBaseEntityMessage entityMessage = getDataBEMessage(groupCode, linkCode, token);
 
         BaseEntity[] beArr = entityMessage.getItems();
         BaseEntity resultBe = null;
@@ -1471,7 +1470,7 @@ public class QwandaUtils {
         return dateTimeString;
     }
 
-    public static QDataBaseEntityMessage fetchResults(final BaseEntity searchBE, final String token)
+    public static QDataBaseEntityMessage fetchResults(final BaseEntity searchBE, final GennyToken token)
             throws IOException {
         QDataBaseEntityMessage results = null;
         SearchEntity se = new SearchEntity(searchBE);
@@ -1491,7 +1490,7 @@ public class QwandaUtils {
 
     }
 
-    public static List<BaseEntity> getBaseEntityWithChildren(String beCode, Integer level, String token) {
+    public static List<BaseEntity> getBaseEntityWithChildren(String beCode, Integer level, GennyToken token) {
 
         if (level == 0) {
             return null; // exit point;
@@ -1544,7 +1543,7 @@ public class QwandaUtils {
         return null;
     }
 
-    private static Attribute getAttribute(String attributeCode, String token) {
+    private static Attribute getAttribute(String attributeCode, GennyToken token) {
 
         try {
 
@@ -1567,7 +1566,7 @@ public class QwandaUtils {
         return uniqueCode;
     }
 
-    public static QDataBaseEntityMessage findBaseEntityByAttributeCodeLikeValue(String realm, String token,
+    public static QDataBaseEntityMessage findBaseEntityByAttributeCodeLikeValue(String realm, GennyToken token,
             String attributeCode, String likeValue) {
         SearchEntity searchBE = new SearchEntity("SBE_FIND_LIKE", "AttributeLink")
                 .addSort("PRI_NAME", "Created", SearchEntity.Sort.ASC)
@@ -1666,11 +1665,11 @@ public class QwandaUtils {
         return sendGET(url, null);
     }
 
-    static public String sendGET(String url, String authToken) {
+    static public String sendGET(String url, GennyToken authToken) {
         return sendGET(url, "application/json", authToken);
     }
 
-    static public String sendGET(String url, String contentType, String authToken) {
+    static public String sendGET(String url, String contentType, GennyToken authToken) {
 
         HttpRequest.Builder requestBuilder = null;
 
@@ -1862,7 +1861,7 @@ public class QwandaUtils {
         return response;
     }
 
-    public static String apiPostEntity2(final String postUrl, final String entityString, final String authToken,
+    public static String apiPostEntity2(final String postUrl, final String entityString, final GennyToken authToken,
             final Consumer<String> callback) throws IOException {
 
         String result = null;
@@ -1887,7 +1886,7 @@ public class QwandaUtils {
     }
 
     public static String apiPostEntity2(final String postUrl, final String entityString, final String contentType,
-            final String authToken,
+            final GennyToken authToken,
             final Consumer<String> callback) throws IOException {
 
         java.net.http.HttpResponse<String> response2 = post(postUrl, entityString, contentType, authToken);
@@ -2244,14 +2243,14 @@ public class QwandaUtils {
      *         import java.net.http.HttpRequest;
      *         import java.net.http.HttpResponse;
      */
-    public static java.net.http.HttpResponse<String> post(String uri, String body, String contentType, String token) {
+    public static java.net.http.HttpResponse<String> post(String uri, String body, String contentType, GennyToken token) {
 
         HttpClient client = java.net.http.HttpClient.newHttpClient();
 
         HttpRequest request = java.net.http.HttpRequest.newBuilder()
                 .uri(URI.create(uri))
                 .setHeader("Content-Type", contentType)
-                .setHeader("Authorization", "Bearer " + token)
+                .setHeader("Authorization", "Bearer " + token.getToken())
                 .POST(java.net.http.HttpRequest.BodyPublishers.ofString(body))
                 .build();
 
