@@ -20,6 +20,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
+
+import life.genny.qwanda.utils.CommonUtils;
 import life.genny.qwandautils.KeycloakUtils;
 import life.genny.qwandautils.QwandaUtils;
 import life.genny.qwandautils.SecurityUtils;
@@ -311,6 +313,11 @@ public class GennyToken implements Serializable {
   }
 
   public String getRealm() {
+    // TODO: HAHAHAHA BIG HACK TIME
+    String projectRealm = CommonUtils.getSystemEnv("PROJECT_REALM");
+    if(projectRealm != null) {
+      return projectRealm;
+    }
     String clientId = adecodedTokenMap.get("azp").toString();
 
     if (clientId.equals("mentormatch")) {
