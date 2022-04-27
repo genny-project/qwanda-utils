@@ -933,6 +933,8 @@ public class RulesUtils {
     
     public static Attribute getAttribute(final String attributeCode, final GennyToken gennyToken) {
     	String realm = gennyToken.getRealm();
+        log.info("FETCH: Token: " + gennyToken.getToken());
+        log.info("FETCH: Fetching attribute " + attributeCode + " from realm: " + realm);
     	if (!realmAttributeMap.containsKey(realm)) {
     		//loadAllAttributesIntoCache(gennyToken);
     	}
@@ -940,7 +942,7 @@ public class RulesUtils {
     		loadAllAttributesIntoCache(gennyToken);
     	}
         Attribute ret = realmAttributeMap.get(gennyToken.getRealm()).get(attributeCode);
-        if ((ret == null)&&(!attributeCode.startsWith("PRI_APP_"))) { // ignore the dynamic attributes
+        if ((ret == null) && (!attributeCode.startsWith("PRI_APP_"))) { // ignore the dynamic attributes
         	if (attributeCode.substring(3).startsWith("_")) {
             if (attributeCode.startsWith("SRT_") || attributeCode.startsWith("RAW_")) {
                 ret = new AttributeText(attributeCode, attributeCode);
