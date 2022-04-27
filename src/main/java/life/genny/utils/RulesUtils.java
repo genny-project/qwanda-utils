@@ -822,7 +822,7 @@ public class RulesUtils {
      
             println("All the attributes about to become loaded ... for realm "+realm);
             JsonObject json = VertxUtils.readCachedJson(realm,"attributes",token);
-            log.info("json fetched from cache:"+json);
+           // log.info("json fetched from cache:"+json);
             if ("ok".equals(json.getString("status")) ) {
                 //	println("LOADING ATTRIBUTES FROM CACHE!");
                 QDataAttributeMessage attMsg = JsonUtils.fromJson(json.getString("value"), QDataAttributeMessage.class);
