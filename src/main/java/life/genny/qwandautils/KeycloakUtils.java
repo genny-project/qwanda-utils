@@ -132,7 +132,7 @@ public class KeycloakUtils {
 		realm = "internmatch";
 		JsonObject fullTokenPayload = KeycloakUtils.getToken(keycloakUrl, realm, clientId, secret, username, password,
 				refreshToken);
-		log.info("Got fullTokenPayLoad :" + fullTokenPayload);
+		//log.info("Got fullTokenPayLoad :" + fullTokenPayload);
 		JsonObject secureTokenPayload = new JsonObject();
 		secureTokenPayload.put("access_token", fullTokenPayload.getString("access_token"));
 		secureTokenPayload.put("refresh_token", fullTokenPayload.getString("refresh_token"));
