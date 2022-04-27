@@ -1,5 +1,14 @@
 package life.genny.utils;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import io.vavr.Tuple3;
+import io.vertx.core.json.JsonObject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.invoke.MethodHandles;
@@ -8,6 +17,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -28,22 +38,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import javax.naming.NamingException;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
-import org.mindrot.jbcrypt.BCrypt;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
-import java.time.format.DateTimeFormatter;
-import io.vavr.Tuple;
-import io.vavr.Tuple2;
-import io.vavr.Tuple3;
-import io.vertx.core.json.JsonObject;
 import life.genny.models.GennyToken;
 import life.genny.qwanda.Answer;
 import life.genny.qwanda.EEntityStatus;
@@ -62,12 +57,17 @@ import life.genny.qwanda.message.QBulkPullMessage;
 import life.genny.qwanda.message.QDataAnswerMessage;
 import life.genny.qwanda.message.QDataBaseEntityMessage;
 import life.genny.qwanda.message.QMessage;
+import life.genny.qwandautils.ANSIColour;
 import life.genny.qwandautils.GennySettings;
 import life.genny.qwandautils.JsonUtils;
+import life.genny.qwandautils.KeycloakUtils;
 import life.genny.qwandautils.QwandaUtils;
 import life.genny.utils.Layout.LayoutUtils;
-import life.genny.qwandautils.KeycloakUtils;
-import life.genny.qwandautils.ANSIColour;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Logger;
+import org.mindrot.jbcrypt.BCrypt;
+
+
 
 public class BaseEntityUtils implements Serializable {
 
@@ -469,6 +469,9 @@ public class BaseEntityUtils implements Serializable {
 				for (EntityAttribute ea : be.getBaseEntityAttributes()) {
 					if (ea != null) {
 						if (!ea.getAttributeCode().startsWith("PRI_APP_")) { // ignore bad attributes
+							if (this.getServiceToken() == null) {
+								this.setServiceToken(this.getGennyToken());
+							}
 							Attribute attribute = RulesUtils.getAttribute(ea.getAttributeCode(),
 									this.getServiceToken());
 							if (attribute != null) {
