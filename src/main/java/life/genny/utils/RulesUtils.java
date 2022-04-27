@@ -933,12 +933,12 @@ public class RulesUtils {
     
     public static Attribute getAttribute(final String attributeCode, final GennyToken gennyToken) {
     	String realm = gennyToken.getRealm();
-        log.info("FETCH: Token: " + gennyToken.getToken());
+        log.debug("FETCH: Token: " + gennyToken.getToken());
         if(gennyToken.getString("azp").equals("backend")) {
             log.warn("RECEIVED TOKEN FROM BACKEND CLIENT. CHECKING FOR PROJECT_REALM ENV TO GET CORRECT REALM");
             realm = getEnv("PROJECT_REALM");
         }
-        log.info("FETCH: Fetching attribute " + attributeCode + " from realm: " + realm);
+        log.debug("FETCH: Fetching attribute " + attributeCode + " from realm: " + realm);
     	if (!realmAttributeMap.containsKey(realm)) {
     		//loadAllAttributesIntoCache(gennyToken);
     	}
