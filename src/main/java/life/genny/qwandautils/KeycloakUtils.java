@@ -274,8 +274,7 @@ public class KeycloakUtils {
 
 	// Send the decoded Json token in the map
 	public static Map<String, Object> getJsonMap(final String json) {
-		GennyToken token = new GennyToken(json);
-		final JSONObject jsonObj = getDecodedToken(token);
+		final JSONObject jsonObj = getDecodedToken(json);
 		return getJsonMap(jsonObj);
 	}
 
