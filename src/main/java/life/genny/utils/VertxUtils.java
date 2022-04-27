@@ -336,7 +336,7 @@ public class VertxUtils {
 
 
     static public <T extends BaseEntity> T  readFromDDT(String realm, final String code, final boolean withAttributes,
-                                                        final String token, Class clazz) {
+                                                        final String token, Class<?> clazz) {
         T be = null;
         if (StringUtils.isBlank(token)) {
         	log.error("TOKEN is null for "+code);

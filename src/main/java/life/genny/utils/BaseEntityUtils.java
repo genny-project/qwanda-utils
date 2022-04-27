@@ -873,7 +873,7 @@ public class BaseEntityUtils implements Serializable {
 
 	}
 
-	public <T extends BaseEntity> T BaseEntityByCode(final String code, Boolean withAttributes, Class clazz,
+	public <T extends BaseEntity> T BaseEntityByCode(final String code, Boolean withAttributes, Class<?> clazz,
 			final String[] filterAttributes) {
 
 		T be = null;
