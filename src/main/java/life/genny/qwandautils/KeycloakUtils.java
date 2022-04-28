@@ -1235,7 +1235,7 @@ public class KeycloakUtils {
 	}
 
 	public static String getImpersonatedToken(String keycloakUrl, String realm, BaseEntity project, BaseEntity userBE,
-			String exchangedToken) throws IOException {
+			GennyToken exchangedToken) throws IOException {
 		// TODO: Please for the love of god lets fix this
 		realm = "internmatch";
 
@@ -1259,7 +1259,7 @@ public class KeycloakUtils {
 	}
 
 	public static String getImpersonatedToken(String keycloakUrl, String realm, BaseEntity project, String uuid,
-			String exchangedToken) throws IOException {
+			GennyToken exchangedToken) throws IOException {
 		// TODO: Please for the love of god lets fix this
 		realm = "internmatch";
 
@@ -1273,7 +1273,7 @@ public class KeycloakUtils {
 	}
 
 	public static String getImpersonatedToken(String keycloakUrl, String realm, String clientId, String secret,
-			String username, String exchangedToken) throws IOException {
+			String username, GennyToken exchangedToken) throws IOException {
 		// TODO: Please for the love of god lets fix this
 		realm = "internmatch";
 
@@ -1292,7 +1292,7 @@ public class KeycloakUtils {
 				if (secret != null) {
 					postParameters.add(new BasicNameValuePair("client_secret", secret));
 				}
-				postParameters.add(new BasicNameValuePair("subject_token", exchangedToken));
+				postParameters.add(new BasicNameValuePair("subject_token", exchangedToken.getToken()));
 				// postParameters.add(new
 				// BasicNameValuePair("client_auth_method","client-secret"));
 				// postParameters.add(new BasicNameValuePair("audience", "target-client"));
