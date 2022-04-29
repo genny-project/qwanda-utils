@@ -36,6 +36,10 @@ public class GennySettings {
 	public static final String fyodorServiceUrl = System.getenv("FYODOR_SERVICE_API") != null ? System.getenv("FYODOR_SERVICE_API") : (projectUrl+":4242");
 	public static final String scheduleServiceUrl = System.getenv("SCHEDULE_SERVICE_API") != null ? System.getenv("SCHEDULE_SERVICE_API") :  projectUrl+"/api/schedule";
 
+	// FUCKING HACK
+	public static final String remoteServerUrl = System.getenv("REMOTE_API_URL") != null ? System.getenv("REMOTE_API_URL") : "https://internmatch-interns.gada.io";
+
+
 	public static final String pontoonUrl = System.getenv("PONTOON_URL") != null ? System.getenv("PONTOON_URL") :  "http://"+hostIP+":"+pontoonPort;
 	public static final Boolean devMode = ("TRUE".equalsIgnoreCase(System.getenv("DEV_MODE"))||"TRUE".equalsIgnoreCase(System.getenv("GENNYDEV"))) ? true : false;
 	public static final Boolean miniKubeMode = "TRUE".equalsIgnoreCase(System.getenv("MINIKUBE_MODE"));
