@@ -1014,4 +1014,3 @@ public class RulesUtils {
     }
 
 }
-function
