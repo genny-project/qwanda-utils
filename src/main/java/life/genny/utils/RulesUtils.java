@@ -935,7 +935,7 @@ public class RulesUtils {
     	String realm = gennyToken.getRealm();
         log.debug("FETCH: Token: " + gennyToken.getToken());
         if(gennyToken.getString("azp").equals("backend")) {
-            log.warn("RECEIVED TOKEN FROM BACKEND CLIENT. CHECKING FOR PROJECT_REALM ENV TO GET CORRECT REALM");
+            // log.warn("RECEIVED TOKEN FROM BACKEND CLIENT. CHECKING FOR PROJECT_REALM ENV TO GET CORRECT REALM");
             realm = getEnv("PROJECT_REALM");
         }
         log.debug("FETCH: Fetching attribute " + attributeCode + " from realm: " + realm);
@@ -1014,3 +1014,4 @@ public class RulesUtils {
     }
 
 }
+function
