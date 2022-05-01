@@ -726,10 +726,11 @@ public class QwandaUtils {
         	
 //            attributeString = QwandaUtils
 //                    .apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" + baseEntAttributeCode, token);
-            be = JsonUtils.fromJson(attributeString, BaseEntity.class);
-            if (be == null) {
+           
+            if (StringUtils.isBlank(attributeString)) {
                 throw new IOException("Cannot find BE " + baseEntAttributeCode);
             }
+            be = JsonUtils.fromJson(attributeString, BaseEntity.class);
 
         } catch (IOException e) {
             throw new IOException("Cannot connect to QwandaURL " + GennySettings.qwandaServiceUrl);

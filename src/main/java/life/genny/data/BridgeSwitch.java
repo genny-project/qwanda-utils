@@ -66,8 +66,10 @@ public class BridgeSwitch {
 
 		Set<String> activeBridgeIds = VertxUtils.getObject(realm, "", BRIDGE_SWITCH_KEY, Set.class, gennyToken);
 
-		if (activeBridgeIds.iterator().hasNext()) {
-			return activeBridgeIds.iterator().next();
+		if (activeBridgeIds != null) {
+			if (activeBridgeIds.iterator().hasNext()) {
+				return activeBridgeIds.iterator().next();
+			}
 		}
 
 		return null;
