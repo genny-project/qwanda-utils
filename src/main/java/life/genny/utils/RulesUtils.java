@@ -824,7 +824,7 @@ public class RulesUtils {
             JsonObject json = VertxUtils.readCachedJson(realm,"attributes",token);
            // log.info("json fetched from cache:"+json);
             if ("ok".equals(json.getString("status")) ) {
-                //	println("LOADING ATTRIBUTES FROM CACHE!");
+                println("LOADING ATTRIBUTES FROM CACHE!");
                 QDataAttributeMessage attMsg = JsonUtils.fromJson(json.getString("value"), QDataAttributeMessage.class);
                 attMsg.setToken(token.getToken());
                 ret = attMsg;
@@ -833,9 +833,10 @@ public class RulesUtils {
                 if (!realmAttributeMap.containsKey(realm)) {
                 	realmAttributeMap.put(realm, new ConcurrentHashMap<String,Attribute>());
                 }
-                Map<String,Attribute> attributeMap = realmAttributeMap.get(realm);
+               // Map<String,Attribute> attributeMap = realmAttributeMap.get(realm);
                 for (Attribute attribute : attributeArray) {
-                    attributeMap.put(attribute.getCode(), attribute);
+                    //attributeMap.put(attribute.getCode(), attribute);
+                    realmAttributeMap.get(realm).put(attribute.getCode(), attribute);
                 }
 //                if (!defAttributesMap.containsKey(realm)) {
 //                	//setUpDefs(token);                    	
@@ -849,7 +850,7 @@ public class RulesUtils {
 //                }
 
                // realmAttributeMap.put(realm, attributeMap);
-                println("All the attributes have been loaded in "+attributeMap.size()+" attributes");
+                println("All the attributes have been loaded in "+realmAttributeMap.get(realm).size()+" attributes");
             } else {
                 println("LOADING ATTRIBUTES FROM API");
                 String jsonString = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/attributes/realms/"+token.getRealm(), token);
@@ -927,14 +928,15 @@ public class RulesUtils {
     
     public static Attribute getAttribute(final String attributeCode, final GennyToken gennyToken) {
     	String realm = gennyToken.getRealm();
+    	log.info("fetching attribute "+attributeCode+" for realm "+realm);
     	if (!realmAttributeMap.containsKey(realm)) {
-    		//loadAllAttributesIntoCache(gennyToken);
+    		loadAllAttributesIntoCache(gennyToken);
     	}
     	if (realmAttributeMap.get(gennyToken.getRealm())==null) {
             log.error("Cache is null for realm: " + gennyToken.getRealm() + "! Has it been initialized?");
     		loadAllAttributesIntoCache(gennyToken);
     	}
-        Attribute ret = realmAttributeMap.get(gennyToken.getRealm()).get(attributeCode);
+        Attribute ret = realmAttributeMap.get(realm).get(attributeCode);
         if ((ret == null)&&(!attributeCode.startsWith("PRI_APP_"))) { // ignore the dynamic attributes
         	if (attributeCode.substring(3).startsWith("_")) {
             if (attributeCode.startsWith("SRT_") || attributeCode.startsWith("RAW_")) {

@@ -1874,13 +1874,13 @@ public class QwandaUtils {
             log.info("FYODOR URL = " + GennySettings.fyodorServiceUrl);
             result = QwandaUtils.apiPostEntity2(
                     GennySettings.fyodorServiceUrl + "/api/search",
-                    entityString, authToken, null);
+                    entityString,"application/json", authToken, null);
             return result;
 
         }
 
         if (postUrl.contains("/qwanda/attributes")) {
-
+        	log.error("THIS /qwanda/attributes api fyodor call should not be made for "+postUrl+" (unless fyodor)");
         }
 
         return apiPostEntity2(postUrl, entityString, "application/json", authToken, callback);
