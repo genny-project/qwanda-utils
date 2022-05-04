@@ -1864,7 +1864,7 @@ public class BaseEntityUtils implements Serializable {
 					log.info("Updating baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
 					retStr = QwandaUtils.apiPutEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys",
 							JsonUtils.toJson(be),
-							this.getServiceToken().getToken(), null);
+							this.getServiceToken(), null);
 
 				} else {
 					log.info("Inserting baseEntity status of " + be.getCode() + " to " + be.getStatus().name());

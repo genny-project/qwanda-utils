@@ -35,7 +35,6 @@ import life.genny.qwanda.entity.Person;
 import life.genny.qwanda.entity.SearchEntity;
 import life.genny.qwanda.exception.BadDataException;
 import life.genny.qwanda.message.*;
-import life.genny.qwandautils.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.HttpEntity;
@@ -97,7 +96,7 @@ public class QwandaUtils {
         // HttpClientBuilder.create().setDefaultRequestConfig(config).build();
         // HttpGet request = new HttpGet(getUrl);
         // if (authToken != null) {
-        // request.addHeader("Authorization", "Bearer " + authToken); // Authorization":
+        // request.addHeader("Authorization", "Bearer " + authToken.getToken()); // Authorization":
         // `Bearer
         // }
         //
@@ -170,7 +169,7 @@ public class QwandaUtils {
         // post.setEntity(postEntity);
         // post.setHeader("Content-Type", "application/json; charset=UTF-8");
         // if (authToken != null) {
-        // post.addHeader("Authorization", "Bearer " + authToken); // Authorization":
+        // post.addHeader("Authorization", "Bearer " + authToken.getToken()); // Authorization":
         // `Bearer
         // }
         //
@@ -234,7 +233,7 @@ public class QwandaUtils {
             post.setEntity(noteContent);
             post.setHeader("Content-Type", "application/json; charset=UTF-8");
             if (authToken != null) {
-                post.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+                post.addHeader("Authorization", "Bearer " + authToken.getToken()); // Authorization": `Bearer
             }
 
             response = httpclient.execute(post);
@@ -1249,7 +1248,7 @@ public class QwandaUtils {
 
     }
 
-    public static <T extends CodedEntity> String apiPutCodedEntity(T codedEntity, final String authToken)
+    public static <T extends CodedEntity> String apiPutCodedEntity(T codedEntity, final GennyToken authToken)
             throws IOException {
 
         String code = codedEntity.getCode();
@@ -1266,7 +1265,7 @@ public class QwandaUtils {
 
         final HttpPost post = new HttpPost(
                 "http://" + GennySettings.hostIP + ":" + GennySettings.apiPort + "/" + key + "/" + uuJson);
-        post.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+        post.addHeader("Authorization", "Bearer " + authToken.getToken()); // Authorization": `Bearer
 
         final StringEntity input = new StringEntity(json); // Do this to test out
         input.setContentType("application/json");
@@ -1286,7 +1285,7 @@ public class QwandaUtils {
         return retJson;
     }
 
-    public static <T extends CodedEntity> T apiGetCodedEntity(String key, final Class clazz, String authToken)
+    public static <T extends CodedEntity> T apiGetCodedEntity(String key, final Class<?> clazz, GennyToken authToken)
             throws ClientProtocolException, IOException {
         String retJson = "";
 
@@ -1298,7 +1297,7 @@ public class QwandaUtils {
         // Request
 
         if (authToken != null) {
-            request.addHeader("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+            request.addHeader("Authorization", "Bearer " + authToken.getToken()); // Authorization": `Bearer
         }
         final HttpResponse response = client.execute(request);
         BufferedReader rd = null;
@@ -1691,13 +1690,13 @@ public class QwandaUtils {
                             .GET()
                             .uri(URI.create(url))
                             .setHeader("Content-Type", contentType)
-                            .setHeader("Authorization", "Bearer " + authToken))
+                            .setHeader("Authorization", "Bearer " + authToken.getToken()))
                     .orElse(
                             HttpRequest.newBuilder()
                                     .GET()
                                     .uri(URI.create(url))
                                     .setHeader("Content-Type", contentType)
-                                    .setHeader("Authorization", "Bearer " + authToken));
+                                    .setHeader("Authorization", "Bearer " + authToken.getToken()));
         }
 
         if (url.contains("genny.life")) { // Hack for local server not having http2
@@ -1746,7 +1745,7 @@ public class QwandaUtils {
         // con.addRequestProperty("Content-Type", "application/json");
         //
         // if (authToken != null) {
-        // con.addRequestProperty("Authorization", "Bearer " + authToken); //
+        // con.addRequestProperty("Authorization", "Bearer " + authToken.getToken()); //
         // Authorization": `Bearer
         // }
         //
@@ -1773,14 +1772,14 @@ public class QwandaUtils {
 
     }
 
-    static public String sendPOST(String url, String authToken) throws IOException {
+    static public String sendPOST(String url, GennyToken authToken) throws IOException {
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
         con.setRequestMethod("POST");
         con.addRequestProperty("Content-Type", "application/json");
 
         if (authToken != null) {
-            con.addRequestProperty("Authorization", "Bearer " + authToken); // Authorization": `Bearer
+            con.addRequestProperty("Authorization", "Bearer " + authToken.getToken()); // Authorization": `Bearer
         }
 
         // con.setRequestProperty("NestUser-Agent", USER_AGENT);
@@ -1908,7 +1907,7 @@ public class QwandaUtils {
         // HttpRequest.Builder requestBuilder =
         // HttpRequest.newBuilder().POST(requestBody).uri(URI.create(postUrl))
         // .setHeader("Content-Type", contentType)
-        // .setHeader("Authorization", "Bearer " + authToken);
+        // .setHeader("Authorization", "Bearer " + authToken.getToken());
 
         // if (postUrl.contains("genny.life")) { // Hack for local server not having
         // http2
@@ -1977,7 +1976,7 @@ public class QwandaUtils {
         // conn.addRequestProperty("Content-Type", "application/json; charset=UTF-8");
         //
         // if (authToken != null) {
-        // conn.addRequestProperty("Authorization", "Bearer " + authToken); //
+        // conn.addRequestProperty("Authorization", "Bearer " + authToken.getToken()); //
         // Authorization": `Bearer
         // }
         //
@@ -2015,7 +2014,7 @@ public class QwandaUtils {
 
     }
 
-    public static String apiPutEntity2(final String putUrl, final String entityString, final String authToken,
+    public static String apiPutEntity2(final String putUrl, final String entityString, final GennyToken authToken,
             final Consumer<String> callback) throws IOException {
         String result = null;
         Integer httpTimeout = 7; // 7 secnds
@@ -2028,7 +2027,7 @@ public class QwandaUtils {
 
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().PUT(requestBody).uri(URI.create(putUrl))
                 .setHeader("Content-Type", "application/json")
-                .setHeader("Authorization", "Bearer " + authToken);
+                .setHeader("Authorization", "Bearer " + authToken.getToken());
 
         if (putUrl.contains("genny.life")) { // Hack for local server not having http2
             requestBuilder = requestBuilder.version(HttpClient.Version.HTTP_1_1);
@@ -2110,12 +2109,12 @@ public class QwandaUtils {
         return result;
     }
 
-    public static String postFile(final String postUrl, final String authToken, String fileName,
+    public static String postFile(final String postUrl, final GennyToken authToken, String fileName,
             Map<Object, Object> data) throws IOException {
         return postFile(postUrl, authToken, new FileUploadRequest(fileName, "application/octet-stream", data));
     }
 
-    public static String postFile(final String postUrl, final String authToken, FileUploadRequest fileUploadRequest)
+    public static String postFile(final String postUrl, final GennyToken authToken, FileUploadRequest fileUploadRequest)
             throws IOException {
         String boundary = UUID.randomUUID().toString();
 

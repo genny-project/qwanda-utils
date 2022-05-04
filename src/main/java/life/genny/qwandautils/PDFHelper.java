@@ -3,6 +3,8 @@ package life.genny.qwandautils;
 import com.google.gson.Gson;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import life.genny.models.GennyToken;
+
 import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
 
@@ -90,7 +92,7 @@ public class PDFHelper {
         return downloadablePdfUrl;
     }
 
-    public static String getDownloadablePdfLinkForHtml(String htmlUrl, HashMap<String, Object> contextMap, String token) {
+    public static String getDownloadablePdfLinkForHtml(String htmlUrl, HashMap<String, Object> contextMap, GennyToken token) {
 
         String content = null;
         String downloadablePdfUrl = null;
@@ -144,7 +146,7 @@ public class PDFHelper {
         return path;
     }
 
-    public static String postCamelotFileToMinio(String htmlString, String token) {
+    public static String postCamelotFileToMinio(String htmlString, GennyToken token) {
         String response = null;
         try {
             String camelotLink = getHtmlStringToPdfInByte(htmlString);
