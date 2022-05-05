@@ -1,7 +1,5 @@
 package life.genny.utils;
 
-import java.util.List;
-
 import org.jboss.logging.Logger;
 
 /**
