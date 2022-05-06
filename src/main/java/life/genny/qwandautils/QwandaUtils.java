@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import java.io.*;
 import java.lang.invoke.MethodHandles;
 import java.net.*;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
@@ -40,6 +39,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -1870,7 +1870,7 @@ public class QwandaUtils {
         // replace all api-service searches with fyodor...
         if (postUrl.contains("/qwanda/baseentitys/search")) {
             // Convert to fyodor search
-            log.info("FYODOR URL = " + GennySettings.fyodorServiceUrl);
+            log.info("FYODOR URL = " + GennySettings.fyodorServiceUrl+" postUrl:"+log.info("response2=" + response2.body()+" postUrl="+postUrl););
             result = QwandaUtils.apiPostEntity2(
                     GennySettings.fyodorServiceUrl + "/api/search",
                     entityString,"application/json", authToken, null);
@@ -1892,7 +1892,8 @@ public class QwandaUtils {
         java.net.http.HttpResponse<String> response2 = post(postUrl, entityString, contentType, authToken);
 
         log.info("response2 status=" + response2.statusCode());
-        log.info("response2=" + response2.body());
+        log.info("response2=" + response2.body() + " postUrl=" + postUrl);
+        log.info("entity:"+entityString);
 
         return response2.body();
 
