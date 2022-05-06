@@ -1031,11 +1031,11 @@ public class VertxUtils {
 //        ars = ars.replaceAll("\\\"", "\"");
 //        activeRealms = JsonUtils.fromJson(ars, listType);
         Set<String> activeRealms = new HashSet<>();
-        String projectRealm = System.getenv("PROJECT_REALM");
+        String projectRealm = CommonUtils.getSystemEnv("PROJECT_REALM");
         if (!StringUtils.isBlank(projectRealm)) {
         	activeRealms.add(projectRealm);
         }
-        String projectRealms = System.getenv("PROJECT_REALMS");
+        String projectRealms = CommonUtils.getSystemEnv("PROJECT_REALMS");
         if (!StringUtils.isBlank(projectRealms)) {
         	String[] projectCodes = projectRealms.split(":");
         	for (String projectCode : projectCodes) {
