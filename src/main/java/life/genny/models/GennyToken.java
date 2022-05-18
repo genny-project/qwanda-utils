@@ -325,7 +325,7 @@ public class GennyToken implements Serializable {
 	  }
 		String clientId = adecodedTokenMap.get("azp").toString();
 
-		if ((clientId.equals("internmatch"))||(clientId.equals("alyson"))) {
+		if ((clientId.equals("internmatch"))||(clientId.equals("alyson"))||(clientId.equals("backend"))) {
 			return "internmatch";
 		} 
 		else {

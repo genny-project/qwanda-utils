@@ -1881,6 +1881,8 @@ public class QwandaUtils {
 
         if (postUrl.contains("/qwanda/attributes")) {
         	log.error("THIS /qwanda/attributes api fyodor call should not be made for "+postUrl+" (unless fyodor)");
+        	return entityString;
+
         }
 
         return apiPostEntity2(postUrl, entityString, "application/json", authToken, callback);
