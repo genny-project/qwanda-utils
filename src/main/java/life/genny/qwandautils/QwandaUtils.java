@@ -722,18 +722,18 @@ public class QwandaUtils {
         T be = null;
         try {
         	
-        	attributeString = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/entity/"+ baseEntAttributeCode, token);
+        	attributeString = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/cache/"+ token.getProjectCode()+"/"+baseEntAttributeCode, token);
         	
 //            attributeString = QwandaUtils
 //                    .apiGet(GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/" + baseEntAttributeCode, token);
            
             if (StringUtils.isBlank(attributeString)) {
-                throw new IOException("Cannot find BE " + baseEntAttributeCode);
+                throw new IOException("Cannot find BE " + baseEntAttributeCode+" with productCode="+token.getProjectCode());
             }
             be = JsonUtils.fromJson(attributeString, BaseEntity.class);
 
         } catch (IOException e) {
-            throw new IOException("Cannot connect to QwandaURL " + GennySettings.qwandaServiceUrl);
+            throw new IOException("Cannot connect to QwandaURL " + GennySettings.fyodorServiceUrl);
         }
 
         return be;
