@@ -238,12 +238,12 @@ public class VertxUtils {
                     }
 
                 } else {
-                    log.debug(" DDT URL:" + GennySettings.ddtUrl + ", realm:" + realm + "key:" + key + "token:" + token );
+                    log.debug(" DDT URL:" + GennySettings.fyodorServiceUrl + ", realm:" + realm + "key:" + key + "token:" + token );
                     //resultStr = QwandaUtils.apiGet(GennySettings.ddtUrl + "/service/cache/read/" + realm + "/" + key, token);
                     int count=5;
                     boolean resultFound = false;
                     while (count > 0) {
-                    	 resultStr = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/cache/read/" + realm + "/" + key, token);
+                    	 resultStr = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/cache/" + realm + "/" + key, token);
                        // resultStr = QwandaUtils.apiGet(GennySettings.ddtUrl + "/service/cache/read/" + realm + "/" + key, token);
                         if (resultStr == null
                         || ("<html><head><title>Error</title></head><body>Not Found</body></html>".equals(resultStr))
