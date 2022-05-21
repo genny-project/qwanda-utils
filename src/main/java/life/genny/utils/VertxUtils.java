@@ -243,7 +243,8 @@ public class VertxUtils {
                     int count=5;
                     boolean resultFound = false;
                     while (count > 0) {
-                        resultStr = QwandaUtils.apiGet(GennySettings.ddtUrl + "/service/cache/read/" + realm + "/" + key, token);
+                    	 resultStr = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/cache/read/" + realm + "/" + key, token);
+                       // resultStr = QwandaUtils.apiGet(GennySettings.ddtUrl + "/service/cache/read/" + realm + "/" + key, token);
                         if (resultStr == null
                         || ("<html><head><title>Error</title></head><body>Not Found</body></html>".equals(resultStr))
                         || ("<html><body><h1>Resource not found</h1></body></html>".equals(resultStr))) {
@@ -322,7 +323,7 @@ public class VertxUtils {
 //					json.put("json", value);
 //					json.put("ttl", ttl_seconds + "");
 //					QwandaUtils.apiPostEntity(GennySettings.ddtUrl + "/service/cache/write/"+key, json.toString(), token);
-                    QwandaUtils.apiPostEntity2(GennySettings.ddtUrl + "/service/cache/write/"+key, value, token,null);
+                    QwandaUtils.apiPostEntity2(GennySettings.fyodorServiceUrl + "/cache/"+realm+"/"+key, value, token,null);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
