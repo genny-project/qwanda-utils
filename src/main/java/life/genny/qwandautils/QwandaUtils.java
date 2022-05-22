@@ -1672,30 +1672,37 @@ public class QwandaUtils {
 
     static public String sendGET(String url, String contentType, GennyToken authToken) {
 
+    	if (url.contains("entityentitys")) {
+    		String furl = url.substring(GennySettings.qwandaServiceUrl.length());
+    		url = GennySettings.fyodorServiceUrl+ furl;
+    		///qwanda/entityentitys/" + targetCode + "/parents"
+    	}
+    	final String aurl = url;
+    	
         HttpRequest.Builder requestBuilder = null;
 
         if (authToken == null) {
             requestBuilder = Optional.ofNullable(authToken)
                     .map(token -> HttpRequest.newBuilder()
                             .GET()
-                            .uri(URI.create(url))
+                            .uri(URI.create(aurl))
                             .setHeader("Content-Type", contentType))
                     .orElse(
                             HttpRequest.newBuilder()
                                     .GET()
-                                    .uri(URI.create(url))
+                                    .uri(URI.create(aurl))
                                     .setHeader("Content-Type", contentType));
         } else {
             requestBuilder = Optional.ofNullable(authToken)
                     .map(token -> HttpRequest.newBuilder()
                             .GET()
-                            .uri(URI.create(url))
+                            .uri(URI.create(aurl))
                             .setHeader("Content-Type", contentType)
                             .setHeader("Authorization", "Bearer " + authToken.getToken()))
                     .orElse(
                             HttpRequest.newBuilder()
                                     .GET()
-                                    .uri(URI.create(url))
+                                    .uri(URI.create(aurl))
                                     .setHeader("Content-Type", contentType)
                                     .setHeader("Authorization", "Bearer " + authToken.getToken()));
         }

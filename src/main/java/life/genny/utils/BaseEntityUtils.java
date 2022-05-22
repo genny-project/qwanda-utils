@@ -3702,7 +3702,7 @@ public class BaseEntityUtils implements Serializable {
 		try {
 			/* Hit the api for a count */
 			String resultJsonStr = QwandaUtils.apiPostEntity2(
-					GennySettings.qwandaServiceUrl + "/qwanda/baseentitys/count25/", JsonUtils.toJson(searchBE),
+					GennySettings.fyodorServiceUrl + "/count25/", JsonUtils.toJson(searchBE),
 					this.getServiceToken(), null);
 
 			System.out.println("Count = " + resultJsonStr);
