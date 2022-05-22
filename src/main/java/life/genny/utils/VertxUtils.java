@@ -243,7 +243,7 @@ public class VertxUtils {
                     int count=5;
                     boolean resultFound = false;
                     while (count > 0) {
-                    	 resultStr = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/cache/" + realm + "/" + key, token);
+                    	 resultStr = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/cache/" + realm + "/" + key+"/json", token);
                        // resultStr = QwandaUtils.apiGet(GennySettings.ddtUrl + "/service/cache/read/" + realm + "/" + key, token);
                         if (resultStr == null
                         || ("<html><head><title>Error</title></head><body>Not Found</body></html>".equals(resultStr))
