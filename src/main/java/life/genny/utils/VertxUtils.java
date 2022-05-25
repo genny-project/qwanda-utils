@@ -366,7 +366,8 @@ public class VertxUtils {
         JsonObject json = readCachedJson(realm, code, token);
 
         if ("ok".equals(json.getString("status"))) {
-            be = JsonUtils.fromJson(json.getString("value"), clazz);
+        	JsonObject valueJson = json.getJsonObject("value");
+            be = JsonUtils.fromJson(valueJson.toString(), clazz);
             if (be != null)  {
                 if ( be.getCode() == null) {
                     log.error("readFromDDT baseEntity for realm " +
