@@ -203,7 +203,11 @@ public class VertxUtils {
             }
             if (ret != null) {
             	JsonObject valueJson = new JsonObject(ret);
-                result = new JsonObject().put("status", "ok").put("value", valueJson);
+            	if (valueJson.containsKey("status")&&valueJson.containsKey("value")) {
+            		result = valueJson;
+            	} else {
+            		result = new JsonObject().put("status", "ok").put("value", valueJson);
+            	}
             } else {
                 result = new JsonObject().put("status", "error").put("value", ret);
             }
