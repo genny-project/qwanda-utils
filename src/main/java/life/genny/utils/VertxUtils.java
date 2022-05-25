@@ -202,7 +202,8 @@ public class VertxUtils {
                 e.printStackTrace();
             }
             if (ret != null) {
-                result = new JsonObject().put("status", "ok").put("value", ret);
+            	JsonObject valueJson = new JsonObject(ret);
+                result = new JsonObject().put("status", "ok").put("value", valueJson);
             } else {
                 result = new JsonObject().put("status", "error").put("value", ret);
             }

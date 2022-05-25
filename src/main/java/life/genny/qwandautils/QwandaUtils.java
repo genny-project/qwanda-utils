@@ -1903,7 +1903,7 @@ public class QwandaUtils {
 
         log.info("response2 status=" + response2.statusCode());
         log.info("response2=" + response2.body() + " postUrl=" + postUrl);
-        log.info("entity:"+entityString);
+       // log.info("entity:"+entityString);
 
         return response2.body();
 

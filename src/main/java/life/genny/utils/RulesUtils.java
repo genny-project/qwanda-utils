@@ -825,7 +825,11 @@ public class RulesUtils {
            // log.info("json fetched from cache:"+json);
             if ("ok".equals(json.getString("status")) ) {
                 println("LOADING ATTRIBUTES FROM CACHE!");
-                QDataAttributeMessage attMsg = JsonUtils.fromJson(json.getString("value"), QDataAttributeMessage.class);
+                JsonObject jsonValue = json.getJsonObject("value");
+                if (jsonValue.containsKey("value")) {
+                	jsonValue = jsonValue.getJsonObject("value"); // TODO UGLY af
+                }
+                QDataAttributeMessage attMsg = JsonUtils.fromJson(jsonValue.toString(), QDataAttributeMessage.class);
                 attMsg.setToken(token.getToken());
                 ret = attMsg;
                 Attribute[] attributeArray = attMsg.getItems();
