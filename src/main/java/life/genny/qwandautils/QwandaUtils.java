@@ -2258,8 +2258,15 @@ public class QwandaUtils {
 
         HttpClient client = java.net.http.HttpClient.newHttpClient();
 
+        HttpClient.Version version = HttpClient.Version.HTTP_2;
+        if (uri.contains("genny.life")) { // Hack for local server not having http2
+           version = HttpClient.Version.HTTP_1_1;
+        }
+
+        
         HttpRequest request = java.net.http.HttpRequest.newBuilder()
                 .uri(URI.create(uri))
+                .version(version)
                 .setHeader("Content-Type", contentType)
                 .setHeader("Authorization", "Bearer " + token.getToken())
                 .POST(java.net.http.HttpRequest.BodyPublishers.ofString(body))
