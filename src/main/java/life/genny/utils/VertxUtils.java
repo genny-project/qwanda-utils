@@ -202,12 +202,18 @@ public class VertxUtils {
                 e.printStackTrace();
             }
             if (ret != null) {
-            	JsonObject valueJson = new JsonObject(ret);
-            	if (valueJson.containsKey("status")&&valueJson.containsKey("value")) {
-            		result = valueJson;
-            	} else {
-            		result = new JsonObject().put("status", "ok").put("value", valueJson);
-            	}
+            	JsonObject valueJson = null;
+            	try {
+					valueJson = new JsonObject(ret);
+					if (valueJson.containsKey("status")&&valueJson.containsKey("value")) {
+	            		result = valueJson;
+	            	} else {
+	            		result = new JsonObject().put("status", "ok").put("value", valueJson);
+	            	}
+				} catch (Exception e) {
+					result = new JsonObject().put("status", "error").put("value", ret);
+				}
+            	
             } else {
                 result = new JsonObject().put("status", "error").put("value", ret);
             }
