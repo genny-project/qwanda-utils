@@ -1869,6 +1869,43 @@ public class QwandaUtils {
         return response;
     }
 
+    public static String apiDeleteEntity2(final String deleteUrl, final GennyToken authToken) throws IOException {
+
+    	   CloseableHttpClient httpclient = HttpClients.createDefault();
+           HttpDeleteWithBody request = new HttpDeleteWithBody(deleteUrl);
+           request.setHeader("Content-Type", "application/json; charset=UTF-8");
+
+           if (authToken != null) {
+               request.addHeader("Authorization", "Bearer " + authToken.getToken()); // Authorization": `Bearer
+           }
+           request.setHeader("Content-Type", "application/json; charset=UTF-8");
+
+           request.setHeader("Content-Type", "application/json; charset=UTF-8");
+
+           CloseableHttpResponse response = httpclient.execute(request);
+           // The underlying HTTP connection is still held by the response object
+           // to allow the response content to be streamed directly from the network
+           // socket.
+           // In order to ensure correct deallocation of system resources
+           // the user MUST call CloseableHttpResponse#close() from a finally clause.
+           // Please note that if response content is not fully consumed the underlying
+           // connection cannot be safely re-used and will be shut down and discarded
+           // by the connection manager.
+           try {
+               HttpEntity entity1 = response.getEntity();
+               String responseString = EntityUtils.toString(entity1);
+
+               EntityUtils.consume(entity1);
+
+               return responseString;
+           } finally {
+               response.close();
+               httpclient.close();
+               // IOUtils.closeQuietly(response);
+               // IOUtils.closeQuietly(httpclient);
+           }
+    }
+    
     public static String apiPostEntity2(final String postUrl, final String entityString, final GennyToken authToken,
             final Consumer<String> callback) throws IOException {
 
