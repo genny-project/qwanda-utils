@@ -2062,7 +2062,7 @@ public class QwandaUtils {
 
     }
 
-    public static String apiPutEntity2(final String putUrl, final String entityString, final GennyToken authToken,
+    public static String apiPutEntity2( String putUrl, final String entityString, final GennyToken authToken,
             final Consumer<String> callback) throws IOException {
         String result = null;
         Integer httpTimeout = 7; // 7 secnds
@@ -2071,6 +2071,11 @@ public class QwandaUtils {
             log.error("Blank url in apiPutEntity");
         }
 
+        
+        if (putUrl.contains("qwanda/baseentitys")) {
+        	putUrl = GennySettings.fyodorServiceUrl+"/entity";
+        }
+        
         BodyPublisher requestBody = BodyPublishers.ofString(entityString);
 
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().PUT(requestBody).uri(URI.create(putUrl))

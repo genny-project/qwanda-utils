@@ -45,8 +45,11 @@ public class GennyToken implements Serializable {
   String projectCode = null;
   Set<String> userRoles = new HashSet<String>();
 
-  public GennyToken(final String token) {
+  public GennyToken(String token) {
     if ((token != null) && (!token.isEmpty())) {
+    	if (token.startsWith("\"")) {
+    		token = token.replaceAll("\"", "");
+    	}
       // Getting decoded token in Hash Map from QwandaUtils
       adecodedTokenMap = KeycloakUtils.getJsonMap(token);
       if (adecodedTokenMap == null) {

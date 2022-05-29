@@ -30,7 +30,9 @@ public class GennySettings {
 
 	public static final String projectUrl = System.getenv("PROJECT_URL")!=null?System.getenv("PROJECT_URL"):"http://alyson7.genny.life";
 	public static final String mediaProxyUrl = System.getenv("MEDIA_PROXY_URL")!=null?System.getenv("MEDIA_PROXY_URL"):(projectUrl+":9898/public");
-	public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL") != null ? System.getenv("REACT_APP_QWANDA_API_URL") : (projectUrl+":8280");
+	//public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL") != null ? System.getenv("REACT_APP_QWANDA_API_URL") : (projectUrl+":8280");
+	public static final String qwandaServiceUrl = System.getenv("REACT_APP_QWANDA_API_URL") != null ? System.getenv("REACT_APP_QWANDA_API_URL") : (projectUrl+":4242");
+
 	public static final String vertxUrl = System.getenv("REACT_APP_VERTX_URL") != null ? System.getenv("REACT_APP_VERTX_URL") :  "http://"+hostIP+":"+apiPort;
 	public static final String bridgeServiceUrl = System.getenv("BRIDGE_SERVICE_API") != null ? System.getenv("BRIDGE_SERVICE_API") :  projectUrl+"/api/service/commands";
 	public static final String fyodorServiceUrl = System.getenv("FYODOR_SERVICE_API") != null ? System.getenv("FYODOR_SERVICE_API") : (projectUrl+":4242");
