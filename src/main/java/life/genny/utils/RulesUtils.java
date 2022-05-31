@@ -932,7 +932,7 @@ public class RulesUtils {
     
     public static Attribute getAttribute(final String attributeCode, final GennyToken gennyToken) {
     	String realm = gennyToken.getRealm();
-    	log.info("fetching attribute "+attributeCode+" for realm "+realm);
+    	//log.debug("fetching attribute "+attributeCode+" for realm "+realm);
     	if (!realmAttributeMap.containsKey(realm)) {
     		loadAllAttributesIntoCache(gennyToken);
     	}
