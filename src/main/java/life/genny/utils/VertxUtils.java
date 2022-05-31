@@ -109,7 +109,7 @@ public class VertxUtils {
         T item = null;
         String prekey = (StringUtils.isBlank(keyPrefix)) ? "" : (keyPrefix + ":");
         JsonObject json = readCachedJson(realm, prekey + key, token);
-        if (json.getString("status").equalsIgnoreCase("ok")) {
+        if (json.containsKey("status") && json.getString("status").equalsIgnoreCase("ok")) {
             String data = null;
             try {
 				data = json.getJsonObject("value").toString();
@@ -119,7 +119,8 @@ public class VertxUtils {
             try {
                 item = (T) JsonUtils.fromJson(data, clazz);
             } catch (Exception e) {
-                log.error("Bad JsonUtils " + realm + ":" + key + ":" + clazz.getTypeName());
+                // log.error("Bad JsonUtils " + realm + ":" + key + ":" + clazz);
+				log.error("Bad JsonUtils");
             }
             return item;
         } else {
@@ -189,118 +190,24 @@ public class VertxUtils {
     }
 
     static public JsonObject readCachedJson(String realm, final String key, final GennyToken token) {
-        JsonObject result = null;
 
-        if (!GennySettings.forceCacheApi) {
-            String ret = null;
-            try {
-                // log.info("VERTX READING DIRECTLY FROM CACHE! USING
-                // "+(GennySettings.isCacheServer?" LOCAL DDT":"CLIENT "));
-                if (key == null) {
-                    log.error("The key needed for the cache to retrieve an entry is null");
+		JsonObject result = new JsonObject().put("status", "error");
 
-                    return null;
-                }
-                ret = (String) cacheInterface.readCache(realm, key, token);
-            } catch (Exception e) {
-                log.error("Cache is  null maybe the realm is not provided or was the wrong realm. The realm is a follows::: " + realm + " ::: if nothing appears within the colons the realm is a empty string");
-                e.printStackTrace();
-            }
-            if (ret != null) {
-            	JsonObject valueJson = null;
-            	try {
-					valueJson = new JsonObject(ret);
-					if (valueJson.containsKey("status")&&valueJson.containsKey("value")) {
-	            		result = valueJson;
-	            	} else {
-	            		result = new JsonObject().put("status", "ok").put("value", valueJson);
-	            	}
-				} catch (Exception e) {
-					result = new JsonObject().put("status", "error").put("value", ret);
-				}
-            	
-            } else {
-                result = new JsonObject().put("status", "error").put("value", ret);
-            }
-        } else {
-            String resultStr = null;
-            try {
-                //	log.info("VERTX READING FROM CACHE API!");
-                if (cachedEnabled) {
-                    if ("DUMMY".equals(token)) {
-                        // leave realm as it
-                    } else {
-                        // TODO: Figure out what do here
-                        GennyToken temp = token;
-                        realm = temp.getRealm();
-                    }
+		try {
+			String uri = GennySettings.fyodorServiceUrl + "/cache/"+realm+"/"+key+"/json";
+			log.info("GET URI = " + uri);
 
-                    resultStr = (String) localCache.get(realm + ":" + key);
-                    if ((resultStr != null) && (!"\"null\"".equals(resultStr))) {
-                        String resultStr6 = null;
-                        if (false) {
-                            // ugly way to fix json
-                            resultStr6  = VertxUtils.fixJson(resultStr);
-                        } else {
-                            resultStr6 = resultStr;
-                        }
-                        // JsonObject rs2 = new JsonObject(resultStr6);
-                        // String resultStr2 = resultStr.replaceAll("\\","");
-                        // .replace("\\\"","\"");
-                        JsonObject resultJson = new JsonObject().put("status", "ok").put("value", resultStr6);
-                        resultStr = resultJson.toString();
-                    } else {
-                        resultStr = null;
-                    }
+			String resultStr = QwandaUtils.apiGet(uri, token);
+			// log.info("Cache read result = " + resultStr);
+			result = new JsonObject(resultStr);
 
-                } else {
-                    log.debug(" DDT URL:" + GennySettings.fyodorServiceUrl + ", realm:" + realm + "key:" + key + "token:" + token );
-                    //resultStr = QwandaUtils.apiGet(GennySettings.ddtUrl + "/service/cache/read/" + realm + "/" + key, token);
-                    int count=5;
-                    boolean resultFound = false;
-                    while (count > 0) {
-                    	 resultStr = QwandaUtils.apiGet(GennySettings.fyodorServiceUrl + "/cache/" + realm + "/" + key+"/json", token);
-                       // resultStr = QwandaUtils.apiGet(GennySettings.ddtUrl + "/service/cache/read/" + realm + "/" + key, token);
-                        if (resultStr == null
-                        || ("<html><head><title>Error</title></head><body>Not Found</body></html>".equals(resultStr))
-                        || ("<html><body><h1>Resource not found</h1></body></html>".equals(resultStr))) {
-                            log.error("Count:" + count  + ", can't find key:" + key + " from cache, response:" + resultStr);
-                            count--;
-                        } else {
-                            count = 0;
-                            resultFound = true;
-                        }
-                    }
-                    // result not found, set result to null for next if check
-                    if(!resultFound)  resultStr = null;
-//					if (resultStr==null) {
-//						resultStr = QwandaUtils.apiGet(GennySettings.ddtUrl + "/read/" + realm + "/" + key, token);
-//					}
-//					resultStr =  readFromDDT(realm, key, token).toString();
-                }
-                if (resultStr != null) {
-                    try {
-                        result = new JsonObject(resultStr);
-                    } catch (Exception e) {
-                        log.error("JsonDecode Error "+resultStr);
-                    }
-                } else {
-                    result = new JsonObject().put("status", "error");
-                }
+		} catch (Exception e) {
+			log.error("Could not read " + key + " from cache");
+			e.printStackTrace();
+		}
 
-            } catch (IOException e) {
-                log.error("Could not read " + key + " from cache");
-            }
-
-        }
-
-        return result;
+		return result;
     }
-
-//    static public JsonObject writeCachedJson(final String realm, final String key, final String value) {
-//        log.debug("The realm provided to writeCachedJson is :::" + realm);
-//        return writeCachedJson(realm, key, value, DEFAULT_TOKEN);
-//    }
 
     static public JsonObject writeCachedJson(final String realm, final String key, final String value,
                                              final GennyToken token) {
@@ -310,56 +217,25 @@ public class VertxUtils {
 
     static public JsonObject writeCachedJson(String realm, final String key, String value, final GennyToken token,
                                              long ttl_seconds) {
-        log.debug("The realm provided to writeCachedJson is :::" + realm);
-        if (!GennySettings.forceCacheApi) {
-            cacheInterface.writeCache(realm, key, value, token, ttl_seconds);
-        } else {
-            try {
-                if (cachedEnabled) {
-                    // force
-                    if ("DUMMY".equals(token)) {
 
-                    } else {
-                        // We need to talk about this
-                        GennyToken temp = new GennyToken(token.getToken());
-                        realm = temp.getRealm();
-                        log.info("A temporal realm was provided :::" + realm + "::: realm is within the colons");
-                    }
-                    if (value == null) {
-                        localCache.remove(realm + ":" + key);
-                    } else {
-                        localCache.put(realm + ":" + key, value);
-                    }
-                } else {
+		JsonObject resp = new JsonObject().put("status", "ok");
 
-                    log.debug("WRITING TO CACHE USING API! " + key);
-                    JsonObject json = new JsonObject();
+		try {
+			String uri = GennySettings.fyodorServiceUrl + "/cache/"+realm+"/"+key;
+			QwandaUtils.apiPostEntity2(uri, value, token, null);
+		} catch (Exception e) {
+			log.error("Unable to save to cache");
+			e.printStackTrace();
+			resp = new JsonObject().put("status", "error");
+		}
 
-//					json.put("key", key);
-//					json.put("json", value);
-//					json.put("ttl", ttl_seconds + "");
-//					QwandaUtils.apiPostEntity(GennySettings.ddtUrl + "/service/cache/write/"+key, json.toString(), token);
-                    QwandaUtils.apiPostEntity2(GennySettings.fyodorServiceUrl + "/cache/"+realm+"/"+key, value, token,null);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                JsonObject error = new JsonObject().put("status", "error");
-                error.put("stackTrace", e.getStackTrace());
-                error.put("errorType", e.toString());
-                return error;
-            }
-        }
-
-        JsonObject ok = new JsonObject().put("status", "ok");
-        return ok;
-
+        return resp;
     }
 
     static public void clearDDT(String realm) {
 
         cacheInterface.clear(realm);
     }
-
 
     static public <T extends BaseEntity> T  readFromDDT(String realm, final String code, final boolean withAttributes,
                                                         final GennyToken token, Class<?> clazz) {
