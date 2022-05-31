@@ -118,7 +118,7 @@ public class BridgeSwitch {
 		BridgeInfo info = VertxUtils.getObject(realm, "", key, BridgeInfo.class, gennyToken);
 		
 		if (info == null) {
-			log.error("No BridgeInfo object found for user " + gennyToken.getUserCode());
+			log.warn("No BridgeInfo object found for user " + gennyToken.getUserCode());
 			return null;
 		}
 
