@@ -2304,6 +2304,12 @@ public class QwandaUtils {
         if (uri.contains("genny.life")) { // Hack for local server not having http2
            version = HttpClient.Version.HTTP_1_1;
         }
+        
+        if ((body == null)&&(uri.contains("cache")))
+        {
+        	uri += "/savenull";
+        	
+        }
 
         log.info("************* post "+uri+" "+StringUtils.abbreviate(token.getToken(), 10));
         HttpRequest request = java.net.http.HttpRequest.newBuilder()
