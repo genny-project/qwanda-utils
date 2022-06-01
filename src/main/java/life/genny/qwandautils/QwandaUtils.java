@@ -2305,21 +2305,29 @@ public class QwandaUtils {
            version = HttpClient.Version.HTTP_1_1;
         }
         
+        HttpRequest request = null;
         if ((body == null)&&(uri.contains("cache")))
         {
         	uri += "/savenull";
-        	
-        }
+        	 log.info("************* post NULL"+uri+" "+StringUtils.abbreviate(token.getToken(), 10));
+             request = java.net.http.HttpRequest.newBuilder()
+                     .uri(URI.create(uri))
+                     .version(version)
+                     .setHeader("Content-Type", contentType)
+                     .setHeader("Authorization", "Bearer " + token.getToken())
+                     .POST(java.net.http.HttpRequest.BodyPublishers.ofString("dummy"))
+                     .build();
+        } else {
 
         log.info("************* post "+uri+" "+StringUtils.abbreviate(token.getToken(), 10));
-        HttpRequest request = java.net.http.HttpRequest.newBuilder()
+        request = java.net.http.HttpRequest.newBuilder()
                 .uri(URI.create(uri))
                 .version(version)
                 .setHeader("Content-Type", contentType)
                 .setHeader("Authorization", "Bearer " + token.getToken())
                 .POST(java.net.http.HttpRequest.BodyPublishers.ofString(body))
                 .build();
-
+        }
         try {
             java.net.http.HttpResponse<String> response = client.send(request,
                     java.net.http.HttpResponse.BodyHandlers.ofString());
