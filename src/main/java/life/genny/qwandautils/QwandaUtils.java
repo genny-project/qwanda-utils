@@ -2305,7 +2305,7 @@ public class QwandaUtils {
            version = HttpClient.Version.HTTP_1_1;
         }
 
-        
+        log.info("************* post "+uri+" "+StringUtils.abbreviate(token.getToken(), 10));
         HttpRequest request = java.net.http.HttpRequest.newBuilder()
                 .uri(URI.create(uri))
                 .version(version)
