@@ -2309,7 +2309,7 @@ public class QwandaUtils {
         if ((body == null)&&(uri.contains("cache")))
         {
         	uri += "/savenull";
-        	 log.info("************* post NULL"+uri+" "+StringUtils.abbreviate(token.getToken(), 10));
+        	 log.debug("************* post NULL"+uri+" "+StringUtils.abbreviate(token.getToken(), 10));
              request = java.net.http.HttpRequest.newBuilder()
                      .uri(URI.create(uri))
                      .version(version)
@@ -2319,7 +2319,7 @@ public class QwandaUtils {
                      .build();
         } else {
 
-        log.info("************* post "+uri+" "+StringUtils.abbreviate(token.getToken(), 10));
+        log.debug("************* post "+uri+" "+StringUtils.abbreviate(token.getToken(), 10));
         request = java.net.http.HttpRequest.newBuilder()
                 .uri(URI.create(uri))
                 .version(version)
