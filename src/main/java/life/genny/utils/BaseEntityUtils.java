@@ -1857,42 +1857,6 @@ public class BaseEntityUtils implements Serializable {
 		return be;
 	}
 
-		// try {
-		// 	if (be != null) {
-		// 		if (!be.hasCode()) {
-		// 			log.error("ERROR! BaseEntity se has no code!");
-		// 		}
-		// 		if (be.getId() == null) {
-		// 			BaseEntity existing = VertxUtils.readFromDDT(getRealm(), be.getCode(),
-		// 					this.getServiceToken());
-		// 			if (existing != null) {
-		// 				be.setId(existing.getId());
-		// 				// copy ea from existing
-		// 				be = this.merge(be, existing, true);
-		// 			}
-		// 		}
-		// 		if (be.getId() != null) {
-		// 			log.info("Updating baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
-		// 			retStr = QwandaUtils.apiPutEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys",
-		// 					JsonUtils.toJson(be),
-		// 					this.getServiceToken(), null);
-
-		// 		} else {
-		// 			log.info("Inserting baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
-		// 			retStr = QwandaUtils.apiPostEntity2(this.qwandaServiceUrl + "/entity",
-		// 					JsonUtils.toJson(be), this.getServiceToken(), null);
-		// 			be.setId(Long.parseLong(retStr));
-		// 		}
-
-		// 		ret = saveBaseEntityAttributes(defBe, be);
-		// 		VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),
-		// 				this.getServiceToken());
-		// 	}
-		// } catch (Exception e) {
-			// e.printStackTrace();
-
-		// }
-
 	public BaseEntity saveBaseEntityAttributes(BaseEntity be) {
 		if ((be == null) || (be.getCode() == null)) {
 			throw new NullPointerException("Cannot save be because be is null or be.getCode is null");

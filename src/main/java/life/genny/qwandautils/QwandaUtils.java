@@ -2304,16 +2304,30 @@ public class QwandaUtils {
         if (uri.contains("genny.life")) { // Hack for local server not having http2
            version = HttpClient.Version.HTTP_1_1;
         }
-
         
-        HttpRequest request = java.net.http.HttpRequest.newBuilder()
+        HttpRequest request = null;
+        if ((body == null)&&(uri.contains("cache")))
+        {
+        	uri += "/savenull";
+        	 log.debug("************* post NULL"+uri+" "+StringUtils.abbreviate(token.getToken(), 10));
+             request = java.net.http.HttpRequest.newBuilder()
+                     .uri(URI.create(uri))
+                     .version(version)
+                     .setHeader("Content-Type", contentType)
+                     .setHeader("Authorization", "Bearer " + token.getToken())
+                     .POST(java.net.http.HttpRequest.BodyPublishers.ofString("dummy"))
+                     .build();
+        } else {
+
+        log.debug("************* post "+uri+" "+StringUtils.abbreviate(token.getToken(), 10));
+        request = java.net.http.HttpRequest.newBuilder()
                 .uri(URI.create(uri))
                 .version(version)
                 .setHeader("Content-Type", contentType)
                 .setHeader("Authorization", "Bearer " + token.getToken())
                 .POST(java.net.http.HttpRequest.BodyPublishers.ofString(body))
                 .build();
-
+        }
         try {
             java.net.http.HttpResponse<String> response = client.send(request,
                     java.net.http.HttpResponse.BodyHandlers.ofString());
