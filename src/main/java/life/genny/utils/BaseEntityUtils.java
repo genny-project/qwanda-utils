@@ -1809,7 +1809,7 @@ public class BaseEntityUtils implements Serializable {
 				} else {
 					endpointUrl = this.qwandaServiceUrl + "/qwanda/baseentitys";
 				}
-				ret = QwandaUtils.apiPostEntity(endpointUrl, JsonUtils.toJson(be), this.getServiceToken());
+				ret = QwandaUtils.apiPostEntity(endpointUrl, JsonUtils.toJson(be), this.getGennyToken());
 
 				boolean isExist = checkIfBaseEntityInCache(be.getCode());
 				if (!isExist)
@@ -1843,46 +1843,55 @@ public class BaseEntityUtils implements Serializable {
 		return false;
 	}
 
-	public BaseEntity saveBaseEntity(BaseEntity defBe, BaseEntity be) { // TODO: Ugly
-		BaseEntity ret = null;
-		String retStr = null;
+	public BaseEntity saveBaseEntity(BaseEntity defBe, BaseEntity be) {
+
+		log.info("Updating baseEntity " + be.getCode());
+		String uri = GennySettings.fyodorServiceUrl + "/qwanda/baseentitys";
 		try {
-			if (be != null) {
-				if (!be.hasCode()) {
-					log.error("ERROR! BaseEntity se has no code!");
-				}
-				if (be.getId() == null) {
-					BaseEntity existing = VertxUtils.readFromDDT(getRealm(), be.getCode(),
-							this.getServiceToken());
-					if (existing != null) {
-						be.setId(existing.getId());
-						// copy ea from existing
-						be = this.merge(be, existing, true);
-					}
-				}
-				if (be.getId() != null) {
-					log.info("Updating baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
-					retStr = QwandaUtils.apiPutEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys",
-							JsonUtils.toJson(be),
-							this.getServiceToken(), null);
-
-				} else {
-					log.info("Inserting baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
-					retStr = QwandaUtils.apiPostEntity2(this.qwandaServiceUrl + "/entity",
-							JsonUtils.toJson(be), this.getServiceToken(), null);
-					be.setId(Long.parseLong(retStr));
-				}
-
-				ret = saveBaseEntityAttributes(defBe, be);
-				VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),
-						this.getServiceToken());
-			}
-		} catch (Exception e) {
+			String result = QwandaUtils.apiPutEntity2(uri, JsonUtils.toJson(be), this.getServiceToken(), null);
+			log.info("RESULT = " + result);
+		} catch (IOException e) {
 			e.printStackTrace();
-
 		}
-		return ret;
+
+		return be;
 	}
+
+		// try {
+		// 	if (be != null) {
+		// 		if (!be.hasCode()) {
+		// 			log.error("ERROR! BaseEntity se has no code!");
+		// 		}
+		// 		if (be.getId() == null) {
+		// 			BaseEntity existing = VertxUtils.readFromDDT(getRealm(), be.getCode(),
+		// 					this.getServiceToken());
+		// 			if (existing != null) {
+		// 				be.setId(existing.getId());
+		// 				// copy ea from existing
+		// 				be = this.merge(be, existing, true);
+		// 			}
+		// 		}
+		// 		if (be.getId() != null) {
+		// 			log.info("Updating baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
+		// 			retStr = QwandaUtils.apiPutEntity2(this.qwandaServiceUrl + "/qwanda/baseentitys",
+		// 					JsonUtils.toJson(be),
+		// 					this.getServiceToken(), null);
+
+		// 		} else {
+		// 			log.info("Inserting baseEntity status of " + be.getCode() + " to " + be.getStatus().name());
+		// 			retStr = QwandaUtils.apiPostEntity2(this.qwandaServiceUrl + "/entity",
+		// 					JsonUtils.toJson(be), this.getServiceToken(), null);
+		// 			be.setId(Long.parseLong(retStr));
+		// 		}
+
+		// 		ret = saveBaseEntityAttributes(defBe, be);
+		// 		VertxUtils.writeCachedJson(getRealm(), be.getCode(), JsonUtils.toJson(be),
+		// 				this.getServiceToken());
+		// 	}
+		// } catch (Exception e) {
+			// e.printStackTrace();
+
+		// }
 
 	public BaseEntity saveBaseEntityAttributes(BaseEntity be) {
 		if ((be == null) || (be.getCode() == null)) {

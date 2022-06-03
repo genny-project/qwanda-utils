@@ -195,15 +195,13 @@ public class VertxUtils {
 
 		try {
 			String uri = GennySettings.fyodorServiceUrl + "/cache/"+realm+"/"+key+"/json";
-			log.info("GET URI = " + uri);
 
 			String resultStr = QwandaUtils.apiGet(uri, token);
-			// log.info("Cache read result = " + resultStr);
 			result = new JsonObject(resultStr);
 
 		} catch (Exception e) {
 			log.error("Could not read " + key + " from cache");
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 
 		return result;
@@ -253,8 +251,14 @@ public class VertxUtils {
         JsonObject json = readCachedJson(realm, code, token);
 
         if ("ok".equals(json.getString("status"))) {
-        	JsonObject valueJson = json.getJsonObject("value");
-            be = JsonUtils.fromJson(valueJson.toString(), clazz);
+
+			try {
+				JsonObject valueJson = json.getJsonObject("value");
+				be = JsonUtils.fromJson(valueJson.toString(), clazz);
+			} catch (Exception e) {
+				log.error("Could not parse value to json: " + json.toString());
+			}
+
             if (be != null)  {
                 if ( be.getCode() == null) {
                     log.error("readFromDDT baseEntity for realm " +
