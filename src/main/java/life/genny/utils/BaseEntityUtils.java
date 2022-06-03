@@ -596,6 +596,7 @@ public class BaseEntityUtils implements Serializable {
 	}
 
 	public BaseEntity saveAnswers(List<Answer> answers, final boolean changeEvent) {
+
 		BaseEntity ret = null;
 		if (!((answers == null) || (answers.isEmpty()))) {
 
@@ -614,38 +615,26 @@ public class BaseEntityUtils implements Serializable {
 
 			for (String targetCode : answersPerTargetCodeMap.keySet()) {
 				List<Answer> targetAnswers = answersPerTargetCodeMap.get(targetCode);
-				Answer items[] = new Answer[targetAnswers.size()];
-				items = targetAnswers.toArray(items);
 
-				QDataAnswerMessage msg = new QDataAnswerMessage(items);
-				ret = this.updateCachedBaseEntity(targetAnswers);
+				BaseEntity target = getBaseEntityByCode(targetCode);
 
-				if (!VertxUtils.cachedEnabled) { // if not running junit, no need for api
-					// String jsonAnswer = JsonUtils.toJson(msg);
-					// jsonAnswer.replace("\\\"", "\"");
+				if (target == null) {
+					continue;
+				}
 
-					if (!VertxUtils.cachedEnabled) { // only post if not in junit
-						// QwandaUtils.apiPostEntity(this.qwandaServiceUrl + "/qwanda/answers/bulk",
-						// jsonAnswer,
-						// token);
-						for (Answer answer : targetAnswers) {
-							try {
-								JsonObject json = new JsonObject(JsonUtils.toJson(answer));
-								json.put("token", this.getServiceToken().getToken());
-								log.debug("Saving answer");
-								VertxUtils.eb.write("answer", json);
-								log.debug("Finished saving answer");
-							} catch (NamingException e) {
-								log.error("Error in saving answer through kafka :::: " + e.getMessage());
-							}
+				for (Answer ans : targetAnswers) {
 
-						}
-					}
-				} else {
-					for (Answer answer : answers) {
-						log.info("Saving Answer :" + answer);
+					// VertxUtils.eb.write("answer", json);
+
+					try {
+						target.addAnswer(ans);
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
+
+				saveBaseEntity(target);
+
 			}
 		}
 		return ret;
