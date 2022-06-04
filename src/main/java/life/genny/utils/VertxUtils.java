@@ -140,7 +140,14 @@ public class VertxUtils {
         String prekey = (StringUtils.isBlank(keyPrefix)) ? "" : (keyPrefix + ":");
         JsonObject json = readCachedJson(realm, prekey + key, token);
         if (json.getString("status").equalsIgnoreCase("ok")) {
-            String data = json.getString("value");
+
+			String data = null;
+			try {
+				data = json.getJsonObject("value").toString();
+			} catch (Exception e) {
+				data = json.getString("value");
+			}
+
             try {
                 item = (T) JsonUtils.fromJson(data, clazz);
             } catch (Exception e) {
@@ -198,7 +205,9 @@ public class VertxUtils {
 			log.info("Cache:"+key);
 
 			String resultStr = QwandaUtils.apiGet(uri, token);
+			log.info("READ = " + resultStr);
 			result = new JsonObject(resultStr);
+			log.info("finished reading");
 
 		} catch (Exception e) {
 			log.error("Could not read " + key + " from cache");
