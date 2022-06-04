@@ -205,9 +205,9 @@ public class VertxUtils {
 			log.info("Cache:"+key);
 
 			String resultStr = QwandaUtils.apiGet(uri, token);
-			log.info("READ = " + resultStr);
-			result = new JsonObject(resultStr);
 			log.info("finished reading");
+			result = new JsonObject(resultStr);
+			log.info("finished converting");
 
 		} catch (Exception e) {
 			log.error("Could not read " + key + " from cache");
