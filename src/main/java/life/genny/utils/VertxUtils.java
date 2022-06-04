@@ -140,7 +140,7 @@ public class VertxUtils {
         String prekey = (StringUtils.isBlank(keyPrefix)) ? "" : (keyPrefix + ":");
         JsonObject json = readCachedJson(realm, prekey + key, token);
         if (json.getString("status").equalsIgnoreCase("ok")) {
-            String data = json.getJsonObject("value").toString();
+            String data = json.getString("value");
             try {
                 item = (T) JsonUtils.fromJson(data, clazz);
             } catch (Exception e) {
