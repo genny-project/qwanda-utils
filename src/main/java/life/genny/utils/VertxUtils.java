@@ -202,12 +202,8 @@ public class VertxUtils {
 
 		try {
 			String uri = GennySettings.fyodorServiceUrl + "/cache/"+realm+"/"+key+"/json";
-			log.info("Cache:"+key);
-
 			String resultStr = QwandaUtils.apiGet(uri, token);
-			log.info("finished reading");
 			result = new JsonObject(resultStr);
-			log.info("finished converting");
 
 		} catch (Exception e) {
 			log.error("Could not read " + key + " from cache");
