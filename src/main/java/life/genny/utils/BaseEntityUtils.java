@@ -624,7 +624,10 @@ public class BaseEntityUtils implements Serializable {
 
 				for (Answer ans : targetAnswers) {
 
-					// VertxUtils.eb.write("answer", json);
+					if (ans.getAttribute() == null) {
+						Attribute freshAttribute = RulesUtils.getAttribute(ans.getAttributeCode(), this.gennyToken);
+						ans.setAttribute(freshAttribute);
+					}
 
 					try {
 						target.addAnswer(ans);
