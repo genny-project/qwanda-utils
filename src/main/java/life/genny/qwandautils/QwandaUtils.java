@@ -2329,15 +2329,20 @@ public class QwandaUtils {
 			        .POST(java.net.http.HttpRequest.BodyPublishers.ofString(body))
 			        .build();
 		} catch (IllegalArgumentException e) {
-			 log.debug("************* post URI Error "+uri+" "+StringUtils.abbreviate(token.getToken(), 10));
+			 log.error("************* post URI Error "+uri+" "+StringUtils.abbreviate(token.getToken(), 10));
 		}
         }
         try {
-            java.net.http.HttpResponse<String> response = client.send(request,
-                    java.net.http.HttpResponse.BodyHandlers.ofString());
+        	
+            java.net.http.HttpResponse<String> response;
+				response = client.send(request,
+				        java.net.http.HttpResponse.BodyHandlers.ofString());
             return response;
         } catch (IOException | InterruptedException e) {
+        	log.error("uri="+uri);
+        	log.error("["+java.net.http.HttpResponse.BodyHandlers.ofString()+"]");
             log.error(e);
+            
         }
 
         return null;
