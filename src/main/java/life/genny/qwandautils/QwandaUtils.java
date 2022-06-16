@@ -2320,13 +2320,17 @@ public class QwandaUtils {
         } else {
 
         log.debug("************* post "+uri+" "+StringUtils.abbreviate(token.getToken(), 10));
-        request = java.net.http.HttpRequest.newBuilder()
-                .uri(URI.create(uri))
-                .version(version)
-                .setHeader("Content-Type", contentType)
-                .setHeader("Authorization", "Bearer " + token.getToken())
-                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(body))
-                .build();
+        try {
+			request = java.net.http.HttpRequest.newBuilder()
+			        .uri(URI.create(uri))
+			        .version(version)
+			        .setHeader("Content-Type", contentType)
+			        .setHeader("Authorization", "Bearer " + token.getToken())
+			        .POST(java.net.http.HttpRequest.BodyPublishers.ofString(body))
+			        .build();
+		} catch (IllegalArgumentException e) {
+			 log.debug("************* post URI Error "+uri+" "+StringUtils.abbreviate(token.getToken(), 10));
+		}
         }
         try {
             java.net.http.HttpResponse<String> response = client.send(request,
