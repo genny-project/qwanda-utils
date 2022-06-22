@@ -1,14 +1,13 @@
 package life.genny.qwandautils;
 
+import com.google.gson.Gson;
+import org.apache.logging.log4j.Logger;
+import org.json.simple.JSONObject;
+
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.List;
-
-import org.apache.logging.log4j.Logger;
-import org.json.simple.JSONObject;
-
-import com.google.gson.Gson;
 
 public class PDFHelper {
 	
@@ -59,15 +58,31 @@ public class PDFHelper {
 		
 		return downloadablePdfUrl;
 	}
-	
+
 	public static String getDownloadablePdfLinkForHtml(String htmlUrl, HashMap<String, Object> contextMap){
+		return getDownloadablePdfLinkForHtml(htmlUrl,contextMap,true);
+	}
+
+	/**
+	 * This method can directly fetch the template from the given url in htmlUrl
+	 * as well as use the template content passed in htmlUrl based on the flag isUrl
+	 * @param htmlUrl
+	 * @param contextMap
+	 * @param isUrl
+	 * @return
+	 */
+	public static String getDownloadablePdfLinkForHtml(String htmlUrl, HashMap<String, Object> contextMap, Boolean isUrl){
 		
 		String content = null;
 		String downloadablePdfUrl = null;
 		
 		try {
-			/* Get content from link in String format */
-			content = QwandaUtils.apiGet(htmlUrl, null);			
+			if (isUrl){
+				/* Get content from link in String format */
+				content = QwandaUtils.apiGet(htmlUrl, null);
+			}else{
+				content = htmlUrl;
+			}
 			/* If merge is required, use MergeUtils for merge with context map */
 			content = MergeUtil.merge(content, contextMap);
 
