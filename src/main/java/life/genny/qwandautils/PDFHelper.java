@@ -64,14 +64,30 @@ public class PDFHelper {
         return downloadablePdfUrl;
     }
 
-    public static String getDownloadablePdfLinkForHtml(String htmlUrl, HashMap<String, Object> contextMap) {
+    public static String getDownloadablePdfLinkForHtml(String htmlUrl, HashMap<String, Object> contextMap){
+        return getDownloadablePdfLinkForHtml(htmlUrl,contextMap,true);
+    }
+
+    /**
+     * This method can directly fetch the template from the given url in htmlUrl
+     * as well as use the template content passed in htmlUrl based on the flag isUrl
+     * @param htmlUrl
+     * @param contextMap
+     * @param isUrl
+     * @return
+     */
+    public static String getDownloadablePdfLinkForHtml(String htmlUrl, HashMap<String, Object> contextMap, Boolean isUrl){
 
         String content = null;
         String downloadablePdfUrl = null;
 
         try {
-            /* Get content from link in String format */
-            content = QwandaUtils.apiGet(htmlUrl, null);
+            if (isUrl){
+                /* Get content from link in String format */
+                content = QwandaUtils.apiGet(htmlUrl, null);
+            }else{
+                content = htmlUrl;
+            }
             /* If merge is required, use MergeUtils for merge with context map */
             content = MergeUtil.merge(content, contextMap);
 
@@ -80,12 +96,12 @@ public class PDFHelper {
         }
 
         String path = getHtmlStringToPdfInByte(content);
-        log.info("path ::" + path);
+        log.info("path ::"+path);
 
-        if (path != null) {
+        if(path != null) {
 
             downloadablePdfUrl = PDF_GEN_SERVICE_API_URL + path;
-            log.info("download url ::" + downloadablePdfUrl);
+            log.info("download url ::"+downloadablePdfUrl);
             return downloadablePdfUrl;
         }
 
