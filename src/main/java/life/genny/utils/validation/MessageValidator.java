@@ -21,10 +21,11 @@ public class MessageValidator {
     }
 
     public static Boolean isBlank(BaseEntity baseEntity, String attribute) {
-        if(baseEntity == null) {
+        if (baseEntity == null) {
             System.out.println("BaseEntity is null!!");
-            return false;
+            return true;
         }
+
         String element = baseEntity.getValueAsString(attribute);
         if (element != null && !element.isEmpty()) {
             return false;
