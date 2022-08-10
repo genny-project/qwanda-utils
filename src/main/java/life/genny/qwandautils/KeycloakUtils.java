@@ -1177,10 +1177,65 @@ public class KeycloakUtils {
 		return count;
 	}
 
+	private static HashMap<String, String> getUserCodeUUIDMapping(List<LinkedHashMap> results) {
+		HashMap<String, String>  userCodeUUIDMapping = new HashMap<>();
+		for (LinkedHashMap userMap : results) {
+			String code = "";
+			String username = (String) userMap.get("username");
+			String email = (String) userMap.get("email");
+			// Username is Email address
+			if(username.contains("@")) {
+				code = QwandaUtils.getNormalisedUsername("PER_" + username);
+			} else {
+				code = QwandaUtils.getNormalisedUsername("PER_" + email);
+			}
+			String id = (String) userMap.get("id");
+			String uuid = "PER_" + id.toUpperCase();
+			if (userCodeUUIDMapping.containsKey(code)) {
+				log.error(String.format("Duplicate user in keycloak, user code:%s, user name:%s, email:%s.",
+						code, username, email));
+			} else {
+				userCodeUUIDMapping.put(code, uuid);
+			}
+		}
+		log.info("Get " + results.size() + " keycloak users");
+		return userCodeUUIDMapping;
+	}
+
+	public static HashMap<String, String> getSpecificUsersByRealm(String keycloakUrl, String realm,
+	                                                              String servicePassword,
+	                                                              String keycloakUserEmails) {
+		// TODO: Please for the love of god lets fix this
+		realm = "internmatch";
+		List<LinkedHashMap> results = new ArrayList<>();
+		String[] emails = keycloakUserEmails.split(":");
+
+		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+			String accessToken = getAccessToken(keycloakUrl, realm, "admin-cli", null, "service", servicePassword);
+
+			for (String email:emails) {
+				// GET auth/admin/realms/{realm}/users?email=blabla@example.com
+				HttpGet get = new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm + "/users?email=" + email + "&exact=true");
+				get.addHeader("Authorization", "Bearer " + accessToken);
+				HttpResponse response = client.execute(get);
+				if (response.getStatusLine().getStatusCode() != 200) {
+					throw new IOException("Get keycloak user response code:" + response.getStatusLine().getStatusCode());
+				}
+				HttpEntity entity = response.getEntity();
+				InputStream is = entity.getContent();
+				results.addAll(JsonSerialization.readValue(is, (new ArrayList<UserRepresentation>()).getClass()));
+				log.info("Get user:" + email);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		log.info("Get " + results.size() + " keycloak users");
+		return getUserCodeUUIDMapping(results);
+	}
+
 	public static HashMap<String, String> getUsersByRealm(String keycloakUrl, String realm, String servicePassword) {
 		// TODO: Please for the love of god lets fix this
 		realm = "internmatch";
-		HashMap<String, String> userCodeUUIDMapping = new HashMap<>();
 		List<LinkedHashMap> results = new ArrayList<>();
 
 		Integer count = getKeycloakUserCount(keycloakUrl, realm, servicePassword);
@@ -1211,27 +1266,8 @@ public class KeycloakUtils {
 			e.printStackTrace();
 		}
 
-		for (LinkedHashMap userMap : results) {
-			String code = "";
-			String username = (String) userMap.get("username");
-			String email = (String) userMap.get("email");
-			// Username is Email address
-			if (username.contains("@")) {
-				code = QwandaUtils.getNormalisedUsername("PER_" + username);
-			} else {
-				code = QwandaUtils.getNormalisedUsername("PER_" + email);
-			}
-			String id = (String) userMap.get("id");
-			String uuid = "PER_" + id.toUpperCase();
-			if (userCodeUUIDMapping.containsKey(code)) {
-				log.error(String.format("Duplicate user in keycloak, user code:%s, user name:%s, email:%s.",
-						code, username, email));
-			} else {
-				userCodeUUIDMapping.put(code, uuid);
-			}
-		}
 		log.info("Get " + results.size() + " keycloak users");
-		return userCodeUUIDMapping;
+		return getUserCodeUUIDMapping(results) ;
 	}
 
 	public static String getImpersonatedToken(String keycloakUrl, String realm, BaseEntity project, BaseEntity userBE,

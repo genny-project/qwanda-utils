@@ -134,6 +134,7 @@ public class GennySettings {
 	// 3 times by default
 	public static final Integer apiPostRetryTimes= System.getenv("API_POST_RETRY_TIMES")==null?3:(Integer.parseInt(System.getenv("API_POST_RETRY_TIMES")));
 
+	public static final String keycloakUserEmails = System.getenv("KEYCLOAK_USER_EMAILS") != null ? System.getenv("KEYCLOAK_USER_EMAILS") : null;
 
 	static{
         Optional<String> cacheServerNameOptional = Optional.ofNullable(System.getenv("CACHE_SERVER_NAME"));
