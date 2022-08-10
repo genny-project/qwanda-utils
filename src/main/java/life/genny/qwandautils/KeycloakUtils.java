@@ -1202,11 +1202,11 @@ public class KeycloakUtils {
 		return userCodeUUIDMapping;
 	}
 
-	public static HashMap<String, String> getSpecificUsersByRealm(String keycloakUrl,
-																  String realm, String servicePassword,
-																  String keycloakUserEmails) {
+	public static HashMap<String, String> getSpecificUsersByRealm(String keycloakUrl, String realm,
+	                                                              String servicePassword,
+	                                                              String keycloakUserEmails) {
 		// TODO: Please for the love of god lets fix this
-        realm = "internmatch";
+		realm = "internmatch";
 		List<LinkedHashMap> results = new ArrayList<>();
 		String[] emails = keycloakUserEmails.split(":");
 
