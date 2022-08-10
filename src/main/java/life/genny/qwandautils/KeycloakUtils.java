@@ -1095,6 +1095,7 @@ public class KeycloakUtils {
 		}
 		return count;
 	}
+
 	private static HashMap<String, String> getUserCodeUUIDMapping(List<LinkedHashMap> results) {
 		HashMap<String, String>  userCodeUUIDMapping = new HashMap<>();
 		for (LinkedHashMap userMap : results) {
@@ -1119,9 +1120,10 @@ public class KeycloakUtils {
 		log.info("Get " + results.size() + " keycloak users");
 		return userCodeUUIDMapping;
 	}
+
 	public static HashMap<String, String> getSpecificUsersByRealm(String keycloakUrl, String realm,
-																  String servicePassword,
-																  String keycloakUserEmails) {
+	                                                              String servicePassword,
+	                                                              String keycloakUserEmails) {
 		List<LinkedHashMap> results = new ArrayList<>();
 		String[] emails = keycloakUserEmails.split(":");
 
