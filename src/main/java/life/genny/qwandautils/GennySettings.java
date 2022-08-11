@@ -131,7 +131,7 @@ public class GennySettings {
 	public static final Integer apiPostTimeOut= System.getenv("API_POST_TIMEOUT")==null?1:(Integer.parseInt(System.getenv("API_POST_TIMEOUT")));
 	// 3 times by default
 	public static final Integer apiPostRetryTimes= System.getenv("API_POST_RETRY_TIMES")==null?3:(Integer.parseInt(System.getenv("API_POST_RETRY_TIMES")));
-
+	public static String MINIO_LAZY_PREFIX = "MINIO_LAZY-";
 
 	static{
         Optional<String> cacheServerNameOptional = Optional.ofNullable(System.getenv("CACHE_SERVER_NAME"));
