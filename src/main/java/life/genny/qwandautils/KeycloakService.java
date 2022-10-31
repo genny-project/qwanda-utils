@@ -152,7 +152,7 @@ public class KeycloakService {
     final HttpClient client = new DefaultHttpClient();
     try {
       final HttpGet get =
-          new HttpGet(this.keycloakUrl + "/auth/admin/realms/" + this.realm + "/users");
+          new HttpGet(this.keycloakUrl + "/admin/realms/" + this.realm + "/users");
       get.addHeader("Authorization", "Bearer " + this.accessToken.getToken());
       try {
         final HttpResponse response = client.execute(get);

@@ -1,35 +1,14 @@
 package life.genny.qwandautils;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.lang.invoke.MethodHandles;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.UUID;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import javax.ws.rs.core.MediaType;
-import java.security.SecureRandom;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vertx.core.json.JsonObject;
+import life.genny.models.GennyToken;
+import life.genny.qwanda.entity.BaseEntity;
+import life.genny.qwanda.message.QDataRegisterMessage;
+import life.genny.utils.BaseEntityUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -39,14 +18,12 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
@@ -55,19 +32,22 @@ import org.keycloak.OAuth2Constants;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.util.JsonSerialization;
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.vertx.core.json.JsonObject;
-import life.genny.models.GennyToken;
-import life.genny.qwanda.entity.BaseEntity;
-import life.genny.qwanda.Answer;
-import life.genny.qwanda.message.QDataRegisterMessage;
-import life.genny.utils.BaseEntityUtils;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import javax.ws.rs.core.MediaType;
+import java.io.*;
+import java.lang.invoke.MethodHandles;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class KeycloakUtils {
 
@@ -205,7 +185,7 @@ public class KeycloakUtils {
 			log.info("using secret:" + secret);
 		}
 
-		String requestURL = keycloakUrl + "/auth/realms/" + realm + "/protocol/openid-connect/token";
+		String requestURL = keycloakUrl + "/realms/" + realm + "/protocol/openid-connect/token";
 		log.info("using requestUrl:" + requestURL);
 		String str = QwandaUtils.performPostCall(requestURL,
 				postDataParams);
@@ -339,8 +319,8 @@ public class KeycloakUtils {
 			String keycloakUrl = getKeycloakUrlFromToken(token);
 
 			HttpPut putRequest = new HttpPut(
-					keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password");
-			log.info(keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/reset-password");
+					keycloakUrl + "/admin/realms/" + realm + "/users/" + userId + "/reset-password");
+			log.info(keycloakUrl + "/admin/realms/" + realm + "/users/" + userId + "/reset-password");
 
 			putRequest.addHeader("Content-Type", "application/json");
 			putRequest.addHeader("Authorization", "Bearer " + token.getToken());
@@ -444,7 +424,7 @@ public class KeycloakUtils {
 		HttpClient httpClient = new DefaultHttpClient();
 		// log.info("Keycloak token used is "+token);
 		try {
-			String uri = keycloakUrl + "/auth/admin/realms/" + realm + "/users";
+			String uri = keycloakUrl + "/admin/realms/" + realm + "/users";
 			HttpPost post = new HttpPost(uri);
 			// HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl +
 			// "/auth/admin/realms/"+realm+"/users"));
@@ -538,7 +518,7 @@ public class KeycloakUtils {
 		HttpClient httpClient = new DefaultHttpClient();
 		// log.info("Keycloak token used is "+token);
 		try {
-			HttpPut post = new HttpPut(keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + keycloakUUID);
+			HttpPut post = new HttpPut(keycloakUrl + "/admin/realms/" + realm + "/users/" + keycloakUUID);
 			// HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl +
 			// "/auth/admin/realms/"+realm+"/users"));
 
@@ -606,7 +586,7 @@ public class KeycloakUtils {
 		int statusCode = -1;
 
 		try {
-			HttpPut post = new HttpPut(keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + keycloakUUID);
+			HttpPut post = new HttpPut(keycloakUrl + "/admin/realms/" + realm + "/users/" + keycloakUUID);
 			post.addHeader("Content-Type", "application/json");
 			post.addHeader("Authorization", "Bearer " + token);
 
@@ -644,7 +624,7 @@ public class KeycloakUtils {
 		HttpClient httpClient = new DefaultHttpClient();
 		// log.info("Keycloak token used is "+token);
 		try {
-			HttpPut post = new HttpPut(keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + keycloakUUID);
+			HttpPut post = new HttpPut(keycloakUrl + "/admin/realms/" + realm + "/users/" + keycloakUUID);
 			// HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl +
 			// "/auth/admin/realms/"+realm+"/users"));
 
@@ -714,7 +694,7 @@ public class KeycloakUtils {
 		HttpClient httpClient = new DefaultHttpClient();
 		// log.info("Keycloak token used is "+token);
 		try {
-			HttpPost post = new HttpPost(keycloakUrl + "/auth/admin/realms/" + realm + "/users");
+			HttpPost post = new HttpPost(keycloakUrl + "/admin/realms/" + realm + "/users");
 			// HttpPost post = new HttpPost(KeycloakUriBuilder.fromUri(keycloakUrl +
 			// "/auth/admin/realms/"+realm+"/users"));
 
@@ -787,7 +767,7 @@ public class KeycloakUtils {
 		HttpClient httpClient = new DefaultHttpClient();
 
 		try {
-			HttpDelete post = new HttpDelete(keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId);
+			HttpDelete post = new HttpDelete(keycloakUrl + "/admin/realms/" + realm + "/users/" + userId);
 
 			post.addHeader("Content-Type", "application/json");
 			post.addHeader("Authorization", "Bearer " + token);
@@ -829,7 +809,7 @@ public class KeycloakUtils {
 
 		try {
 			String encodedUsername = encodeValue(username);
-			String uri = keycloakUrl + "/auth/admin/realms/" + realm + "/users?username=" + encodedUsername;
+			String uri = keycloakUrl + "/admin/realms/" + realm + "/users?username=" + encodedUsername;
 			final HttpGet get = new HttpGet(uri);
 			get.addHeader("Authorization", "Bearer " + token);
 			try {
@@ -901,7 +881,7 @@ public class KeycloakUtils {
 			if (userId != null) {
 				HttpClient httpClient = new DefaultHttpClient();
 
-				String requestURL = keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId
+				String requestURL = keycloakUrl + "/admin/realms/" + realm + "/users/" + userId
 						+ "/reset-password";
 				HttpPut putRequest = new HttpPut(requestURL);
 
@@ -1084,9 +1064,9 @@ public class KeycloakUtils {
 				HttpClient httpClient = new DefaultHttpClient();
 
 				HttpPut putRequest = new HttpPut(
-						keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + userId + "/send-verify-email");
+						keycloakUrl + "/admin/realms/" + realm + "/users/" + userId + "/send-verify-email");
 
-				log.info(keycloakUrl + "/auth/admin/realms/" + "internmatch" + "/users/" + userId
+				log.info(keycloakUrl + "/admin/realms/" + "internmatch" + "/users/" + userId
 						+ "/send-verify-email");
 
 				putRequest.addHeader("Content-Type", "application/json");
@@ -1162,7 +1142,7 @@ public class KeycloakUtils {
 		Integer count = -1;
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 			String accessToken = getAccessToken(keycloakUrl, realm, "admin-cli", null, "service", servicePassword);
-			HttpGet getUserCount = new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm + "/users/count");
+			HttpGet getUserCount = new HttpGet(keycloakUrl + "/admin/realms/" + realm + "/users/count");
 			getUserCount.addHeader("Authorization", "Bearer " + accessToken);
 			HttpResponse response = client.execute(getUserCount);
 			if (response.getStatusLine().getStatusCode() != 200) {
@@ -1215,7 +1195,7 @@ public class KeycloakUtils {
 
 			for (String email:emails) {
 				// GET auth/admin/realms/{realm}/users?email=blabla@example.com
-				HttpGet get = new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm + "/users?email=" + email + "&exact=true");
+				HttpGet get = new HttpGet(keycloakUrl + "/admin/realms/" + realm + "/users?email=" + email + "&exact=true");
 				get.addHeader("Authorization", "Bearer " + accessToken);
 				HttpResponse response = client.execute(get);
 				if (response.getStatusLine().getStatusCode() != 200) {
@@ -1247,7 +1227,7 @@ public class KeycloakUtils {
 			int loopCount = count / GennySettings.MAX_KEYCLOAK_USER_PER_CALL;
 			for (int index = 0; index <= loopCount; index++) {
 				int startNumber = index * GennySettings.MAX_KEYCLOAK_USER_PER_CALL;
-				HttpGet get = new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm
+				HttpGet get = new HttpGet(keycloakUrl + "/admin/realms/" + realm
 						+ "/users?first=" + startNumber
 						+ "&max=" + GennySettings.MAX_KEYCLOAK_USER_PER_CALL);
 				get.addHeader("Authorization", "Bearer " + accessToken);
@@ -1320,7 +1300,7 @@ public class KeycloakUtils {
 
 			try {
 				// // this needs -Dkeycloak.profile.feature.token_exchange=enabled
-				HttpPost post = new HttpPost(keycloakUrl + "/auth/realms/" + realm + "/protocol/openid-connect/token");
+				HttpPost post = new HttpPost(keycloakUrl + "/realms/" + realm + "/protocol/openid-connect/token");
 				postParameters = new ArrayList<NameValuePair>(); // urn:ietf:params:oauth:grant-type:token-exchange
 				postParameters
 						.add(new BasicNameValuePair("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange"));
@@ -1401,7 +1381,7 @@ public class KeycloakUtils {
 		// TODO: Please for the love of god lets fix this
 		realm = "internmatch";
 		CloseableHttpClient httpclient = HttpClients.createDefault();
-		String urlResetPassword = keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + uuid
+		String urlResetPassword = keycloakUrl + "/admin/realms/" + realm + "/users/" + uuid
 				+ "/execute-actions-email?redirect_uri=" + redirectUrl + "&client_id=" + clientId + "&lifespan="
 				+ lifespan;
 		HttpPut putRequest = new HttpPut(urlResetPassword);

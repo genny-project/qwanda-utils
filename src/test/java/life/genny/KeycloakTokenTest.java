@@ -1,20 +1,11 @@
 package life.genny;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.core.MediaType;
-
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.junit.Test;
-
 import io.vertx.core.json.JsonObject;
 import life.genny.qwandautils.KeycloakUtils;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class KeycloakTokenTest {
 
@@ -66,7 +57,7 @@ public class KeycloakTokenTest {
 //			 "admin-cli", null, "admin",
 //			 System.getenv("KEYCLOAK_PASSWORD"));
 
-			 String url = keycloakUrl + "/auth/admin/realms/" + realm + "/users/" + uuid;
+			 String url = keycloakUrl + "/admin/realms/" + realm + "/users/" + uuid;
 			 String result = KeycloakUtils.sendGET(url,accessToken);
 
 			 JsonObject userJson = new JsonObject(result);

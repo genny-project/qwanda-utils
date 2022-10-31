@@ -1,5 +1,6 @@
 package life.genny;
 
+import life.genny.qwandautils.KeycloakUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -10,7 +11,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
-import org.junit.Test;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.common.util.KeycloakUriBuilder;
 import org.keycloak.constants.ServiceUrlConstants;
@@ -25,10 +25,6 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-
-// import org.junit.Test;
-// import org.keycloak.representations.AccessTokenResponse;
-import life.genny.qwandautils.KeycloakUtils;
 
 public class KeycloakTest {
 
@@ -96,7 +92,7 @@ public  List<LinkedHashMap>  fetchAllKeycloakUsers()
 	    final HttpClient client = new DefaultHttpClient();
 	    try {
 	      final HttpGet get =
-	          new HttpGet(keycloakUrl + "/auth/admin/realms/" + realm + "/users");
+	          new HttpGet(keycloakUrl + "/admin/realms/" + realm + "/users");
 	      get.addHeader("Authorization", "Bearer " + token);
 	      try {
 	        final HttpResponse response = client.execute(get);
