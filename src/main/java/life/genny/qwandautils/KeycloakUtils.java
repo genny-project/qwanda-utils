@@ -74,7 +74,7 @@ public class KeycloakUtils {
 			String username,
 			String password) throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		try {
 
 			JsonObject content = KeycloakUtils.getToken(keycloakUrl, realm, clientId, secret, username, password);
@@ -94,7 +94,7 @@ public class KeycloakUtils {
 			String secret,
 			String username, String password) throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 
 		JsonObject content = KeycloakUtils.getSecureTokenPayload(keycloakUrl, realm, clientId, secret, username,
 				password);
@@ -109,7 +109,7 @@ public class KeycloakUtils {
 			String username, String password, String refreshToken) throws IOException {
 
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		JsonObject fullTokenPayload = KeycloakUtils.getToken(keycloakUrl, realm, clientId, secret, username, password,
 				refreshToken);
 		//log.info("Got fullTokenPayLoad :" + fullTokenPayload);
@@ -122,7 +122,7 @@ public class KeycloakUtils {
 	public static JsonObject getSecureTokenPayload(String keycloakUrl, String realm, String clientId, String secret,
 			String username, String password) throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		return KeycloakUtils.getSecureTokenPayload(keycloakUrl, realm, clientId, secret, username, password, null);
 	}
 
@@ -130,7 +130,7 @@ public class KeycloakUtils {
 			String password, String refreshToken) throws IOException {
 
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		HashMap<String, String> postDataParams = new HashMap<>();
 		postDataParams.put("Content-Type", "application/x-www-form-urlencoded");
 		/* if we have a refresh token */
@@ -199,7 +199,7 @@ public class KeycloakUtils {
 	public static JsonObject getToken(String keycloakUrl, String realm, String clientId, String secret,
 			String username, String password) throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		return KeycloakUtils.getToken(keycloakUrl, realm, clientId, secret, username, password, null);
 	}
 
@@ -310,7 +310,7 @@ public class KeycloakUtils {
 	public static String resetUserPassword(String userId, GennyToken token, String realm)
 			throws ClientProtocolException, IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 
 		HttpClient httpClient = new DefaultHttpClient();
 
@@ -361,7 +361,7 @@ public class KeycloakUtils {
 			String newFirstname, String newLastname, String newEmail)
 			throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		String newRealmRoles = "user,offline_access,uma_authorization";
 		String newGroupRoles = "/users";
 		String password = UUID.randomUUID().toString().substring(0, 10);
@@ -373,7 +373,7 @@ public class KeycloakUtils {
 			String newFirstname, String newLastname, String newEmail, String password)
 			throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		String newRealmRoles = "user,offline_access,uma_authorization";
 		String newGroupRoles = "/users";
 
@@ -387,7 +387,7 @@ public class KeycloakUtils {
 			String newGroupRoles)
 			throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		return createUser(null, token, realm, newUsername,
 				newFirstname, newLastname, newEmail, password, newRealmRoles, newGroupRoles);
 	}
@@ -396,7 +396,7 @@ public class KeycloakUtils {
 	public static String createDummyUser(GennyToken token, String realm)
 			throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		String keycloakUrl = getKeycloakUrlFromToken(token);
 
 		String randomCode = UUID.randomUUID().toString().substring(0, 18);
@@ -504,7 +504,7 @@ public class KeycloakUtils {
 			String newGroupRoles)
 			throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		String keycloakUrl = getKeycloakUrlFromToken(token);
 		keycloakUUID = keycloakUUID.toLowerCase();
 
@@ -574,7 +574,7 @@ public class KeycloakUtils {
 	public static int updateUserField(String keycloakUUID, GennyToken token, String realm,
 			String fieldName, String newValue) throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 
 		String keycloakUrl = getKeycloakUrlFromToken(token);
 		keycloakUUID = keycloakUUID.toLowerCase();
@@ -612,7 +612,7 @@ public class KeycloakUtils {
 	public static int updateUserEmail(String keycloakUUID, GennyToken token, String realm, String newEmail)
 			throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		String keycloakUrl = getKeycloakUrlFromToken(token);
 		keycloakUUID = keycloakUUID.toLowerCase();
 
@@ -677,7 +677,7 @@ public class KeycloakUtils {
 			String newGroupRoles)
 			throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		String keycloakUrl = getKeycloakUrlFromToken(token);
 
 		String idJson = "";
@@ -761,7 +761,7 @@ public class KeycloakUtils {
 	public static String removeUser(GennyToken token, String realm, String userId)
 			throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 
 		String keycloakUrl = getKeycloakUrlFromToken(token);
 		HttpClient httpClient = new DefaultHttpClient();
@@ -791,7 +791,7 @@ public class KeycloakUtils {
 	public static String getKeycloakUserId(final GennyToken token, String realm, final String username)
 			throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		final List<LinkedHashMap> users = fetchKeycloakUsers(token, realm, username);
 		if (!users.isEmpty()) {
 			return (String) users.get(0).get("id");
@@ -802,7 +802,7 @@ public class KeycloakUtils {
 	public static List<LinkedHashMap> fetchKeycloakUsers(final GennyToken token, String realm,
 			final String username) {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		String keycloakUrl = getKeycloakUrlFromToken(token);
 		List<LinkedHashMap> results = new ArrayList<LinkedHashMap>();
 		final HttpClient client = new DefaultHttpClient();
@@ -861,7 +861,7 @@ public class KeycloakUtils {
 	public static int setPassword(GennyToken token, String realm, String userId, String password)
 			throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		return setPassword(token, realm, userId, password, false);
 	}
 
@@ -869,7 +869,7 @@ public class KeycloakUtils {
 			Boolean askUserToResetPassword)
 			throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		String keycloakUrl = getKeycloakUrlFromToken(token);
 		String json = "{\"type\": \"password\", " + "\"temporary\": \"" + (askUserToResetPassword ? "true" : "false")
 				+ "\",\"value\": \"" + password + "\"" + "}";
@@ -1055,7 +1055,7 @@ public class KeycloakUtils {
 
 	public static String sendVerifyEmail(String realm, final String username, final GennyToken servicetoken) {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		String keycloakUrl = getKeycloakUrlFromToken(servicetoken);
 		String userId;
 		try {
@@ -1063,11 +1063,11 @@ public class KeycloakUtils {
 			if (userId != null) {
 				HttpClient httpClient = new DefaultHttpClient();
 
-				HttpPut putRequest = new HttpPut(
-						keycloakUrl + "/admin/realms/" + realm + "/users/" + userId + "/send-verify-email");
+				String finalUrl =
+						keycloakUrl + "/admin/realms/" + realm + "/users/" + userId + "/send-verify-email";
+				HttpPut putRequest = new HttpPut(finalUrl);
 
-				log.info(keycloakUrl + "/admin/realms/" + "internmatch" + "/users/" + userId
-						+ "/send-verify-email");
+				log.info(finalUrl);
 
 				putRequest.addHeader("Content-Type", "application/json");
 				putRequest.addHeader("Authorization", "Bearer " + servicetoken);
@@ -1138,7 +1138,7 @@ public class KeycloakUtils {
 
 	public static Integer getKeycloakUserCount(String keycloakUrl, String realm, String servicePassword) {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		Integer count = -1;
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 			String accessToken = getAccessToken(keycloakUrl, realm, "admin-cli", null, "service", servicePassword);
@@ -1186,7 +1186,7 @@ public class KeycloakUtils {
 	                                                              String servicePassword,
 	                                                              String keycloakUserEmails) {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		List<LinkedHashMap> results = new ArrayList<>();
 		String[] emails = keycloakUserEmails.split(":");
 
@@ -1215,7 +1215,7 @@ public class KeycloakUtils {
 
 	public static HashMap<String, String> getUsersByRealm(String keycloakUrl, String realm, String servicePassword) {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		List<LinkedHashMap> results = new ArrayList<>();
 
 		Integer count = getKeycloakUserCount(keycloakUrl, realm, servicePassword);
@@ -1253,7 +1253,7 @@ public class KeycloakUtils {
 	public static String getImpersonatedToken(String keycloakUrl, String realm, BaseEntity project, BaseEntity userBE,
 			GennyToken exchangedToken) throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 
 		if (userBE == null) {
 			log.error(ANSIColour.RED + "User BE is NULL" + ANSIColour.RESET);
@@ -1277,7 +1277,7 @@ public class KeycloakUtils {
 	public static String getImpersonatedToken(String keycloakUrl, String realm, BaseEntity project, String uuid,
 			GennyToken exchangedToken) throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 
 		String keycloakJson = project.getValueAsString("ENV_KEYCLOAK_JSON");
 		JsonObject json = new JsonObject(keycloakJson);
@@ -1291,7 +1291,7 @@ public class KeycloakUtils {
 	public static String getImpersonatedToken(String keycloakUrl, String realm, String clientId, String secret,
 			String username, GennyToken exchangedToken) throws IOException {
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 
 		HttpClient httpClient = new DefaultHttpClient();
 
@@ -1379,7 +1379,7 @@ public class KeycloakUtils {
 			throws IOException {
 
 		// TODO: Please for the love of god lets fix this
-		realm = "internmatch";
+//		realm = "internmatch";
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		String urlResetPassword = keycloakUrl + "/admin/realms/" + realm + "/users/" + uuid
 				+ "/execute-actions-email?redirect_uri=" + redirectUrl + "&client_id=" + clientId + "&lifespan="
