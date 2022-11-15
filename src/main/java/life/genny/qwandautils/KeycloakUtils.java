@@ -76,6 +76,7 @@ public class KeycloakUtils {
 		// TODO: Please for the love of god lets fix this
 //		realm = "internmatch";
 		try {
+			password="Service@123";
 
 			JsonObject content = KeycloakUtils.getToken(keycloakUrl, realm, clientId, secret, username, password);
 			if (content != null) {
@@ -95,6 +96,7 @@ public class KeycloakUtils {
 			String username, String password) throws IOException {
 		// TODO: Please for the love of god lets fix this
 //		realm = "internmatch";
+		password="Service@123";
 
 		JsonObject content = KeycloakUtils.getSecureTokenPayload(keycloakUrl, realm, clientId, secret, username,
 				password);
