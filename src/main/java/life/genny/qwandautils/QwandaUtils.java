@@ -1853,10 +1853,15 @@ public class QwandaUtils {
                 done = true;
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 // TODO Auto-generated catch block
-                log.error("Count:" + count + " , TimeOut value:" + httpTimeout + ", Exception occurred when post to URL: " + postUrl + ",Body is entityString:" + entityString + ", Exception details:" + e.getCause());
-                // try renewing the httpclient
-                httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
-                        .connectTimeout(Duration.ofSeconds(httpTimeout)).build();
+                if (e.getCause() != null && e.getCause().toString().contains("HTTP/1.1 header parser received no bytes")) {
+                    //use http1.1
+                    httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_1_1)
+                            .connectTimeout(Duration.ofSeconds(httpTimeout)).build();
+                } else {
+                    log.error("Count:" + count + " , TimeOut value:" + httpTimeout + ", Exception occurred when post to URL: " + postUrl + ",Body is entityString:" + entityString + ", Exception details:" + e.getCause());
+                    httpClient = HttpClient.newBuilder().executor(executorService).version(HttpClient.Version.HTTP_2)
+                            .connectTimeout(Duration.ofSeconds(httpTimeout)).build();
+                }
                 if (count <= 0) {
                     done = true;
                 }

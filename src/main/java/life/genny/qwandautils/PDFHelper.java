@@ -17,6 +17,9 @@ public class PDFHelper {
 	final public static String PDF_GEN_SERVICE_API_URL = System.getenv("PDF_GEN_SERVICE_API_URL") == null ? "http://localhost:7331"
 			: System.getenv("PDF_GEN_SERVICE_API_URL");
 
+// k8s svc name
+	final public static String PDF_GEN_SVC_URL =  System.getenv("PDF_GEN_SVC_URL");
+
 	public static String getJournalPDFHeader(String headerURL) throws IOException {
 //		String headerURL = "https://raw.githubusercontent.com/genny-project/layouts/2020-05-25-journal-report-update/internmatch-new/document_templates/journal-header-template.html";
 		return QwandaUtils.apiGet(headerURL, null);
@@ -112,9 +115,13 @@ public class PDFHelper {
 		String resp = null;
 		String path = null;
 		try {
-
-			/* Camelot htmlToPdfConverter service */ 
-			resp = QwandaUtils.apiPostEntity(PDF_GEN_SERVICE_API_URL + "/raw", gson.toJson(postObj), null);
+			/* Camelot htmlToPdfConverter service */
+			if (PDF_GEN_SVC_URL == null){
+				resp = QwandaUtils.apiPostEntity(PDF_GEN_SERVICE_API_URL + "/raw", gson.toJson(postObj), null);
+			} else {
+			// Internal deployment use self-signed certificate, use http://k8s-svc-name instead of https call
+				resp = QwandaUtils.apiPostEntity(PDF_GEN_SVC_URL + "/raw", gson.toJson(postObj), null);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
