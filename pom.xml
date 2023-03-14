@@ -48,7 +48,7 @@
 
 		<jersey-version>2.13</jersey-version>
 		<version.apache-httpclient>4.5.13</version.apache-httpclient>
-		<version.keycloak>20.0.3</version.keycloak>
+		<version.keycloak>21.0.1</version.keycloak>
 
 		<version.resteasy>3.0.10.Final</version.resteasy>
 		<vertx.version>3.9.3</vertx.version>
